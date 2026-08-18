@@ -1,0 +1,1193 @@
+================================================
+SOURCE OF TRUTH
+================================================
+
+PRODUCT ARCHITECTURE:
+The original TwoHearts major-screen architecture supplied by
+the user.
+
+VISUAL PROGRESS:
+The existing Canva PDF containing completed screens, plus any
+additional Canva screens explicitly created afterward.
+
+IMPLEMENTATION SOURCE OF TRUTH:
+The existing GitHub repository and all relevant documentation
+already contained inside the repository.
+
+IMPORTANT REPOSITORY DOCUMENTATION MAY INCLUDE:
+- TWOHEARTS_BUILD_PROGRESS.md
+- TwoHeartsRDMap.txt
+- MasterPrompt.txt
+- TwoHeart UI Reference Screens
+- Other relevant .md files
+- Other relevant .txt files
+- Existing source files
+- Existing assets
+- Existing configuration files
+- Existing UI/reference documentation
+
+THE AI BUILDER MUST INSPECT THESE REPOSITORY FILES BEFORE
+IMPLEMENTING A FEATURE.
+
+DO NOT assume that the roadmap is the only source of project
+context.
+
+================================================
+BUILD TECHNOLOGY
+================================================
+
+TwoHearts V1 is implemented as a:
+
+MOBILE-FIRST WEB APPLICATION
++
+CAPACITOR NATIVE RUNTIME
++
+ANDROID APK BUILD THROUGH GITHUB ACTIONS
+
+The web technology is the implementation layer.
+
+Capacitor provides the native Android bridge where native
+device capabilities are required.
+
+IMPORTANT:
+TwoHearts must NOT be designed or implemented as a generic
+website that happens to be placed inside a WebView.
+
+The application should visually and behaviorally feel like a
+purpose-built mobile application.
+
+The fact that Capacitor uses a WebView internally must not
+translate into a "website inside an app" appearance.
+
+================================================
+CAPACITOR UI PRINCIPLE
+================================================
+
+The application UI must be:
+
+mobile-first
+touch-first
+portrait-first
+responsive
+native-feeling
+smooth
+app-like
+optimized for Android phones
+
+Use web technologies to reproduce the interaction quality
+expected from a native mobile application.
+
+The implementation should include appropriate:
+
+- mobile navigation
+- touch targets
+- scrolling behavior
+- dialogs
+- bottom sheets where appropriate
+- forms
+- keyboard-aware layouts
+- gesture-friendly interactions
+- loading states
+- empty states
+- confirmation states
+- error states
+- transitions
+- pressed states
+- disabled states
+- appropriate Android back-button behavior
+- safe-area handling
+- system status/navigation-bar awareness
+
+Do NOT create desktop-style website layouts and simply shrink
+them for mobile.
+
+================================================
+NATIVE CAPABILITIES
+================================================
+
+When TwoHearts requires a device capability, use the appropriate
+Capacitor/native integration rather than simulating the feature
+with a fake web-only implementation.
+
+Potential native capabilities include:
+
+- local notifications
+- photo/media access
+- camera access
+- filesystem/local file handling
+- device-safe local storage
+- sharing/export where explicitly required
+- Android back-button handling
+- status/navigation bar integration
+
+Native capabilities should only be introduced where required
+by the TwoHearts feature architecture.
+
+Do NOT introduce unnecessary online services or backend
+dependencies merely because Capacitor is being used.
+
+================================================
+V1 DATA ARCHITECTURE
+================================================
+
+TwoHearts V1 remains:
+
+OFFLINE-FIRST
+LOCAL-FIRST
+PRIVATE
+DEVICE-STORED
+
+Core V1 information remains stored locally on the device.
+
+Examples include:
+
+- profile information
+- relationship information
+- memories
+- photos/videos associated with memories
+- notes
+- timeline
+- important dates
+- reminders
+- moods
+- places
+- Open When content
+- mini-game data
+- private vault data
+- period tracker data
+- preferences
+- app lock/security configuration
+
+Do not introduce a cloud database simply because the app is
+being implemented with Capacitor.
+
+Do not require an internet connection for core V1 functionality.
+
+================================================
+V1 ONLINE BOUNDARY
+================================================
+
+V1 does NOT require:
+
+- Firebase backend
+- Supabase backend
+- cloud database
+- online account system
+- online chat
+- online partner synchronization
+- server-side notifications
+- cloud storage
+- cloud media hosting
+- external authentication service
+
+The future V2 architecture may introduce online communication
+and synchronization where explicitly required.
+
+Do not prematurely implement V2 functionality inside V1.
+
+================================================
+LOCAL NOTIFICATIONS
+================================================
+
+V1 reminders and notifications must use the device's local
+notification capability.
+
+For the Capacitor implementation, use an appropriate
+Capacitor-compatible local notification mechanism.
+
+Notifications must continue to function without an internet
+connection whenever the Android operating system permits the
+scheduled local notification.
+
+Do NOT use:
+
+- Firebase Cloud Messaging
+- server push
+- backend notification services
+
+for ordinary V1 reminders.
+
+================================================
+FOUNDATION
+================================================
+
+01 ✓ — Splash Screen
+     COVERED BY CANVA PDF — PAGE 1
+
+02 ✓ — Welcome / First Launch
+     COVERED BY CANVA PDF — EARLY ONBOARDING PAGES
+
+03 ✓ — Profile Setup
+     COVERED BY CANVA PDF — PROFILE SETUP
+
+04 ✓ — Relationship Setup
+     COVERED BY CANVA PDF — SPECIAL SOMEONE /
+     RELATIONSHIP SETUP
+
+05 ✓ — Personalization Setup
+     COVERED BY CANVA PDF — PERSONALIZATION / SETUP FLOW
+
+06 ✓ — App Lock Setup
+     DESIGNED AS A DEDICATED SCREEN
+
+07 ✓ — Setup Complete
+     DESIGNED AS A DEDICATED SCREEN
+
+================================================
+MAIN NAVIGATION
+================================================
+
+08 ✓ — Home Dashboard
+     COVERED BY CANVA PDF — HOME SCREEN
+
+09 ✓ — Us / Relationship Hub
+     DESIGNED AS A DEDICATED SCREEN
+
+10 ✓ — Games Hub
+     COVERED BY CANVA PDF — MINI GAMES HUB
+
+11 ✓ — Notes Hub
+     COVERED BY CANVA PDF — NOTES HOME
+
+12 ✓ — More Menu
+     DESIGNED AS A DEDICATED SCREEN
+
+================================================
+HOME / RELATIONSHIP
+================================================
+
+13 ✓ — Home Dashboard — Full Content
+     COVERED BY CANVA PDF — UPDATED HOME DESIGN
+
+14 ✓ — Relationship Counter
+     DESIGNED AS A DEDICATED SCREEN
+
+15 ☐ — Anniversary / Important Dates
+     PARTIALLY/CONCEPTUALLY COVERED BY EXISTING
+     HOME/ONBOARDING DESIGN.
+     DEDICATED SCREEN STILL NEEDED.
+
+================================================
+MEMORIES
+================================================
+
+16 ✓ — Memories Home
+     COVERED BY CANVA PDF
+
+17 ✓ — Add Memory
+     COVERED BY CANVA PDF
+
+18 ✓ — Memory Details
+     COVERED BY CANVA PDF
+
+================================================
+NOTES
+================================================
+
+19 ✓ — Notes Home
+     COVERED BY CANVA PDF
+
+20 ✓ — Note Editor
+     COVERED BY CANVA PDF
+
+21 ✓ — Individual Note
+     COVERED BY CANVA PDF
+
+================================================
+TIMELINE
+================================================
+
+22 ✓ — Timeline Home
+     DESIGNED AS A DEDICATED SCREEN
+
+23 ✓ — Add Timeline Event
+     DESIGNED AS A DEDICATED SCREEN
+
+24 ✓ — Timeline Event Details
+     DESIGNED AS A DEDICATED SCREEN
+
+================================================
+SURPRISE BOX
+================================================
+
+25 — REMOVED / DEFERRED FROM V1
+     Surprise Box Home
+
+26 — REMOVED / DEFERRED FROM V1
+     Create Surprise
+
+27 — REMOVED / DEFERRED FROM V1
+     Open Surprise / Reveal
+
+REASON:
+Surprise Box depends on a mechanism allowing one person's
+content to reach the other person's device.
+
+It is deferred to a future online/synchronization version.
+
+DO NOT DESIGN 25–27 FOR CURRENT V1.
+
+DO NOT COUNT 25–27 AS INCOMPLETE V1 WORK.
+
+DO NOT REINTRODUCE THEM BECAUSE OF THE CAPACITOR MIGRATION.
+
+THE HISTORICAL NUMBERING MUST REMAIN INTACT.
+
+================================================
+MINI-GAMES
+================================================
+
+28 ✓ — Games Home
+     COVERED BY CANVA PDF — PAGE 17
+
+29 ✅ — Games Category
+
+30 ✅ — Game Instructions
+
+31 ✓ — Game Gameplay — Primary Template
+     COVERED BY MULTIPLE EXISTING GAMEPLAY SCREENS
+
+32 ✅ — Game Results
+
+33 ✅ — Game Statistics / Achievements
+
+================================================
+COUPLE GAMES
+================================================
+
+34 ✓ — Who Knows Who Better
+     EXISTING CANVA COUPLE-TRIVIA SCREEN COVERS THIS
+     FUNCTIONAL CONCEPT
+
+35 ✓ — Guess My Answer
+     EXISTING COUPLE-GAME DESIGN CONCEPT COVERS THIS
+     FUNCTIONAL CATEGORY.
+
+36 ✓ — Would You Rather
+     COVERED BY CANVA PDF
+
+37 ✓ — Couple Trivia
+     COVERED BY CANVA PDF
+
+38 ✓ — This or That
+     COVERED BY CANVA PDF
+
+39 ☐ — How Well Do You Remember
+
+40 ✓ — Finish My Sentence
+     EXISTING MINI-GAME HUB CONTAINS THIS CONCEPT.
+     DEDICATED GAMEPLAY SCREEN ONLY IF ACTUALLY REQUIRED.
+
+41 ☐ — Who Would Most Likely
+
+42 ☐ — Guess the Memory
+
+43 ☐ — Relationship Bingo
+
+================================================
+FUN GAMES
+================================================
+
+44 ☐ — Would You Survive
+
+45 ☐ — Choose Your Fate
+
+46 ☐ — Impossible Choices
+
+47 ✓ — Truth or Dare
+     GAME CONCEPT PRESENT IN EXISTING MINI-GAME SYSTEM
+
+48 ✓ — Emoji Guess
+     COVERED BY CANVA PDF
+
+49 ☐ — Word Chain
+
+50 ✓ — 20 Questions
+     COVERED BY CANVA PDF
+
+51 ✓ — Guess the Word
+     COVERED BY CANVA PDF
+
+52 ✓ — Memory Match
+     COVERED BY CANVA PDF — PAGE 28
+
+53 ✓ — Reaction Challenge
+     GAME CATEGORY / SYSTEM COVERAGE EXISTS.
+     DEDICATED SCREEN ONLY IF ACTUALLY REQUIRED.
+
+================================================
+BRAIN / REPLAYABLE GAMES
+================================================
+
+54 ☐ — Daily Question
+
+55 ☐ — Daily Challenge
+
+56 ✓ — Word Scramble
+     COVERED BY CANVA PDF
+
+57 ✓ — Trivia
+     COVERED BY CANVA PDF
+
+58 ☐ — Guess the Number
+
+59 ☐ — Higher or Lower
+
+60 ✓ — Riddle Room
+     COVERED BY CANVA PDF AS "RIDDLE ME THIS"
+
+61 ✓ — Story Builder
+     GAME CONCEPT PRESENT IN EXISTING MINI-GAMES HUB
+
+62 ☐ — Would You Rather — Chaos
+
+63 ☐ — Lucky Box
+
+================================================
+OUR PLACES
+================================================
+
+64 ✅ — Our Places Home
+     CANVA SLIDE 48
+
+65 ✅ — Add Place
+     CANVA SLIDE 49
+
+66 ✅ — Place Details
+     CANVA SLIDE 50
+
+================================================
+MOOD
+================================================
+
+67 ✅ — Mood Home
+     CANVA SLIDE 51
+
+68 ✅ — Mood Selection
+     CANVA SLIDE 52
+
+69 ✅ — Mood History
+     CANVA SLIDE 53
+
+================================================
+PERIOD TRACKER — OFFLINE V1
+================================================
+
+IMPORTANT:
+The Period Tracker uses the same local-first architecture as
+the rest of TwoHearts.
+
+All period tracking data remains on the device.
+
+No online health service is required.
+
+No cloud synchronization is required.
+
+No online fertility calculation is required.
+
+No server-side calculation is required.
+
+No server notification system is required.
+
+================================================
+PERIOD TRACKER SCREENS
+================================================
+
+54 — Period Tracker Home
+
+Main offline overview:
+
+- Current cycle day
+- Current cycle status
+- Estimated next period
+- Cycle progress
+- Quick "Log Period" action
+- Recent tracking information
+- Local reminder status
+
+55 — Period Calendar
+
+Offline monthly calendar showing:
+
+- Logged period days
+- Current day
+- Previous periods
+- Estimated upcoming period
+- Optional estimated fertile window
+- Month navigation
+
+56 — Log Period
+
+Record locally:
+
+- Period start
+- Period end
+- Flow level
+- Optional note
+
+57 — Cycle Details
+
+Show locally calculated:
+
+- Cycle start date
+- Current cycle day
+- Cycle length
+- Period duration
+- Previous cycle information
+- Estimated next period
+
+58 — Cycle History
+
+Display locally stored:
+
+- Previous cycles
+- Period dates
+- Cycle lengths
+- Period durations
+- Simple historical trends
+
+59 — Period Tracker Settings
+
+Local configuration:
+
+- Typical cycle length
+- Typical period length
+- Prediction preferences
+- Tracking preferences
+- First-day-of-period behavior
+- Privacy preferences
+
+60 — Period Reminders
+
+DEVICE-LOCAL reminders only:
+
+- Expected period reminder
+- Tracking reminder
+- Custom reminder
+- Reminder timing
+
+61 — Period Tracker Privacy
+
+Local privacy controls:
+
+- Keep tracker private
+- Partner visibility
+- What information is shared
+- Hide sensitive details
+- Local-only mode
+
+62 — Period Tracker First-Time Setup
+
+First-use setup stored locally:
+
+- Last period date
+- Typical cycle length
+- Typical period duration
+- Tracking preferences
+- Privacy preference
+
+IMPORTANT ARCHITECTURAL NOTE:
+
+The Period Tracker numbering above follows the roadmap supplied
+by the user.
+
+It is a separate feature group and its numbers should NOT be
+interpreted as replacing or deleting the Mini-Game architecture
+that uses overlapping historical numbers.
+
+The feature title and section are authoritative.
+
+================================================
+OPTIONAL FUTURE V1 SCREENS
+================================================
+
+63 — Fertile Window View
+
+Local ESTIMATE only.
+
+64 — Period Tracker Insights
+
+Local calculations based only on recorded data.
+
+65 — Export Period Data
+
+Export locally stored information.
+
+No cloud upload required.
+
+These remain optional and should not be implemented merely
+because they appear in the roadmap.
+
+================================================
+PERIOD CALCULATION RULE
+================================================
+
+All calculations happen ON DEVICE.
+
+Example:
+
+LAST PERIOD
++
+AVERAGE RECORDED CYCLE LENGTH
+=
+ESTIMATED NEXT PERIOD
+
+Predictions MUST clearly be labeled:
+
+"Estimated"
+
+They are not guaranteed medical predictions.
+
+Predictions may change as additional information is recorded.
+
+================================================
+PERIOD PRIVACY RULE
+================================================
+
+Period Tracker information is sensitive.
+
+Default:
+
+PRIVATE.
+
+Nothing may automatically be:
+
+- uploaded
+- published
+- shared
+- synchronized online
+
+Partner visibility must be explicitly controlled by the user.
+
+================================================
+PERIOD REMINDER RULE
+================================================
+
+Use device-local notifications.
+
+Do NOT use:
+
+- Firebase
+- Supabase
+- backend services
+- push notification servers
+
+================================================
+OPEN WHEN
+================================================
+
+70 ☐ — Open When Home
+
+71 ☐ — Create Open When
+
+72 ☐ — Open When Reveal
+
+V1 implementation must remain fully local/offline.
+
+The original "Open When" concept must not be turned into online
+messaging merely because Capacitor is being used.
+
+================================================
+REMINDERS
+================================================
+
+73 ✓ — Reminders Home
+     COVERED BY CANVA PDF
+
+74 ✓ — Create Reminder
+     COVERED BY CANVA PDF
+
+75 ✓ — Reminder Details
+     COVERED BY CANVA PDF
+
+Reminder functionality must work locally.
+
+Use device-local notification scheduling where notifications
+are required.
+
+================================================
+PRIVATE VAULT
+================================================
+
+76 ✅ — Vault Locked
+     CANVA SLIDE 63
+
+77 ✅ — Vault Home
+     CANVA SLIDE 64
+
+78 ✅ — Add Vault Content
+     CANVA SLIDE 65
+
+79 ✅ — Vault Content Viewer
+     CANVA SLIDE 66
+
+The Private Vault must remain local and private.
+
+Do not upload vault content to a server.
+
+================================================
+SETTINGS
+================================================
+
+80 ✅ — Settings Home
+     CANVA SLIDE 67
+
+81 ✅ — Profile Settings
+     CANVA SLIDE 68
+
+82 ✅ — Relationship Settings
+     CANVA SLIDE 69
+
+83 ✅ — Appearance Settings
+     CANVA SLIDE 70
+
+84 ✅ — Notification Settings
+     CANVA SLIDE 71
+
+85 ✅ — Security / App Lock Settings
+     CANVA SLIDE 72
+
+86 ✅ — Storage Settings
+     CANVA SLIDE 73
+
+87 ✅ — About TwoHearts
+     CANVA SLIDE 74
+
+Settings must expose only capabilities actually implemented by
+the Capacitor application.
+
+Do not create fake settings for unsupported backend features.
+
+================================================
+SEARCH
+================================================
+
+88 ✅ — Global Search
+     CANVA SLIDE 75
+
+89 ✅ — Search Results
+     CANVA SLIDE 76
+
+Search must operate against locally stored V1 data.
+
+================================================
+NOTIFICATION CENTER
+================================================
+
+90 ✅ — Notification Center
+     CANVA SLIDE 77
+
+The Notification Center must distinguish between locally
+generated notifications/reminders and any future online
+notifications.
+
+V1 does not require an online notification backend.
+
+================================================
+CURRENT CANVA PDF — 35 ORIGINAL PAGES
+================================================
+
+These pages already exist and MUST NOT be recreated.
+
+01 ✓ — Splash / Welcome
+02 ✓ — Welcome / Onboarding
+03 ✓ — Profile Setup
+04 ✓ — Special Someone Profile
+05 ✓ — Relationship / Connection Setup
+06 ✓ — Important Date / Beginning Setup
+07 ✓ — Home Dashboard
+08 ✓ — Memories Home
+09 ✓ — Memory Details
+10 ✓ — Add Memory
+11 ✓ — Notes Home
+12 ✓ — Note Editor
+13 ✓ — Individual Note
+14 ✓ — Reminders Home
+15 ✓ — Create Reminder
+16 ✓ — Reminder Details
+17 ✓ — Games Home
+18 ✓ — Would You Rather
+19 ✓ — 20 Questions
+20 ✓ — Couple Trivia
+21 ✓ — Word Scramble
+22 ✓ — Guess the Word
+23 ✓ — Riddle Me This
+24 ✓ — Two Truths & a Lie
+25 ✓ — Emoji Guess
+26 ✓ — Would You Rather gameplay variation
+27 ✓ — This or That
+28 ✓ — Memory Match
+29 ✓ — Hangman
+30 ✓ — Word Scramble gameplay variation
+31 ✓ — Trivia Challenge
+32 ✓ — Word Search
+33 ✓ — Tic-Tac-Toe
+34 ✓ — Connect Four
+35 ✓ — 2048
+
+DO NOT RECREATE THESE.
+
+================================================
+ADDITIONAL DEDICATED SCREENS
+================================================
+
+Already designed:
+
+✓ App Lock Setup
+✓ Setup Complete
+✓ Us / Relationship Hub
+✓ More Menu
+✓ Relationship Counter
+✓ Timeline Home
+✓ Add Timeline Event
+✓ Timeline Event Details
+
+DO NOT RECREATE THEM.
+
+================================================
+EXTRA CANVA GAME SCREENS
+================================================
+
+Already designed and retained:
+
+✓ Hangman
+✓ Word Search
+✓ Tic-Tac-Toe
+✓ Connect Four
+✓ 2048
+✓ Two Truths & a Lie
+✓ Additional Word Scramble gameplay
+✓ Additional Trivia gameplay
+✓ Additional gameplay variations
+
+These are legitimate additional game screens.
+
+DO NOT DELETE THEM.
+
+DO NOT RECREATE THEM.
+
+DO NOT COUNT THEM twice toward the major-screen architecture.
+
+================================================
+SURPRISE BOX STATUS
+================================================
+
+25–27 remain:
+
+REMOVED / DEFERRED FROM V1.
+
+Do not automatically reintroduce them.
+
+================================================
+WHAT REMAINS TO DESIGN
+================================================
+
+Remaining work consists of genuinely active unchecked screens
+and any supporting UI states required to make those features
+complete.
+
+Do NOT recreate existing Canva screens.
+
+Do NOT recreate additional dedicated screens.
+
+Do NOT duplicate extra game screens.
+
+A feature may require multiple implementation views even when
+it corresponds to one major architecture entry.
+
+The objective is:
+
+COMPLETE FEATURE + UI COVERAGE
+
+NOT:
+
+FORCE THE PROJECT TO HAVE EXACTLY 87 PHYSICAL CANVA PAGES.
+
+================================================
+NO REDUNDANCY RULE
+================================================
+
+Before implementing any requested screen, compare it against:
+
+1. Original major-screen architecture
+2. Existing 35-page Canva PDF
+3. Additional completed Canva screens
+4. Extra game screens
+5. Existing repository implementation
+6. TWOHEARTS_BUILD_PROGRESS.md
+7. TwoHeartsRDMap.txt
+8. MasterPrompt.txt
+9. TwoHeart UI Reference Screens
+10. Other relevant repository documentation
+
+Determine whether the requested feature is:
+
+ALREADY COVERED
+PARTIALLY COVERED
+OR
+GENUINELY MISSING
+
+If already implemented:
+
+DO NOT rebuild it.
+
+If visually designed but not yet implemented:
+
+IMPLEMENT THE EXISTING DESIGN rather than creating a new one.
+
+If partially covered:
+
+Only create the additional UI actually required.
+
+If genuinely missing:
+
+Implement it according to the roadmap and existing visual identity.
+
+================================================
+CANVA NUMBERING RULE
+================================================
+
+The Canva page number and original major-screen number are
+different concepts.
+
+Example:
+
+Original major screen:
+
+64 — Our Places Home
+
+does NOT mean Canva Slide 64.
+
+If the user says:
+
+"Slide 36 — Our Places Home"
+
+then:
+
+DESIGN / IMPLEMENT OUR PLACES HOME
+
+and associate it with:
+
+CANVA SLIDE 36.
+
+The supplied screen TITLE determines WHAT.
+
+The supplied CANVA SLIDE NUMBER determines WHERE.
+
+Never infer the requested screen from a number alone.
+
+================================================
+MASTER CANVA DESIGN REQUIREMENT
+================================================
+
+Every TwoHearts visual screen must maintain:
+
+1080 × 2400 PX
+PORTRAIT
+MOBILE APP UI
+
+Do NOT:
+
+- resize the intended design canvas
+- change aspect ratio
+- convert to square
+- convert to landscape
+- crop the intended canvas
+- rotate the intended canvas
+
+The web implementation must reproduce the same visual proportions
+and hierarchy as the approved 1080 × 2400 designs.
+
+Responsive behavior may be implemented for different Android
+screen sizes, but the reference design remains:
+
+1080 × 2400 portrait.
+
+================================================
+MASTER TWOHEARTS DESIGN IDENTITY
+================================================
+
+TwoHearts should consistently feel:
+
+warm
+intimate
+elegant
+premium
+personal
+calm
+modern
+playful
+trustworthy
+
+PRIMARY BRAND ACCENT:
+
+BURGUNDY RED
+
+SUPPORTING PALETTE:
+
+warm cream
+soft blush
+muted rose
+warm beige
+lighter burgundy
+darker burgundy
+deep charcoal
+soft neutral tones
+
+Use burgundy strategically.
+
+Do not cover entire screens in burgundy unnecessarily.
+
+TwoHearts has a subtle botanical identity inspired by:
+
+rose
+lily
+
+Use floral details sparingly.
+
+DO NOT:
+
+- overload screens with flowers
+- overload screens with hearts
+- make the app look like a Valentine's Day card
+- use gender-specific relationship assumptions
+- make the app look like a dating app
+- make the app look like a public social network
+
+================================================
+RELATIONSHIP-NEUTRAL LANGUAGE
+================================================
+
+Preferred:
+
+"YOU"
+"YOUR SPECIAL SOMEONE"
+
+Avoid:
+
+"BOYFRIEND"
+"GIRLFRIEND"
+"HUSBAND"
+"WIFE"
+
+unless explicitly requested by the user.
+
+================================================
+MOBILE APP FEEL
+================================================
+
+The Capacitor implementation must preserve the visual identity
+of the Canva designs while providing a genuine mobile-app
+interaction model.
+
+The application should NOT contain:
+
+- browser-like navigation
+- website headers
+- desktop navigation bars
+- unnecessary browser-style UI
+- excessive webpage whitespace
+- hover-dependent interactions
+- desktop-only controls
+
+Use:
+
+- touch-friendly controls
+- appropriately sized tap targets
+- mobile cards
+- mobile sheets/dialogs
+- app-style navigation
+- mobile scrolling
+- appropriate animation
+- visual feedback for taps
+- keyboard-aware forms
+- native-feeling system integration
+
+The goal is:
+
+"An actual TwoHearts mobile app built using web technology
+and packaged through Capacitor."
+
+NOT:
+
+"A website wrapped in an APK."
+
+================================================
+FINAL SOURCE-OF-TRUTH RULE
+================================================
+
+There are now four layers of project truth:
+
+1. ORIGINAL MAJOR-SCREEN ARCHITECTURE
+   Defines the feature architecture.
+
+2. EXISTING CANVA PDF + ADDITIONAL CANVA WORK
+   Defines what has already been visually designed.
+
+3. EXISTING REPOSITORY + PROJECT DOCUMENTATION
+   Defines what has already been implemented and provides
+   implementation context.
+
+4. CURRENT USER REQUEST
+   Defines exactly which screen/work should be addressed next.
+
+For the current task:
+
+THE USER'S EXPLICIT:
+
+"SLIDE NUMBER + SCREEN TITLE"
+
+takes priority for identifying the requested design task.
+
+However, the AI must first inspect the repository and
+documentation to determine whether that requested work already
+exists.
+
+Do not silently reinterpret the request.
+
+Do not invent a different screen.
+
+Do not renumber the architecture.
+
+Do not create redundant work.
+
+Do not automatically revive Surprise Box.
+
+Do not introduce V2 online functionality into V1.
+
+================================================
+CAPACITOR IMPLEMENTATION RULE
+================================================
+
+The migration to Capacitor changes HOW TwoHearts is built.
+
+It does NOT change WHAT TwoHearts is.
+
+Preserve:
+
+- feature architecture
+- screen architecture
+- visual identity
+- offline-first behavior
+- local data ownership
+- privacy model
+- V1/V2 separation
+- Canva reference designs
+- relationship-neutral language
+- game collection
+- reminders
+- vault
+- period tracker
+- memories
+- notes
+- timeline
+- places
+- moods
+- Open When
+
+Only alter implementation details that are required by the
+Capacitor/mobile-web stack.
+
+================================================
+END OF TWOHEARTS V1 MASTER ROADMAP
+================================================

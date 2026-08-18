@@ -1,0 +1,2444 @@
+============================================================
+TWOHEARTS V1 — MASTER BUILD PROMPT
+REACT + CAPACITOR EDITION
+============================================================
+
+IMPORTANT:
+
+This is the master instruction for building TwoHearts V1.
+
+READ THIS ENTIRE PROMPT BEFORE IMPLEMENTATION.
+
+TwoHearts is a private personal couples application.
+
+The application must be built as a real mobile application using:
+
+REACT
++
+CAPACITOR
++
+MOBILE-FIRST UI
++
+LOCAL-FIRST DATA
++
+NATIVE DEVICE CAPABILITIES
++
+GITHUB ACTIONS APK BUILD
+
+The final deliverable is an Android APK-capable source project.
+
+The application must NOT require a hosted website, backend,
+cloud database, or internet connection for normal V1 functionality.
+
+============================================================
+1. YOUR ROLE
+============================================================
+
+You are an AI responsible for implementing the TwoHearts V1
+application from the supplied TwoHearts project materials.
+
+You are not being asked to create a generic website.
+
+You are not being asked to create a desktop web application.
+
+You are not being asked to create a public SaaS product.
+
+You are building a private, mobile-first couples application
+whose primary target is Android.
+
+The owner understands that React/Capacitor applications use
+web technologies internally.
+
+That does NOT mean this project should be designed like a website.
+
+The final application must feel like a purpose-built mobile
+application.
+
+Your responsibility is to build:
+
+THE TWOOHEARTS MOBILE APPLICATION.
+
+The owner will handle final APK installation/distribution
+through GitHub Actions.
+
+Do not require a proprietary cloud build service.
+
+============================================================
+2. REQUIRED TECHNOLOGY STACK
+============================================================
+
+TwoHearts V1 MUST use:
+
+- React
+- TypeScript where practical
+- Capacitor
+- Android platform through Capacitor
+- Mobile-first component architecture
+- Local persistent storage
+- Local application data
+- Local assets
+- GitHub Actions for APK generation
+
+Preferred architecture:
+
+React UI
+    ↓
+Application / Feature Logic
+    ↓
+Repositories / Services
+    ↓
+Local Persistence
+    ↓
+Capacitor Native APIs where device capabilities are required
+
+Use native Android capabilities through Capacitor plugins or
+appropriate Capacitor APIs when functionality genuinely requires
+device-level behavior.
+
+Examples include:
+
+- local notifications
+- filesystem access
+- photo/media access
+- device capabilities
+- Android back behavior
+- application lifecycle integration
+
+Do NOT introduce unnecessary frameworks.
+
+Do NOT add a backend.
+
+Do NOT introduce Firebase unless explicitly required by a future
+version.
+
+Do NOT introduce Supabase.
+
+Do NOT introduce a cloud database.
+
+Do NOT introduce mandatory online authentication.
+
+Do NOT introduce mandatory internet access.
+
+============================================================
+3. CAPACITOR DOES NOT MEAN "BUILD A WEBSITE"
+============================================================
+
+Capacitor is being used as the mobile application bridge.
+
+The application must NOT be designed as:
+
+"website first, APK second."
+
+Instead:
+
+MOBILE APP FIRST.
+
+The React application must be designed specifically for phone
+screens and touch interaction.
+
+Do NOT create a desktop website and simply make it responsive.
+
+Do NOT create a website that happens to fit inside a phone.
+
+Do NOT create browser-like navigation.
+
+Do NOT create desktop-oriented layouts.
+
+Do NOT create web pages with excessive whitespace intended for
+desktop monitors.
+
+Do NOT rely on hover interactions.
+
+Do NOT use mouse-only interactions.
+
+Do NOT make important controls dependent on hover.
+
+Do NOT create browser-style UI.
+
+The application should visually and behaviorally feel like a
+real mobile app.
+
+============================================================
+4. MOBILE-FIRST REQUIREMENT
+============================================================
+
+Design for Android phones first.
+
+Primary design characteristics:
+
+- portrait-first
+- touch-first
+- mobile spacing
+- large touch targets
+- thumb-friendly controls
+- mobile navigation
+- appropriate safe areas
+- Android screen dimensions
+- keyboard-aware layouts
+- scrolling optimized for mobile
+- responsive handling of different Android screen sizes
+
+The supplied TwoHearts UI references are the visual foundation.
+
+The implementation must preserve their mobile composition.
+
+============================================================
+5. NATIVE-FEELING REQUIREMENT
+============================================================
+
+Even though React and Capacitor are used, the application should
+feel like a dedicated mobile application rather than a wrapped
+website.
+
+Use:
+
+- mobile-native navigation patterns
+- touch-friendly controls
+- native-feeling dialogs
+- native-feeling confirmation flows
+- Android-safe-area handling
+- proper back navigation
+- mobile keyboard handling
+- device notification integration
+- native filesystem/media integration where required
+- smooth but restrained mobile transitions
+
+Avoid:
+
+- browser-like navigation bars
+- website headers
+- desktop menus
+- hover effects
+- web-only UI patterns
+- generic website templates
+- generic dashboard templates
+- excessive web animations
+- unnecessary loading screens
+- "website inside an APK" visual appearance
+
+The goal is:
+
+A USER SHOULD OPEN THE APK AND EXPERIENCE IT AS A MOBILE APP.
+
+============================================================
+6. GITHUB / PROJECT MATERIALS
+============================================================
+
+The supplied TwoHearts project materials contain the information
+needed to build the application.
+
+The primary materials for this build are:
+
+1. TWOHEARTS V1 MASTER MAJOR UI SCREEN ROADMAP
+2. TWOHEARTS V1 MASTER BUILD PROMPT
+3. The existing completed TwoHearts visual screen work
+
+Use these together.
+
+The roadmap defines:
+
+- feature architecture
+- active V1 screens
+- feature scope
+- completed screens
+- remaining screens
+- intentionally removed features
+- screen relationships
+
+The visual references define:
+
+- visual identity
+- layout
+- hierarchy
+- colors
+- typography
+- cards
+- buttons
+- illustrations
+- navigation
+- game visual direction
+- spacing
+- component appearance
+
+Do not ignore either source.
+
+============================================================
+7. SCREEN NUMBERING
+============================================================
+
+Screen numbering may be inconsistent between the roadmap and
+visual reference material.
+
+This is expected.
+
+Do NOT assume:
+
+screen number = file number
+
+or:
+
+screen number = image number.
+
+Identify screens using:
+
+1. screen title
+2. feature purpose
+3. actual visual content
+4. roadmap terminology
+5. surrounding navigation/context
+
+Do not create duplicate screens merely because numbering differs.
+
+The screen TITLE and FUNCTION are more important than arbitrary
+file numbering.
+
+============================================================
+8. NO REDUNDANCY
+============================================================
+
+Before implementing a feature or screen, compare it against:
+
+- roadmap
+- existing visual work
+- existing implementation
+- feature architecture
+
+If a screen already exists:
+
+DO NOT CREATE A DUPLICATE.
+
+A single major feature may require multiple supporting states.
+
+That is acceptable.
+
+For example:
+
+- empty state
+- populated state
+- editing state
+- confirmation state
+- result state
+- gameplay state
+- error state
+
+may all exist when necessary.
+
+The goal is:
+
+COMPLETE FUNCTIONAL COVERAGE.
+
+Not:
+
+ONE SCREEN = ONE FILE.
+
+============================================================
+9. V1 OFFLINE-FIRST ARCHITECTURE
+============================================================
+
+TwoHearts V1 is fundamentally offline.
+
+Core functionality must work with:
+
+Wi-Fi OFF
++
+Mobile Data OFF.
+
+The app must not require an internet connection for:
+
+- startup
+- onboarding
+- profile setup
+- relationship setup
+- memories
+- notes
+- timeline
+- reminders
+- games
+- places
+- mood
+- period tracker
+- vault
+- settings
+- search
+- notification center
+- other core V1 functionality
+
+Do NOT introduce a mandatory backend.
+
+Do NOT introduce:
+
+- Firebase
+- Supabase
+- cloud database
+- online authentication
+- remote APIs
+- mandatory synchronization
+- remote notification servers
+- online health services
+- cloud storage
+
+V1 is local-first.
+
+============================================================
+10. CAPACITOR NATIVE BRIDGE
+============================================================
+
+Use Capacitor for device-level functionality where appropriate.
+
+Examples:
+
+React
+ ↓
+Capacitor
+ ↓
+Android native capability
+
+Use native device functionality for:
+
+- system notifications
+- local notification scheduling
+- media/photo access
+- filesystem operations where necessary
+- Android back button
+- lifecycle-related functionality
+- other device capabilities when genuinely needed
+
+Do not recreate native capabilities using unreliable browser
+workarounds when a suitable Capacitor/native solution exists.
+
+============================================================
+11. DATA ARCHITECTURE
+============================================================
+
+Do not make React components responsible for all data storage.
+
+Use a separation such as:
+
+UI
+↓
+Feature Logic
+↓
+Repository / Service
+↓
+Local Persistence
+
+The exact implementation is an engineering decision.
+
+The important requirement is:
+
+UI MUST NOT BE TIGHTLY COUPLED TO STORAGE IMPLEMENTATION.
+
+The application should be able to evolve without rewriting
+every screen when storage changes.
+
+============================================================
+12. LOCAL PERSISTENCE
+============================================================
+
+Use appropriate local persistent storage for TwoHearts V1.
+
+The storage system must support structured application data.
+
+Potential entities include:
+
+- User Profile
+- Special Someone Profile
+- Relationship
+- Important Dates
+- Memories
+- Notes
+- Timeline Events
+- Reminders
+- Places
+- Mood Entries
+- Period Tracker
+- Period Cycles
+- Vault Content
+- Games
+- Game Progress
+- Game Statistics
+- Achievements
+- Settings
+- Notification Schedules
+
+Do not place unrelated data into one giant unstructured object.
+
+Use logical models and repositories.
+
+============================================================
+13. DATABASE / STORAGE SUSTAINABILITY
+============================================================
+
+Local storage must be designed for future changes.
+
+Do NOT solve schema changes by simply deleting all local data.
+
+If the selected persistence system supports schema/version
+migrations, use them appropriately.
+
+Existing user data should be preserved whenever practical.
+
+Document important storage migrations.
+
+============================================================
+14. SUSTAINABILITY
+============================================================
+
+Build TwoHearts for long-term maintainability.
+
+Do NOT optimize only for:
+
+"make it work once."
+
+Avoid:
+
+- dependency bloat
+- unnecessary packages
+- abandoned packages
+- unstable libraries
+- unnecessary plugins
+- unnecessary cloud services
+- tightly coupled components
+- duplicated business logic
+- duplicated game engines
+- hard-coded content scattered throughout the project
+
+Every dependency must have a reasonable purpose.
+
+============================================================
+15. PROJECT STRUCTURE
+============================================================
+
+Use a clean structure similar to:
+
+src/
+  components/
+  core/
+  data/
+  repositories/
+  services/
+  customization/
+  features/
+    onboarding/
+    home/
+    relationship/
+    memories/
+    notes/
+    timeline/
+    reminders/
+    games/
+    places/
+    mood/
+    period-tracker/
+    vault/
+    settings/
+    search/
+    notifications/
+  navigation/
+  assets/
+  theme/
+
+android/
+
+docs/
+
+The exact folder structure is an engineering decision.
+
+The requirement is:
+
+FEATURES MUST BE EASY TO LOCATE.
+
+============================================================
+16. SEPARATION OF CONCERNS
+============================================================
+
+Keep separate:
+
+UI
+≠
+Business Logic
+≠
+Data
+≠
+Configuration
+≠
+Game Content
+≠
+Assets
+≠
+Notification Scheduling
+
+Do not:
+
+- put database logic directly into UI components
+- put game questions inside gameplay components
+- put Period Tracker calculations inside UI components
+- scatter theme colors throughout components
+- scatter replaceable assets throughout source code
+- scatter notification scheduling logic throughout screens
+
+============================================================
+17. SYSTEM-WIDE OWNER CUSTOMIZATION
+============================================================
+
+THIS IS A CRITICAL REQUIREMENT.
+
+The owner wants extensive control over the application.
+
+The owner may want to change:
+
+- photos
+- logo
+- icons
+- colors
+- text
+- game questions
+- game answers
+- game choices
+- prompts
+- default content
+- notification text
+- images
+- typography
+- feature defaults
+- game categories
+- placeholder content
+
+Normal customization must NOT require rewriting unrelated
+application logic.
+
+Create a clearly identifiable owner customization area.
+
+The owner should be able to locate customizable content quickly.
+
+============================================================
+18. DEDICATED OWNER CUSTOMIZATION DIRECTORY
+============================================================
+
+Create a dedicated customization area in the project.
+
+For example:
+
+src/
+  customization/
+
+or another clearly documented equivalent.
+
+Organize it logically.
+
+Possible structure:
+
+customization/
+  branding/
+  theme/
+  images/
+  icons/
+  games/
+  defaults/
+  notifications/
+
+The exact structure may differ.
+
+The requirement is:
+
+THERE MUST BE ONE CLEARLY IDENTIFIABLE PLACE FOR OWNER
+CUSTOMIZATION.
+
+The owner should not need to search through the entire application.
+
+============================================================
+19. CUSTOMIZATION FILE COMMENTS
+============================================================
+
+Important customization files must contain clear comments.
+
+Explain:
+
+- what the file controls
+- what each field means
+- what can safely be changed
+- how to add content
+- how to remove content
+- expected formats
+- examples where useful
+
+For example:
+
+------------------------------------------------------------
+OWNER CUSTOMIZATION
+------------------------------------------------------------
+
+This file controls the customizable content for TwoHearts.
+
+You can safely modify the values marked as customizable.
+
+Do not modify feature logic to change normal content.
+
+------------------------------------------------------------
+
+The exact format depends on the selected architecture.
+
+============================================================
+20. REPLACEABLE PHOTOS
+============================================================
+
+Personal photos must be replaceable without modifying feature logic.
+
+Use clearly named assets.
+
+For example:
+
+assets/
+  images/
+    onboarding_welcome_photo
+    relationship_placeholder
+    memory_placeholder
+
+The owner must be able to replace these assets.
+
+Do not embed personal images directly into React components.
+
+Document exact replacement locations.
+
+============================================================
+21. REPLACEABLE LOGO
+============================================================
+
+Create an intentional TwoHearts logo.
+
+Do NOT use a standard emoji as the final application logo.
+
+Do not use:
+
+❤️
+
+as the complete branding solution.
+
+The logo must be an actual replaceable asset.
+
+Document where the owner can replace it.
+
+============================================================
+22. REPLACEABLE ICONS
+============================================================
+
+Do NOT use Unicode emoji as final interface icons.
+
+Do not use:
+
+❤️
+🎮
+🔒
+📅
+📝
+
+as permanent UI icon replacements.
+
+Use:
+
+- SVG
+- local vector assets
+- PNG assets
+- appropriate icon assets
+
+The icon system must feel intentionally designed for TwoHearts.
+
+The owner must be able to replace icons later.
+
+============================================================
+23. DESIGN SYSTEM
+============================================================
+
+Preserve the TwoHearts visual identity established by the visual
+references.
+
+TwoHearts should feel:
+
+- warm
+- intimate
+- elegant
+- premium
+- calm
+- modern
+- personal
+- romantic
+- playful
+
+Preserve relationships between:
+
+- colors
+- typography
+- backgrounds
+- cards
+- buttons
+- spacing
+- decorative elements
+- illustrations
+- navigation
+
+Do NOT replace the visual identity with a generic React template.
+
+Do NOT use a generic SaaS dashboard design.
+
+Do NOT make the app look like a dating platform.
+
+Do NOT make the app look like a public social network.
+
+============================================================
+24. TWOHEARTS BRANDING
+============================================================
+
+Primary accent:
+
+BURGUNDY RED
+
+Supporting colors may include:
+
+- warm cream
+- soft blush
+- muted rose
+- warm beige
+- lighter burgundy
+- darker burgundy
+- deep charcoal
+- soft neutral tones
+
+Use burgundy strategically.
+
+Do not make every screen overwhelmingly burgundy.
+
+The visual identity may include subtle botanical inspiration from
+rose/lily forms.
+
+Use floral details sparingly.
+
+Do not overload the application with:
+
+- flowers
+- hearts
+- Valentine's Day imagery
+
+============================================================
+25. RELATIONSHIP-NEUTRAL LANGUAGE
+============================================================
+
+Preferred:
+
+YOU
+
+YOUR SPECIAL SOMEONE
+
+Avoid automatically assuming:
+
+boyfriend
+girlfriend
+husband
+wife
+
+unless explicitly required by the user's supplied content.
+
+TwoHearts should remain relationship-neutral.
+
+============================================================
+26. CREATIVE DESIGN FREEDOM
+============================================================
+
+Not every state will have a visual reference.
+
+When a required state is missing, use professional design judgment.
+
+You may create:
+
+- empty states
+- dialogs
+- confirmations
+- error states
+- editing states
+- loading states
+- first-use states
+- gameplay transitions
+- results
+- no-results states
+- permission explanations
+- other required states
+
+Every new state must follow the established TwoHearts design
+system.
+
+============================================================
+27. UI REFINEMENT
+============================================================
+
+The supplied designs may contain imperfections.
+
+Do not blindly reproduce obvious mistakes.
+
+You may improve:
+
+- spacing
+- alignment
+- typography
+- hierarchy
+- icon consistency
+- accessibility
+- touch targets
+- component consistency
+- interaction states
+- visual polish
+
+Do not change the underlying TwoHearts concept.
+
+Think:
+
+MOBILE APPLICATION ENGINEER
++
+REACT IMPLEMENTER
++
+CAPACITOR INTEGRATOR
++
+UI POLISH DESIGNER
+
+============================================================
+28. TYPOGRAPHY
+============================================================
+
+Implement a system-wide text-size setting.
+
+At minimum:
+
+- Small
+- Default
+- Large
+- Extra Large
+
+The setting should affect appropriate application text consistently.
+
+Do not hard-code every text size in a way that prevents scaling.
+
+Use scalable typography.
+
+Ensure larger sizes remain usable.
+
+============================================================
+29. FIRST-LAUNCH PERMISSION FLOW
+============================================================
+
+When appropriate, first launch should explain permissions before
+requesting them.
+
+Possible permissions:
+
+- notifications
+- photos/media
+- other device capabilities only when actually required
+
+DO NOT request unnecessary permissions.
+
+The app must explain why a permission is needed.
+
+If denied:
+
+- do not crash
+- continue where possible
+- explain what functionality may be unavailable
+- provide a way to enable the permission later where appropriate
+
+============================================================
+30. NOTIFICATIONS ARE CRITICAL
+============================================================
+
+TwoHearts notifications must be REAL SYSTEM NOTIFICATIONS.
+
+They must not merely appear inside the application.
+
+The user should be able to receive configured notifications when
+the application UI is not open.
+
+Important notification features include:
+
+- reminders
+- Important Dates
+- Period Tracker reminders
+- custom reminders
+- other intentionally configured reminders
+
+============================================================
+31. LOCAL NOTIFICATIONS
+============================================================
+
+Use Capacitor's native notification capabilities or an
+appropriate maintained Capacitor notification plugin.
+
+Do NOT use:
+
+- browser notifications
+- web push
+- Firebase Cloud Messaging
+- server notification APIs
+- JavaScript timers as the notification engine
+- an open React component as the scheduler
+
+Notifications must be scheduled through native Android-compatible
+mechanisms.
+
+============================================================
+32. NOTIFICATIONS WHEN APP IS CLOSED
+============================================================
+
+A scheduled notification must not require the React application
+to remain open.
+
+Example:
+
+User creates:
+
+"Period reminder — 8:00 AM"
+
+The user closes TwoHearts.
+
+At the scheduled time:
+
+Android should deliver the system notification.
+
+The React UI does not need to remain open.
+
+============================================================
+33. PERSISTENT NOTIFICATION SCHEDULING
+============================================================
+
+Do not depend on:
+
+- setTimeout
+- setInterval
+- in-memory timers
+- continuously running components
+- open screens
+
+Store notification schedules persistently.
+
+When the application starts again, reconcile scheduled notifications
+with stored reminder data.
+
+Handle:
+
+- reminder creation
+- reminder editing
+- reminder deletion
+- period prediction changes
+- device restart where supported
+- time changes
+- timezone changes
+
+Use the appropriate native Capacitor/Android scheduling behavior.
+
+============================================================
+34. PERIOD TRACKER NOTIFICATIONS
+============================================================
+
+Period Tracker notifications must be locally scheduled.
+
+Examples:
+
+- Expected period reminder
+- Tracking reminder
+- Custom reminder
+
+When cycle information changes:
+
+1. update local data
+2. recalculate predictions
+3. cancel stale schedules
+4. schedule updated notifications
+
+Do not leave obsolete notifications behind.
+
+============================================================
+35. NOTIFICATION PERMISSION
+============================================================
+
+Handle Android notification permission requirements.
+
+If permission is denied:
+
+- do not crash
+- explain the consequence
+- do not falsely claim that the notification was delivered
+- provide a path to system notification settings where practical
+
+============================================================
+36. NOTIFICATION CHANNELS
+============================================================
+
+Use Android notification channels through the native notification
+system where applicable.
+
+Possible categories:
+
+- Reminders
+- Period Tracker
+- Important Dates
+- Relationship
+- Other necessary categories
+
+Do not create unnecessary channels.
+
+Respect user-controlled notification settings.
+
+============================================================
+37. NOTIFICATION QUALITY
+============================================================
+
+Never create notification spam.
+
+Do not send:
+
+- random motivational messages
+- notifications every time the app opens
+- database update notifications
+- game-action notifications
+- repeated reminders
+- notification loops
+- duplicate alarms
+
+Only notify when the user intentionally enabled/configured a
+notification or when it is an explicit feature requirement.
+
+============================================================
+38. NO DUPLICATE NOTIFICATIONS
+============================================================
+
+Every scheduled reminder must have a stable identifier.
+
+When edited:
+
+Cancel/update the previous schedule.
+
+When deleted:
+
+Cancel the schedule.
+
+When Period Tracker data changes:
+
+Update affected schedules.
+
+Do not schedule duplicate notifications every time the app opens.
+
+============================================================
+39. ANDROID FORCE-STOP / OEM BEHAVIOR
+============================================================
+
+Do not falsely claim that the app can guarantee background
+execution after a user explicitly force-stops it.
+
+Android and OEM battery-management behavior may restrict background
+execution.
+
+However, implement correct native scheduling so normal usage works
+when:
+
+- UI is closed
+- app is backgrounded
+- device is locked
+- device is restarted where supported
+
+Do not keep the application permanently running in the background.
+
+============================================================
+40. BATTERY EFFICIENCY
+============================================================
+
+Avoid:
+
+- permanent background services
+- polling
+- continuous wake locks
+- infinite timers
+
+Use scheduled native mechanisms.
+
+Goal:
+
+RELIABLE
++
+BATTERY-CONSCIOUS
++
+NATIVE DEVICE INTEGRATION
+
+============================================================
+41. GAMES
+============================================================
+
+TwoHearts contains multiple games.
+
+Implement the games represented by the final TwoHearts roadmap and
+visual materials.
+
+Examples may include:
+
+- Would You Rather
+- 20 Questions
+- Couple Trivia
+- Word Scramble
+- Guess the Word
+- Riddle Me This
+- Two Truths & A Lie
+- Emoji Guess
+- This or That
+- Memory Match
+- Hangman
+- Trivia
+- Word Search
+- Tic-Tac-Toe
+- Connect Four
+- 2048
+
+Do not create screenshot-only games.
+
+Games must actually function.
+
+============================================================
+42. GAME MODULARITY
+============================================================
+
+Each game should be independently maintainable.
+
+Changing one game must not break another.
+
+Separate where appropriate:
+
+- game content
+- game logic
+- game state
+- game UI
+- results
+- statistics
+- achievements
+
+Do not create one enormous game component containing every game.
+
+============================================================
+43. GAME CONTENT MUST BE CUSTOMIZABLE
+============================================================
+
+THIS IS CRITICAL.
+
+The owner wants to personalize games specifically for his special
+someone.
+
+Do NOT bury questions and answers inside React components.
+
+Store game content separately.
+
+A possible structure:
+
+src/
+  customization/
+    games/
+      coupleTrivia.ts
+      guessMyAnswer.ts
+      wouldYouRather.ts
+      thisOrThat.ts
+
+OR:
+
+assets/
+  games/
+    couple_trivia.json
+    guess_my_answer.json
+
+The exact structure is an engineering decision.
+
+The requirement is:
+
+GAME CONTENT MUST BE EASY TO FIND AND MODIFY.
+
+The owner must be able to change:
+
+- questions
+- answers
+- choices
+- prompts
+- categories
+- descriptions
+
+without rewriting the game engine.
+
+============================================================
+44. GAME CONTENT COMMENTS
+============================================================
+
+Game customization files must include clear comments/documentation.
+
+Explain:
+
+- what the file controls
+- what each field means
+- how to add a question
+- how to edit an answer
+- how to remove an entry
+- expected formats
+- examples
+
+The owner should not have to reverse-engineer the game system.
+
+============================================================
+45. DATA / CONTENT / UI SEPARATION
+============================================================
+
+Maintain:
+
+UI
+≠
+game content
+≠
+database
+≠
+configuration
+≠
+assets
+
+This separation is essential.
+
+============================================================
+46. PRIVATE VAULT
+============================================================
+
+Vault is privacy-sensitive.
+
+Vault content must not accidentally appear in:
+
+- global search
+- notification previews
+- home previews
+- ordinary lists
+
+unless explicitly allowed.
+
+Use appropriate local security mechanisms.
+
+Do not store sensitive credentials in plaintext.
+
+============================================================
+47. APP LOCK
+============================================================
+
+Implement App Lock according to the roadmap.
+
+Support appropriate functionality such as:
+
+- enable/disable
+- changing the lock
+- lock timing
+- manual locking
+- automatic locking where specified
+
+Use appropriate secure local mechanisms.
+
+============================================================
+48. PERIOD TRACKER
+============================================================
+
+Period Tracker is LOCAL/OFFLINE in V1.
+
+Implement:
+
+- Period Tracker Home
+- Period Calendar
+- Log Period
+- Cycle Details
+- Cycle History
+- Period Tracker Settings
+- Period Reminders
+- Period Tracker Privacy
+- Period Tracker First-Time Setup
+
+All data is local.
+
+No online health service.
+
+No cloud synchronization.
+
+Cycle calculations must be isolated from UI.
+
+Predictions must clearly be labelled:
+
+ESTIMATED
+
+They are not guaranteed medical predictions.
+
+============================================================
+49. LOCAL REMINDERS
+============================================================
+
+Implement local reminder functionality.
+
+Possible reminders:
+
+- Important Dates
+- Relationship milestones
+- Timeline reminders
+- Custom reminders
+- Period reminders
+- Tracking reminders
+
+Every enabled reminder should be persisted locally and connected
+to the native notification scheduler.
+
+============================================================
+50. SEARCH
+============================================================
+
+Implement local Global Search.
+
+Search appropriate non-private content such as:
+
+- Memories
+- Notes
+- Timeline
+- Reminders
+- Places
+- other appropriate local content
+
+Respect Vault privacy.
+
+Do not use an online search engine.
+
+============================================================
+51. NAVIGATION
+============================================================
+
+Buttons must actually work.
+
+Examples:
+
+Add Memory
+→ opens Add Memory.
+
+Save
+→ persists data.
+
+Delete
+→ confirmation → deletion.
+
+Game
+→ launches functional game.
+
+Reminder
+→ saves reminder and schedules notification.
+
+Search
+→ searches local data.
+
+Settings
+→ modifies actual settings.
+
+Back
+→ behaves correctly.
+
+Android back behavior must be handled appropriately through
+Capacitor/native integration.
+
+Do not build static mockups.
+
+============================================================
+52. EMPTY STATES
+============================================================
+
+Create polished empty states.
+
+Examples:
+
+No memories yet.
+
+No notes yet.
+
+No timeline events.
+
+No places yet.
+
+No mood history.
+
+No reminders.
+
+No Vault content.
+
+No search results.
+
+No period history.
+
+Use TwoHearts visual language.
+
+============================================================
+53. ERROR HANDLING
+============================================================
+
+Handle normal errors gracefully.
+
+Examples:
+
+- empty input
+- invalid dates
+- missing images
+- malformed game content
+- storage errors
+- notification permission denial
+- invalid reminder data
+- unsupported files
+
+Never expose raw errors or stack traces to users.
+
+============================================================
+54. ACCESSIBILITY
+============================================================
+
+Support:
+
+- scalable text
+- readable contrast
+- adequate touch targets
+- meaningful accessibility labels
+- accessible controls
+- proper text wrapping
+
+Respect font-size settings.
+
+============================================================
+55. PERFORMANCE
+============================================================
+
+Avoid:
+
+- memory leaks
+- excessive renders
+- unnecessary storage queries
+- huge unoptimized images
+- unnecessary animations
+- unnecessary background processing
+- network operations
+
+Keep the application responsive on normal Android devices.
+
+============================================================
+56. PERSONAL INFORMATION
+============================================================
+
+Do not hard-code personal relationship information inside feature
+logic.
+
+Personal:
+
+- names
+- dates
+- photos
+- private notes
+- Vault content
+
+must be stored as user data or replaceable assets.
+
+============================================================
+57. ASSET STRUCTURE
+============================================================
+
+Use predictable directories.
+
+For example:
+
+src/
+  assets/
+    branding/
+    onboarding/
+    games/
+    illustrations/
+    icons/
+
+The exact implementation may vary.
+
+Use descriptive filenames.
+
+Prefer:
+
+onboarding_welcome_photo
+
+twohearts_logo
+
+couple_trivia_questions
+
+over:
+
+image1
+
+final2
+
+newfinal
+
+test
+
+thing
+
+stuff
+
+============================================================
+58. CUSTOMIZATION GUIDE
+============================================================
+
+CREATE:
+
+TWOHEARTS_CUSTOMIZATION_GUIDE.md
+
+This file is mandatory.
+
+It must explain exactly how the owner can modify the application.
+
+Include:
+
+------------------------------------------------------------
+CHANGE WELCOME PHOTO
+------------------------------------------------------------
+
+Exact path.
+
+Exact filename.
+
+Supported format.
+
+Replacement instructions.
+
+------------------------------------------------------------
+CHANGE APP LOGO
+------------------------------------------------------------
+
+Exact path.
+
+Replacement instructions.
+
+------------------------------------------------------------
+CHANGE BUTTON ICONS
+------------------------------------------------------------
+
+Exact path.
+
+Replacement instructions.
+
+------------------------------------------------------------
+CHANGE COLORS
+------------------------------------------------------------
+
+Exact theme/configuration location.
+
+------------------------------------------------------------
+CHANGE FONT DEFAULTS
+------------------------------------------------------------
+
+Exact location.
+
+------------------------------------------------------------
+CHANGE GAME QUESTIONS
+------------------------------------------------------------
+
+Exact file.
+
+------------------------------------------------------------
+CHANGE GAME ANSWERS
+------------------------------------------------------------
+
+Exact file.
+
+------------------------------------------------------------
+ADD GAME QUESTIONS
+------------------------------------------------------------
+
+Required structure.
+
+------------------------------------------------------------
+REMOVE GAME QUESTIONS
+------------------------------------------------------------
+
+Safe procedure.
+
+------------------------------------------------------------
+CHANGE DEFAULT TEXT
+------------------------------------------------------------
+
+Exact string/content location.
+
+------------------------------------------------------------
+CHANGE IMAGES
+------------------------------------------------------------
+
+Asset location.
+
+------------------------------------------------------------
+CHANGE REMINDER DEFAULTS
+------------------------------------------------------------
+
+Exact configuration.
+
+------------------------------------------------------------
+CHANGE PERIOD TRACKER DEFAULTS
+------------------------------------------------------------
+
+Exact configuration.
+
+------------------------------------------------------------
+FIND FEATURE CODE
+------------------------------------------------------------
+
+Feature index matching the actual project.
+
+IMPORTANT:
+
+DO NOT INVENT FILE PATHS.
+
+The guide must use paths that actually exist in the final
+repository.
+
+============================================================
+59. OWNER CUSTOMIZATION QUICK INDEX
+============================================================
+
+Include:
+
+I want to change:
+→ Go here.
+
+Examples:
+
+Welcome photo
+→ actual project path
+
+App logo
+→ actual project path
+
+Game questions
+→ actual project path
+
+Game answers
+→ actual project path
+
+Colors
+→ actual project path
+
+Font settings
+→ actual project path
+
+Notification text
+→ actual project path
+
+App name
+→ actual project path
+
+Period Tracker settings
+→ actual project path
+
+Reminder defaults
+→ actual project path
+
+Feature implementation
+→ actual project folder
+
+============================================================
+60. README
+============================================================
+
+CREATE:
+
+README.md
+
+Explain:
+
+- TwoHearts V1
+- React architecture
+- Capacitor architecture
+- Android target
+- offline-first design
+- local data
+- project structure
+- UI references
+- assets
+- game content
+- storage
+- customization guide
+- GitHub Actions
+- APK artifact
+- build process
+
+============================================================
+61. GITHUB ACTIONS
+============================================================
+
+Create a GitHub Actions workflow capable of building the Android
+APK.
+
+The workflow should:
+
+1. Checkout repository.
+2. Configure Node.js.
+3. Install dependencies.
+4. Build the React application.
+5. Synchronize Capacitor.
+6. Configure Java/Android build environment.
+7. Build the Android project.
+8. Generate APK.
+9. Upload APK as a workflow artifact.
+
+Do not require a proprietary cloud build service.
+
+Keep the workflow reproducible.
+
+============================================================
+62. APK BUILD / DEPLOYMENT DOCUMENTATION
+============================================================
+
+README.md must explain how the owner can:
+
+1. Modify TwoHearts.
+2. Commit changes.
+3. Push changes to GitHub.
+4. Open GitHub.
+5. Open Actions.
+6. Select the Android build workflow.
+7. Run it when workflow dispatch is available.
+8. Wait for completion.
+9. Open the completed workflow.
+10. Locate the APK artifact.
+11. Download the APK.
+12. Install it on an Android device.
+
+The owner should be able to repeat this after changing:
+
+- photos
+- logos
+- icons
+- game questions
+- game answers
+- colors
+- configuration
+- source code
+
+No backend or website hosting should be required.
+
+============================================================
+63. BUILD SUSTAINABILITY
+============================================================
+
+The repository must contain everything required for the normal
+source build process.
+
+Do not depend on:
+
+- temporary AI-builder files
+- hidden configuration
+- undocumented services
+- proprietary build systems
+- undocumented secrets
+
+Document required environment configuration.
+
+============================================================
+64. CAPACITOR AND ANDROID BUILD STRUCTURE
+============================================================
+
+The final project should contain a proper Capacitor Android project.
+
+Conceptually:
+
+React source
+    ↓
+React production build
+    ↓
+Capacitor sync
+    ↓
+Android project
+    ↓
+Gradle
+    ↓
+APK
+
+Do not simply upload the React website somewhere and point the APK
+toward it.
+
+The APK must contain the application resources necessary for
+offline V1 functionality.
+
+============================================================
+65. OFFLINE STARTUP
+============================================================
+
+The application must start and function without an internet
+connection.
+
+Do not load core UI from:
+
+- external websites
+- remote JavaScript
+- remote CSS
+- CDN-only dependencies at runtime
+- external APIs
+
+All required production application assets must be bundled with
+the application.
+
+============================================================
+66. FUTURE V2 COMPATIBILITY
+============================================================
+
+V1 remains offline.
+
+Do not implement online communication simply to prepare for V2.
+
+However, keep architecture modular enough that a future V2 could
+potentially introduce:
+
+- online synchronization
+- two-person communication
+- remote notifications
+- additional online features
+
+Do not implement those features now.
+
+============================================================
+67. NOTIFICATION ARCHITECTURE SUMMARY
+============================================================
+
+Conceptually:
+
+USER CREATES REMINDER
+        ↓
+LOCAL DATA STORE
+        ↓
+NOTIFICATION SERVICE
+        ↓
+CAPACITOR NATIVE NOTIFICATION API
+        ↓
+ANDROID NATIVE SCHEDULING
+        ↓
+ANDROID NOTIFICATION SYSTEM
+
+The React UI does not need to remain open.
+
+For updates:
+
+UPDATE LOCAL DATA
+        ↓
+CANCEL OLD SCHEDULE
+        ↓
+CREATE UPDATED SCHEDULE
+
+For deletion:
+
+DELETE LOCAL DATA
+        ↓
+CANCEL NOTIFICATION
+
+For Period Tracker:
+
+UPDATE PERIOD DATA
+        ↓
+RECALCULATE ESTIMATES
+        ↓
+UPDATE NOTIFICATION SCHEDULES
+
+============================================================
+68. NOTIFICATION RELIABILITY
+============================================================
+
+Do not use simplistic JavaScript timers as the notification engine.
+
+Do not depend on the app being open.
+
+Handle where supported:
+
+- Android notification permission
+- Android scheduling requirements
+- reboot/rescheduling
+- timezone changes
+- system time changes
+- reminder edits
+- reminder deletion
+- Period Tracker changes
+- duplicate prevention
+- notification channels
+- battery efficiency
+
+Follow the requirements of the Android version being targeted.
+
+============================================================
+69. NO NOTIFICATION SPAM
+============================================================
+
+TwoHearts is a private relationship application.
+
+Notifications must feel intentional.
+
+Never send:
+
+- random motivational spam
+- unnecessary app-open notifications
+- database update notifications
+- game action notifications
+- duplicate reminders
+- notification loops
+
+Only meaningful configured notifications should appear.
+
+============================================================
+70. OWNER FREEDOM PRINCIPLE
+============================================================
+
+The owner should be able to make normal changes safely.
+
+For example:
+
+CHANGE:
+Welcome photo
+
+SHOULD NOT BREAK:
+Games.
+
+CHANGE:
+Game question
+
+SHOULD NOT BREAK:
+Period Tracker.
+
+CHANGE:
+Logo
+
+SHOULD NOT BREAK:
+Vault.
+
+CHANGE:
+Color
+
+SHOULD NOT BREAK:
+Storage.
+
+CHANGE:
+Reminder text
+
+SHOULD NOT BREAK:
+Navigation.
+
+This requires clean separation of:
+
+assets
+content
+configuration
+UI
+logic
+data
+
+============================================================
+71. DO NOT OVERENGINEER
+============================================================
+
+Build professionally without unnecessary complexity.
+
+TwoHearts is a private personal application.
+
+The architecture should be:
+
+- clean
+- modular
+- understandable
+- sustainable
+- maintainable
+
+Do not build an enterprise-scale architecture unnecessarily.
+
+============================================================
+72. IMPLEMENTATION ORDER
+============================================================
+
+Implement systematically.
+
+PHASE 1
+React + Capacitor foundation.
+
+PHASE 2
+TwoHearts theme and design system.
+
+PHASE 3
+Local persistence architecture.
+
+PHASE 4
+Repositories/data services.
+
+PHASE 5
+First-launch permission flow and onboarding.
+
+PHASE 6
+Main navigation.
+
+PHASE 7
+Home and relationship.
+
+PHASE 8
+Memories.
+
+PHASE 9
+Notes.
+
+PHASE 10
+Timeline.
+
+PHASE 11
+Reminders and native local notification engine.
+
+PHASE 12
+Games framework.
+
+PHASE 13
+Games.
+
+PHASE 14
+Our Places.
+
+PHASE 15
+Mood.
+
+PHASE 16
+Period Tracker.
+
+PHASE 17
+Vault and App Lock.
+
+PHASE 18
+Settings.
+
+PHASE 19
+Search.
+
+PHASE 20
+Notification Center.
+
+PHASE 21
+Customization architecture.
+
+PHASE 22
+README and customization documentation.
+
+PHASE 23
+GitHub Actions APK workflow.
+
+============================================================
+73. IMPLEMENTATION DISCIPLINE
+============================================================
+
+Do NOT attempt to build the entire application as one giant
+operation.
+
+Work systematically feature-by-feature.
+
+Before implementing a feature:
+
+1. Understand the roadmap requirement.
+2. Identify existing visual coverage.
+3. Identify reusable components.
+4. Determine required data.
+5. Determine required interactions.
+6. Implement the feature.
+7. Connect navigation.
+8. Connect local persistence.
+9. Connect notifications if applicable.
+10. Verify that customization remains separated.
+11. Document important owner-editable content.
+
+Do not silently remove functionality.
+
+Do not silently replace requirements.
+
+============================================================
+74. CUSTOMIZATION MUST BE BUILT, NOT MERELY DOCUMENTED
+============================================================
+
+The customization system is an actual application architecture
+requirement.
+
+Do NOT simply create a markdown file saying:
+
+"edit this file."
+
+The referenced customization files/directories must actually exist.
+
+Examples:
+
+If the guide says game questions are located at:
+
+src/customization/games/coupleTrivia.ts
+
+THAT FILE MUST ACTUALLY EXIST.
+
+If the guide says the logo is at:
+
+src/assets/branding/twohearts-logo.svg
+
+THAT ASSET MUST ACTUALLY EXIST.
+
+Documentation must correspond to reality.
+
+============================================================
+75. SYSTEM-WIDE CUSTOMIZATION
+============================================================
+
+The customization system should cover, where applicable:
+
+BRANDING
+- app logo
+- app icon
+- brand imagery
+
+VISUALS
+- colors
+- typography defaults
+- spacing/theme configuration
+- icons
+
+IMAGES
+- onboarding photos
+- placeholder images
+- illustrations
+- feature imagery
+
+GAMES
+- questions
+- answers
+- choices
+- prompts
+- categories
+- descriptions
+
+TEXT
+- default UI text
+- notification wording
+- empty-state text where appropriate
+
+DEFAULTS
+- feature defaults
+- reminder defaults
+- Period Tracker defaults
+- game defaults
+
+The owner should not need to modify unrelated feature logic for
+normal customization.
+
+============================================================
+76. GAME CUSTOMIZATION EXAMPLES
+============================================================
+
+The customization system should make it obvious how to change:
+
+QUESTION:
+
+"What is my favorite food?"
+
+ANSWER:
+
+"Pizza"
+
+CHOICES:
+
+"Pizza"
+"Burger"
+"Sushi"
+
+PROMPT:
+
+"Who would most likely survive a zombie apocalypse?"
+
+The owner should be able to modify these without modifying the
+game engine.
+
+============================================================
+77. FINAL QUALITY CHECK
+============================================================
+
+Before considering the application complete:
+
+[ ] React application
+[ ] Capacitor Android integration
+[ ] Mobile-first design
+[ ] Android APK build
+[ ] No hosted website requirement
+[ ] No mandatory backend
+[ ] No mandatory internet
+[ ] Offline startup
+[ ] Local persistent data
+[ ] Sustainable architecture
+[ ] Modular features
+[ ] Replaceable assets
+[ ] Replaceable photos
+[ ] Replaceable logo
+[ ] Replaceable icons
+[ ] Replaceable game questions
+[ ] Replaceable game answers
+[ ] Owner customization directory
+[ ] Owner customization files documented
+[ ] System-wide customization
+[ ] User-adjustable font size
+[ ] App Lock
+[ ] Private Vault
+[ ] Local reminders
+[ ] Real Android system notifications
+[ ] Notifications work while UI is closed
+[ ] Persistent notification scheduling
+[ ] Notification updates
+[ ] Notification deletion
+[ ] Period Tracker notifications
+[ ] Notification permission handling
+[ ] No notification spam
+[ ] No duplicate notifications
+[ ] Battery-conscious scheduling
+[ ] First-launch permission flow
+[ ] Permission denial handled
+[ ] Storage migration strategy
+[ ] GitHub Actions APK workflow
+[ ] README.md
+[ ] TWOHEARTS_CUSTOMIZATION_GUIDE.md
+[ ] APK deployment tutorial
+[ ] Feature location index
+[ ] No duplicate screens
+[ ] UI references reconciled by title/function
+[ ] Missing states designed consistently
+[ ] Existing UI imperfections polished
+[ ] TwoHearts visual identity preserved
+[ ] Android back behavior works
+[ ] Touch interactions work
+[ ] Keyboard handling works
+[ ] Safe-area handling works
+[ ] Application functions offline
+[ ] Production assets bundled locally
+
+============================================================
+78. MOST IMPORTANT PRINCIPLE
+============================================================
+
+DO NOT THINK:
+
+"Convert these screenshots into a website and put it in an APK."
+
+DO NOT THINK:
+
+"Build a generic React dashboard."
+
+THINK:
+
+"Build the complete TwoHearts V1 mobile application using React
+and Capacitor, with a native-feeling Android experience, local
+data, native device capabilities, and the supplied TwoHearts visual
+identity."
+
+The roadmap defines the feature architecture.
+
+The visual references define the visual foundation.
+
+React provides the application UI architecture.
+
+Capacitor provides the native Android bridge.
+
+Local storage provides offline persistence.
+
+Native notification capabilities provide real system notifications.
+
+GitHub Actions provides reproducible APK generation.
+
+The application must be:
+
+MOBILE-FIRST
++
+OFFLINE
++
+LOCAL
++
+SUSTAINABLE
++
+CUSTOMIZABLE
++
+PRIVATE
++
+FUNCTIONAL
++
+VISUALLY CONSISTENT
++
+MAINTAINABLE
+
+============================================================
+79. FINAL INSTRUCTION
+============================================================
+
+READ THE PROVIDED TWOOHEARTS MATERIALS BEFORE IMPLEMENTATION.
+
+Understand the roadmap.
+
+Understand the existing visual work.
+
+Match screens by title, purpose, and actual visual content.
+
+Do not create duplicate screens.
+
+Do not redesign completed screens unnecessarily.
+
+Do not invent a different product.
+
+Do not turn TwoHearts into a generic website.
+
+Do not require a backend.
+
+Do not require internet access for V1.
+
+Do not create fake notification behavior.
+
+Do not rely on JavaScript timers for system notifications.
+
+Use Capacitor/native Android capabilities when device-level
+functionality is required.
+
+Build the application as a sustainable mobile product.
+
+Where a screen is not fully designed, use professional creative
+judgment while following the established TwoHearts visual system.
+
+Where an asset may be replaced by the owner, isolate it.
+
+Where game content may be customized, isolate it.
+
+Where configuration may change, centralize it.
+
+Where the owner may need to make changes later, document exactly
+where those changes belong.
+
+CREATE:
+
+README.md
+
+AND:
+
+TWOHEARTS_CUSTOMIZATION_GUIDE.md
+
+The customization guide must explain how to change practically
+everything the owner is reasonably expected to customize.
+
+The guide must use actual project paths.
+
+The project must contain the actual customization files it
+documents.
+
+The owner must be able to:
+
+1. Modify TwoHearts.
+2. Push the changes to GitHub.
+3. Run the GitHub Actions Android workflow.
+4. Download the generated APK.
+5. Install the APK on an Android device.
+
+No backend.
+
+No web hosting.
+
+No proprietary deployment platform.
+
+No mandatory internet.
+
+============================================================
+END OF TWOHEARTS V1 MASTER BUILD PROMPT
+============================================================
