@@ -1,20 +1,23 @@
 /**
- * Android back-button + app lifecycle foundation.
+ * Android back-button + app lifecycle foundation (Phase 1), wired onto the
+ * Phase 3 lifecycle service bus (`services/lifecycle/appLifecycleService`).
  *
- * Uses @capacitor/app for native Android back button handling and
- * lifecycle (foreground/background) events. In a web/dev context these
- * listeners are simply inert, so the foundation degrades gracefully
- * (MasterPrompt §39, §5).
- *
- * Feature-specific back behavior is added in Phase 3+; this hook only
- * establishes the global wiring + a fallback (close any open modal, else
- * let the system handle back).
+ * - The service singleton owns the native `appStateChange` listener (one
+ *   registration, shared by app-lock auto-lock, notification
+ *   reconciliation, and future feature subscribers).
+ * - This hook adds the UI-facing concerns only: back-button dismissal of
+ *   transient UI errors and notification-registry reconciliation on
+ *   foreground (keeps the DB registry aligned with the OS pending list).
+ * - In a web/dev context the service falls back to document visibility
+ *   events, so semantics are identical without a device (MasterPrompt §39).
  */
 
 import { useEffect } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import { uiStore } from './uiState';
 import { useUiState } from './uiState';
+import { appLifecycle } from '../services/lifecycle/appLifecycleService';
+import { coreServices } from '../services/bootstrap/appBootstrap';
 
 export function useAppLifecycle() {
   const { isMounted } = useUiState();
@@ -24,12 +27,11 @@ export function useAppLifecycle() {
 
     let backListener: { remove: () => void } | undefined;
 
-    // Android back button: the default behavior here is to let the OS
-    // handle back when there's nothing for the app to intercept.
-    // Feature phases wire modal/route-aware back behavior.
+    // Android back button: dismiss transient UI errors, then defer to the
+    // system when nothing intercepts (feature phases add route-aware back).
     CapacitorApp.addListener('backButton', () => {
-      uiStore.setGlobalError(null); // dismiss any global error sheet
-      // Defer to native by not calling preventDefault in V1 foundation.
+      uiStore.setGlobalError(null);
+      appLifecycle.notifyBackButton();
     })
       .then((h) => {
         backListener = h;
@@ -38,17 +40,17 @@ export function useAppLifecycle() {
         // Not running on a native platform during dev — safe to ignore.
       });
 
-    const lifecycle = CapacitorApp.addListener('appStateChange', ({ isActive }) => {
-      // Foreground/background transitions; feature phases use this for
-      // app-lock auto-lock (Phase 17) and notification reconciliation.
-      void isActive;
-    })
-      .then((h) => h)
-      .catch(() => undefined);
+    // Reconcile the notification registry against the OS pending list each
+    // time the app returns to the foreground (delivered/cleared schedules).
+    const unsubscribeReconcile = appLifecycle.onEvent((event) => {
+      if (event === 'foreground' && coreServices.notifications) {
+        void coreServices.notifications.reconcile();
+      }
+    });
 
     return () => {
       backListener?.remove();
-      lifecycle.then((h) => h?.remove()).catch(() => undefined);
+      unsubscribeReconcile();
     };
   }, [isMounted]);
 }

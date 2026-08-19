@@ -68,9 +68,49 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
 ## Phase status
 - Phase 0: Reconnaissance — COMPLETE
 - Phase 1: Engineering foundation — COMPLETE (e21e523)
-- Phase 2: Local-first data & persistence foundation — COMPLETE
-  (branch `phase-2-local-first-persistence`; docs/persistence.md)
-- Phase 3+: features (onboarding, memories, notes, …) — NOT STARTED
+- Phase 2: Local-first data & persistence foundation — COMPLETE (ab1ce1d;
+  docs/persistence.md). Schema v2 after Phase 3 (adds notification_registry).
+- Phase 3: Core services & device foundation — COMPLETE (src/services/**;
+  docs/core-services.md)
+- Phase 4+: features (onboarding, memories, notes, …) — NOT STARTED
+
+## Phase 3 core services (src/services/)
+- bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,
+  schema-verify) abort to AppGate retry UI; non-critical log-and-continue.
+  `coreServices` registry: device / notifications? / appLock? (optional when
+  a non-critical stage degraded).
+- errors/appError.ts — AppError{category,code,recoverable}; safeUserMessage
+  never leaks internals; normalizeAppError translates PersistenceError.
+- logging/logger.ts — leveled, scoped; redact() strips pin/password/secret/
+  token/body/content/vault/media keys + Uint8Array payloads.
+- validation/validators.ts — pure {ok,errors} validators; validate() composer.
+- datetime/datetime.ts — local wall clock for user-facing dates; Feb 29→Feb 28
+  leap rule; DST-safe local-day diffs; no date library.
+- device/deviceCapabilities.ts — one capability matrix + has(); web fallbacks.
+- permissions/permissionService.ts — granted|denied|prompt|unavailable; never
+  throws; check() never prompts.
+- lifecycle/appLifecycleService.ts — singleton bus owning appStateChange;
+  simulate() for tests; core/useAppLifecycle delegates here.
+- files/fileService.ts + fileAdapters.ts — generic non-media files under
+  files/ root; MemoryFileAdapter for tests.
+- media/mediaUtils.ts — size limits (photo 25MB, video 500MB), magic-byte
+  sniffing; Phase 2 mediaTypes/MediaStorage still own storage.
+- search/ — normalize.ts + searchEngine.ts; per-feature providers query
+  repositories directly (no duplicate index); deterministic ranking.
+- security/ — SecureStore boundary; capacitorSecureStore is the ONLY
+  @aparajita/capacitor-secure-storage import site; pinHash = PBKDF2-HMAC-
+  SHA-256 (120k iters, random salt, constant-time compare); appLockService =
+  memory-only lock state, relock-on-foreground via lifecycle bus.
+
+## Phase 3 rules
+- React components import NO Capacitor plugins and NO storage APIs.
+- Each plugin is imported in exactly ONE driver file.
+- Node tests cannot resolve Vite aliases (@theme/* etc.) — modules reachable
+  from tests must use relative imports with .ts extensions.
+- Settings = non-sensitive config only; PIN material lives in SecureStore;
+  lock state is memory-only (cold start = locked when enabled).
+- AndroidManifest: POST_NOTIFICATIONS + SCHEDULE_EXACT_ALARM (local
+  notifications only — no push in V1).
 
 ## Git
 - user.name=openhands, user.email=openhands@all-hands.dev (local config).

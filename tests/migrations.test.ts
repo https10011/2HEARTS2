@@ -13,14 +13,17 @@ test('migrations apply in order on a fresh database', async () => {
   await runMigrations(db, ALL_MIGRATIONS);
 
   const applied = await db.query<AppliedMigrationRow>('SELECT * FROM schema_migrations ORDER BY id ASC');
-  assert.deepStrictEqual(applied.map((row) => row.id), [1]);
-  assert.deepStrictEqual(applied.map((row) => row.name), ['initial-schema']);
+  assert.deepStrictEqual(applied.map((row) => row.id), [1, 2]);
+  assert.deepStrictEqual(applied.map((row) => row.name), ['initial-schema', 'notification-registry']);
   assert.ok(isValidIsoTimestamp(applied[0].applied_at));
 
   const tables = await db.query<{ name: string }>(
-    "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'media_assets'",
+    "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('media_assets', 'notification_registry') ORDER BY name",
   );
-  assert.strictEqual(tables.length, 1);
+  assert.deepStrictEqual(
+    tables.map((t) => t.name),
+    ['media_assets', 'notification_registry'],
+  );
   await db.close();
 });
 
@@ -32,8 +35,11 @@ test('migrations are idempotent — running again applies nothing twice', async 
   await runMigrations(db, ALL_MIGRATIONS);
 
   const applied = await db.query<AppliedMigrationRow>('SELECT * FROM schema_migrations');
-  assert.strictEqual(applied.length, 1);
-  assert.strictEqual(applied[0].id, 1);
+  assert.strictEqual(applied.length, 2);
+  assert.deepStrictEqual(
+    applied.map((row) => row.id).sort(),
+    [1, 2],
+  );
   await db.close();
 });
 

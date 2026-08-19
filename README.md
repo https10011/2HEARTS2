@@ -41,7 +41,9 @@ src/
   features/          # Feature screens (added in Phase 6+ — empty now by design)
   data/              # Persistence: database/, model/, serialization/, media/, settings/
   repositories/      # Domain repositories (BaseRepository + MediaAssetRepository)
-  services/          # backup/ (export envelope), future domain services
+  services/          # Core services (Phase 3): bootstrap/ errors/ logging/ validation/
+                     # datetime/ device/ permissions/ lifecycle/ files/ media/ search/
+                     # security/ notifications/ (+ backup/ export envelope)
   hooks/ utils/ config/  # Shared hooks, utils (ids/time/base64), persistence config
   assets/            # Replaceable SVG logo/icon/illustration assets
 android/             # Capacitor Android project (Gradle → APK)
@@ -105,6 +107,12 @@ See **`docs/persistence.md`** for the Phase 2 database decision (SQLite +
 sql.js dev adapter), layers, schema versioning/migrations, settings vs domain
 boundary, media storage, serialization, error handling, backup/export
 boundary, and the future V2 sync seam.
+
+See **`docs/core-services.md`** for the Phase 3 core services: bootstrap
+pipeline, error taxonomy, redacted logging, validators, datetime helpers,
+device capability matrix, permission service, lifecycle bus, file/media
+utilities, search engine, secure storage + app lock foundation, and the
+local notification architecture.
 
 ## Authoritative specifications
 

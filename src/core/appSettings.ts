@@ -13,7 +13,10 @@
  */
 
 import { useSyncExternalStore } from 'react';
-import { TEXT_SIZE_SCALE, type TextSizeKey } from '@theme/tokens';
+// Relative import (not the @theme alias): this module is imported by the
+// Phase 3 bootstrap pipeline, which must also load under Node's test runner
+// where Vite path aliases do not resolve.
+import { TEXT_SIZE_SCALE, type TextSizeKey } from '../theme/tokens.ts';
 import { defaultSettingsStorage } from '../data/settings/settingsStorage.ts';
 
 const STORAGE_KEY = 'twohearts.settings.v1';
@@ -26,6 +29,12 @@ export interface AppSettings {
   onboarded: boolean;
   /** Whether app lock is enabled (Vault/AppLock feature, Phase 17). */
   appLockEnabled: boolean;
+  /**
+   * Seconds of background inactivity before the app re-locks (0 = lock on
+   * any background). Non-sensitive CONFIG ONLY — the PIN verifier lives in
+   * the SecureStore (src/services/security), never here.
+   */
+  lockTimeoutSeconds: number;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -33,6 +42,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   textSize: 'default',
   onboarded: false,
   appLockEnabled: false,
+  lockTimeoutSeconds: 60,
 };
 
 type Listener = () => void;

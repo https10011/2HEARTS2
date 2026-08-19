@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './styles/global.css';
-import { initializeDatabase } from './data/database/connection';
-import { safeMessageFor } from './data/database/errors';
+import { bootstrapApp } from './services/bootstrap/appBootstrap';
 
 // In browser/dev contexts the persistence layer runs on sql.js (the same SQL
 // schema as native Android SQLite). The WASM asset URL is handed to the
@@ -14,10 +13,10 @@ import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 (globalThis as { __TWOHEARTS_SQL_WASM_URL__?: string }).__TWOHEARTS_SQL_WASM_URL__ = sqlWasmUrl;
 
 /**
- * Application bootstrap: persistence initializes BEFORE the React tree is
- * allowed to mount, so feature code can always assume the database is ready
- * (Phase 2 initialization gate). Failure renders a calm, raw-error-free
- * fallback with retry.
+ * Application bootstrap: the Phase 3 initialization pipeline (persistence +
+ * migrations + core services) completes BEFORE the React tree is allowed to
+ * mount, so feature code can always assume the platform is ready. Failure
+ * renders a calm, raw-error-free fallback with retry.
  */
 function AppGate() {
   const [status, setStatus] = useState<'pending' | 'ready' | 'failed'>('pending');
@@ -25,11 +24,18 @@ function AppGate() {
 
   React.useEffect(() => {
     let cancelled = false;
-    initializeDatabase()
-      .then(() => !cancelled && setStatus('ready'))
-      .catch((cause) => {
+    bootstrapApp()
+      .then((result) => {
         if (cancelled) return;
-        setError(safeMessageFor(cause));
+        if (result.ok) setStatus('ready');
+        else {
+          setError(result.failureMessage ?? 'Initialization failed.');
+          setStatus('failed');
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setError('Initialization failed.');
         setStatus('failed');
       });
     return () => {

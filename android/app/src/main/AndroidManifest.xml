@@ -37,5 +37,14 @@
 
     <!-- Permissions -->
 
+    <!-- INTERNET: required by the Android System WebView runtime itself;
+         the app makes no network requests (offline-first). -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- POST_NOTIFICATIONS: required on Android 13+ for LOCAL notifications
+         (Phase 3). No remote push exists in V1. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- SCHEDULE_EXACT_ALARM: requested by the local-notifications plugin so
+         future exact schedules (e.g. anniversaries) can fire precisely;
+         Phase 3 defaults to inexact scheduling. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 </manifest>
