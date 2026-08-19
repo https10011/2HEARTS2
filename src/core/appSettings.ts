@@ -1,11 +1,12 @@
 /**
  * Persistent application settings store.
  *
- * This is the V1 persistent settings foundation. It is intentionally
- * framework-light (no external state library) to avoid dependency bloat
- * (MasterPrompt §14). The local-first domain data layer (memories, notes,
- * etc.) is added in the persistence phase (Phase 3); this store covers
- * application-level preferences only.
+ * APPLICATION SETTINGS only (text size, onboarding flag, app-lock flag) —
+ * domain data (memories, notes, …) lives in the SQLite layer introduced in
+ * Phase 2. Settings stay on `localStorage` ON PURPOSE: they must be readable
+ * before database initialization and are tiny/flat; the hard boundary is the
+ * `SettingsStorage` abstraction so nothing here touches `localStorage`
+ * directly (see src/data/settings).
  *
  * Schema versioning: bump SCHEMA_VERSION and add a migration in
  * `migrate` to preserve user data across releases (MasterPrompt §13).
@@ -13,6 +14,7 @@
 
 import { useSyncExternalStore } from 'react';
 import { TEXT_SIZE_SCALE, type TextSizeKey } from '@theme/tokens';
+import { defaultSettingsStorage } from '../data/settings/settingsStorage.ts';
 
 const STORAGE_KEY = 'twohearts.settings.v1';
 const SCHEMA_VERSION = 1;
@@ -38,9 +40,8 @@ const listeners = new Set<Listener>();
 let current: AppSettings = load();
 
 function load(): AppSettings {
-  if (typeof localStorage === 'undefined') return { ...DEFAULT_SETTINGS };
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = defaultSettingsStorage.get(STORAGE_KEY);
     if (!raw) return { ...DEFAULT_SETTINGS };
     const parsed = JSON.parse(raw) as Partial<AppSettings>;
     return migrate({ ...DEFAULT_SETTINGS, ...parsed });
@@ -62,7 +63,7 @@ function migrate(data: AppSettings): AppSettings {
 function persist(next: AppSettings) {
   current = next;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    defaultSettingsStorage.set(STORAGE_KEY, JSON.stringify(next));
   } catch {
     // Storage unavailable / quota — state still lives in memory for the session.
   }

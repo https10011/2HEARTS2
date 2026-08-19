@@ -4,9 +4,9 @@ A private, offline-first, local-first couples application for Android, built wit
 **React + TypeScript + Capacitor**. The app runs entirely on-device — no backend,
 no cloud database, no mandatory internet connection (V1 architectural boundary).
 
-This repository currently contains the **Phase 1 engineering foundation** only.
-Feature screens (onboarding, memories, notes, games, vault, period tracker, etc.)
-are added in later phases.
+This repository contains the **Phase 1 engineering foundation** plus the
+**Phase 2 local-first persistence foundation**. Feature screens (onboarding,
+memories, notes, games, vault, period tracker, etc.) are added in later phases.
 
 ## Technology stack
 
@@ -16,10 +16,10 @@ are added in later phases.
 | UI framework | React 18 | MasterPrompt §2 required stack |
 | Build tool | Vite | Fast, produces a static bundle bundled into the APK (offline-first) |
 | Native runtime | Capacitor 6 | Android native bridge (MasterPrompt §10) |
-| Native plugins | `@capacitor/app`, `@capacitor/status-bar` | Back button + lifecycle; status bar — minimal, justified |
+| Native plugins | `@capacitor/app`, `@capacitor/status-bar`, `@capacitor/filesystem`, `@capacitor-community/sqlite` | Back button + lifecycle; status bar; private media files; native SQLite — minimal, justified |
 | Routing | React Router 6 | Onboarding / unlocked / feature / modal navigation |
 | State | `useSyncExternalStore` (no external lib) | Avoids dependency bloat (MasterPrompt §14) |
-| Persistence | `localStorage` (settings) — extensible to local DB | Foundation only; domain layer added in Phase 3 |
+| Persistence | SQLite (`@capacitor-community/sqlite` native, `sql.js` in browser/tests); `localStorage` for settings only | Relational domain data, transactions, migrations — see `docs/persistence.md` |
 | CI | GitHub Actions | Reproducible APK generation (MasterPrompt §61) |
 
 No Firebase, Supabase, cloud database, remote auth, FCM, or cloud storage is
@@ -39,7 +39,10 @@ src/
   styles/            # Global mobile-first CSS
   customization/     # ONE place for owner customization (branding/theme/defaults)
   features/          # Feature screens (added in Phase 6+ — empty now by design)
-  data/ repositories/ services/ hooks/ utils/ config/  # Domain layers (Phase 3+)
+  data/              # Persistence: database/, model/, serialization/, media/, settings/
+  repositories/      # Domain repositories (BaseRepository + MediaAssetRepository)
+  services/          # backup/ (export envelope), future domain services
+  hooks/ utils/ config/  # Shared hooks, utils (ids/time/base64), persistence config
   assets/            # Replaceable SVG logo/icon/illustration assets
 android/             # Capacitor Android project (Gradle → APK)
 .github/workflows/   # APK build workflow
@@ -53,6 +56,7 @@ npm install          # install dependencies
 npm run dev          # start Vite dev server (http://localhost:5173)
 npm run build        # TypeScript check + production build → dist/
 npm run typecheck    # TypeScript only
+npm test             # Persistence unit tests (sql.js in Node, no mocks)
 ```
 
 ## Android / Capacitor build
@@ -94,6 +98,13 @@ No web hosting. No backend. No proprietary deployment platform.
 
 See **`TWOHEARTS_CUSTOMIZATION_GUIDE.md`** for how to change the logo, colors,
 fonts, app name, and feature defaults without touching feature logic.
+
+## Persistence architecture
+
+See **`docs/persistence.md`** for the Phase 2 database decision (SQLite +
+sql.js dev adapter), layers, schema versioning/migrations, settings vs domain
+boundary, media storage, serialization, error handling, backup/export
+boundary, and the future V2 sync seam.
 
 ## Authoritative specifications
 
