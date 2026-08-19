@@ -26,6 +26,7 @@ test('bootstrap runs all stages and reaches ready state', async () => {
     'lifecycle',
     'notifications',
     'app-lock',
+    'application-state',
   ]);
   // Critical stages must succeed everywhere (sql.js path under Node).
   const critical = result.stages.filter((s) => s.critical);

@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { useAppSettings, applyTextSize } from './appSettings';
+import { useAppSettings, applyTextSize, applyThemeMode } from './appSettings';
 import { uiStore } from './uiState';
 import { useAppLifecycle } from './useAppLifecycle';
 
@@ -23,7 +23,8 @@ export function AppRootProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     applyTextSize(settings.textSize);
-  }, [settings.textSize]);
+    applyThemeMode(settings.themeMode);
+  }, [settings.textSize, settings.themeMode]);
 
   return <>{children}</>;
 }

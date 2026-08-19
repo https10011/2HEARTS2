@@ -13,16 +13,22 @@ test('migrations apply in order on a fresh database', async () => {
   await runMigrations(db, ALL_MIGRATIONS);
 
   const applied = await db.query<AppliedMigrationRow>('SELECT * FROM schema_migrations ORDER BY id ASC');
-  assert.deepStrictEqual(applied.map((row) => row.id), [1, 2]);
-  assert.deepStrictEqual(applied.map((row) => row.name), ['initial-schema', 'notification-registry']);
+  assert.deepStrictEqual(applied.map((row) => row.id), [1, 2, 3]);
+  assert.deepStrictEqual(applied.map((row) => row.name), [
+    'initial-schema',
+    'notification-registry',
+    'relationship-foundation',
+  ]);
   assert.ok(isValidIsoTimestamp(applied[0].applied_at));
 
   const tables = await db.query<{ name: string }>(
-    "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('media_assets', 'notification_registry') ORDER BY name",
+    `SELECT name FROM sqlite_master WHERE type = 'table' AND name IN
+      ('media_assets', 'notification_registry', 'profiles', 'couple_relationship', 'important_dates')
+     ORDER BY name`,
   );
   assert.deepStrictEqual(
     tables.map((t) => t.name),
-    ['media_assets', 'notification_registry'],
+    ['couple_relationship', 'important_dates', 'media_assets', 'notification_registry', 'profiles'],
   );
   await db.close();
 });
@@ -35,10 +41,10 @@ test('migrations are idempotent — running again applies nothing twice', async 
   await runMigrations(db, ALL_MIGRATIONS);
 
   const applied = await db.query<AppliedMigrationRow>('SELECT * FROM schema_migrations');
-  assert.strictEqual(applied.length, 2);
+  assert.strictEqual(applied.length, 3);
   assert.deepStrictEqual(
     applied.map((row) => row.id).sort(),
-    [1, 2],
+    [1, 2, 3],
   );
   await db.close();
 });
@@ -52,6 +58,35 @@ test('migration registry is ordered and gap-less', () => {
   const ids = ALL_MIGRATIONS.map((m) => m.id);
   assert.deepStrictEqual(ids, [...ids].sort((a, b) => a - b));
   ids.forEach((id, index) => assert.strictEqual(id, index + 1));
+});
+
+test('existing v2 data survives the migration to schema v3', async () => {
+  const db = new SqlJsAdapter();
+  await db.open();
+
+  // Simulate a Phase 3 install: migrations 1+2 applied, real data present.
+  const phase3Migrations = ALL_MIGRATIONS.filter((m) => m.id <= 2);
+  await runMigrations(db, phase3Migrations);
+  await db.run(
+    `INSERT INTO notification_registry
+       (notification_id, owner_ref, channel_id, title, body, scheduled_at, meta_json, created_at, updated_at)
+     VALUES
+       (7, 'reminder:test', 'reminders', 'T', 'B', '2026-08-20T10:00:00Z', '{"a":1}', '2026-08-19T10:00:00Z', '2026-08-19T10:00:00Z')`,
+  );
+
+  // The v2→v3 upgrade applies only migration 3 and preserves everything.
+  await runMigrations(db, ALL_MIGRATIONS);
+  const applied = await db.query<AppliedMigrationRow>('SELECT * FROM schema_migrations ORDER BY id ASC');
+  assert.deepStrictEqual(applied.map((row) => row.id), [1, 2, 3]);
+
+  const rows = await db.query<{ owner_ref: string }>('SELECT owner_ref FROM notification_registry');
+  assert.deepStrictEqual(rows.map((r) => r.owner_ref), ['reminder:test']);
+
+  const tables = await db.query<{ name: string }>(
+    "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'profiles'",
+  );
+  assert.strictEqual(tables.length, 1);
+  await db.close();
 });
 
 test('a failing migration aborts cleanly and marks nothing applied', async () => {

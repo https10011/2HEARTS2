@@ -69,10 +69,13 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
 - Phase 0: Reconnaissance — COMPLETE
 - Phase 1: Engineering foundation — COMPLETE (e21e523)
 - Phase 2: Local-first data & persistence foundation — COMPLETE (ab1ce1d;
-  docs/persistence.md). Schema v2 after Phase 3 (adds notification_registry).
+  docs/persistence.md). Schema v3 after Phase 4 (adds relationship tables).
 - Phase 3: Core services & device foundation — COMPLETE (src/services/**;
   docs/core-services.md)
-- Phase 4+: features (onboarding, memories, notes, …) — NOT STARTED
+- Phase 4: Application state & user/relationship foundation — COMPLETE
+  (src/data/relationship/**, src/services/relationship/**,
+  src/services/state/**; docs/relationship-state.md)
+- Phase 5+: features (onboarding, memories, notes, …) — NOT STARTED
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,
@@ -101,6 +104,30 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   @aparajita/capacitor-secure-storage import site; pinHash = PBKDF2-HMAC-
   SHA-256 (120k iters, random salt, constant-time compare); appLockService =
   memory-only lock state, relock-on-foreground via lifecycle bus.
+
+## Phase 4 relationship & state foundation
+- data/relationship/relationshipTypes.ts — Profile (role owner|partner,
+  one LIVE per role via partial unique index), CoupleRelationship (SQL
+  singleton via singleton = 1 UNIQUE), ImportantDate (recurrence none|yearly
+  NOW for future reminders; nullable profile_id = relationship-level).
+- utils/time.ts adds local 'yyyy-mm-dd' calendar-date conventions
+  (toLocalDateKeyTo/fromLocalDateKey/isValidDateKey/compareIso); birthdays/
+  startDate/anniversaries are LOCAL keys, entity metadata stays UTC ISO.
+- repositories/ — profileRepository, coupleRepository (singleton: get/save
+  only, NOT BaseRepository), importantDateRepository (+ listForProfile,
+  listRecurring).
+- services/relationship/relationshipService.ts — feature boundary; profile
+  write + couple link in ONE outer transaction; summary computes age days /
+  next anniversary (Feb 29 → Feb 28 rule) via Phase 3 datetime.
+- services/state/appStateService.ts — first-launch stamp (survives reset),
+  onboarding stage derived from DOMAIN truth (never downgrade 'complete'),
+  completeSetup() refuses while domain incomplete; bootstrap stage
+  'application-state' wires it (+ coreServices.appState/relationship).
+- core/appSettings.ts — settings schema v2 (+ firstLaunchAt,
+  onboardingStage, themeMode light|dark|system); v1→v2 migration tested via
+  isolated dynamic import; applyThemeMode sets data-th-theme on root.
+- 114 tests: relationship.test, appStateAndPreferences.test,
+  settingsMigration.test + updated migrations/bootstrap suites.
 
 ## Phase 3 rules
 - React components import NO Capacitor plugins and NO storage APIs.

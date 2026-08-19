@@ -31,3 +31,27 @@ export function isValidIsoTimestamp(value: string): boolean {
 export function compareIso(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
+
+/**
+ * Local calendar-date convention (Phase 4).
+ *
+ * Relationship dates (start date, birthdays, important dates) are LOCAL
+ * calendar days with no time component — a couples app celebrates "the
+ * day", not an instant. They persist as `yyyy-mm-dd` keys (matching
+ * `toLocalDateKey` in services/datetime). Timestamps (createdAt etc.)
+ * remain UTC ISO 8601 as defined above; the two conventions never mix.
+ */
+
+const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Returns true when value is a `yyyy-mm-dd` key for a REAL calendar date. */
+export function isValidDateKey(value: string): boolean {
+  if (!DATE_KEY_PATTERN.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}

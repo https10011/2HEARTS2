@@ -17,3 +17,17 @@ export { MediaStorage, type MediaReference } from './media/mediaStorage.ts';
 export type { MediaAsset, MediaKind } from './media/mediaTypes.ts';
 export type { MediaFileSystem } from './media/fileSystem.ts';
 export type { SettingsStorage } from './settings/settingsStorage.ts';
+export type {
+  Profile,
+  ProfileRole,
+  CoupleRelationship,
+  ImportantDate,
+  Recurrence,
+} from './relationship/relationshipTypes.ts';
+export {
+  assertProfile,
+  assertCoupleRelationship,
+  assertImportantDate,
+  PROFILE_ROLES,
+  RECURRENCES,
+} from './relationship/relationshipTypes.ts';

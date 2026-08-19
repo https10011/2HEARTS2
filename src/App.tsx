@@ -2,7 +2,7 @@ import { AppRootProvider } from './core/AppRootProvider';
 import { ErrorBoundary } from './core/ErrorBoundary';
 import { AppRouter } from './navigation/AppRouter';
 import { useAppSettings } from './core/appSettings';
-import { applyTextSize } from './core/appSettings';
+import { applyTextSize, applyThemeMode } from './core/appSettings';
 import { useEffect } from 'react';
 
 /**
@@ -21,7 +21,8 @@ export function App() {
   const settings = useAppSettings();
   useEffect(() => {
     applyTextSize(settings.textSize);
-  }, [settings.textSize]);
+    applyThemeMode(settings.themeMode);
+  }, [settings.textSize, settings.themeMode]);
 
   return (
     <ErrorBoundary>

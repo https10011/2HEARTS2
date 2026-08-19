@@ -10,9 +10,14 @@
 import { PERSISTENCE_CONFIG } from '../../../config/persistence.ts';
 import { initialSchemaMigration } from './001_initial.ts';
 import { notificationRegistryMigration } from './002_notification_registry.ts';
+import { relationshipFoundationMigration } from './003_relationship_foundation.ts';
 import type { Migration } from './types.ts';
 
-export const ALL_MIGRATIONS: Migration[] = [initialSchemaMigration, notificationRegistryMigration];
+export const ALL_MIGRATIONS: Migration[] = [
+  initialSchemaMigration,
+  notificationRegistryMigration,
+  relationshipFoundationMigration,
+];
 
 /** Guards the config/registry agreement at module load. */
 function assertRegistryConsistent(): void {

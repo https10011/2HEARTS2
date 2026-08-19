@@ -29,6 +29,8 @@ import { NotificationRegistryRepository } from '../notifications/notificationReg
 import { capacitorSecureStore } from '../security/capacitorSecureStore.ts';
 import { MemorySecureStore } from '../security/secureStore.ts';
 import { AppLockService, type LockSettings } from '../security/appLockService.ts';
+import { RelationshipService } from '../relationship/relationshipService.ts';
+import { AppStateService } from '../state/appStateService.ts';
 import { Capacitor } from '@capacitor/core';
 
 const log = createLogger('bootstrap');
@@ -53,6 +55,10 @@ export interface CoreServices {
   notifications?: NotificationService;
   /** undefined when the (non-critical) app-lock stage degraded. */
   appLock?: AppLockService;
+  /** undefined when the (non-critical) application-state stage degraded. */
+  appState?: AppStateService;
+  /** undefined when the (non-critical) application-state stage degraded. */
+  relationship?: RelationshipService;
 }
 
 export const coreServices: CoreServices = {
@@ -130,6 +136,18 @@ function buildStages(): Stage[] {
         const lock = new AppLockService(store, lockSettings);
         await lock.initialize();
         coreServices.appLock = lock;
+      },
+    },
+    {
+      name: 'application-state',
+      critical: false,
+      run: async () => {
+        const adapter = await getDatabase();
+        const appState = new AppStateService(adapter);
+        appState.markFirstLaunchIfNeeded();
+        await appState.reconcileOnboardingStage();
+        coreServices.appState = appState;
+        coreServices.relationship = new RelationshipService(adapter);
       },
     },
   ];

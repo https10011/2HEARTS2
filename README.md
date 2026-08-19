@@ -40,10 +40,13 @@ src/
   customization/     # ONE place for owner customization (branding/theme/defaults)
   features/          # Feature screens (added in Phase 6+ — empty now by design)
   data/              # Persistence: database/, model/, serialization/, media/, settings/
-  repositories/      # Domain repositories (BaseRepository + MediaAssetRepository)
+                     # + relationship/ (Phase 4 domain types)
+  repositories/      # Domain repositories (BaseRepository + media + Phase 4:
+                     # profiles/couple/important-dates)
   services/          # Core services (Phase 3): bootstrap/ errors/ logging/ validation/
                      # datetime/ device/ permissions/ lifecycle/ files/ media/ search/
                      # security/ notifications/ (+ backup/ export envelope)
+                     # + Phase 4: relationship/ (domain boundary) state/ (setup state)
   hooks/ utils/ config/  # Shared hooks, utils (ids/time/base64), persistence config
   assets/            # Replaceable SVG logo/icon/illustration assets
 android/             # Capacitor Android project (Gradle → APK)
@@ -113,6 +116,11 @@ pipeline, error taxonomy, redacted logging, validators, datetime helpers,
 device capability matrix, permission service, lifecycle bus, file/media
 utilities, search engine, secure storage + app lock foundation, and the
 local notification architecture.
+
+See **`docs/relationship-state.md`** for the Phase 4 relationship and
+application-state foundation: profiles (owner/partner), the singleton couple
+relationship, important dates with recurrence, first-launch/onboarding state,
+preferences (text size + theme mode), and the setup-completion gate.
 
 ## Authoritative specifications
 

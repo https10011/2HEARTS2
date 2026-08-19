@@ -20,7 +20,24 @@ import { TEXT_SIZE_SCALE, type TextSizeKey } from '../theme/tokens.ts';
 import { defaultSettingsStorage } from '../data/settings/settingsStorage.ts';
 
 const STORAGE_KEY = 'twohearts.settings.v1';
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
+
+/**
+ * Onboarding progression (Phase 4). Persisted so a killed app resumes setup
+ * where it left off. 'complete' is the same truth as `onboarded: true`;
+ * both exist because `onboarded` predates the staged model.
+ */
+export const ONBOARDING_STAGES = ['fresh', 'owner', 'relationship', 'personalization', 'complete'] as const;
+export type OnboardingStage = (typeof ONBOARDING_STAGES)[number];
+
+/**
+ * Theme mode preference (Phase 4). 'light'/'dark' force a scheme; 'system'
+ * follows the OS. Only 'light' styles exist today — the preference is
+ * persisted now so the settings UI ships with working persistence, and
+ * applying dark mode becomes a CSS token flip later.
+ */
+export const THEME_MODES = ['light', 'dark', 'system'] as const;
+export type ThemeMode = (typeof THEME_MODES)[number];
 
 export interface AppSettings {
   schemaVersion: number;
@@ -35,6 +52,10 @@ export interface AppSettings {
    * the SecureStore (src/services/security), never here.
    */
   lockTimeoutSeconds: number;
+  /** UTC ISO 8601 of the very first launch, recorded once, never reset. */
+  firstLaunchAt: string | null;
+  onboardingStage: OnboardingStage;
+  themeMode: ThemeMode;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -43,6 +64,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   onboarded: false,
   appLockEnabled: false,
   lockTimeoutSeconds: 60,
+  firstLaunchAt: null,
+  onboardingStage: 'fresh',
+  themeMode: 'light',
 };
 
 type Listener = () => void;
@@ -62,10 +86,20 @@ function load(): AppSettings {
 }
 
 function migrate(data: AppSettings): AppSettings {
-  // Future migrations go here, preserving existing user data.
+  // v1 → v2 (Phase 4): adds firstLaunchAt / onboardingStage / themeMode.
+  // DEFAULT_SETTINGS already supplies the new keys, so the merge in load()
+  // covers existing installs; this step only stamps the version and keeps
+  // the onboarded flag and staged state coherent for v1 data.
   let out = data;
   if (out.schemaVersion < 1) {
     out = { ...out, schemaVersion: 1 };
+  }
+  if (out.schemaVersion < 2) {
+    out = {
+      ...out,
+      onboardingStage: out.onboarded ? 'complete' : out.onboardingStage,
+      schemaVersion: 2,
+    };
   }
   return out;
 }
@@ -92,11 +126,28 @@ export const appSettingsStore = {
   setTextSize(size: TextSizeKey) {
     persist({ ...current, textSize: size });
   },
+  setThemeMode(mode: ThemeMode) {
+    persist({ ...current, themeMode: mode });
+  },
+  setOnboardingStage(stage: OnboardingStage) {
+    persist({ ...current, onboardingStage: stage, onboarded: stage === 'complete' });
+  },
+  /**
+   * Records the very first launch timestamp exactly once. Called by the
+   * bootstrap pipeline; later calls are no-ops. `reset()` does NOT clear it
+   * — first launch is historical fact, not a preference.
+   */
+  markFirstLaunch(timestampIso: string) {
+    if (current.firstLaunchAt === null) {
+      persist({ ...current, firstLaunchAt: timestampIso });
+    }
+  },
   completeOnboarding() {
-    persist({ ...current, onboarded: true });
+    persist({ ...current, onboarded: true, onboardingStage: 'complete' });
   },
   reset() {
-    persist({ ...DEFAULT_SETTINGS });
+    // firstLaunchAt survives reset: it is history, not a preference.
+    persist({ ...DEFAULT_SETTINGS, firstLaunchAt: current.firstLaunchAt });
   },
 };
 
@@ -116,4 +167,20 @@ export function applyTextSize(size: TextSizeKey) {
     '--th-text-scale',
     String(TEXT_SIZE_SCALE[size]),
   );
+}
+
+/**
+ * Applies the theme-mode preference to the document root
+ * (`data-th-theme`). Only light tokens exist today; dark tokens become a
+ * CSS-level switch later without touching this persistence contract.
+ */
+export function applyThemeMode(mode: ThemeMode) {
+  if (typeof document === 'undefined') return;
+  const resolved =
+    mode === 'system'
+      ? window.matchMedia?.('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      : mode;
+  document.documentElement.dataset.thTheme = resolved;
 }
