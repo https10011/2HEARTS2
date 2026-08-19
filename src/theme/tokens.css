@@ -1,0 +1,133 @@
+/**
+ * TwoHearts Design Token Foundation
+ * ----------------------------------------------------------------
+ * Single source of truth for the TwoHearts visual identity.
+ *
+ * These tokens implement the MasterPrompt design direction:
+ *   - Primary accent: BURGUNDY RED
+ *   - Supporting palette: warm cream, soft blush, muted rose,
+ *     warm beige, lighter/darker burgundy, deep charcoal, soft neutrals
+ *   - Warm, intimate, elegant, premium, calm, modern, personal, playful
+ *
+ * The 1080×2400 reference designs are visual proportions, NOT a hard
+ * viewport. Components use these tokens + responsive scaling, never
+ * hard-coded pixel layouts tied to one physical device.
+ */
+
+/* ----- Color tokens ----- */
+:root {
+  /* Brand accent — burgundy family (used strategically, never screen-flooding) */
+  --th-color-burgundy: #6A1B2B;
+  --th-color-burgundy-light: #8E3147;
+  --th-color-burgundy-dark: #4A0F1D;
+
+  /* Warm neutrals / supporting palette */
+  --th-color-cream: #FDF6F0;
+  --th-color-blush: #F6E1DE;
+  --th-color-rose-muted: #C9808B;
+  --th-color-beige: #EDE0D4;
+  --th-color-charcoal: #2B2420;
+  --th-color-neutral-soft: #F2E9E4;
+
+  /* Semantic surface tokens */
+  --th-color-bg: var(--th-color-cream);
+  --th-color-surface: #FFFFFF;
+  --th-color-surface-elevated: #FFFDFB;
+  --th-color-text-primary: var(--th-color-charcoal);
+  --th-color-text-secondary: #6B5D58;
+  --th-color-text-on-accent: #FFF8F3;
+  --th-color-border: #E8DAD3;
+  --th-color-divider: #EFE3DC;
+
+  /* Feedback */
+  --th-color-success: #4F7A5A;
+  --th-color-warning: #B07A1E;
+  --th-color-error: #A33A2A;
+  --th-color-error-bg: #F7E7E3;
+
+  /* ----- Typography ----- */
+  --th-font-family-base: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue',
+    'Roboto', sans-serif;
+  --th-font-family-display: 'Georgia', 'Times New Roman', serif;
+
+  /* Font-size scale — scales with the user text-size setting (App.tsx sets --th-text-scale) */
+  --th-text-scale: 1;
+  --th-font-size-xs: calc(0.75rem * var(--th-text-scale));
+  --th-font-size-sm: calc(0.875rem * var(--th-text-scale));
+  --th-font-size-md: calc(1rem * var(--th-text-scale));
+  --th-font-size-lg: calc(1.125rem * var(--th-text-scale));
+  --th-font-size-xl: calc(1.375rem * var(--th-text-scale));
+  --th-font-size-2xl: calc(1.75rem * var(--th-text-scale));
+  --th-font-size-3xl: calc(2.25rem * var(--th-text-scale));
+
+  --th-font-weight-regular: 400;
+  --th-font-weight-medium: 500;
+  --th-font-weight-semibold: 600;
+  --th-font-weight-bold: 700;
+
+  --th-line-height-tight: 1.2;
+  --th-line-height-normal: 1.45;
+  --th-line-height-relaxed: 1.6;
+
+  /* ----- Spacing scale (4pt base) ----- */
+  --th-space-0: 0;
+  --th-space-1: 0.25rem; /* 4px */
+  --th-space-2: 0.5rem; /* 8px */
+  --th-space-3: 0.75rem; /* 12px */
+  --th-space-4: 1rem; /* 16px */
+  --th-space-5: 1.25rem; /* 20px */
+  --th-space-6: 1.5rem; /* 24px */
+  --th-space-8: 2rem; /* 32px */
+  --th-space-10: 2.5rem; /* 40px */
+  --th-space-12: 3rem; /* 48px */
+  --th-space-16: 4rem; /* 64px */
+
+  /* ----- Corner radii ----- */
+  --th-radius-sm: 0.5rem;
+  --th-radius-md: 0.875rem;
+  --th-radius-lg: 1.25rem;
+  --th-radius-xl: 1.75rem;
+  --th-radius-pill: 9999px;
+  --th-radius-circle: 50%;
+
+  /* ----- Shadows / elevation ----- */
+  --th-shadow-sm: 0 1px 2px rgba(74, 15, 29, 0.06), 0 1px 3px rgba(43, 36, 32, 0.05);
+  --th-shadow-md: 0 2px 6px rgba(74, 15, 29, 0.08), 0 1px 4px rgba(43, 36, 32, 0.06);
+  --th-shadow-lg: 0 6px 16px rgba(74, 15, 29, 0.1), 0 2px 6px rgba(43, 36, 32, 0.07);
+  --th-shadow-focus: 0 0 0 3px rgba(142, 49, 71, 0.28);
+
+  /* ----- Borders ----- */
+  --th-border-width-thin: 1px;
+  --th-border-width-medium: 2px;
+  --th-color-border-default: var(--th-color-border);
+  --th-color-border-accent: var(--th-color-burgundy-light);
+
+  /* ----- Component dimensions ----- */
+  --th-touch-target-min: 44px; /* WCAG-aligned minimum touch target */
+  --th-header-height: 56px;
+  --th-bottom-nav-height: 64px;
+  --th-screen-max-width: 480px; /* phone-first content column */
+
+  /* ----- Safe areas (Capacitor sets these via env insets) ----- */
+  --th-safe-area-top: env(safe-area-inset-top, 0px);
+  --th-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --th-safe-area-left: env(safe-area-inset-left, 0px);
+  --th-safe-area-right: env(safe-area-inset-right, 0px);
+
+  /* ----- Animation timing ----- */
+  --th-duration-fast: 120ms;
+  --th-duration-normal: 220ms;
+  --th-duration-slow: 360ms;
+  --th-ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --th-ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --th-ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Reduced motion: respect OS setting (battery + accessibility) */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --th-duration-fast: 1ms;
+    --th-duration-normal: 1ms;
+    --th-duration-slow: 1ms;
+  }
+}

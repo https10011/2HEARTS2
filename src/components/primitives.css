@@ -1,0 +1,166 @@
+/* TwoHearts reusable UI primitives — component styles. */
+
+/* ----- Button ----- */
+.th-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--th-space-2);
+  min-height: var(--th-touch-target-min);
+  padding: var(--th-space-3) var(--th-space-5);
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+  border-radius: var(--th-radius-pill);
+  transition: background-color var(--th-duration-fast) var(--th-ease-standard),
+    transform var(--th-duration-fast) var(--th-ease-standard),
+    opacity var(--th-duration-fast) var(--th-ease-standard);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.th-button:active {
+  transform: scale(0.97);
+}
+.th-button:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.th-button--primary {
+  background-color: var(--th-color-burgundy);
+  color: var(--th-color-text-on-accent);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-button--secondary {
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy-dark);
+}
+.th-button--ghost {
+  background-color: transparent;
+  color: var(--th-color-burgundy);
+}
+.th-button--full {
+  width: 100%;
+}
+
+/* ----- Card ----- */
+.th-card {
+  background-color: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-lg);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  padding: var(--th-space-4);
+  box-shadow: var(--th-shadow-sm);
+}
+
+/* ----- Input ----- */
+.th-input {
+  width: 100%;
+  min-height: var(--th-touch-target-min);
+  padding: var(--th-space-3) var(--th-space-4);
+  font-family: inherit;
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-primary);
+  background-color: var(--th-color-surface);
+  border: var(--th-border-width-medium) solid var(--th-color-border-default);
+  border-radius: var(--th-radius-md);
+  transition: border-color var(--th-duration-fast) var(--th-ease-standard),
+    box-shadow var(--th-duration-fast) var(--th-ease-standard);
+}
+.th-input:focus {
+  outline: none;
+  border-color: var(--th-color-border-accent);
+  box-shadow: var(--th-shadow-focus);
+}
+
+/* ----- Header ----- */
+.th-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--th-space-3);
+  min-height: var(--th-header-height);
+  padding: 0 var(--th-space-4);
+  background-color: var(--th-color-surface);
+  border-bottom: var(--th-border-width-thin) solid var(--th-color-divider);
+}
+.th-header__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+}
+
+/* ----- Icon button ----- */
+.th-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--th-touch-target-min);
+  height: var(--th-touch-target-min);
+  border-radius: var(--th-radius-circle);
+  color: var(--th-color-burgundy);
+  transition: background-color var(--th-duration-fast) var(--th-ease-standard),
+    transform var(--th-duration-fast) var(--th-ease-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-icon-button:active {
+  transform: scale(0.92);
+  background-color: var(--th-color-neutral-soft);
+}
+
+/* ----- Divider ----- */
+.th-divider {
+  height: var(--th-border-width-thin);
+  background-color: var(--th-color-divider);
+  width: 100%;
+  margin: var(--th-space-4) 0;
+}
+
+/* ----- Empty state ----- */
+.th-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-12) var(--th-space-6);
+  text-align: center;
+  color: var(--th-color-text-secondary);
+}
+
+/* ----- Loading state ----- */
+.th-loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--th-space-12) var(--th-space-6);
+  color: var(--th-color-text-secondary);
+}
+
+/* ----- Modal / dialog foundation ----- */
+.th-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(43, 36, 32, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  animation: th-fade-in var(--th-duration-normal) var(--th-ease-decelerate);
+}
+.th-modal-sheet {
+  width: 100%;
+  max-width: var(--th-screen-max-width);
+  background-color: var(--th-color-surface);
+  border-radius: var(--th-radius-xl) var(--th-radius-xl) 0 0;
+  padding: var(--th-space-5) var(--th-space-4) calc(var(--th-space-5) + var(--th-safe-area-bottom));
+  box-shadow: var(--th-shadow-lg);
+  animation: th-slide-up var(--th-duration-normal) var(--th-ease-decelerate);
+}
+
+@keyframes th-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes th-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

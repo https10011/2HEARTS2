@@ -1,0 +1,16 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    TwoHearts logo — replaceable asset.
+    Replace this file at src/assets/branding/twohearts-logo.svg
+    Keep the viewBox / aspect ratio if you want layout to remain stable.
+  -->
+  <defs>
+    <linearGradient id="th-logo-grad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8E3147" />
+      <stop offset="1" stop-color="#6A1B2B" />
+    </linearGradient>
+  </defs>
+  <!-- two overlapping hearts, subtle botanical rose inspiration -->
+  <path d="M58 38c-6-9-20-9-24 1-3 8 4 16 24 27 20-11 27-19 24-27-4-10-18-10-24-1z" fill="url(#th-logo-grad)"/>
+  <path d="M42 52c-4-6-13-6-15 0-2 5 3 10 15 17 12-7 17-12 15-17-2-6-11-6-15 0z" fill="#F6E1DE"/>
+</svg>

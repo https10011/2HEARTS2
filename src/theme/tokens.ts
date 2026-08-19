@@ -1,0 +1,55 @@
+/**
+ * TwoHearts design tokens — typed mirror.
+ *
+ * The CSS custom properties in tokens.css are the runtime source of truth.
+ * This module exposes typed constants for use in JS/TS (e.g. animation
+ * durations passed to Framer-motion-free transitions, or hex colors for
+ * canvas/SVG drawing where CSS vars are inconvenient).
+ *
+ * Keep these in sync with src/theme/tokens.css.
+ */
+
+export const palette = {
+  burgundy: '#6A1B2B',
+  burgundyLight: '#8E3147',
+  burgundyDark: '#4A0F1D',
+  cream: '#FDF6F0',
+  blush: '#F6E1DE',
+  roseMuted: '#C9808B',
+  beige: '#EDE0D4',
+  charcoal: '#2B2420',
+  neutralSoft: '#F2E9E4',
+} as const;
+
+export const duration = {
+  fast: 120,
+  normal: 220,
+  slow: 360,
+} as const;
+
+export const ease = {
+  standard: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
+  decelerate: 'cubic-bezier(0, 0, 0.2, 1)',
+  accelerate: 'cubic-bezier(0.4, 0, 1, 1)',
+} as const;
+
+/**
+ * System-wide text-size setting (MasterPrompt §28).
+ * Maps a user-facing option to a CSS scale multiplier applied to
+ * --th-text-scale on the root element.
+ */
+export type TextSizeKey = 'small' | 'default' | 'large' | 'extra-large';
+
+export const TEXT_SIZE_SCALE: Record<TextSizeKey, number> = {
+  small: 0.88,
+  default: 1,
+  large: 1.12,
+  'extra-large': 1.28,
+};
+
+export const TEXT_SIZE_LABELS: Record<TextSizeKey, string> = {
+  small: 'Small',
+  default: 'Default',
+  large: 'Large',
+  'extra-large': 'Extra Large',
+};

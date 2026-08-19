@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    TwoHearts app icon — replaceable.
+    Replace at src/assets/branding/twohearts-app-icon.svg
+    This is a reference vector; the Android launcher icons are generated
+    into android/app/src/main/res/ during the build/config step.
+  -->
+  <rect width="512" height="512" rx="112" fill="#6A1B2B"/>
+  <path d="M256 150c-30-45-100-45-120 5-16 40 20 80 120 135 100-55 136-95 120-135-20-50-90-50-120-5z" fill="#F6E1DE"/>
+  <path d="M196 232c-20-30-64-30-74 0-10 25 15 50 74 85 59-35 84-60 74-85-10-30-54-30-74 0z" fill="#8E3147"/>
+</svg>
