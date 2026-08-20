@@ -14,6 +14,7 @@ import {
   IconHeart,
   IconMapPin,
   IconChevronRight,
+  IconBell,
 } from '../../../components/index.ts';
 
 export function MoreScreen() {
@@ -35,6 +36,14 @@ export function MoreScreen() {
             <IconMapPin size={20} />
           </div>
           <span className="th-more-item__label">Our Places</span>
+          <IconChevronRight size={18} className="th-more-item__chevron" />
+        </Link>
+
+        <Link to={RoutePath.appNotifications} className="th-more-item">
+          <div className="th-more-item__icon">
+            <IconBell size={20} />
+          </div>
+          <span className="th-more-item__label">Notifications</span>
           <IconChevronRight size={18} className="th-more-item__chevron" />
         </Link>
 

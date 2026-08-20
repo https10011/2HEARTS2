@@ -1,9 +1,8 @@
 /**
- * Note search provider (Phase 8).
+ * Note search provider (Phase 18).
  *
  * Integrates notes with the existing Phase 3 search infrastructure.
- * Notes are searchable by title and content. The provider queries
- * the NoteRepository directly — no duplicate index.
+ * Notes are searchable by title and content.
  */
 
 import type { DatabaseAdapter } from '../../data/database/adapter.ts';
@@ -25,13 +24,13 @@ export class NoteSearchProvider implements SearchProvider {
     const matches: SearchMatch[] = [];
 
     for (const note of notes) {
-      const score = scoreCandidate(query, note.title, note.content);
+      const score = scoreCandidate(query, note.title, note.content ?? undefined);
       if (score > 0) {
         matches.push({
           id: note.id,
           kind: 'note',
           title: note.title,
-          snippet: NoteRepository.excerpt(note.content, 120),
+          snippet: note.content ? note.content.slice(0, 120) : undefined,
           updatedAt: note.updatedAt,
           score,
         });

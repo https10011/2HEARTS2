@@ -32,6 +32,8 @@ import { PlacesHome, CreatePlace, PlaceDetail } from '../features/places/index.t
 import { MoodHome, MoodEntryScreen, MoodHistory } from '../features/mood/index.ts';
 import { PeriodHome, LogPeriod, CycleHistory } from '../features/period/index.ts';
 import { VaultEntry, AddVaultContent, VaultContentViewer } from '../features/vault/index.ts';
+import { SearchScreen } from '../features/app-shell/screens/SearchScreen.tsx';
+import { NotificationCenter } from '../features/notifications/NotificationCenter.tsx';
 
 /**
  * Navigation architecture (Phase 6).
@@ -196,12 +198,11 @@ const router = createBrowserRouter([
       },
       {
         path: 'more/search',
-        element: (
-          <PlaceholderScreen
-            title="Search"
-            description="Find memories, notes, and more."
-          />
-        ),
+        element: <SearchScreen />,
+      },
+      {
+        path: 'notifications',
+        element: <NotificationCenter />,
       },
       {
         path: 'more/vault',

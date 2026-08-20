@@ -62,7 +62,7 @@ export class VaultRepository {
 
   async list(profileId: string): Promise<VaultItem[]> {
     const rows = await this.adapter.query<Row>(
-      `SELECT * FROM vault_items WHERE profile_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
+      `SELECT * FROM vault_items WHERE profile_id = ? AND deleted_at IS NULL ORDER BY created_at DESC, rowid DESC`,
       [profileId],
     );
     return rows.map((r) => vaultItemSerializer.fromRow(r));
@@ -70,8 +70,8 @@ export class VaultRepository {
 
   async listByType(profileId: string, contentType: VaultContentType): Promise<VaultItem[]> {
     const rows = await this.adapter.query<Row>(
-      `SELECT * FROM vault_items WHERE profile_id = ? AND content_type = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
-      [profileId, contentType],
+      `SELECT * FROM vault_items WHERE profile_id = ? AND content_type = ? AND deleted_at IS NULL ORDER BY created_at DESC, rowid DESC`,
+      [profileId, contentType]
     );
     return rows.map((r) => vaultItemSerializer.fromRow(r));
   }

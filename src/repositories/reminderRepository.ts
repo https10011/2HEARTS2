@@ -145,6 +145,21 @@ export class ReminderRepository {
   }
 
   // -----------------------------------------------------------------------
+  // Search
+  // -----------------------------------------------------------------------
+
+  async search(query: string): Promise<Reminder[]> {
+    const pattern = `%${query}%`;
+    const rows = await this.adapter.query<Row>(
+      `SELECT * FROM reminders WHERE deleted_at IS NULL
+         AND (title LIKE ? OR description LIKE ?)
+       ORDER BY scheduled_date ASC, scheduled_time ASC`,
+      [pattern, pattern],
+    );
+    return rows.map((r) => reminderSerializer.fromRow(r));
+  }
+
+  // -----------------------------------------------------------------------
   // Helpers
   // -----------------------------------------------------------------------
 

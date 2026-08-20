@@ -120,6 +120,21 @@ export class MemoryRepository extends BaseRepository<Memory> {
     await this.db.run('DELETE FROM memory_media WHERE memory_id = ?', [memoryId]);
   }
 
+  /**
+   * Search memories by title and caption (case-insensitive LIKE).
+   */
+  async search(query: string): Promise<Memory[]> {
+    const pattern = `%${query}%`;
+    const rows = await this.db.query<Row>(
+      `SELECT ${MEMORY_COLUMNS.join(', ')} FROM memories
+       WHERE deleted_at IS NULL
+         AND (title LIKE ? OR caption LIKE ?)
+       ORDER BY updated_at DESC, title ASC`,
+      [pattern, pattern],
+    );
+    return rows.map((row) => memorySerializer.fromRow(row));
+  }
+
   /** Counts active memories. */
   async count(): Promise<number> {
     const rows = await this.db.query<{ n: number }>(

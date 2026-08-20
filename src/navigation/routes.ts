@@ -109,6 +109,9 @@ export const RoutePath = {
   appMoreVault: '/app/more/vault',
   appMoreAbout: '/app/more/about',
 
+  /** Notification Center (Phase 18). */
+  appNotifications: '/app/notifications',
+
   /** Foundation placeholder — verifies the engineering foundation runs. */
   foundation: '/app/foundation',
 } as const;

@@ -19,6 +19,7 @@ export {
   IconHeart,
   IconGamepad,
   IconFileText,
+  IconBell,
   IconSettings,
   IconTrash,
   IconEdit,
