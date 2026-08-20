@@ -80,6 +80,13 @@ export const RoutePath = {
   appPlacesDetail: '/app/places/:placeId',
   appPlacesEdit: '/app/places/:placeId/edit',
 
+  /** Mood feature (Phase 15). */
+  appMood: '/app/mood',
+  appMoodAdd: '/app/mood/add',
+  appMoodHistory: '/app/mood/history',
+  appMoodDetail: '/app/mood/:entryId',
+  appMoodEdit: '/app/mood/:entryId/edit',
+
   /** More menu. */
   appMore: '/app/more',
   appMoreSettings: '/app/more/settings',

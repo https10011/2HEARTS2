@@ -28,6 +28,7 @@ import { TimelineHome, AddEvent, EventDetail } from '../features/timeline/index.
 import { GamePlayScreen, GameResultsScreen, MemoryMatchScreen, WordScrambleScreen, CasualGamePlayScreen } from '../features/games/index.ts';
 import { RemindersHome, CreateReminder, ReminderDetail } from '../features/reminders/index.ts';
 import { PlacesHome, CreatePlace, PlaceDetail } from '../features/places/index.ts';
+import { MoodHome, MoodEntryScreen, MoodHistory } from '../features/mood/index.ts';
 
 /**
  * Navigation architecture (Phase 6).
@@ -156,6 +157,13 @@ const router = createBrowserRouter([
       { path: 'memories', element: <MemoriesHome /> },
       { path: 'memories/add', element: <AddMemory /> },
       { path: 'memories/:memoryId', element: <MemoryDetail /> },
+
+      // Mood (Phase 15)
+      { path: 'mood', element: <MoodHome /> },
+      { path: 'mood/add', element: <MoodEntryScreen /> },
+      { path: 'mood/history', element: <MoodHistory /> },
+      { path: 'mood/:entryId', element: <MoodEntryScreen /> },
+      { path: 'mood/:entryId/edit', element: <MoodEntryScreen /> },
 
       // Places (Phase 14)
       { path: 'places', element: <PlacesHome /> },
