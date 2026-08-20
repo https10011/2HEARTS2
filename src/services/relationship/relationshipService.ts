@@ -27,8 +27,10 @@ import { isValidDateKey, systemClock, type Clock } from '../../utils/time.ts';
 import {
   anniversaryInYear,
   daysUntilAnniversary,
+  decomposeCalendarAge,
   parseDate,
   relationshipAgeDays,
+  startOfLocalDay,
   toLocalDateKey,
 } from '../datetime/datetime.ts';
 import { AppError } from '../errors/appError.ts';
@@ -48,9 +50,13 @@ export interface RelationshipSummary {
   startDate: string | null;
   /** Whole local days since the start date, or null when unset/in future. */
   ageDays: number | null;
+  /** Decomposed calendar age (years/months/days), or null when unavailable. */
+  decomposedAge: { years: number; months: number; days: number } | null;
   /** Local `yyyy-mm-dd` of the anniversary in the current/next year. */
   nextAnniversary: string | null;
   daysUntilNextAnniversary: number | null;
+  /** Upcoming important dates with days-until info. */
+  upcomingDates: Array<{ title: string; date: string; daysUntil: number; recurrence: Recurrence }>
 }
 
 function validationFailure(errors: string[]): never {
@@ -161,11 +167,14 @@ export class RelationshipService {
     let nextAnniversary: string | null = null;
     let daysUntilNextAnniversary: number | null = null;
 
+    let decomposedAge: RelationshipSummary['decomposedAge'] = null;
+
     if (startDate !== null) {
       const start = parseDate(startDate, true);
       const now = this.clock();
       if (start && start <= now) {
         ageDays = relationshipAgeDays(start, now);
+        decomposedAge = decomposeCalendarAge(start, now);
         const next = anniversaryInYear(start, now.getFullYear());
         const candidate = next >= startOfToday(now) ? next : anniversaryInYear(start, now.getFullYear() + 1);
         nextAnniversary = toLocalDateKey(candidate);
@@ -179,7 +188,44 @@ export class RelationshipService {
       }
     }
 
-    return { owner, partner, startDate, ageDays, nextAnniversary, daysUntilNextAnniversary };
+    // Upcoming important dates with days-until
+    const allDates = await this.dates.list();
+    const now2 = this.clock();
+    const todayKey = toLocalDateKey(startOfLocalDay(now2));
+    const upcomingDates: RelationshipSummary['upcomingDates'] = [];
+    for (const d of allDates) {
+      const dateKey = d.date;
+      const dateObj = parseDate(dateKey, true);
+      if (!dateObj) continue;
+      if (d.recurrence === 'yearly') {
+        // For yearly dates, calculate next occurrence
+        const thisYearAnniv = anniversaryInYear(dateObj, now2.getFullYear());
+        const nextOccurrence = thisYearAnniv >= startOfLocalDay(now2)
+          ? thisYearAnniv
+          : anniversaryInYear(dateObj, now2.getFullYear() + 1);
+        const daysUntil = relationshipAgeDays(startOfLocalDay(now2), startOfLocalDay(nextOccurrence));
+        upcomingDates.push({
+          title: d.title,
+          date: toLocalDateKey(nextOccurrence),
+          daysUntil,
+          recurrence: d.recurrence,
+        });
+      } else {
+        // Non-recurring: only show if in the future
+        if (dateKey > todayKey) {
+          const daysUntil = relationshipAgeDays(startOfLocalDay(now2), startOfLocalDay(dateObj));
+          upcomingDates.push({
+            title: d.title,
+            date: dateKey,
+            daysUntil,
+            recurrence: d.recurrence,
+          });
+        }
+      }
+    }
+    upcomingDates.sort((a, b) => a.daysUntil - b.daysUntil || a.date.localeCompare(b.date));
+
+    return { owner, partner, startDate, ageDays, decomposedAge, nextAnniversary, daysUntilNextAnniversary, upcomingDates };
   }
 
   // -- Important dates --------------------------------------------------------
@@ -213,8 +259,39 @@ export class RelationshipService {
     return this.dates.list();
   }
 
+  async updateImportantDate(id: string, input: { title?: string; date?: string; recurrence?: Recurrence }): Promise<ImportantDate> {
+    const existing = await this.dates.getById(id);
+    if (!existing) {
+      throw new AppError('persistence', 'not-found', {
+        recoverable: false,
+        userMessage: 'Date not found.',
+      });
+    }
+    const changes: Record<string, unknown> = {};
+    if (input.title !== undefined) {
+      const title = normalizeInput(input.title);
+      const result = validate(textLength(title, 1, MAX_TITLE_LENGTH, 'Title'));
+      if (!result.ok) validationFailure(result.errors);
+      changes.title = title;
+    }
+    if (input.date !== undefined) {
+      assertValidDateKey(input.date, 'date');
+      changes.date = input.date;
+    }
+    if (input.recurrence !== undefined) {
+      changes.recurrence = input.recurrence;
+    }
+    const updated = await this.dates.update(id, changes);
+    assertImportantDate(updated);
+    return updated;
+  }
+
   async removeImportantDate(id: string): Promise<boolean> {
     return this.dates.delete(id);
+  }
+
+  async getImportantDateById(id: string): Promise<ImportantDate | null> {
+    return this.dates.getById(id);
   }
 }
 
@@ -223,4 +300,4 @@ function startOfToday(now: Date): Date {
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
-export type { Profile, ImportantDate, Recurrence };
+

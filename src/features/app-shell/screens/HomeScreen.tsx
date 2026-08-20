@@ -8,13 +8,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { coreServices } from '../../../services/bootstrap/appBootstrap.ts';
-import type { RelationshipService } from '../../../services/relationship/relationshipService.ts';
+import type { RelationshipService, RelationshipSummary } from '../../../services/relationship/relationshipService.ts';
 import { RoutePath } from '../../../navigation/routes.ts';
-import { IconHeart, IconGamepad, IconFileText, IconChevronRight, LoadingState } from '../../../components/index.ts';
+import { IconHeart, IconGamepad, IconFileText, IconChevronRight, IconCalendar, LoadingState } from '../../../components/index.ts';
 
 export function HomeScreen() {
   const [greeting, setGreeting] = useState<string | null>(null);
-  const [relationshipDays, setRelationshipDays] = useState<number | null>(null);
+  const [summary, setSummary] = useState<RelationshipSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,15 +31,13 @@ export function HomeScreen() {
       }
 
       try {
-        const summary = await svc.getSummary();
+        const s = await svc.getSummary();
         if (cancelled) return;
-        if (summary.owner) {
-          setGreeting(`Hi, ${summary.owner.displayName}!`);
+        setSummary(s);
+        if (s.owner) {
+          setGreeting(`Hi, ${s.owner.displayName}!`);
         } else {
           setGreeting('Welcome to TwoHearts');
-        }
-        if (summary.ageDays !== null) {
-          setRelationshipDays(summary.ageDays);
         }
       } catch {
         if (!cancelled) setGreeting('Welcome to TwoHearts');
@@ -56,6 +54,14 @@ export function HomeScreen() {
     return <LoadingState label="Loading your space…" />;
   }
 
+  const age = summary?.decomposedAge;
+  const ageParts: string[] = [];
+  if (age) {
+    if (age.years > 0) ageParts.push(`${age.years} ${age.years === 1 ? 'year' : 'years'}`);
+    if (age.months > 0) ageParts.push(`${age.months} ${age.months === 1 ? 'month' : 'months'}`);
+    if (ageParts.length === 0 || age.days > 0) ageParts.push(`${age.days} ${age.days === 1 ? 'day' : 'days'}`);
+  }
+
   return (
     <div className="th-content-pad">
       {/* Greeting */}
@@ -65,13 +71,41 @@ export function HomeScreen() {
       </div>
 
       {/* Relationship summary card */}
-      {relationshipDays !== null && (
+      {age && (
         <div className="th-relationship-card" style={{ marginBottom: 'var(--th-space-6)' }}>
           <div className="th-relationship-card__title">
-            {relationshipDays} {relationshipDays === 1 ? 'day' : 'days'} together
+            {ageParts.join(', ')} together
           </div>
           <div className="th-relationship-card__subtitle">
-            Your journey continues every day
+            {summary?.nextAnniversary && summary.daysUntilNextAnniversary !== null && summary.daysUntilNextAnniversary > 0
+              ? `Next anniversary in ${summary.daysUntilNextAnniversary} ${summary.daysUntilNextAnniversary === 1 ? 'day' : 'days'}`
+              : summary?.daysUntilNextAnniversary === 0
+                ? 'Today is your anniversary!'
+                : 'Your journey continues every day'
+            }
+          </div>
+        </div>
+      )}
+
+      {/* Upcoming important dates */}
+      {summary && summary.upcomingDates.length > 0 && (
+        <div className="th-home-section" style={{ marginBottom: 'var(--th-space-6)' }}>
+          <h2 className="th-screen-subtitle" style={{ marginBottom: 'var(--th-space-3)' }}>Upcoming dates</h2>
+          <div className="th-hub-grid">
+            {summary.upcomingDates.slice(0, 3).map((d) => (
+              <div key={d.date + d.title} className="th-feature-card" style={{ cursor: 'default' }}>
+                <div className="th-feature-card__icon">
+                  <IconCalendar size={20} />
+                </div>
+                <div className="th-feature-card__body">
+                  <div className="th-feature-card__title">{d.title}</div>
+                  <div className="th-feature-card__desc">
+                    {d.daysUntil === 0 ? 'Today!' : `In ${d.daysUntil} ${d.daysUntil === 1 ? 'day' : 'days'}`}
+                    {d.recurrence === 'yearly' ? ' · yearly' : ''}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

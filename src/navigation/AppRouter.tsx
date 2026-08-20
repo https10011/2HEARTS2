@@ -21,6 +21,7 @@ import { UsScreen } from '../features/app-shell/screens/UsScreen.tsx';
 import { GamesHubScreen } from '../features/app-shell/screens/GamesHubScreen.tsx';
 import { NotesHome, NoteEditor, NoteDetail } from '../features/notes/index.ts';
 import { MoreScreen } from '../features/app-shell/screens/MoreScreen.tsx';
+import { ImportantDatesScreen } from '../features/app-shell/screens/ImportantDatesScreen.tsx';
 import { PlaceholderScreen } from '../features/app-shell/screens/PlaceholderScreen.tsx';
 import { MemoriesHome, AddMemory, MemoryDetail } from '../features/memories/index.ts';
 import { TimelineHome, AddEvent, EventDetail } from '../features/timeline/index.ts';
@@ -115,12 +116,7 @@ const router = createBrowserRouter([
       { path: 'timeline/:eventId/edit', element: <AddEvent /> },
       {
         path: 'us/reminders',
-        element: (
-          <PlaceholderScreen
-            title="Reminders"
-            description="Never miss an important date or occasion."
-          />
-        ),
+        element: <ImportantDatesScreen />,
       },
 
       // Games
