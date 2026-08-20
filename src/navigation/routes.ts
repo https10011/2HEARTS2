@@ -43,12 +43,18 @@ export const RoutePath = {
   appMemoriesAdd: '/app/memories/add',
   appMemoriesDetail: '/app/memories/:memoryId',
 
-  /** Games hub. */
+  /** Games hub (Phase 11). */
   appGames: '/app/games',
+  appGamesPlay: '/app/games/:gameType',
+  appGamesResults: '/app/games/:gameType/results',
   appGamesWhoKnows: '/app/games/who-knows',
   appGamesWouldYouRather: '/app/games/would-you-rather',
   appGamesTwentyQuestions: '/app/games/twenty-questions',
   appGamesHowWell: '/app/games/how-well',
+  appGamesGuessMyAnswer: '/app/games/guess-my-answer',
+  appGamesThisOrThat: '/app/games/this-or-that',
+  appGamesFinishMySentence: '/app/games/finish-my-sentence',
+  appGamesCoupleTrivia: '/app/games/couple-trivia',
 
   /** Notes hub (Phase 8). */
   appNotes: '/app/notes',

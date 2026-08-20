@@ -1149,6 +1149,21 @@
   color: var(--th-color-text-secondary);
 }
 
+/* ===== Progress bar ===== */
+.th-progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: var(--th-color-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.th-progress-bar__fill {
+  height: 100%;
+  background-color: var(--th-color-burgundy);
+  border-radius: 2px;
+  transition: width var(--th-duration-normal) var(--th-ease-standard);
+}
+
 /* ===== Phase 10 — Relationship / Home ===== */
 
 /* Profile card */

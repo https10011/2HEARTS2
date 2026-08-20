@@ -25,6 +25,7 @@ import { ImportantDatesScreen } from '../features/app-shell/screens/ImportantDat
 import { PlaceholderScreen } from '../features/app-shell/screens/PlaceholderScreen.tsx';
 import { MemoriesHome, AddMemory, MemoryDetail } from '../features/memories/index.ts';
 import { TimelineHome, AddEvent, EventDetail } from '../features/timeline/index.ts';
+import { GamePlayScreen, GameResultsScreen } from '../features/games/index.ts';
 
 /**
  * Navigation architecture (Phase 6).
@@ -119,44 +120,15 @@ const router = createBrowserRouter([
         element: <ImportantDatesScreen />,
       },
 
-      // Games
+      // Games (Phase 11)
       { path: 'games', element: <GamesHubScreen /> },
-      {
-        path: 'games/who-knows',
-        element: (
-          <PlaceholderScreen
-            title="Who Knows Who Better?"
-            description="A fun game to test how well you know each other."
-          />
-        ),
-      },
-      {
-        path: 'games/would-you-rather',
-        element: (
-          <PlaceholderScreen
-            title="Would You Rather?"
-            description="Fun dilemmas to spark conversation."
-          />
-        ),
-      },
-      {
-        path: 'games/twenty-questions',
-        element: (
-          <PlaceholderScreen
-            title="20 Questions"
-            description="Deep conversation starters for couples."
-          />
-        ),
-      },
-      {
-        path: 'games/how-well',
-        element: (
-          <PlaceholderScreen
-            title="How Well Do You Know Each Other?"
-            description="The ultimate couple challenge."
-          />
-        ),
-      },
+      { path: 'games/:gameType', element: <GamePlayScreen /> },
+      { path: 'games/:gameType/results', element: <GameResultsScreen /> },
+      // Legacy route aliases for direct links
+      { path: 'games/who-knows', element: <Navigate to="/app/games/who-knows-who-better" replace /> },
+      { path: 'games/would-you-rather', element: <Navigate to="/app/games/would-you-rather" replace /> },
+      { path: 'games/twenty-questions', element: <Navigate to="/app/games/couple-trivia" replace /> },
+      { path: 'games/how-well', element: <Navigate to="/app/games/guess-my-answer" replace /> },
 
       // Notes (Phase 8)
       { path: 'notes', element: <NotesHome /> },

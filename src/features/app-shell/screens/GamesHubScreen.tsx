@@ -1,13 +1,14 @@
 /**
- * GamesHubScreen (Phase 6).
+ * GamesHubScreen (Phase 11).
  *
  * Games hub — navigation structure for couple games.
- * Actual game implementations arrive in later phases.
+ * Each game links to the shared GamePlayScreen with its game type.
  */
 
 import { Link } from 'react-router-dom';
 import { RoutePath } from '../../../navigation/routes.ts';
 import { IconChevronRight } from '../../../components/index.ts';
+import { ALL_GAME_DEFINITIONS } from '../../../customization/games/gameContent.ts';
 
 export function GamesHubScreen() {
   return (
@@ -18,37 +19,19 @@ export function GamesHubScreen() {
       </p>
 
       <div className="th-hub-grid">
-        <Link to={RoutePath.appGamesWhoKnows} className="th-feature-card">
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">Who Knows Who Better?</div>
-            <div className="th-feature-card__desc">Test how well you know each other</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
-
-        <Link to={RoutePath.appGamesWouldYouRather} className="th-feature-card">
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">Would You Rather?</div>
-            <div className="th-feature-card__desc">Fun dilemmas for couples</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
-
-        <Link to={RoutePath.appGamesTwentyQuestions} className="th-feature-card">
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">20 Questions</div>
-            <div className="th-feature-card__desc">Deep conversations starter</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
-
-        <Link to={RoutePath.appGamesHowWell} className="th-feature-card">
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">How Well Do You Know Each Other?</div>
-            <div className="th-feature-card__desc">The ultimate couple challenge</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
+        {ALL_GAME_DEFINITIONS.map((game) => (
+          <Link
+            key={game.type}
+            to={`${RoutePath.appGames}/${game.type}`}
+            className="th-feature-card"
+          >
+            <div className="th-feature-card__body">
+              <div className="th-feature-card__title">{game.title}</div>
+              <div className="th-feature-card__desc">{game.description}</div>
+            </div>
+            <IconChevronRight size={18} className="th-feature-card__chevron" />
+          </Link>
+        ))}
       </div>
     </div>
   );
