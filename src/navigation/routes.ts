@@ -44,8 +44,11 @@ export const RoutePath = {
   appGamesTwentyQuestions: '/app/games/twenty-questions',
   appGamesHowWell: '/app/games/how-well',
 
-  /** Notes hub. */
+  /** Notes hub (Phase 8). */
   appNotes: '/app/notes',
+  appNotesAdd: '/app/notes/add',
+  appNotesDetail: '/app/notes/:noteId',
+  appNotesEdit: '/app/notes/:noteId/edit',
   appNotesShared: '/app/notes/shared',
   appNotesPrivate: '/app/notes/private',
 

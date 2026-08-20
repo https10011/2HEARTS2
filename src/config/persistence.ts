@@ -13,7 +13,7 @@ export const PERSISTENCE_CONFIG = {
    * Current application schema version. Bumped exactly once per migration;
    * the migration with this id must exist in `ALL_MIGRATIONS`.
    */
-  schemaVersion: 4,
+  schemaVersion: 5,
   /**
    * Root directory (relative to the private app data directory) where
    * locally stored photos/videos live. Files inside use generated names;

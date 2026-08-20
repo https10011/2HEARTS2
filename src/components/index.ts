@@ -20,4 +20,6 @@ export {
   IconGamepad,
   IconFileText,
   IconSettings,
+  IconTrash,
+  IconEdit,
 } from './Icon';

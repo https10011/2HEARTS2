@@ -19,7 +19,7 @@ import { AppShell } from '../features/app-shell/AppShell.tsx';
 import { HomeScreen } from '../features/app-shell/screens/HomeScreen.tsx';
 import { UsScreen } from '../features/app-shell/screens/UsScreen.tsx';
 import { GamesHubScreen } from '../features/app-shell/screens/GamesHubScreen.tsx';
-import { NotesHubScreen } from '../features/app-shell/screens/NotesHubScreen.tsx';
+import { NotesHome, NoteEditor, NoteDetail } from '../features/notes/index.ts';
 import { MoreScreen } from '../features/app-shell/screens/MoreScreen.tsx';
 import { PlaceholderScreen } from '../features/app-shell/screens/PlaceholderScreen.tsx';
 import { MemoriesHome, AddMemory, MemoryDetail } from '../features/memories/index.ts';
@@ -160,26 +160,11 @@ const router = createBrowserRouter([
         ),
       },
 
-      // Notes
-      { path: 'notes', element: <NotesHubScreen /> },
-      {
-        path: 'notes/shared',
-        element: (
-          <PlaceholderScreen
-            title="Shared Notes"
-            description="Notes you both can see and edit."
-          />
-        ),
-      },
-      {
-        path: 'notes/private',
-        element: (
-          <PlaceholderScreen
-            title="Private Notes"
-            description="Only you can see these notes."
-          />
-        ),
-      },
+      // Notes (Phase 8)
+      { path: 'notes', element: <NotesHome /> },
+      { path: 'notes/add', element: <NoteEditor /> },
+      { path: 'notes/:noteId', element: <NoteDetail /> },
+      { path: 'notes/:noteId/edit', element: <NoteEditor /> },
 
       // Memories (Phase 7)
       { path: 'memories', element: <MemoriesHome /> },
