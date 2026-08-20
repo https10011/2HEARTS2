@@ -22,9 +22,34 @@ export const RoutePath = {
   onboardingAppLock: '/onboarding/app-lock',
   onboardingComplete: '/onboarding/complete',
 
-  /** Main application shell (unlocked). */
+  /** Main application shell (Phase 6). */
   appRoot: '/app',
   appHome: '/app/home',
+
+  /** Us / Relationship hub. */
+  appUs: '/app/us',
+  appUsMemories: '/app/us/memories',
+  appUsTimeline: '/app/us/timeline',
+  appUsReminders: '/app/us/reminders',
+
+  /** Games hub. */
+  appGames: '/app/games',
+  appGamesWhoKnows: '/app/games/who-knows',
+  appGamesWouldYouRather: '/app/games/would-you-rather',
+  appGamesTwentyQuestions: '/app/games/twenty-questions',
+  appGamesHowWell: '/app/games/how-well',
+
+  /** Notes hub. */
+  appNotes: '/app/notes',
+  appNotesShared: '/app/notes/shared',
+  appNotesPrivate: '/app/notes/private',
+
+  /** More menu. */
+  appMore: '/app/more',
+  appMoreSettings: '/app/more/settings',
+  appMoreSearch: '/app/more/search',
+  appMoreVault: '/app/more/vault',
+  appMoreAbout: '/app/more/about',
 
   /** Foundation placeholder — verifies the engineering foundation runs. */
   foundation: '/app/foundation',

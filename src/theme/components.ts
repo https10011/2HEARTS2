@@ -21,4 +21,15 @@ export const componentClassNames = {
   divider: 'th-divider',
   emptyState: 'th-empty-state',
   loadingState: 'th-loading-state',
+  // App shell (Phase 6)
+  appShell: 'th-app-shell',
+  appContent: 'th-app-content',
+  bottomNav: 'th-bottom-nav',
+  bottomNavItem: 'th-bottom-nav-item',
+  bottomNavItemActive: 'th-bottom-nav-item--active',
+  bottomNavLabel: 'th-bottom-nav-label',
+  appHeader: 'th-app-header',
+  featureCard: 'th-feature-card',
+  moreItem: 'th-more-item',
+  placeholder: 'th-placeholder',
 } as const;

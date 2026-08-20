@@ -6,9 +6,9 @@ no cloud database, no mandatory internet connection (V1 architectural boundary).
 
 This repository contains the **Phase 1 engineering foundation**, **Phase 2
 local-first persistence foundation**, **Phase 3 core services**, **Phase 4
-relationship & application state foundation**, and **Phase 5 onboarding & app
-entry experience**. Feature screens (memories, notes, games, vault, period
-tracker, etc.) are added in later phases.
+relationship & application state foundation**,and **Phase 5 onboarding & app entry experience**, and **Phase 6 main app shell
+& navigation**. Feature screens (memories, notes, games, vault, period tracker,
+etc.) are added in later phases.
 
 ## Technology stack
 
@@ -128,6 +128,10 @@ See **`docs/onboarding.md`** for the Phase 5 onboarding and app entry experience
 splash, welcome, profile setup, relationship setup, personalization, optional
 app-lock, setup completion, returning-user behavior, routing architecture, and
 testing status.
+
+See **`docs/app-shell.md`** for the Phase 6 main app shell and navigation:
+bottom tab navigation, home dashboard, hub screens (Us, Games, Notes, More),
+feature placeholder routes, back-button behavior, and testing status.
 
 ## Authoritative specifications
 

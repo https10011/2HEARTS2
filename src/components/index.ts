@@ -16,4 +16,8 @@ export {
   IconSearch,
   IconMenu,
   IconPlus,
+  IconHeart,
+  IconGamepad,
+  IconFileText,
+  IconSettings,
 } from './Icon';

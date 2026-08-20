@@ -76,7 +76,8 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   (src/data/relationship/**, src/services/relationship/**,
   src/services/state/**; docs/relationship-state.md)
 - Phase 5: Onboarding & app entry experience — COMPLETE
-- Phase 6+: features (memories, notes, …) — NOT STARTED
+- Phase 6: Main app shell & navigation — COMPLETE
+- Phase 7+: features (memories, notes, …) — NOT STARTED
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,
