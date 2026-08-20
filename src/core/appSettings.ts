@@ -20,7 +20,7 @@ import { TEXT_SIZE_SCALE, type TextSizeKey } from '../theme/tokens.ts';
 import { defaultSettingsStorage } from '../data/settings/settingsStorage.ts';
 
 const STORAGE_KEY = 'twohearts.settings.v1';
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 /**
  * Onboarding progression (Phase 4). Persisted so a killed app resumes setup
@@ -31,10 +31,9 @@ export const ONBOARDING_STAGES = ['fresh', 'owner', 'relationship', 'personaliza
 export type OnboardingStage = (typeof ONBOARDING_STAGES)[number];
 
 /**
- * Theme mode preference (Phase 4). 'light'/'dark' force a scheme; 'system'
- * follows the OS. Only 'light' styles exist today — the preference is
- * persisted now so the settings UI ships with working persistence, and
- * applying dark mode becomes a CSS token flip later.
+ * Theme mode preference (Phase 4; dark tokens landed in Phase 19).
+ * 'light'/'dark' force a scheme; 'system' follows the OS. Tokens.css owns
+ * the per-theme token sets; applyThemeMode only flips `data-th-theme`.
  */
 export const THEME_MODES = ['light', 'dark', 'system'] as const;
 export type ThemeMode = (typeof THEME_MODES)[number];
@@ -56,6 +55,15 @@ export interface AppSettings {
   firstLaunchAt: string | null;
   onboardingStage: OnboardingStage;
   themeMode: ThemeMode;
+  /**
+   * Master gate for ALL local notification scheduling (Phase 19). When off,
+   * reminder notification scheduling is skipped; config only, no secrets.
+   */
+  notificationsEnabled: boolean;
+  /** Per-category gate for reminder notifications (Phase 19). */
+  remindersEnabled: boolean;
+  /** Simplify animations/timing throughout the app (Phase 19). */
+  reduceMotion: boolean;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -67,6 +75,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   firstLaunchAt: null,
   onboardingStage: 'fresh',
   themeMode: 'light',
+  notificationsEnabled: true,
+  remindersEnabled: true,
+  reduceMotion: false,
 };
 
 type Listener = () => void;
@@ -101,6 +112,12 @@ function migrate(data: AppSettings): AppSettings {
       schemaVersion: 2,
     };
   }
+  // v2 → v3 (Phase 19): adds notificationsEnabled / remindersEnabled /
+  // reduceMotion. DEFAULT_SETTINGS merge already supplies the new keys with
+  // safe defaults (all reminders on, full motion); stamp the version only.
+  if (out.schemaVersion < 3) {
+    out = { ...out, schemaVersion: 3 };
+  }
   return out;
 }
 
@@ -124,13 +141,28 @@ export const appSettingsStore = {
     persist({ ...current, ...partial });
   },
   setTextSize(size: TextSizeKey) {
+    if (!Object.keys(TEXT_SIZE_SCALE).includes(size)) {
+      throw new Error(`Invalid text size: ${String(size)}`);
+    }
     persist({ ...current, textSize: size });
   },
   setThemeMode(mode: ThemeMode) {
+    if (!(THEME_MODES as readonly string[]).includes(mode)) {
+      throw new Error(`Invalid theme mode: ${String(mode)}`);
+    }
     persist({ ...current, themeMode: mode });
   },
   setOnboardingStage(stage: OnboardingStage) {
     persist({ ...current, onboardingStage: stage, onboarded: stage === 'complete' });
+  },
+  setNotificationsEnabled(enabled: boolean) {
+    persist({ ...current, notificationsEnabled: enabled });
+  },
+  setRemindersEnabled(enabled: boolean) {
+    persist({ ...current, remindersEnabled: enabled });
+  },
+  setReduceMotion(enabled: boolean) {
+    persist({ ...current, reduceMotion: enabled });
   },
   /**
    * Records the very first launch timestamp exactly once. Called by the
@@ -171,8 +203,7 @@ export function applyTextSize(size: TextSizeKey) {
 
 /**
  * Applies the theme-mode preference to the document root
- * (`data-th-theme`). Only light tokens exist today; dark tokens become a
- * CSS-level switch later without touching this persistence contract.
+ * (`data-th-theme`); tokens.css resolves the actual palette per theme.
  */
 export function applyThemeMode(mode: ThemeMode) {
   if (typeof document === 'undefined') return;
@@ -183,4 +214,17 @@ export function applyThemeMode(mode: ThemeMode) {
         : 'light'
       : mode;
   document.documentElement.dataset.thTheme = resolved;
+}
+
+/**
+ * Applies the reduce-motion preference to the document root
+ * (`data-th-motion`); tokens.css collapses the duration scale when set.
+ */
+export function applyReduceMotion(enabled: boolean) {
+  if (typeof document === 'undefined') return;
+  if (enabled) {
+    document.documentElement.dataset.thMotion = 'reduced';
+  } else {
+    delete document.documentElement.dataset.thMotion;
+  }
 }

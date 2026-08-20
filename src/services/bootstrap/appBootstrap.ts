@@ -31,6 +31,10 @@ import { MemorySecureStore } from '../security/secureStore.ts';
 import { AppLockService, type LockSettings } from '../security/appLockService.ts';
 import { RelationshipService } from '../relationship/relationshipService.ts';
 import { AppStateService } from '../state/appStateService.ts';
+import { DataManagementService } from '../maintenance/dataManagementService.ts';
+import { MediaStorage } from '../../data/media/mediaStorage.ts';
+import { CapacitorFileSystem } from '../../data/media/capacitorFileSystem.ts';
+import { MemoryFileSystem } from '../../data/media/memoryFileSystem.ts';
 import { Capacitor } from '@capacitor/core';
 
 const log = createLogger('bootstrap');
@@ -59,6 +63,11 @@ export interface CoreServices {
   appState?: AppStateService;
   /** undefined when the (non-critical) application-state stage degraded. */
   relationship?: RelationshipService;
+  /**
+   * Phase 19 — data/storage management behind the Storage settings screen.
+   * undefined when the (non-critical) application-state stage degraded.
+   */
+  dataManagement?: DataManagementService;
 }
 
 export const coreServices: CoreServices = {
@@ -148,6 +157,15 @@ function buildStages(): Stage[] {
         await appState.reconcileOnboardingStage();
         coreServices.appState = appState;
         coreServices.relationship = new RelationshipService(adapter);
+        // Phase 19: storage/data management for the Settings screens. Media
+        // bytes live in private app files on device, memory fs in web/dev.
+        const fs = Capacitor.isNativePlatform() ? new CapacitorFileSystem() : new MemoryFileSystem();
+        coreServices.dataManagement = new DataManagementService(
+          adapter,
+          new MediaStorage(adapter, fs),
+          coreServices.notifications ?? null,
+          coreServices.appLock ?? null,
+        );
       },
     },
   ];

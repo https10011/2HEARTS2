@@ -123,11 +123,51 @@
   --th-ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
 }
 
-/* Reduced motion: respect OS setting (battery + accessibility) */
+/**
+ * Dark theme (Phase 19) — "Soft and low-light" per the Appearance reference.
+ * Warm dark surfaces derived from the charcoal/rose family; the burgundy
+ * accent stays so the identity is preserved. Only the semantic surface
+ * tokens flip; brand palette primitives remain shared.
+ */
+:root[data-th-theme='dark'] {
+  --th-color-bg: #1C1512;
+  --th-color-cream: #1C1512;
+  --th-color-surface: #2A211C;
+  --th-color-surface-elevated: #322822;
+  --th-color-blush: #3A2A28;
+  --th-color-neutral-soft: #2E2620;
+  --th-color-beige: #463A32;
+  --th-color-text-primary: #F5ECE4;
+  --th-color-charcoal: #F5ECE4;
+  --th-color-text-secondary: #C4B2A9;
+  --th-color-text-on-accent: #FFF8F3;
+  --th-color-border: #463A33;
+  --th-color-divider: #3A2F29;
+  --th-color-burgundy: #C9808B;
+  --th-color-burgundy-light: #D99AA6;
+  --th-color-burgundy-dark: #8E3147;
+  --th-color-error-bg: #452019;
+
+  --th-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --th-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.35);
+  --th-shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --th-shadow-focus: 0 0 0 3px rgba(201, 128, 139, 0.4);
+}
+
+/**
+ * Reduced motion (Phase 19): honor both the OS setting and the in-app
+ * preference (`data-th-motion="reduced"`, set by core/appSettings).
+ */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --th-duration-fast: 1ms;
     --th-duration-normal: 1ms;
     --th-duration-slow: 1ms;
   }
+}
+
+:root[data-th-motion='reduced'] {
+  --th-duration-fast: 1ms;
+  --th-duration-normal: 1ms;
+  --th-duration-slow: 1ms;
 }

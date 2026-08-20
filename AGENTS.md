@@ -85,7 +85,21 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
 - Phase 5: Onboarding & app entry experience — COMPLETE
 - Phase 6: Main app shell & navigation — COMPLETE
 - Phase 7: Memories — COMPLETE (docs/memories.md; schema v4)
-- Phase 8+: features (notes, games, reminders, …) — NOT STARTED
+- Phase 8: Notes & Lists — COMPLETE
+- Phase 9: Timeline — COMPLETE
+- Phase 10: Games (Memory Match, Word Scramble) — COMPLETE
+- Phase 11: Games polish — COMPLETE
+- Phase 12: Casual Games — COMPLETE
+- Phase 13: Reminders — COMPLETE (ReminderService; schedules via NotificationService)
+- Phase 14: Places — COMPLETE
+- Phase 15: Mood — COMPLETE
+- Phase 16: Period Tracker — COMPLETE
+- Phase 17: Vault — COMPLETE (VaultPinGate separate from app lock; master switch)
+- Phase 18: Search & Notification Center — COMPLETE (dark tokens, anniversaries/
+  dates worker via ReminderNotificationDriver)
+- Phase 19: Settings & App Management — COMPLETE (docs/settings.md; settings
+  schema v3; DataManagementService; AppLockGate)
+- Phase 20+: NOT STARTED
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,
@@ -114,6 +128,22 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   @aparajita/capacitor-secure-storage import site; pinHash = PBKDF2-HMAC-
   SHA-256 (120k iters, random salt, constant-time compare); appLockService =
   memory-only lock state, relock-on-foreground via lifecycle bus.
+
+## Phase 19 settings & app management
+- Settings schema v3: + notificationsEnabled / remindersEnabled / reduceMotion
+  (defaults true/true/false); pure v2→v3 migration; setTextSize/setThemeMode
+  reject invalid values at the store boundary.
+- features/settings/ — 8 screens (hub, profile, relationship, appearance,
+  notifications, security, storage, about) + settingsUi helpers + AppLockGate
+  (full-app lock overlay in App.tsx; Vault keeps its own VaultPinGate).
+- services/maintenance/dataManagementService.ts — storage report, orphan-media
+  cache clear, destructive resetAllLocalData (one-tx domain wipe + media sweep
+  + notification cancel + PIN removal + settings reset; schema_migrations and
+  firstLaunchAt preserved). Bootstrap stage 'data-management' (non-critical).
+- ReminderService.scheduleNotification gates on notificationsEnabled &&
+  remindersEnabled — covers the Phase 18 anniversaries/dates worker too.
+- config/appInfo.ts — single source for About screen (from capacitor.config).
+- No fake settings: only implemented capabilities are exposed.
 
 ## Phase 4 relationship & state foundation
 - data/relationship/relationshipTypes.ts — Profile (role owner|partner,

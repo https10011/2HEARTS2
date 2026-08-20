@@ -34,6 +34,11 @@ import { PeriodHome, LogPeriod, CycleHistory } from '../features/period/index.ts
 import { VaultEntry, AddVaultContent, VaultContentViewer } from '../features/vault/index.ts';
 import { SearchScreen } from '../features/app-shell/screens/SearchScreen.tsx';
 import { NotificationCenter } from '../features/notifications/NotificationCenter.tsx';
+import {
+  SettingsHomeScreen, ProfileSettingsScreen, RelationshipSettingsScreen,
+  AppearanceSettingsScreen, NotificationSettingsScreen, SecuritySettingsScreen,
+  StorageSettingsScreen, AboutScreen,
+} from '../features/settings/index.ts';
 
 /**
  * Navigation architecture (Phase 6).
@@ -187,15 +192,13 @@ const router = createBrowserRouter([
 
       // More
       { path: 'more', element: <MoreScreen /> },
-      {
-        path: 'more/settings',
-        element: (
-          <PlaceholderScreen
-            title="Settings"
-            description="Customize your TwoHearts experience."
-          />
-        ),
-      },
+      { path: 'more/settings', element: <SettingsHomeScreen /> },
+      { path: 'more/settings/profile', element: <ProfileSettingsScreen /> },
+      { path: 'more/settings/relationship', element: <RelationshipSettingsScreen /> },
+      { path: 'more/settings/appearance', element: <AppearanceSettingsScreen /> },
+      { path: 'more/settings/notifications', element: <NotificationSettingsScreen /> },
+      { path: 'more/settings/security', element: <SecuritySettingsScreen /> },
+      { path: 'more/settings/storage', element: <StorageSettingsScreen /> },
       {
         path: 'more/search',
         element: <SearchScreen />,
@@ -210,12 +213,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'more/about',
-        element: (
-          <PlaceholderScreen
-            title="About"
-            description="TwoHearts — your private couple space."
-          />
-        ),
+        element: <AboutScreen />,
       },
 
       // Vault (Phase 17)

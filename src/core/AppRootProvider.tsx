@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { useAppSettings, applyTextSize, applyThemeMode } from './appSettings';
+import { useAppSettings, applyTextSize, applyThemeMode, applyReduceMotion } from './appSettings';
 import { uiStore } from './uiState';
 import { useAppLifecycle } from './useAppLifecycle';
 
@@ -24,7 +24,8 @@ export function AppRootProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     applyTextSize(settings.textSize);
     applyThemeMode(settings.themeMode);
-  }, [settings.textSize, settings.themeMode]);
+    applyReduceMotion(settings.reduceMotion);
+  }, [settings.textSize, settings.themeMode, settings.reduceMotion]);
 
   return <>{children}</>;
 }

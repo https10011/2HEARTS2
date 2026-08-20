@@ -1,6 +1,7 @@
 import { AppRootProvider } from './core/AppRootProvider';
 import { ErrorBoundary } from './core/ErrorBoundary';
 import { AppRouter } from './navigation/AppRouter';
+import { AppLockGate } from './features/settings/AppLockGate';
 import { useAppSettings } from './core/appSettings';
 import { applyTextSize, applyThemeMode } from './core/appSettings';
 import { useEffect } from 'react';
@@ -27,7 +28,9 @@ export function App() {
   return (
     <ErrorBoundary>
       <AppRootProvider>
-        <AppRouter />
+        <AppLockGate>
+          <AppRouter />
+        </AppLockGate>
       </AppRootProvider>
     </ErrorBoundary>
   );

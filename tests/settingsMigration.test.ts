@@ -12,7 +12,7 @@ import { test } from 'node:test';
 import assert from 'node:assert';
 import { defaultSettingsStorage } from '../src/data/settings/settingsStorage.ts';
 
-test('v1 settings migrate to schema v2 preserving user data', async () => {
+test('v1 settings migrate through schema v2/v3 preserving user data', async () => {
   defaultSettingsStorage.set(
     'twohearts.settings.v1',
     JSON.stringify({
@@ -27,14 +27,17 @@ test('v1 settings migrate to schema v2 preserving user data', async () => {
   const { appSettingsStore } = await import('../src/core/appSettings.ts');
   const state = appSettingsStore.getState();
 
-  assert.strictEqual(state.schemaVersion, 2);
+  assert.strictEqual(state.schemaVersion, 3);
   assert.strictEqual(state.textSize, 'large'); // preserved
   assert.strictEqual(state.appLockEnabled, true); // preserved
   assert.strictEqual(state.lockTimeoutSeconds, 30); // preserved
   assert.strictEqual(state.firstLaunchAt, null); // defaulted
   assert.strictEqual(state.onboardingStage, 'complete'); // derived from onboarded flag
   assert.strictEqual(state.themeMode, 'light'); // defaulted
+  assert.strictEqual(state.notificationsEnabled, true); // v3 default (Phase 19)
+  assert.strictEqual(state.remindersEnabled, true); // v3 default (Phase 19)
+  assert.strictEqual(state.reduceMotion, false); // v3 default (Phase 19)
 
   // Re-migration is a no-op (idempotent by construction).
-  assert.strictEqual(appSettingsStore.getState().schemaVersion, 2);
+  assert.strictEqual(appSettingsStore.getState().schemaVersion, 3);
 });

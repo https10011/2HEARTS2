@@ -1293,3 +1293,186 @@
   word-break: break-all;
   line-height: 1.4;
 }
+
+
+/* ----- Settings (Phase 19) ----- */
+
+/* Toggle switch primitive */
+.th-switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 28px;
+  border: none;
+  border-radius: var(--th-radius-pill);
+  background: var(--th-color-beige);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--th-duration-normal) var(--th-ease-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-switch--on {
+  background: var(--th-color-burgundy);
+}
+.th-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--th-radius-circle);
+  background: var(--th-color-surface);
+  box-shadow: var(--th-shadow-sm);
+  transition: transform var(--th-duration-normal) var(--th-ease-standard);
+}
+.th-switch--on .th-switch__thumb {
+  transform: translateX(20px);
+}
+.th-switch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.th-switch:focus-visible {
+  box-shadow: var(--th-shadow-focus);
+}
+
+/* Section label above a settings group */
+.th-settings-section {
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--th-color-rose-muted);
+  margin: var(--th-space-6) 0 var(--th-space-2);
+}
+
+/* Grouped white card holding settings rows */
+.th-settings-group {
+  background: var(--th-color-surface);
+  border-radius: var(--th-radius-lg);
+  box-shadow: var(--th-shadow-sm);
+  overflow: hidden;
+}
+
+/* One settings row: icon + label/description + trailing control */
+.th-settings-row {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  width: 100%;
+  min-height: var(--th-touch-target-min);
+  padding: var(--th-space-3) var(--th-space-4);
+  border: none;
+  border-bottom: var(--th-border-width-thin) solid var(--th-color-divider);
+  background: transparent;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.th-settings-row:last-child {
+  border-bottom: none;
+}
+.th-settings-row--static {
+  cursor: default;
+}
+.th-settings-row__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--th-radius-circle);
+  background: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+.th-settings-row__body {
+  flex: 1;
+  min-width: 0;
+}
+.th-settings-row__label {
+  display: block;
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-medium);
+  color: var(--th-color-text-primary);
+}
+.th-settings-row__description {
+  display: block;
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  line-height: var(--th-line-height-normal);
+}
+.th-settings-row__trailing {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  color: var(--th-color-text-secondary);
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-medium);
+}
+.th-settings-row--danger .th-settings-row__label {
+  color: var(--th-color-error);
+}
+
+/* Soft informational card (privacy notes, storage summary, about cards) */
+.th-settings-info {
+  background: var(--th-color-neutral-soft);
+  border-radius: var(--th-radius-lg);
+  padding: var(--th-space-4);
+  display: flex;
+  gap: var(--th-space-3);
+  align-items: flex-start;
+  color: var(--th-color-text-primary);
+}
+.th-settings-info__title {
+  font-weight: var(--th-font-weight-semibold);
+  margin: 0 0 var(--th-space-1);
+}
+.th-settings-info__text {
+  margin: 0;
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  line-height: var(--th-line-height-relaxed);
+}
+
+/* Header summary card at the top of Settings Home */
+.th-settings-profile-card {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-4);
+  width: 100%;
+  padding: var(--th-space-5);
+  background: var(--th-color-surface);
+  border: none;
+  border-radius: var(--th-radius-lg);
+  box-shadow: var(--th-shadow-sm);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.th-settings-profile-card__avatar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--th-radius-circle);
+  background: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+.th-settings-profile-card__name {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  color: var(--th-color-text-primary);
+}
+.th-settings-profile-card__subtitle {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}

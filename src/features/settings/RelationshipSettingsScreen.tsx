@@ -1,0 +1,150 @@
+/**
+ * Relationship Settings (Phase 19 — roadmap screen 82).
+ *
+ * Manage the partner profile (name, optional birthday) and the
+ * relationship start date through RelationshipService; links to the
+ * Important Dates manager (Phase 4 relationship foundation).
+ */
+
+import { useEffect, useState } from 'react';
+import { RoutePath } from '../../navigation/routes.ts';
+import { Button, Input, IconCalendar } from '../../components/index.ts';
+import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
+import { safeUserMessage } from '../../services/errors/appError.ts';
+import { SettingsScreen, SettingRow, InfoCard } from './settingsUi.tsx';
+
+export function RelationshipSettingsScreen() {
+  const [name, setName] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const relationship = coreServices.relationship;
+    if (!relationship) return;
+    Promise.all([relationship.getPartner(), relationship.getSummary()])
+      .then(([partnerProfile, summary]) => {
+        if (cancelled) return;
+        if (partnerProfile) {
+          setName(partnerProfile.displayName);
+          setBirthday(partnerProfile.birthDate ?? '');
+        }
+        setStartDate(summary.startDate ?? '');
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleSave = async () => {
+    const relationship = coreServices.relationship;
+    if (!relationship) {
+      setError('Relationship service is unavailable.');
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+    try {
+      if (name.trim() !== '') {
+        await relationship.savePartner({
+          displayName: name,
+          birthDate: birthday.trim() === '' ? null : birthday,
+        });
+      }
+      await relationship.setStartDate(startDate.trim() === '' ? null : startDate);
+      setSaved(true);
+    } catch (cause) {
+      setError(safeUserMessage(cause));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <SettingsScreen title="Relationship Settings" backTo={RoutePath.appMoreSettings}>
+      <p style={{ marginTop: 0, fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
+        Manage the details you share with TwoHearts.
+      </p>
+
+      <p className="th-settings-section">Special Someone</p>
+      <div className="th-form-group">
+        <label className="th-form-label" htmlFor="partner-name">
+          Name
+        </label>
+        <Input
+          id="partner-name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Your special someone's name"
+          maxLength={40}
+        />
+      </div>
+
+      <div className="th-form-group">
+        <label className="th-form-label" htmlFor="partner-birthday">
+          Birthday (optional)
+        </label>
+        <Input
+          id="partner-birthday"
+          type="date"
+          value={birthday}
+          onChange={(e) => setBirthday(e.target.value)}
+        />
+      </div>
+
+      <div className="th-form-group">
+        <label className="th-form-label" htmlFor="start-date">
+          Relationship start date
+        </label>
+        <Input
+          id="start-date"
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
+      </div>
+
+      {error ? (
+        <p role="alert" style={{ color: 'var(--th-color-error)', fontSize: 'var(--th-font-size-sm)' }}>
+          {error}
+        </p>
+      ) : null}
+      {saved ? (
+        <p role="status" style={{ color: 'var(--th-color-success)', fontSize: 'var(--th-font-size-sm)' }}>
+          Saved.
+        </p>
+      ) : null}
+
+      <Button
+        variant="primary"
+        full
+        onClick={handleSave}
+        disabled={saving || (name.trim() === '' && startDate.trim() === '')}
+      >
+        {saving ? 'Saving…' : 'Save Changes'}
+      </Button>
+
+      <p className="th-settings-section">Relationship</p>
+      <div className="th-settings-group">
+        <SettingRow
+          to={RoutePath.appUsReminders}
+          icon={<IconCalendar size={18} />}
+          label="Important Dates"
+          description="Manage anniversaries and special dates"
+        />
+      </div>
+
+      <div style={{ marginTop: 'var(--th-space-6)' }}>
+        <InfoCard
+          title="Relationship information is private"
+          text="Your relationship details are stored locally on this device."
+        />
+      </div>
+    </SettingsScreen>
+  );
+}

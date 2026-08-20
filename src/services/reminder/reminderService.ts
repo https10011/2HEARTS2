@@ -20,6 +20,7 @@ import {
 } from '../../data/reminder/reminderTypes.ts';
 import { ReminderRepository } from '../../repositories/reminderRepository.ts';
 import type { NotificationService } from '../notifications/notificationService.ts';
+import { appSettingsStore } from '../../core/appSettings.ts';
 
 const log = createLogger('reminders');
 
@@ -258,6 +259,14 @@ export class ReminderService {
 
   private async scheduleNotification(reminder: Reminder): Promise<void> {
     if (!this.notificationService || !reminder.notificationOwnerRef) return;
+
+    // Phase 19: honor the notification preferences gate (master + reminders
+    // category). When off, drop any stale schedule instead of firing.
+    const prefs = appSettingsStore.getState();
+    if (!prefs.notificationsEnabled || !prefs.remindersEnabled) {
+      await this.cancelNotification(reminder);
+      return;
+    }
 
     try {
       const fireAt = this.computeFireAt(reminder.scheduledDate, reminder.scheduledTime);

@@ -88,7 +88,7 @@ test('preferences persist distinctly from domain data via the store boundary', a
   const persisted = JSON.parse(raw!) as AppSettings;
   assert.strictEqual(persisted.textSize, 'large');
   assert.strictEqual(persisted.themeMode, 'dark');
-  assert.strictEqual(persisted.schemaVersion, 2);
+  assert.strictEqual(persisted.schemaVersion, 3); // schema v3 since Phase 19
 
   // Domain data still lives in SQLite ONLY — nothing domain-shaped in settings.
   const relationship = new RelationshipService(db, CLOCK);

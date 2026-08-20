@@ -109,6 +109,14 @@ export const RoutePath = {
   appMoreVault: '/app/more/vault',
   appMoreAbout: '/app/more/about',
 
+  /** Settings screens (Phase 19). */
+  appMoreSettingsProfile: '/app/more/settings/profile',
+  appMoreSettingsRelationship: '/app/more/settings/relationship',
+  appMoreSettingsAppearance: '/app/more/settings/appearance',
+  appMoreSettingsNotifications: '/app/more/settings/notifications',
+  appMoreSettingsSecurity: '/app/more/settings/security',
+  appMoreSettingsStorage: '/app/more/settings/storage',
+
   /** Notification Center (Phase 18). */
   appNotifications: '/app/notifications',
 
