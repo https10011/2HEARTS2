@@ -29,6 +29,7 @@ import { GamePlayScreen, GameResultsScreen, MemoryMatchScreen, WordScrambleScree
 import { RemindersHome, CreateReminder, ReminderDetail } from '../features/reminders/index.ts';
 import { PlacesHome, CreatePlace, PlaceDetail } from '../features/places/index.ts';
 import { MoodHome, MoodEntryScreen, MoodHistory } from '../features/mood/index.ts';
+import { PeriodHome, LogPeriod, CycleHistory } from '../features/period/index.ts';
 
 /**
  * Navigation architecture (Phase 6).
@@ -157,6 +158,15 @@ const router = createBrowserRouter([
       { path: 'memories', element: <MemoriesHome /> },
       { path: 'memories/add', element: <AddMemory /> },
       { path: 'memories/:memoryId', element: <MemoryDetail /> },
+
+      // Period Tracker (Phase 16)
+      { path: 'period', element: <PeriodHome /> },
+      { path: 'period/log', element: <LogPeriod /> },
+      { path: 'period/calendar', element: <PlaceholderScreen title="Period Calendar" description="View your cycle calendar." /> },
+      { path: 'period/history', element: <CycleHistory /> },
+      { path: 'period/settings', element: <PlaceholderScreen title="Period Settings" description="Configure cycle preferences." /> },
+      { path: 'period/:entryId', element: <LogPeriod /> },
+      { path: 'period/:entryId/edit', element: <LogPeriod /> },
 
       // Mood (Phase 15)
       { path: 'mood', element: <MoodHome /> },

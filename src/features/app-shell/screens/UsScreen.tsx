@@ -205,6 +205,17 @@ export function UsScreen() {
           </div>
           <IconChevronRight size={18} className="th-feature-card__chevron" />
         </Link>
+
+        <Link to={RoutePath.appPeriod} className="th-feature-card">
+          <div className="th-feature-card__icon" style={{ fontSize: '1.25rem' }}>
+            📅
+          </div>
+          <div className="th-feature-card__body">
+            <div className="th-feature-card__title">Period Tracker</div>
+            <div className="th-feature-card__desc">Track your cycle</div>
+          </div>
+          <IconChevronRight size={18} className="th-feature-card__chevron" />
+        </Link>
       </div>
     </div>
   );

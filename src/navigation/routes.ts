@@ -87,6 +87,15 @@ export const RoutePath = {
   appMoodDetail: '/app/mood/:entryId',
   appMoodEdit: '/app/mood/:entryId/edit',
 
+  /** Period Tracker feature (Phase 16). */
+  appPeriod: '/app/period',
+  appPeriodLog: '/app/period/log',
+  appPeriodCalendar: '/app/period/calendar',
+  appPeriodHistory: '/app/period/history',
+  appPeriodSettings: '/app/period/settings',
+  appPeriodDetail: '/app/period/:entryId',
+  appPeriodEdit: '/app/period/:entryId/edit',
+
   /** More menu. */
   appMore: '/app/more',
   appMoreSettings: '/app/more/settings',

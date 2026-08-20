@@ -17,6 +17,7 @@ import { timelineMigration } from './006_timeline.ts';
 import { remindersMigration } from './007_reminders.ts';
 import { placesMigration } from './008_places.ts';
 import { moodMigration } from './009_mood.ts';
+import { periodTrackerMigration } from './010_period_tracker.ts';
 import type { Migration } from './types.ts';
 
 export const ALL_MIGRATIONS: Migration[] = [
@@ -29,6 +30,7 @@ export const ALL_MIGRATIONS: Migration[] = [
   remindersMigration,
   placesMigration,
   moodMigration,
+  periodTrackerMigration,
 ];
 
 /** Guards the config/registry agreement at module load. */
