@@ -40,15 +40,22 @@ features must remain architecturally separable from V1.
 - `theme/` — tokens.css (design tokens), tokens.ts (typed mirror + TEXT_SIZE_SCALE).
 - `styles/` — global.css (mobile-first, safe-area, portrait).
 - `customization/` — ONE owner-customization place (theme/, defaults/, games/).
-- `features/` — empty by design; populated Phase 6+.
+- `features/` — `app-shell/` (AppShell, BottomNav, main screens);
+  `memories/` (MemoriesHome, AddMemory, MemoryDetail, useMemoryService).
+  `onboarding/` (SplashScreen, Welcome, ProfileSetup, RelationshipSetup,
+  PersonalizationSetup, AppLockSetup, SetupComplete, OnboardingGate, HomeScreen).
 - `data/` — persistence (Phase 2): `database/` (adapter + connection +
-  migrations @ schema v1), `model/entity.ts` (UUID v4 ids, ISO UTC
+  migrations @ schema v4), `model/entity.ts` (UUID v4 ids, ISO UTC
   createdAt/updatedAt, optional deletedAt tombstone), `serialization/`
   (one EntitySerializer per entity), `media/` (MediaFileSystem adapters +
   MediaStorage service; safe refs; orphan sweep), `settings/settingsStorage.ts`
   (localStorage abstraction; also drives `core/appSettings.ts`).
-- `repositories/` — BaseRepository CRUD conventions + MediaAssetRepository.
+  `memory/` (Memory, MemoryMedia domain models).
+- `repositories/` — BaseRepository CRUD conventions + MediaAssetRepository
+  + MemoryRepository.
 - `services/backup/` — versioned export envelope + validation (no UI yet).
+- `services/memory/` — MemoryService: create, update, delete, list, media
+  coordination, validation, error normalization.
 - `hooks/ utils/ config/` — shared hooks; `utils/{ids,time,base64}.ts`;
   `config/persistence.ts` (db name, schemaVersion=1, media root).
 - `assets/{branding,icons,illustrations,images}/` — replaceable SVG assets.
@@ -77,7 +84,8 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   src/services/state/**; docs/relationship-state.md)
 - Phase 5: Onboarding & app entry experience — COMPLETE
 - Phase 6: Main app shell & navigation — COMPLETE
-- Phase 7+: features (memories, notes, …) — NOT STARTED
+- Phase 7: Memories — COMPLETE (docs/memories.md; schema v4)
+- Phase 8+: features (notes, games, reminders, …) — NOT STARTED
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,

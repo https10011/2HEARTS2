@@ -22,6 +22,7 @@ import { GamesHubScreen } from '../features/app-shell/screens/GamesHubScreen.tsx
 import { NotesHubScreen } from '../features/app-shell/screens/NotesHubScreen.tsx';
 import { MoreScreen } from '../features/app-shell/screens/MoreScreen.tsx';
 import { PlaceholderScreen } from '../features/app-shell/screens/PlaceholderScreen.tsx';
+import { MemoriesHome, AddMemory, MemoryDetail } from '../features/memories/index.ts';
 
 /**
  * Navigation architecture (Phase 6).
@@ -99,12 +100,7 @@ const router = createBrowserRouter([
       { path: 'us', element: <UsScreen /> },
       {
         path: 'us/memories',
-        element: (
-          <PlaceholderScreen
-            title="Memories"
-            description="Photos and moments from your journey together will live here."
-          />
-        ),
+        element: <Navigate to={RoutePath.appMemories} replace />,
       },
       {
         path: 'us/timeline',
@@ -184,6 +180,11 @@ const router = createBrowserRouter([
           />
         ),
       },
+
+      // Memories (Phase 7)
+      { path: 'memories', element: <MemoriesHome /> },
+      { path: 'memories/add', element: <AddMemory /> },
+      { path: 'memories/:memoryId', element: <MemoryDetail /> },
 
       // More
       { path: 'more', element: <MoreScreen /> },

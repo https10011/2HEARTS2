@@ -6,9 +6,9 @@ no cloud database, no mandatory internet connection (V1 architectural boundary).
 
 This repository contains the **Phase 1 engineering foundation**, **Phase 2
 local-first persistence foundation**, **Phase 3 core services**, **Phase 4
-relationship & application state foundation**,and **Phase 5 onboarding & app entry experience**, and **Phase 6 main app shell
-& navigation**. Feature screens (memories, notes, games, vault, period tracker,
-etc.) are added in later phases.
+relationship & application state foundation**, **Phase 5 onboarding & app entry
+experience**, **Phase 6 main app shell & navigation**, and **Phase 7 Memories**.
+Feature screens (notes, games, reminders, vault, etc.) are added in later phases.
 
 ## Technology stack
 
@@ -132,6 +132,10 @@ testing status.
 See **`docs/app-shell.md`** for the Phase 6 main app shell and navigation:
 bottom tab navigation, home dashboard, hub screens (Us, Games, Notes, More),
 feature placeholder routes, back-button behavior, and testing status.
+
+See **`docs/memories.md`** for the Phase 7 Memories feature: memory data model,
+repository, service, media handling, CRUD screens (home, add, detail),
+local-first storage, and testing status.
 
 ## Authoritative specifications
 
