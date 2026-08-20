@@ -53,8 +53,8 @@ describe('Notes migration', () => {
     await finalizeDatabaseForTests();
   });
 
-  it('schema version is 5 after migration', () => {
-    assert.equal(PERSISTENCE_CONFIG.schemaVersion, 5);
+  it('schema version is 6 after migration', () => {
+    assert.equal(PERSISTENCE_CONFIG.schemaVersion, 6);
   });
 
   it('creates notes table', async () => {

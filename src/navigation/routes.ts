@@ -26,6 +26,12 @@ export const RoutePath = {
   appRoot: '/app',
   appHome: '/app/home',
 
+  /** Timeline feature (Phase 9). */
+  appTimelineRoot: '/app/timeline',
+  appTimelineAdd: '/app/timeline/add',
+  appTimelineDetail: '/app/timeline/:eventId',
+  appTimelineEdit: '/app/timeline/:eventId/edit',
+
   /** Us / Relationship hub. */
   appUs: '/app/us',
   appUsMemories: '/app/us/memories',

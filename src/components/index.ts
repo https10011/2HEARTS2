@@ -22,4 +22,5 @@ export {
   IconSettings,
   IconTrash,
   IconEdit,
+  IconCalendar,
 } from './Icon';

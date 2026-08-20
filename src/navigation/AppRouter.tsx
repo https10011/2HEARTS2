@@ -23,6 +23,7 @@ import { NotesHome, NoteEditor, NoteDetail } from '../features/notes/index.ts';
 import { MoreScreen } from '../features/app-shell/screens/MoreScreen.tsx';
 import { PlaceholderScreen } from '../features/app-shell/screens/PlaceholderScreen.tsx';
 import { MemoriesHome, AddMemory, MemoryDetail } from '../features/memories/index.ts';
+import { TimelineHome, AddEvent, EventDetail } from '../features/timeline/index.ts';
 
 /**
  * Navigation architecture (Phase 6).
@@ -104,13 +105,14 @@ const router = createBrowserRouter([
       },
       {
         path: 'us/timeline',
-        element: (
-          <PlaceholderScreen
-            title="Timeline"
-            description="Your relationship story told over time."
-          />
-        ),
+        element: <Navigate to={RoutePath.appTimelineRoot} replace />,
       },
+
+      // Timeline (Phase 9)
+      { path: 'timeline', element: <TimelineHome /> },
+      { path: 'timeline/add', element: <AddEvent /> },
+      { path: 'timeline/:eventId', element: <EventDetail /> },
+      { path: 'timeline/:eventId/edit', element: <AddEvent /> },
       {
         path: 'us/reminders',
         element: (

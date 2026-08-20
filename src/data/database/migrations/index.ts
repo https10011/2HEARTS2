@@ -13,6 +13,7 @@ import { notificationRegistryMigration } from './002_notification_registry.ts';
 import { relationshipFoundationMigration } from './003_relationship_foundation.ts';
 import { memoriesMigration } from './004_memories.ts';
 import { notesMigration } from './005_notes.ts';
+import { timelineMigration } from './006_timeline.ts';
 import type { Migration } from './types.ts';
 
 export const ALL_MIGRATIONS: Migration[] = [
@@ -21,6 +22,7 @@ export const ALL_MIGRATIONS: Migration[] = [
   relationshipFoundationMigration,
   memoriesMigration,
   notesMigration,
+  timelineMigration,
 ];
 
 /** Guards the config/registry agreement at module load. */
