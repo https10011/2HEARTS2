@@ -96,6 +96,12 @@ export const RoutePath = {
   appPeriodDetail: '/app/period/:entryId',
   appPeriodEdit: '/app/period/:entryId/edit',
 
+  /** Vault feature (Phase 17). */
+  appVault: '/app/vault',
+  appVaultAdd: '/app/vault/add',
+  appVaultDetail: '/app/vault/:itemId',
+  appVaultEdit: '/app/vault/:itemId/edit',
+
   /** More menu. */
   appMore: '/app/more',
   appMoreSettings: '/app/more/settings',

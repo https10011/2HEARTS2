@@ -23,6 +23,7 @@ import { NotesHome, NoteEditor, NoteDetail } from '../features/notes/index.ts';
 import { MoreScreen } from '../features/app-shell/screens/MoreScreen.tsx';
 import { ImportantDatesScreen } from '../features/app-shell/screens/ImportantDatesScreen.tsx';
 import { PlaceholderScreen } from '../features/app-shell/screens/PlaceholderScreen.tsx';
+import { coreServices } from '../services/bootstrap/appBootstrap.ts';
 import { MemoriesHome, AddMemory, MemoryDetail } from '../features/memories/index.ts';
 import { TimelineHome, AddEvent, EventDetail } from '../features/timeline/index.ts';
 import { GamePlayScreen, GameResultsScreen, MemoryMatchScreen, WordScrambleScreen, CasualGamePlayScreen } from '../features/games/index.ts';
@@ -30,6 +31,7 @@ import { RemindersHome, CreateReminder, ReminderDetail } from '../features/remin
 import { PlacesHome, CreatePlace, PlaceDetail } from '../features/places/index.ts';
 import { MoodHome, MoodEntryScreen, MoodHistory } from '../features/mood/index.ts';
 import { PeriodHome, LogPeriod, CycleHistory } from '../features/period/index.ts';
+import { VaultEntry, AddVaultContent, VaultContentViewer } from '../features/vault/index.ts';
 
 /**
  * Navigation architecture (Phase 6).
@@ -203,12 +205,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'more/vault',
-        element: (
-          <PlaceholderScreen
-            title="Vault"
-            description="Your private, secure storage."
-          />
-        ),
+        element: <Navigate to="/app/vault" replace />,
       },
       {
         path: 'more/about',
@@ -219,6 +216,12 @@ const router = createBrowserRouter([
           />
         ),
       },
+
+      // Vault (Phase 17)
+      { path: 'vault', element: <VaultEntry appLockService={coreServices.appLock!} vaultService={undefined} /> },
+      { path: 'vault/add', element: <AddVaultContent /> },
+      { path: 'vault/:itemId', element: <VaultContentViewer /> },
+      { path: 'vault/:itemId/edit', element: <AddVaultContent /> },
 
       // Legacy foundation route
       { path: 'foundation', element: <HomeScreen /> },
