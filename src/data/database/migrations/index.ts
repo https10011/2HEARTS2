@@ -14,6 +14,7 @@ import { relationshipFoundationMigration } from './003_relationship_foundation.t
 import { memoriesMigration } from './004_memories.ts';
 import { notesMigration } from './005_notes.ts';
 import { timelineMigration } from './006_timeline.ts';
+import { remindersMigration } from './007_reminders.ts';
 import type { Migration } from './types.ts';
 
 export const ALL_MIGRATIONS: Migration[] = [
@@ -23,6 +24,7 @@ export const ALL_MIGRATIONS: Migration[] = [
   memoriesMigration,
   notesMigration,
   timelineMigration,
+  remindersMigration,
 ];
 
 /** Guards the config/registry agreement at module load. */

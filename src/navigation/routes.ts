@@ -60,6 +60,12 @@ export const RoutePath = {
   appGamesCasualTrivia: '/app/games/casual-trivia',
   appGamesRiddleRoom: '/app/games/riddle-room',
 
+  /** Reminders feature (Phase 13). */
+  appReminders: '/app/reminders',
+  appRemindersAdd: '/app/reminders/add',
+  appRemindersDetail: '/app/reminders/:reminderId',
+  appRemindersEdit: '/app/reminders/:reminderId/edit',
+
   /** Notes hub (Phase 8). */
   appNotes: '/app/notes',
   appNotesAdd: '/app/notes/add',

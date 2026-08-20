@@ -26,6 +26,7 @@ import { PlaceholderScreen } from '../features/app-shell/screens/PlaceholderScre
 import { MemoriesHome, AddMemory, MemoryDetail } from '../features/memories/index.ts';
 import { TimelineHome, AddEvent, EventDetail } from '../features/timeline/index.ts';
 import { GamePlayScreen, GameResultsScreen, MemoryMatchScreen, WordScrambleScreen, CasualGamePlayScreen } from '../features/games/index.ts';
+import { RemindersHome, CreateReminder, ReminderDetail } from '../features/reminders/index.ts';
 
 /**
  * Navigation architecture (Phase 6).
@@ -137,6 +138,12 @@ const router = createBrowserRouter([
       { path: 'games/would-you-rather', element: <Navigate to="/app/games/would-you-rather" replace /> },
       { path: 'games/twenty-questions', element: <Navigate to="/app/games/couple-trivia" replace /> },
       { path: 'games/how-well', element: <Navigate to="/app/games/guess-my-answer" replace /> },
+
+      // Reminders (Phase 13)
+      { path: 'reminders', element: <RemindersHome /> },
+      { path: 'reminders/add', element: <CreateReminder /> },
+      { path: 'reminders/:reminderId', element: <ReminderDetail /> },
+      { path: 'reminders/:reminderId/edit', element: <CreateReminder /> },
 
       // Notes (Phase 8)
       { path: 'notes', element: <NotesHome /> },

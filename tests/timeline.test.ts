@@ -55,7 +55,7 @@ describe('Timeline migration', () => {
   });
 
   it('schema version is 6 after migration', () => {
-    assert.equal(PERSISTENCE_CONFIG.schemaVersion, 6);
+    assert.equal(PERSISTENCE_CONFIG.schemaVersion, 7);
   });
 
   it('creates timeline_events table', async () => {
