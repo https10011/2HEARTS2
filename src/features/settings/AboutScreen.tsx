@@ -9,7 +9,7 @@
  */
 
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconHeart } from '../../components/index.ts';
+import { IconHeart, BrandLogo } from '../../components/index.ts';
 import { APP_INFO } from '../../config/appInfo.ts';
 import { SettingsScreen, InfoCard } from './settingsUi.tsx';
 
@@ -26,21 +26,9 @@ export function AboutScreen() {
   return (
     <SettingsScreen title="About TwoHearts" backTo={RoutePath.appMore}>
       <div style={{ textAlign: 'center', margin: 'var(--th-space-4) 0' }}>
-        <div
-          style={{
-            width: '72px',
-            height: '72px',
-            margin: '0 auto var(--th-space-3)',
-            borderRadius: 'var(--th-radius-circle)',
-            background: 'var(--th-color-burgundy)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--th-color-text-on-accent)',
-            boxShadow: 'var(--th-shadow-md)',
-          }}
-        >
-          <IconHeart size={32} />
+        <div style={{ margin: '0 auto var(--th-space-3)', width: 'fit-content' }}>
+          {/* Authoritative brand badge — one component (Phase 20) */}
+          <BrandLogo variant="badge" size={72} />
         </div>
         <h2 style={{ margin: 0, fontFamily: 'var(--th-font-family-display)', color: 'var(--th-color-burgundy)' }}>
           {APP_INFO.name}

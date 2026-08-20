@@ -24,7 +24,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  general: '#6A1B2B',
+  general: 'var(--th-color-burgundy)',
   shared: '#8B5E3C',
   private: '#4A5568',
   'love-letter': '#C53030',

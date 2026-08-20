@@ -9,6 +9,8 @@ export { EmptyState } from './EmptyState';
 export { LoadingState } from './LoadingState';
 export { Modal } from './Modal';
 export { Switch } from './Switch';
+export { BrandLogo } from './BrandLogo';
+export type { BrandLogoProps, BrandLogoVariant } from './BrandLogo';
 export {
   IconBack,
   IconClose,

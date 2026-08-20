@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
-import { Button, Input, IconHeart } from '../../components/index.ts';
+import { Button, Input, BrandLogo } from '../../components/index.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import type { LockState } from '../../services/security/appLockService.ts';
 
@@ -61,21 +61,8 @@ export function AppLockGate({ children }: { children: ReactNode }) {
       }}
       aria-label="TwoHearts is locked"
     >
-      <div
-        style={{
-          width: '72px',
-          height: '72px',
-          borderRadius: '50%',
-          background: 'var(--th-color-burgundy)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--th-color-text-on-accent)',
-          boxShadow: 'var(--th-shadow-md)',
-        }}
-      >
-        <IconHeart size={30} />
-      </div>
+      {/* Authoritative brand badge — one component (Phase 20) */}
+      <BrandLogo variant="badge" size={72} />
       <h1
         style={{
           margin: 0,

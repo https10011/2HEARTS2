@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './styles/global.css';
 import { bootstrapApp } from './services/bootstrap/appBootstrap';
+import { BrandLogo } from './components/BrandLogo';
 
 // In browser/dev contexts the persistence layer runs on sql.js (the same SQL
 // schema as native Android SQLite). The WASM asset URL is handed to the
@@ -29,32 +30,8 @@ function SplashView() {
         gap: 'var(--th-space-4)',
       }}
     >
-      <div
-        style={{
-          width: '80px',
-          height: '80px',
-          borderRadius: '50%',
-          background: 'var(--th-color-burgundy)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: 'var(--th-shadow-md)',
-        }}
-      >
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 80 80"
-          fill="none"
-          aria-hidden="true"
-        >
-          <path
-            d="M40 58C40 58 18 44 18 30C18 22 24 16 32 16C36 16 39 18 40 20C41 18 44 16 48 16C56 16 62 22 62 30C62 44 40 58 40 58Z"
-            fill="#FFF8F3"
-            opacity="0.95"
-          />
-        </svg>
-      </div>
+      {/* Authoritative brand mark — one component (Phase 20) */}
+      <BrandLogo variant="badge" size={80} />
       <h1
         style={{
           fontFamily: 'var(--th-font-family-display)',
