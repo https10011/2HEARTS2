@@ -74,6 +74,12 @@ export const RoutePath = {
   appNotesShared: '/app/notes/shared',
   appNotesPrivate: '/app/notes/private',
 
+  /** Places feature (Phase 14). */
+  appPlaces: '/app/places',
+  appPlacesAdd: '/app/places/add',
+  appPlacesDetail: '/app/places/:placeId',
+  appPlacesEdit: '/app/places/:placeId/edit',
+
   /** More menu. */
   appMore: '/app/more',
   appMoreSettings: '/app/more/settings',

@@ -11,7 +11,7 @@ import { coreServices } from '../../../services/bootstrap/appBootstrap.ts';
 import type { RelationshipService, RelationshipSummary } from '../../../services/relationship/relationshipService.ts';
 import type { Profile } from '../../../data/relationship/relationshipTypes.ts';
 import { RoutePath } from '../../../navigation/routes.ts';
-import { IconChevronRight, IconHeart, IconCalendar, LoadingState } from '../../../components/index.ts';
+import { IconChevronRight, IconHeart, IconCalendar, IconMapPin, LoadingState } from '../../../components/index.ts';
 
 function formatBirthDate(dateStr: string | null): string {
   if (!dateStr) return '';
@@ -180,6 +180,17 @@ export function UsScreen() {
           <div className="th-feature-card__body">
             <div className="th-feature-card__title">Reminders</div>
             <div className="th-feature-card__desc">Important dates &amp; occasions</div>
+          </div>
+          <IconChevronRight size={18} className="th-feature-card__chevron" />
+        </Link>
+
+        <Link to={RoutePath.appPlaces} className="th-feature-card">
+          <div className="th-feature-card__icon">
+            <IconMapPin size={20} />
+          </div>
+          <div className="th-feature-card__body">
+            <div className="th-feature-card__title">Our Places</div>
+            <div className="th-feature-card__desc">Meaningful locations</div>
           </div>
           <IconChevronRight size={18} className="th-feature-card__chevron" />
         </Link>

@@ -12,6 +12,7 @@ import {
   IconSettings,
   IconSearch,
   IconHeart,
+  IconMapPin,
   IconChevronRight,
 } from '../../../components/index.ts';
 
@@ -26,6 +27,14 @@ export function MoreScreen() {
             <IconSettings size={20} />
           </div>
           <span className="th-more-item__label">Settings</span>
+          <IconChevronRight size={18} className="th-more-item__chevron" />
+        </Link>
+
+        <Link to={RoutePath.appPlaces} className="th-more-item">
+          <div className="th-more-item__icon">
+            <IconMapPin size={20} />
+          </div>
+          <span className="th-more-item__label">Our Places</span>
           <IconChevronRight size={18} className="th-more-item__chevron" />
         </Link>
 

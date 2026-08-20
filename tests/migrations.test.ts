@@ -13,7 +13,7 @@ test('migrations apply in order on a fresh database', async () => {
   await runMigrations(db, ALL_MIGRATIONS);
 
   const applied = await db.query<AppliedMigrationRow>('SELECT * FROM schema_migrations ORDER BY id ASC');
-  assert.deepStrictEqual(applied.map((row) => row.id), [1, 2, 3, 4, 5, 6, 7]);
+  assert.deepStrictEqual(applied.map((row) => row.id), [1, 2, 3, 4, 5, 6, 7, 8]);
   assert.deepStrictEqual(applied.map((row) => row.name), [
     'initial-schema',
     'notification-registry',
@@ -22,17 +22,18 @@ test('migrations apply in order on a fresh database', async () => {
     'notes',
     'timeline-events',
     'reminders',
+    'places',
   ]);
   assert.ok(isValidIsoTimestamp(applied[0].applied_at));
 
   const tables = await db.query<{ name: string }>(
     `SELECT name FROM sqlite_master WHERE type = 'table' AND name IN
-      ('media_assets', 'notification_registry', 'profiles', 'couple_relationship', 'important_dates', 'memories', 'memory_media', 'notes', 'timeline_events', 'reminders')
+      ('media_assets', 'notification_registry', 'profiles', 'couple_relationship', 'important_dates', 'memories', 'memory_media', 'notes', 'timeline_events', 'reminders', 'places')
      ORDER BY name`,
   );
   assert.deepStrictEqual(
     tables.map((t) => t.name),
-    ['couple_relationship', 'important_dates', 'media_assets', 'memories', 'memory_media', 'notes', 'notification_registry', 'profiles', 'reminders', 'timeline_events'],
+    ['couple_relationship', 'important_dates', 'media_assets', 'memories', 'memory_media', 'notes', 'notification_registry', 'places', 'profiles', 'reminders', 'timeline_events'],
   );
   await db.close();
 });
@@ -45,10 +46,10 @@ test('migrations are idempotent — running again applies nothing twice', async 
   await runMigrations(db, ALL_MIGRATIONS);
 
   const applied = await db.query<AppliedMigrationRow>('SELECT * FROM schema_migrations');
-  assert.strictEqual(applied.length, 7);
+  assert.strictEqual(applied.length, 8);
   assert.deepStrictEqual(
     applied.map((row) => row.id).sort(),
-    [1, 2, 3, 4, 5, 6, 7],
+    [1, 2, 3, 4, 5, 6, 7, 8],
   );
   await db.close();
 });
@@ -81,7 +82,7 @@ test('existing v2 data survives the migration to schema v3', async () => {
   // The v2→v3 upgrade applies only migration 3 and preserves everything.
   await runMigrations(db, ALL_MIGRATIONS);
   const applied = await db.query<AppliedMigrationRow>('SELECT * FROM schema_migrations ORDER BY id ASC');
-  assert.deepStrictEqual(applied.map((row) => row.id), [1, 2, 3, 4, 5, 6, 7]);
+  assert.deepStrictEqual(applied.map((row) => row.id), [1, 2, 3, 4, 5, 6, 7, 8]);
 
   const rows = await db.query<{ owner_ref: string }>('SELECT owner_ref FROM notification_registry');
   assert.deepStrictEqual(rows.map((r) => r.owner_ref), ['reminder:test']);
