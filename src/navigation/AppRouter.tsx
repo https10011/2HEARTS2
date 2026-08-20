@@ -6,43 +6,34 @@ import {
   Outlet,
 } from 'react-router-dom';
 import { RoutePath, ROUTE_DEFAULTS } from './routes';
+import {
+  WelcomeScreen,
+  ProfileSetupScreen,
+  RelationshipSetupScreen,
+  PersonalizationSetupScreen,
+  AppLockSetupScreen,
+  SetupCompleteScreen,
+} from '../features/onboarding/index.ts';
+import { HomeScreen } from '../features/onboarding/HomeScreen.tsx';
+import { OnboardingGate } from '../features/onboarding/OnboardingGate.tsx';
 
 /**
- * Navigation foundation.
+ * Navigation foundation (Phase 5).
  *
- * Uses React Router with a single router instance. The AppRootProvider
- * (src/core/AppRootProvider) gates the main app shell behind application
- * state (onboarded + unlocked), which is implemented in the state phase.
- * For Phase 1 the router simply demonstrates the working foundation.
+ * Uses React Router with a single router instance. The OnboardingGate
+ * evaluates application state at the root (`/`) and routes to the correct
+ * destination:
+ *   - Brand-new users → onboarding flow
+ *   - Incomplete setup → resume correct stage
+ *   - Completed setup → app home
  *
- * Modal-style flows are supported via nested routes + the Modal primitive;
- * feature phases will add them as needed.
+ * Onboarding sub-routes are NOT gated — they are direct children of
+ * /onboarding/* and the gate only triggers at `/`. This avoids redirect
+ * loops when onboarding screens navigate between each other or to /app.
  */
-
-function FoundationPlaceholder() {
-  return (
-    <main style={{ padding: 'var(--th-space-6)', textAlign: 'center' }}>
-      <p style={{ marginBottom: 'var(--th-space-4)' }}>
-        TwoHearts engineering foundation is running.
-      </p>
-      <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)' }}>
-        Onboarding, main navigation, and feature screens arrive in later phases.
-      </p>
-    </main>
-  );
-}
-
-function OnboardingPlaceholder() {
-  return (
-    <main style={{ padding: 'var(--th-space-6)', textAlign: 'center' }}>
-      <p>Onboarding foundation route (content in Phase 5).</p>
-    </main>
-  );
-}
 
 /** App shell layout — provides the screen container + outlet for nested routes. */
 function AppShell() {
-  // Screen container from primitives gives safe-area + scroll behavior.
   return (
     <div className="th-screen">
       <Outlet />
@@ -52,23 +43,49 @@ function AppShell() {
 
 const router = createBrowserRouter([
   {
+    /**
+     * Root path — the OnboardingGate evaluates app state and redirects.
+     * Once redirected to /onboarding/* or /app/*, sub-routes render
+     * directly without re-entering the gate.
+     */
     path: '/',
-    element: <Navigate to={ROUTE_DEFAULTS.entryForNewUser} replace />,
+    element: (
+      <OnboardingGate>
+        <Outlet />
+      </OnboardingGate>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Navigate to={ROUTE_DEFAULTS.entryForNewUser} replace />,
+      },
+    ],
   },
   {
     path: RoutePath.onboardingRoot,
     children: [
-      { index: true, element: <Navigate to={RoutePath.onboardingWelcome} replace /> },
-      { path: 'welcome', element: <OnboardingPlaceholder /> },
+      {
+        index: true,
+        element: <Navigate to={RoutePath.onboardingWelcome} replace />,
+      },
+      { path: 'welcome', element: <WelcomeScreen /> },
+      { path: 'profile', element: <ProfileSetupScreen /> },
+      { path: 'relationship', element: <RelationshipSetupScreen /> },
+      { path: 'personalization', element: <PersonalizationSetupScreen /> },
+      { path: 'app-lock', element: <AppLockSetupScreen /> },
+      { path: 'complete', element: <SetupCompleteScreen /> },
     ],
   },
   {
     path: RoutePath.appRoot,
     element: <AppShell />,
     children: [
-      { index: true, element: <Navigate to={RoutePath.appHome} replace /> },
-      { path: 'home', element: <FoundationPlaceholder /> },
-      { path: 'foundation', element: <FoundationPlaceholder /> },
+      {
+        index: true,
+        element: <Navigate to={RoutePath.appHome} replace />,
+      },
+      { path: 'home', element: <HomeScreen /> },
+      { path: 'foundation', element: <HomeScreen /> },
     ],
   },
   { path: '*', element: <Navigate to={ROUTE_DEFAULTS.entryForNewUser} replace /> },

@@ -4,9 +4,11 @@ A private, offline-first, local-first couples application for Android, built wit
 **React + TypeScript + Capacitor**. The app runs entirely on-device — no backend,
 no cloud database, no mandatory internet connection (V1 architectural boundary).
 
-This repository contains the **Phase 1 engineering foundation** plus the
-**Phase 2 local-first persistence foundation**. Feature screens (onboarding,
-memories, notes, games, vault, period tracker, etc.) are added in later phases.
+This repository contains the **Phase 1 engineering foundation**, **Phase 2
+local-first persistence foundation**, **Phase 3 core services**, **Phase 4
+relationship & application state foundation**, and **Phase 5 onboarding & app
+entry experience**. Feature screens (memories, notes, games, vault, period
+tracker, etc.) are added in later phases.
 
 ## Technology stack
 
@@ -121,6 +123,11 @@ See **`docs/relationship-state.md`** for the Phase 4 relationship and
 application-state foundation: profiles (owner/partner), the singleton couple
 relationship, important dates with recurrence, first-launch/onboarding state,
 preferences (text size + theme mode), and the setup-completion gate.
+
+See **`docs/onboarding.md`** for the Phase 5 onboarding and app entry experience:
+splash, welcome, profile setup, relationship setup, personalization, optional
+app-lock, setup completion, returning-user behavior, routing architecture, and
+testing status.
 
 ## Authoritative specifications
 

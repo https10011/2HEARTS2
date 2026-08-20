@@ -13,6 +13,63 @@ import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 (globalThis as { __TWOHEARTS_SQL_WASM_URL__?: string }).__TWOHEARTS_SQL_WASM_URL__ = sqlWasmUrl;
 
 /**
+ * Splash screen shown during bootstrap initialization.
+ * Displays the TwoHearts branding while core services start up.
+ */
+function SplashView() {
+  return (
+    <main
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100dvh',
+        background: 'var(--th-color-bg)',
+        gap: 'var(--th-space-4)',
+      }}
+    >
+      <div
+        style={{
+          width: '80px',
+          height: '80px',
+          borderRadius: '50%',
+          background: 'var(--th-color-burgundy)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: 'var(--th-shadow-md)',
+        }}
+      >
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 80 80"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M40 58C40 58 18 44 18 30C18 22 24 16 32 16C36 16 39 18 40 20C41 18 44 16 48 16C56 16 62 22 62 30C62 44 40 58 40 58Z"
+            fill="#FFF8F3"
+            opacity="0.95"
+          />
+        </svg>
+      </div>
+      <h1
+        style={{
+          fontFamily: 'var(--th-font-family-display)',
+          fontSize: 'var(--th-font-size-xl)',
+          color: 'var(--th-color-burgundy)',
+          fontWeight: 'var(--th-font-weight-semibold)',
+        }}
+      >
+        TwoHearts
+      </h1>
+    </main>
+  );
+}
+
+/**
  * Application bootstrap: the Phase 3 initialization pipeline (persistence +
  * migrations + core services) completes BEFORE the React tree is allowed to
  * mount, so feature code can always assume the platform is ready. Failure
@@ -44,7 +101,7 @@ function AppGate() {
   }, [status]);
 
   if (status === 'pending') {
-    return null;
+    return <SplashView />;
   }
 
   if (status === 'failed') {

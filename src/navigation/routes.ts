@@ -16,6 +16,11 @@ export const RoutePath = {
   /** Onboarding group — first-launch setup flow (Phase 5). */
   onboardingRoot: '/onboarding',
   onboardingWelcome: '/onboarding/welcome',
+  onboardingProfile: '/onboarding/profile',
+  onboardingRelationship: '/onboarding/relationship',
+  onboardingPersonalization: '/onboarding/personalization',
+  onboardingAppLock: '/onboarding/app-lock',
+  onboardingComplete: '/onboarding/complete',
 
   /** Main application shell (unlocked). */
   appRoot: '/app',
@@ -26,6 +31,21 @@ export const RoutePath = {
 } as const;
 
 export type RoutePathKey = keyof typeof RoutePath;
+
+/**
+ * Onboarding step order for progression and step-indicator rendering.
+ * Index 0 = Welcome (first screen after splash).
+ */
+export const ONBOARDING_STEPS = [
+  RoutePath.onboardingWelcome,
+  RoutePath.onboardingProfile,
+  RoutePath.onboardingRelationship,
+  RoutePath.onboardingPersonalization,
+  RoutePath.onboardingAppLock,
+  RoutePath.onboardingComplete,
+] as const;
+
+export type OnboardingStepIndex = number;
 
 export const ROUTE_DEFAULTS = {
   /** Where a fresh, un-onboarded user lands. */
