@@ -153,8 +153,8 @@ describe('Game engine', () => {
 // ---------------------------------------------------------------------------
 
 describe('Game content', () => {
-  it('has all 6 game definitions', () => {
-    assert.equal(ALL_GAME_DEFINITIONS.length, 6);
+  it('has all 10 game definitions (6 couple + 4 casual)', () => {
+    assert.equal(ALL_GAME_DEFINITIONS.length, 10);
   });
 
   it('getGameDefinition returns known games', () => {
@@ -164,21 +164,30 @@ describe('Game content', () => {
     assert.ok(getGameDefinition('couple-trivia'));
     assert.ok(getGameDefinition('this-or-that'));
     assert.ok(getGameDefinition('finish-my-sentence'));
+    assert.ok(getGameDefinition('memory-match'));
+    assert.ok(getGameDefinition('word-scramble'));
+    assert.ok(getGameDefinition('casual-trivia'));
+    assert.ok(getGameDefinition('riddle-room'));
   });
 
   it('returns undefined for unknown game type', () => {
     assert.equal(getGameDefinition('unknown-game' as GameType), undefined);
   });
 
-  it('each game has questions', () => {
+  it('each game has questions or is board-based', () => {
     for (const def of ALL_GAME_DEFINITIONS) {
+      // memory-match is board-based with no question bank
+      if (def.type === 'memory-match') {
+        assert.equal(def.questions.length, 0, 'memory-match should have no questions (board-based)');
+        continue;
+      }
       assert.ok(def.questions.length > 0, `${def.type} has no questions`);
       assert.ok(def.questionsPerRound > 0, `${def.type} has 0 questionsPerRound`);
     }
   });
 
   it('choice games have options', () => {
-    const choiceGames: GameType[] = ['would-you-rather', 'this-or-that'];
+    const choiceGames: GameType[] = ['would-you-rather', 'this-or-that', 'casual-trivia'];
     for (const type of choiceGames) {
       const def = getGameDefinition(type)!;
       for (const q of def.questions) {

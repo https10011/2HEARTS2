@@ -11,7 +11,15 @@ export type GameType =
   | 'would-you-rather'
   | 'couple-trivia'
   | 'this-or-that'
-  | 'finish-my-sentence';
+  | 'finish-my-sentence'
+  // Phase 12 casual games
+  | 'memory-match'
+  | 'word-scramble'
+  | 'casual-trivia'
+  | 'riddle-room';
+
+/** Category grouping for Games Hub display. */
+export type GameCategory = 'couple' | 'casual';
 
 export type PlayerRole = 'player1' | 'player2';
 
@@ -75,6 +83,45 @@ export interface GameSession {
   createdAt: string;
   /** ISO timestamp of last update. */
   updatedAt: string;
+  /** Memory Match board state — only present for memory-match games. */
+  board?: MemoryBoard;
+  /** Word Scramble state — only present for word-scramble games. */
+  scrambleState?: ScrambleState;
+  /** Casual game score (single-player casual games). */
+  casualScore?: number;
+  /** Casual game total moves/attempts. */
+  casualMoves?: number;
+}
+
+export interface MemoryCard {
+  id: string;
+  pairId: string;
+  symbol: string;
+  revealed: boolean;
+  matched: boolean;
+}
+
+export interface MemoryBoard {
+  cards: MemoryCard[];
+  /** Index of first flipped unmatched card (waiting for second flip). */
+  firstFlippedIndex: number | null;
+  /** Number of matched pairs found. */
+  matchedPairs: number;
+  /** Total pairs to find. */
+  totalPairs: number;
+  /** Number of moves (each pair of flips = 1 move). */
+  moves: number;
+}
+
+export interface ScrambleState {
+  /** The current word index in the round. */
+  currentWordIndex: number;
+  /** Total words in the round. */
+  totalWords: number;
+  /** Correct answers so far. */
+  correct: number;
+  /** Whether the current guess is correct (set after validation). */
+  lastGuessCorrect: boolean | null;
 }
 
 export interface GameResult {
@@ -92,6 +139,21 @@ export interface GameResult {
   /** Whether the answers matched overall. */
   overallMatch: boolean;
   /** Fun result message based on score. */
+  message: string;
+  /** Casual game results (memory match, word scramble, etc.) */
+  casualResult?: CasualGameResult;
+}
+
+export interface CasualGameResult {
+  /** Score or pairs found. */
+  score: number;
+  /** Total moves/attempts. */
+  moves: number;
+  /** Time in seconds if tracked. */
+  timeSeconds?: number;
+  /** Accuracy percentage for trivia/riddles. */
+  accuracy?: number;
+  /** Result message. */
   message: string;
 }
 

@@ -25,7 +25,7 @@ import { ImportantDatesScreen } from '../features/app-shell/screens/ImportantDat
 import { PlaceholderScreen } from '../features/app-shell/screens/PlaceholderScreen.tsx';
 import { MemoriesHome, AddMemory, MemoryDetail } from '../features/memories/index.ts';
 import { TimelineHome, AddEvent, EventDetail } from '../features/timeline/index.ts';
-import { GamePlayScreen, GameResultsScreen } from '../features/games/index.ts';
+import { GamePlayScreen, GameResultsScreen, MemoryMatchScreen, WordScrambleScreen, CasualGamePlayScreen } from '../features/games/index.ts';
 
 /**
  * Navigation architecture (Phase 6).
@@ -120,8 +120,16 @@ const router = createBrowserRouter([
         element: <ImportantDatesScreen />,
       },
 
-      // Games (Phase 11)
+      // Games (Phase 11 + Phase 12)
       { path: 'games', element: <GamesHubScreen /> },
+      { path: 'games/memory-match', element: <MemoryMatchScreen /> },
+      { path: 'games/memory-match/results', element: <GameResultsScreen /> },
+      { path: 'games/word-scramble', element: <WordScrambleScreen /> },
+      { path: 'games/word-scramble/results', element: <GameResultsScreen /> },
+      { path: 'games/casual-trivia', element: <CasualGamePlayScreen /> },
+      { path: 'games/casual-trivia/results', element: <GameResultsScreen /> },
+      { path: 'games/riddle-room', element: <CasualGamePlayScreen /> },
+      { path: 'games/riddle-room/results', element: <GameResultsScreen /> },
       { path: 'games/:gameType', element: <GamePlayScreen /> },
       { path: 'games/:gameType/results', element: <GameResultsScreen /> },
       // Legacy route aliases for direct links

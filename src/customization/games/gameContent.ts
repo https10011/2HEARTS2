@@ -8,7 +8,7 @@
  * scoring type, and presentation metadata.
  */
 
-import type { GameDefinition, GameQuestion, GameType } from '../../data/game/gameTypes.ts';
+import type { GameDefinition, GameCategory, GameQuestion, GameType } from '../../data/game/gameTypes.ts';
 
 // ---------------------------------------------------------------------------
 // Who Knows Who Better — player2 guesses player1's answers
@@ -187,7 +187,110 @@ export const FINISH_MY_SENTENCE: GameDefinition = {
 // All games registry
 // ---------------------------------------------------------------------------
 
-export const ALL_GAME_DEFINITIONS: GameDefinition[] = [
+// ===========================================================================
+// Phase 12 — Fun / Casual games
+// ===========================================================================
+
+// --- Memory Match ---
+// Memory Match is board-based; no question bank. The definition marks the
+// game type so the hub can show it, but the engine uses createMemoryBoard().
+
+export const MEMORY_MATCH: GameDefinition = {
+  type: 'memory-match',
+  title: 'Memory Match',
+  description: 'Find all matching pairs on the board. Test your memory!',
+  questionsPerRound: 8, // Number of pairs
+  turnBased: false,
+  scoringType: 'none',
+  questions: [], // Board-based — engine generates cards
+};
+
+// --- Word Scramble ---
+
+const wordScrambleWords: GameQuestion[] = [
+  { id: 'ws-1', text: 'Unscramble this word:', correctAnswer: 'LOVE', category: 'romance' },
+  { id: 'ws-2', text: 'Unscramble this word:', correctAnswer: 'TOGETHER', category: 'relationship' },
+  { id: 'ws-3', text: 'Unscramble this word:', correctAnswer: 'FOREVER', category: 'romance' },
+  { id: 'ws-4', text: 'Unscramble this word:', correctAnswer: 'HAPPINESS', category: 'feelings' },
+  { id: 'ws-5', text: 'Unscramble this word:', correctAnswer: 'ADVENTURE', category: 'activities' },
+  { id: 'ws-6', text: 'Unscramble this word:', correctAnswer: 'BEAUTIFUL', category: 'compliments' },
+  { id: 'ws-7', text: 'Unscramble this word:', correctAnswer: 'KISSING', category: 'romance' },
+  { id: 'ws-8', text: 'Unscramble this word:', correctAnswer: 'DANCING', category: 'activities' },
+  { id: 'ws-9', text: 'Unscramble this word:', correctAnswer: 'ROMANTIC', category: 'romance' },
+  { id: 'ws-10', text: 'Unscramble this word:', correctAnswer: 'COOKING', category: 'activities' },
+  { id: 'ws-11', text: 'Unscramble this word:', correctAnswer: 'DREAMING', category: 'feelings' },
+  { id: 'ws-12', text: 'Unscramble this word:', correctAnswer: 'SUNSET', category: 'nature' },
+];
+
+export const WORD_SCRAMBLE: GameDefinition = {
+  type: 'word-scramble',
+  title: 'Word Scramble',
+  description: 'Unscramble love-themed words before time runs out!',
+  questionsPerRound: 10,
+  turnBased: false,
+  scoringType: 'match',
+  questions: wordScrambleWords,
+};
+
+// --- Trivia (casual, not couple-specific) ---
+
+const casualTriviaQuestions: GameQuestion[] = [
+  { id: 'ctr-1', text: 'What is the most romantic city in the world?', options: ['Paris', 'London', 'Tokyo', 'New York'], category: 'romance' },
+  { id: 'ctr-2', text: 'How many sides does a heart shape have?', options: ['Two', 'Three', 'Four', 'One'], category: 'love' },
+  { id: 'ctr-3', text: 'Which flower symbolizes love?', options: ['Rose', 'Tulip', 'Daisy', 'Sunflower'], category: 'romance' },
+  { id: 'ctr-4', text: 'What color is traditionally associated with love?', options: ['Red', 'Blue', 'Green', 'Yellow'], category: 'love' },
+  { id: 'ctr-5', text: 'What day is Valentine\'s Day?', options: ['February 14', 'March 14', 'January 14', 'December 14'], category: 'romance' },
+  { id: 'ctr-6', text: 'What does the French word amour mean?', options: ['Love', 'Friend', 'Life', 'Beauty'], category: 'romance' },
+  { id: 'ctr-7', text: 'Which movie is a famous love story?', options: ['The Notebook', 'Toy Story', 'Jaws', 'Batman'], category: 'pop culture' },
+  { id: 'ctr-8', text: 'What is the traditional 25th wedding anniversary gift?', options: ['Silver', 'Gold', 'Diamond', 'Pearl'], category: 'anniversaries' },
+  { id: 'ctr-9', text: 'What does a dozen roses symbolize?', options: ['Love', 'Friendship', 'Sympathy', 'Gratitude'], category: 'romance' },
+  { id: 'ctr-10', text: 'Which gemstone is most associated with love?', options: ['Ruby', 'Emerald', 'Sapphire', 'Topaz'], category: 'romance' },
+  { id: 'ctr-11', text: 'What is the traditional 50th anniversary gift?', options: ['Gold', 'Silver', 'Diamond', 'Platinum'], category: 'anniversaries' },
+  { id: 'ctr-12', text: 'In Greek mythology, who is the god of love?', options: ['Eros', 'Zeus', 'Apollo', 'Ares'], category: 'mythology' },
+];
+
+export const CASUAL_TRIVIA: GameDefinition = {
+  type: 'casual-trivia',
+  title: 'Love Trivia',
+  description: 'Test your knowledge about love, romance, and relationships!',
+  questionsPerRound: 10,
+  turnBased: false,
+  scoringType: 'choice',
+  questions: casualTriviaQuestions,
+};
+
+// --- Riddle Room ---
+
+const riddleRoomQuestions: GameQuestion[] = [
+  { id: 'rr-1', text: 'I have a heart that never beats. What am I?', correctAnswer: 'Artichoke', category: 'riddles' },
+  { id: 'rr-2', text: 'What has keys but no locks, space but no room, and you can enter but can\'t go inside?', correctAnswer: 'Keyboard', category: 'riddles' },
+  { id: 'rr-3', text: 'What comes once in a minute, twice in a moment, but never in a thousand years?', correctAnswer: 'M', category: 'riddles' },
+  { id: 'rr-4', text: 'What has hands but cannot clap?', correctAnswer: 'Clock', category: 'riddles' },
+  { id: 'rr-5', text: 'What can travel around the world while staying in a corner?', correctAnswer: 'Stamp', category: 'riddles' },
+  { id: 'rr-6', text: 'What has a head and a tail but no body?', correctAnswer: 'Coin', category: 'riddles' },
+  { id: 'rr-7', text: 'What gets wetter the more it dries?', correctAnswer: 'Towel', category: 'riddles' },
+  { id: 'rr-8', text: 'I speak without a mouth and hear without ears. What am I?', correctAnswer: 'Echo', category: 'riddles' },
+  { id: 'rr-9', text: 'What has many teeth but cannot bite?', correctAnswer: 'Comb', category: 'riddles' },
+  { id: 'rr-10', text: 'What can you break without touching it?', correctAnswer: 'Silence', category: 'riddles' },
+  { id: 'rr-11', text: 'What begins with T, ends with T, and has T in it?', correctAnswer: 'Teapot', category: 'riddles' },
+  { id: 'rr-12', text: 'What has an eye but cannot see?', correctAnswer: 'Needle', category: 'riddles' },
+];
+
+export const RIDDLE_ROOM: GameDefinition = {
+  type: 'riddle-room',
+  title: 'Riddle Room',
+  description: 'Solve tricky riddles together. How sharp are your minds?',
+  questionsPerRound: 10,
+  turnBased: false,
+  scoringType: 'match',
+  questions: riddleRoomQuestions,
+};
+
+// ---------------------------------------------------------------------------
+// All games registry
+// ---------------------------------------------------------------------------
+
+export const COUPLE_GAME_DEFINITIONS: GameDefinition[] = [
   WHO_KNOWS_WHO_BETTER,
   GUESS_MY_ANSWER,
   WOULD_YOU_RATHER,
@@ -196,8 +299,25 @@ export const ALL_GAME_DEFINITIONS: GameDefinition[] = [
   FINISH_MY_SENTENCE,
 ];
 
+export const CASUAL_GAME_DEFINITIONS: GameDefinition[] = [
+  MEMORY_MATCH,
+  WORD_SCRAMBLE,
+  CASUAL_TRIVIA,
+  RIDDLE_ROOM,
+];
+
+export const ALL_GAME_DEFINITIONS: GameDefinition[] = [
+  ...COUPLE_GAME_DEFINITIONS,
+  ...CASUAL_GAME_DEFINITIONS,
+];
+
 export function getGameDefinition(type: GameType): GameDefinition | undefined {
   return ALL_GAME_DEFINITIONS.find((g) => g.type === type);
+}
+
+/** Returns the category for a game type. */
+export function getGameCategory(type: GameType): GameCategory {
+  return CASUAL_GAME_DEFINITIONS.some((g) => g.type === type) ? 'casual' : 'couple';
 }
 
 

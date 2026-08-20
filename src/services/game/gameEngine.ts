@@ -17,8 +17,11 @@ import type {
   GameRound,
   GameSession,
   GameType,
+  MemoryBoard,
+  MemoryCard,
   PlayerAnswer,
   PlayerRole,
+  ScrambleState,
 } from '../../data/game/gameTypes.ts';
 
 // ---------------------------------------------------------------------------
@@ -261,4 +264,430 @@ function getResultMessage(gameType: GameType, matchCount: number, total: number)
   if (ratio >= 0.5) return "Pretty good understanding of each other! 🌟";
   if (ratio >= 0.3) return "There's always more to learn about each other! 💫";
   return "Time to ask each other more questions! 😄";
+}
+
+// ===========================================================================
+// Memory Match (Phase 12)
+// ===========================================================================
+
+/** Symbols available for Memory Match cards. */
+const MEMORY_MATCH_SYMBOLS = [
+  '🌸', '🌻', '🌊', '🌙', '⭐', '🦋', '🎵', '🌈',
+  '🍓', '🦊', '🐻', '🌊', '🍑', '🍩', '🎄', '🔥',
+  '💎', '🎁', '🍀', '🐱', '🐶', '🌺', '🎈', '🎀',
+];
+
+/** Creates a shuffled Memory Match board. */
+export function createMemoryBoard(pairCount: number, clock: Clock = systemClock): MemoryBoard {
+  const symbols = MEMORY_MATCH_SYMBOLS.slice(0, pairCount);
+  const cards: MemoryCard[] = [];
+
+  for (const symbol of symbols) {
+    const pairId = newId();
+    cards.push({ id: newId(), pairId, symbol, revealed: false, matched: false });
+    cards.push({ id: newId(), pairId, symbol, revealed: false, matched: false });
+  }
+
+  // Fisher-Yates shuffle
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+
+  void clock; // Used for timestamping; board itself is positional
+
+  return {
+    cards,
+    firstFlippedIndex: null,
+    matchedPairs: 0,
+    totalPairs: pairCount,
+    moves: 0,
+  };
+}
+
+/** Creates a Memory Match session. */
+export function createMemoryMatchSession(pairCount: number, clock: Clock = systemClock): GameSession {
+  const now = nowIso(clock);
+  return {
+    id: newId(),
+    gameType: 'memory-match' as GameType,
+    currentRound: 0,
+    rounds: [],
+    player1Score: 0,
+    player2Score: 0,
+    completed: false,
+    createdAt: now,
+    updatedAt: now,
+    board: createMemoryBoard(pairCount, clock),
+    casualScore: 0,
+    casualMoves: 0,
+  };
+}
+
+export interface FlipResult {
+  session: GameSession;
+  card: MemoryCard;
+  matched: boolean;
+  gameOver: boolean;
+}
+
+/** Flips a card by index. Returns updated session and match status. */
+export function flipCard(
+  session: GameSession,
+  cardIndex: number,
+  clock: Clock = systemClock,
+): FlipResult | null {
+  const board = session.board;
+  if (!board || session.completed) return null;
+
+  const card = board.cards[cardIndex];
+  if (!card || card.revealed || card.matched) return null;
+
+  // Reveal the card
+  const newCards = [...board.cards];
+  newCards[cardIndex] = { ...card, revealed: true };
+
+  const newBoard: MemoryBoard = { ...board, cards: newCards };
+  let matched = false;
+
+  if (newBoard.firstFlippedIndex === null) {
+    // First card of the pair
+    newBoard.firstFlippedIndex = cardIndex;
+  } else {
+    // Second card — check match
+    const firstCard = newBoard.cards[newBoard.firstFlippedIndex];
+    newBoard.moves++;
+
+    if (firstCard.pairId === card.pairId) {
+      // Match!
+      matched = true;
+      newBoard.matchedPairs++;
+      newCards[newBoard.firstFlippedIndex] = { ...firstCard, matched: true };
+      newCards[cardIndex] = { ...card, revealed: true, matched: true };
+      newBoard.firstFlippedIndex = null;
+    } else {
+      // No match — flip both back after a delay (handled in UI)
+      newBoard.firstFlippedIndex = null;
+      // Cards stay revealed; UI will flip them back
+    }
+  }
+
+  const gameOver = newBoard.matchedPairs >= newBoard.totalPairs;
+
+  const updated: GameSession = {
+    ...session,
+    board: newBoard,
+    casualScore: newBoard.matchedPairs,
+    casualMoves: newBoard.moves,
+    completed: gameOver,
+    updatedAt: nowIso(clock),
+  };
+
+  return { session: updated, card: newCards[cardIndex], matched, gameOver };
+}
+
+/** Resets non-matching cards (called by UI after a delay). */
+export function resetUnmatchedCards(
+  session: GameSession,
+  cardIndex1: number,
+  cardIndex2: number,
+  clock: Clock = systemClock,
+): GameSession {
+  const board = session.board;
+  if (!board) return session;
+
+  const newCards = [...board.cards];
+  const c1 = newCards[cardIndex1];
+  const c2 = newCards[cardIndex2];
+  if (c1 && !c1.matched) newCards[cardIndex1] = { ...c1, revealed: false };
+  if (c2 && !c2.matched) newCards[cardIndex2] = { ...c2, revealed: false };
+
+  return {
+    ...session,
+    board: { ...board, cards: newCards },
+    updatedAt: nowIso(clock),
+  };
+}
+
+/** Generates Memory Match result. */
+export function completeMemoryMatch(
+  session: GameSession,
+  clock: Clock = systemClock,
+): { session: GameSession; result: GameResult } {
+  const board = session.board;
+  const moves = board?.moves ?? 0;
+  const pairs = board?.totalPairs ?? 0;
+
+  // Score: fewer moves = better
+  const efficiency = pairs > 0 ? Math.round((pairs / Math.max(moves, pairs)) * 100) : 0;
+
+  let message: string;
+  if (efficiency >= 80) message = 'Incredible memory! 🧠✨';
+  else if (efficiency >= 60) message = 'Great job remembering! 🌟';
+  else if (efficiency >= 40) message = 'Not bad at all! 💪';
+  else message = 'Practice makes perfect! 🔄';
+
+  const completed: GameSession = {
+    ...session,
+    completed: true,
+    updatedAt: nowIso(clock),
+  };
+
+  return {
+    session: completed,
+    result: {
+      gameType: 'memory-match' as GameType,
+      totalQuestions: pairs,
+      player1Score: pairs,
+      player2Score: 0,
+      rounds: [],
+      overallMatch: true,
+      message,
+      casualResult: {
+        score: pairs,
+        moves,
+        accuracy: efficiency,
+        message,
+      },
+    },
+  };
+}
+
+// ===========================================================================
+// Word Scramble (Phase 12)
+// ===========================================================================
+
+/** Creates a Word Scramble session. */
+export function createWordScrambleSession(
+  wordCount: number,
+  clock: Clock = systemClock,
+): GameSession {
+  const now = nowIso(clock);
+  return {
+    id: newId(),
+    gameType: 'word-scramble' as GameType,
+    currentRound: 0,
+    rounds: [],
+    player1Score: 0,
+    player2Score: 0,
+    completed: false,
+    createdAt: now,
+    updatedAt: now,
+    scrambleState: {
+      currentWordIndex: 0,
+      totalWords: wordCount,
+      correct: 0,
+      lastGuessCorrect: null,
+    },
+    casualScore: 0,
+    casualMoves: 0,
+  };
+}
+
+/** Scrambles a word using Fisher-Yates. */
+export function scrambleWord(word: string): string {
+  const chars = word.split('');
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  const result = chars.join('');
+  // Ensure it's actually different
+  return result === word ? scrambleWord(word) : result;
+}
+
+export interface ScrambleGuessResult {
+  session: GameSession;
+  correct: boolean;
+  gameOver: boolean;
+  answer: string;
+}
+
+/** Validates a word scramble guess. */
+export function validateScrambleGuess(
+  session: GameSession,
+  guess: string,
+  answer: string,
+  clock: Clock = systemClock,
+): ScrambleGuessResult | null {
+  const state = session.scrambleState;
+  if (!state || session.completed) return null;
+
+  const correct = normalizeAnswer(guess) === normalizeAnswer(answer);
+  const newCorrect = correct ? state.correct + 1 : state.correct;
+  const nextIndex = state.currentWordIndex + 1;
+  const gameOver = nextIndex >= state.totalWords;
+
+  const newState: ScrambleState = {
+    ...state,
+    currentWordIndex: nextIndex,
+    correct: newCorrect,
+    lastGuessCorrect: correct,
+  };
+
+  return {
+    session: {
+      ...session,
+      scrambleState: newState,
+      casualScore: newCorrect,
+      casualMoves: (session.casualMoves ?? 0) + 1,
+      completed: gameOver,
+      updatedAt: nowIso(clock),
+    },
+    correct,
+    gameOver,
+    answer,
+  };
+}
+
+/** Generates Word Scramble result. */
+export function completeWordScramble(
+  session: GameSession,
+  clock: Clock = systemClock,
+): { session: GameSession; result: GameResult } {
+  const state = session.scrambleState;
+  const correct = state?.correct ?? 0;
+  const total = state?.totalWords ?? 0;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+  let message: string;
+  if (accuracy >= 90) message = 'Word wizard! Almost perfect! 📝✨';
+  else if (accuracy >= 70) message = 'Great vocabulary skills! 🌟';
+  else if (accuracy >= 50) message = 'Nice effort! Keep going! 💪';
+  else message = 'Words are tricky! Try again! 🔄';
+
+  return {
+    session: {
+      ...session,
+      completed: true,
+      updatedAt: nowIso(clock),
+    },
+    result: {
+      gameType: 'word-scramble' as GameType,
+      totalQuestions: total,
+      player1Score: correct,
+      player2Score: 0,
+      rounds: [],
+      overallMatch: accuracy >= 50,
+      message,
+      casualResult: {
+        score: correct,
+        moves: state?.totalWords ?? 0,
+        accuracy,
+        message,
+      },
+    },
+  };
+}
+
+// ===========================================================================
+// Casual trivia / riddle helpers (Phase 12)
+// ===========================================================================
+
+export interface CasualGuessResult {
+  session: GameSession;
+  correct: boolean;
+  gameOver: boolean;
+}
+
+/** Records a single-player answer for casual games (trivia, riddle). */
+export function recordCasualAnswer(
+  session: GameSession,
+  definition: GameDefinition,
+  questionIndex: number,
+  answer: string,
+  selectedOption?: number,
+  clock: Clock = systemClock,
+): CasualGuessResult | null {
+  if (session.completed) return null;
+
+  const question = definition.questions[questionIndex];
+  if (!question) return null;
+
+  let correct = false;
+
+  if (definition.scoringType === 'choice' && question.options && selectedOption !== undefined) {
+    // For multiple choice: the correct answer is the first option
+    correct = selectedOption === 0;
+  } else if (definition.scoringType === 'match') {
+    // For text input: compare against correctAnswer
+    const correctAns = question.correctAnswer ?? '';
+    correct = normalizeAnswer(answer) === normalizeAnswer(correctAns);
+  }
+
+  const newScore = (session.casualScore ?? 0) + (correct ? 1 : 0);
+  const nextIndex = questionIndex + 1;
+  const gameOver = nextIndex >= definition.questionsPerRound;
+
+  // Create or update round
+  const round: GameRound = {
+    questionIndex,
+    question,
+    answers: [{
+      questionId: question.id,
+      player: 'player1',
+      answer: answer.trim(),
+      selectedOption,
+      matched: correct,
+    }],
+    complete: true,
+  };
+
+  const newRounds = [...session.rounds.filter((r) => r.questionIndex !== questionIndex), round];
+
+  return {
+    session: {
+      ...session,
+      rounds: newRounds,
+      casualScore: newScore,
+      casualMoves: (session.casualMoves ?? 0) + 1,
+      currentRound: nextIndex,
+      completed: gameOver,
+      updatedAt: nowIso(clock),
+    },
+    correct,
+    gameOver,
+  };
+}
+
+/** Completes a casual single-player game and generates result. */
+export function completeCasualGame(
+  session: GameSession,
+  clock: Clock = systemClock,
+): { session: GameSession; result: GameResult } {
+  const score = session.casualScore ?? 0;
+  const total = session.casualMoves ?? 0;
+  const accuracy = total > 0 ? Math.round((score / total) * 100) : 0;
+
+  const roundResults = session.rounds
+    .filter((r) => r.complete)
+    .map((r) => {
+      const a = r.answers[0];
+      return {
+        question: r.question.text,
+        player1Answer: a?.answer ?? '',
+        player2Answer: r.question.correctAnswer ?? r.question.options?.[0] ?? '',
+        matched: a?.matched ?? false,
+      };
+    });
+
+  let message: string;
+  if (accuracy >= 90) message = 'Outstanding! 🌟';
+  else if (accuracy >= 70) message = 'Well done! 💕';
+  else if (accuracy >= 50) message = 'Good effort! 💪';
+  else message = 'Keep trying! 🔄';
+
+  return {
+    session: { ...session, completed: true, updatedAt: nowIso(clock) },
+    result: {
+      gameType: session.gameType,
+      totalQuestions: total,
+      player1Score: score,
+      player2Score: 0,
+      rounds: roundResults,
+      overallMatch: accuracy >= 50,
+      message,
+      casualResult: { score, moves: total, accuracy, message },
+    },
+  };
 }
