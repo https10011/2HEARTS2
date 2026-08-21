@@ -10,13 +10,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import type { MemoryWithMedia } from '../../services/memory/memoryService.ts';
 import { useMemoryService } from './useMemoryService.ts';
-import { Button, IconButton, IconBack, IconCamera, IconVideo, LoadingState } from '../../components/index.ts';
+import { Button, IconButton, IconBack, IconCamera, IconVideo, LoadingState, useToast } from '../../components/index.ts';
 import { Modal } from '../../components/index.ts';
 
 export function MemoryDetail() {
   const { memoryId } = useParams<{ memoryId: string }>();
   const navigate = useNavigate();
   const memoryService = useMemoryService();
+  const toast = useToast();
   const [memory, setMemory] = useState<MemoryWithMedia | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,11 +48,13 @@ export function MemoryDetail() {
     setDeleting(true);
     try {
       await memoryService.deleteMemory(memoryId);
+      toast.success('Memory deleted');
       navigate(RoutePath.appMemories, { replace: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete memory.';
       setError(message);
       setShowDeleteConfirm(false);
+      toast.error('Could not delete memory');
     } finally {
       setDeleting(false);
     }

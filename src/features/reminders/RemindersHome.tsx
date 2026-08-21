@@ -80,7 +80,7 @@ export function RemindersHome() {
       {/* Empty state */}
       {activeReminders.length === 0 && completedReminders.length === 0 && (
         <div className="th-empty-state" style={{ marginTop: 'var(--th-space-12)' }}>
-          <div style={{ marginBottom: 'var(--th-space-4)', color: 'var(--th-color-rose-muted)' }}>
+          <div className="th-empty-state__icon" style={{ marginBottom: 'var(--th-space-4)', color: 'var(--th-color-rose-muted)' }}>
             <IconBell size={48} />
           </div>
           <h3 style={{ marginBottom: 'var(--th-space-2)' }}>No reminders yet</h3>

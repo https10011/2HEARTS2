@@ -13,6 +13,7 @@ import { getDatabase } from '../../data/database/connection.ts';
 import { PlaceRepository } from '../../repositories/placeRepository.ts';
 import { PlaceService } from '../../services/place/placeService.ts';
 import { AppError } from '../../services/errors/appError.ts';
+import { useToast } from '../../components/index.ts';
 
 
 const CATEGORY_OPTIONS = ['Restaurant', 'Vacation', 'Home', 'Adventure', 'Special', 'Other'] as const;
@@ -30,6 +31,7 @@ export function CreatePlace() {
   const navigate = useNavigate();
   const { placeId } = useParams<{ placeId: string }>();
   const isEditing = Boolean(placeId);
+  const toast = useToast();
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
@@ -91,8 +93,10 @@ export function CreatePlace() {
 
       if (isEditing && placeId) {
         await service.update(placeId, data);
+        toast.success('Place updated');
       } else {
         await service.create(data);
+        toast.success('Place saved');
       }
       navigate(RoutePath.appPlaces);
     } catch (err) {
@@ -101,10 +105,11 @@ export function CreatePlace() {
       } else {
         setError('An unexpected error occurred.');
       }
+      toast.error('Could not save place');
     } finally {
       setSaving(false);
     }
-  }, [name, address, city, state, country, latitude, longitude, notes, category, isEditing, placeId, navigate]);
+  }, [name, address, city, state, country, latitude, longitude, notes, category, isEditing, placeId, navigate, toast]);
 
   if (loadingPlace) {
     return (

@@ -9,7 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { useNoteService } from './useNoteService.ts';
 import type { NoteView } from '../../services/note/noteService.ts';
-import { IconTrash, IconEdit, IconFileText } from '../../components/index.ts';
+import { IconTrash, IconEdit, IconFileText, useToast } from '../../components/index.ts';
 
 import { NOTE_CATEGORY_LABELS as CATEGORY_LABELS, NOTE_CATEGORY_COLORS as CATEGORY_COLORS } from './categoryMeta.ts';
 
@@ -17,6 +17,7 @@ export function NoteDetail() {
   const navigate = useNavigate();
   const { noteId } = useParams<{ noteId: string }>();
   const { getNote, deleteNote } = useNoteService();
+  const toast = useToast();
 
   const [note, setNote] = useState<NoteView | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,13 +51,15 @@ export function NoteDetail() {
     setDeleting(true);
     try {
       await deleteNote(noteId);
+      toast.success('Note deleted');
       navigate(RoutePath.appNotes, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete note.');
       setDeleting(false);
       setShowDeleteConfirm(false);
+      toast.error('Could not delete note');
     }
-  }, [noteId, deleteNote, navigate]);
+  }, [noteId, deleteNote, navigate, toast]);
 
   const formatDate = (iso: string): string => {
     const d = new Date(iso);

@@ -9,6 +9,8 @@ export { EmptyState } from './EmptyState';
 export { LoadingState } from './LoadingState';
 export { Modal } from './Modal';
 export { Switch } from './Switch';
+export { ToastProvider, useToast, TOAST_DURATION_MS } from './toast';
+export type { ToastApi, ToastMessage, ToastVariant } from './toast';
 export { BrandLogo } from './BrandLogo';
 export type { BrandLogoProps, BrandLogoVariant } from './BrandLogo';
 export { RoseLilyDecoration, OnboardingArt } from './decorations';
@@ -23,6 +25,7 @@ export {
   IconBack,
   IconClose,
   IconCheck,
+  IconInfo,
   IconChevronRight,
   IconHome,
   IconSearch,

@@ -32,6 +32,32 @@ Single source of truth for visual decisions. Change once → update everywhere.
   in src/tests resolves to a definition in tokens.css, and no other file defines
   `--th-*` tokens.
 
+## Motion & feedback (Phase 25)
+- One interaction layer in `src/components/primitives.css` ("Motion &
+  feedback (Phase 25)"); features must not ship screen-local transitions or
+  hardcoded durations/easings (guarded by `tests/phase25-motion.test.ts`).
+- Semantic motion pairs already existed (`--th-motion-{fast,standard,
+  emphasized,entrance,exit,press,modal,drift}`); Phase 25 adds
+  `--th-duration-spin` (indeterminate spinner cycle) and these primitives:
+  - `.th-pressable` — generic scale-press feedback for clickable content.
+  - `.th-toast-viewport` + `.th-toast[--success|--error|--info]` — ONE toast
+    host (`ToastProvider`, mounted once in AppShell above the bottom nav);
+    screens publish via `useToast()` from `src/components/toast.tsx`
+    (auto-dismiss `TOAST_DURATION_MS` = 2.4s + tokenized exit fade, so toasts
+    never linger; the host survives the navigation the action triggered).
+  - `th-scale-in` — one calm entrance for empty-state visuals
+    (`.th-empty-state__visual` AND the legacy `.th-empty-state__icon`).
+  - `th-dialog-in` — the modal vocabulary (fade + rise) applied to the
+    shared centered `.th-modal` dialogs (bottom sheets already use
+    `.th-modal-overlay` fade + `th-slide-up`).
+  - `LoadingState` uses the single `.th-spinner` (`th-spin` keyframe exists
+    exactly once) + a visible caption so reduced-motion users still see
+    status (spinner freezes via OS setting or `data-th-motion='reduced'`).
+- Theme flips (light ↔ dark) animate surface `background-color`/`border-color`
+  via one scoped rule in `src/styles/global.css` (no per-property
+  choreography, no JS timing).
+- `IconInfo` added to the centralized Icon set (toast info variant).
+
 ## Text scaling
 - `core/appSettings.ts` (schema v3) → `data-th-text-scale` attribute on root; `TEXT_SIZE_SCALE`
   mapping in `src/theme/tokens.ts`. All `--th-font-size-*` multiply by `var(--th-text-scale)`.

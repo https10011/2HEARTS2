@@ -24,7 +24,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className={cls.emptyState}>
-      {visual ? <div aria-hidden="true">{visual}</div> : null}
+      {visual ? <div className="th-empty-state__visual" aria-hidden="true">{visual}</div> : null}
       <h2 style={{ fontSize: 'var(--th-font-size-lg)', color: 'var(--th-color-text-primary)' }}>
         {title}
       </h2>

@@ -11,7 +11,7 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { getDatabase } from '../../data/database/connection.ts';
 import { PlaceRepository } from '../../repositories/placeRepository.ts';
 import { PlaceService } from '../../services/place/placeService.ts';
-import { IconMapPin } from '../../components/index.ts';
+import { IconMapPin, useToast } from '../../components/index.ts';
 import type { Place } from '../../data/place/placeTypes.ts';
 
 let _placeService: PlaceService | null = null;
@@ -26,6 +26,7 @@ async function getPlaceService(): Promise<PlaceService> {
 export function PlaceDetail() {
   const navigate = useNavigate();
   const { placeId } = useParams<{ placeId: string }>();
+  const toast = useToast();
   const [place, setPlace] = useState<Place | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -51,11 +52,12 @@ export function PlaceDetail() {
     try {
       const service = await getPlaceService();
       await service.delete(placeId);
+      toast.success('Place deleted');
       navigate(RoutePath.appPlaces);
     } catch {
       setShowDeleteConfirm(false);
     }
-  }, [placeId, navigate]);
+  }, [placeId, navigate, toast]);
 
   if (loading) {
     return (

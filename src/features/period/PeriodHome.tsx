@@ -147,7 +147,7 @@ export function PeriodHome() {
                   width: `${Math.min(100, (cycle.currentCycleDay / cycle.cycleLength) * 100)}%`,
                   borderRadius: '4px',
                   background: cycle.inPeriod ? 'var(--th-color-burgundy)' : 'var(--th-color-pink)',
-                  transition: 'width 0.3s ease',
+                  transition: 'width var(--th-motion-standard)',
                 }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--th-space-1)' }}>

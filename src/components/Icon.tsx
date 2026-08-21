@@ -49,6 +49,17 @@ export function IconCheck(props: IconProps) {
   );
 }
 
+/** Info (toast/status badge). */
+export function IconInfo(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 11V16" />
+      <circle cx="12" cy="8" r="0.8" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconChevronRight(props: IconProps) {
   return (
     <svg {...base(props)} aria-hidden="true">

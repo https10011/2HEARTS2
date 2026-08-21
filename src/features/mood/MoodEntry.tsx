@@ -12,6 +12,7 @@ import { getDatabase } from '../../data/database/connection.ts';
 import { MoodRepository } from '../../repositories/moodRepository.ts';
 import { MoodService } from '../../services/mood/moodService.ts';
 import { AppError } from '../../services/errors/appError.ts';
+import { useToast } from '../../components/index.ts';
 import {
   type MoodValue,
   MOOD_EMOJI,
@@ -39,6 +40,7 @@ function todayKey(): string {
 export function MoodEntryScreen() {
   const navigate = useNavigate();
   const { entryId } = useParams<{ entryId: string }>();
+  const toast = useToast();
   const isEditing = Boolean(entryId);
 
   const [selectedMood, setSelectedMood] = useState<MoodValue | null>(null);
@@ -84,6 +86,7 @@ export function MoodEntryScreen() {
           moodValue: selectedMood,
           note: note || null,
         });
+        toast.success('Mood updated');
       } else {
         await service.record({
           moodValue: selectedMood,
@@ -91,6 +94,7 @@ export function MoodEntryScreen() {
           profileId,
           entryDate: today,
         });
+        toast.success('Mood saved');
       }
       navigate(RoutePath.appMood);
     } catch (err) {
@@ -99,6 +103,7 @@ export function MoodEntryScreen() {
       } else {
         setError('An unexpected error occurred.');
       }
+      toast.error('Could not save mood');
     } finally {
       setSaving(false);
     }
@@ -145,7 +150,7 @@ export function MoodEntryScreen() {
                 border: isSelected ? '2px solid var(--th-color-burgundy)' : '2px solid var(--th-color-border)',
                 background: isSelected ? 'var(--th-color-burgundy-light, rgba(106, 27, 43, 0.08))' : 'var(--th-color-surface)',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease',
+                transition: 'all var(--th-motion-fast)',
                 transform: isSelected ? 'scale(1.05)' : 'scale(1)',
               }}
             >

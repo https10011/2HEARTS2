@@ -39,6 +39,29 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/**
+ * Theme transition (Phase 25): light ↔ dark flips animate surface colors
+ * smoothly instead of flashing. Scoped to shell surfaces (never `*` on
+ * interactive elements, whose own transitions already own background-color
+ * via more specific component rules); reduced-motion collapses the duration
+ * to ~1ms via the token system.
+ */
+body,
+#root,
+.th-app-shell,
+.th-app-content,
+.th-screen,
+.th-bottom-nav,
+.th-card,
+.th-feature-card,
+.th-home-card,
+.th-modal-sheet,
+.th-modal {
+  transition:
+    background-color var(--th-duration-normal) var(--th-ease-standard),
+    border-color var(--th-duration-normal) var(--th-ease-standard);
+}
+
 #root {
   display: flex;
   flex-direction: column;

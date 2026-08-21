@@ -21,6 +21,7 @@ import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { router } from '../../navigation/AppRouter.tsx';
 import { RoutePath } from '../../navigation/routes.ts';
 import { BottomNav } from './BottomNav.tsx';
+import { ToastProvider } from '../../components/toast.tsx';
 
 /** History index threshold: idx > 0 means an in-app back target exists. */
 function hasInAppHistory(): boolean {
@@ -64,11 +65,15 @@ export function AppShell() {
 
   return (
     <div className="th-app-shell">
-      <div className="th-app-content" ref={contentRef}>
-        <div className="th-route-transition" key={location.pathname}>
-          <Outlet />
+      {/* One toast host for the whole app (Phase 25) — screens publish via
+          useToast(); the toast survives the navigation it triggered. */}
+      <ToastProvider>
+        <div className="th-app-content" ref={contentRef}>
+          <div className="th-route-transition" key={location.pathname}>
+            <Outlet />
+          </div>
         </div>
-      </div>
+      </ToastProvider>
       <BottomNav />
     </div>
   );

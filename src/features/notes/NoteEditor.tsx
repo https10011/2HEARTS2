@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { useNoteService } from './useNoteService.ts';
+import { useToast } from '../../components/index.ts';
 import type { NoteCategory } from '../../data/note/noteTypes.ts';
 import { NOTE_CATEGORIES } from '../../data/note/noteTypes.ts';
 import { NOTE_CATEGORY_LABELS as CATEGORY_LABELS } from './categoryMeta.ts';
@@ -17,6 +18,7 @@ export function NoteEditor() {
   const navigate = useNavigate();
   const { noteId } = useParams<{ noteId: string }>();
   const { createNote, updateNote, getNote, validateNote } = useNoteService();
+  const toast = useToast();
 
   const isEditing = Boolean(noteId);
 
@@ -61,17 +63,20 @@ export function NoteEditor() {
     try {
       if (isEditing && noteId) {
         await updateNote(noteId, { title: title.trim(), content, category });
+        toast.success('Note updated');
       } else {
         await createNote({ title: title.trim(), content, category });
+        toast.success('Note saved');
       }
       navigate(RoutePath.appNotes, { replace: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save note.';
       setErrors([message]);
+      toast.error('Could not save note');
     } finally {
       setSaving(false);
     }
-  }, [title, content, category, isEditing, noteId, validateNote, createNote, updateNote, navigate]);
+  }, [title, content, category, isEditing, noteId, validateNote, createNote, updateNote, navigate, toast]);
 
   if (loading) {
     return (

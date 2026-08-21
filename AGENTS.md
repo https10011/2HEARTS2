@@ -134,7 +134,19 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   (Settings/Search/About). AppShell: back = navigate(-1) deep, no-op at Home,
   Home-fallback without in-app history; `.th-route-transition` entrance
   (fade+rise, reduceMotion-aware). tests/phase24-home-navigation.test.ts.
-  Phase 25+: NOT STARTED
+- Phase 25 (system-wide motion & micro-interactions) — COMPLETE
+  (docs/design-system.md "Motion & feedback"; tests/phase25-motion.test.ts):
+  ONE interaction layer in primitives.css (`.th-pressable`, toast viewport +
+  variants, `th-scale-in` empty entrance covering `__visual`+legacy `__icon`,
+  `th-dialog-in` centered-modal entrance, reduced-motion spinner freeze);
+  centralized `components/toast.tsx` (ToastProvider mounted ONCE in AppShell,
+  `useToast()`, auto-dismiss 2.4s + tokenized exit; host survives navigation);
+  save/delete/update toasts wired into notes/memories/reminders/places/mood +
+  notification center; `LoadingState` uses the single `.th-spinner` (one
+  `th-spin` keyframe app-wide) + visible caption; `--th-duration-spin` token;
+  theme flips transition surface colors via ONE scoped rule in global.css;
+  inline hardcoded transitions eliminated (MoodEntry, PeriodHome);
+  `IconInfo` added to centralized Icon set. Phase 26+: NOT STARTED
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,

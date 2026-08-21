@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { Screen } from '../../components/Screen.tsx';
 import { Header } from '../../components/Header.tsx';
 import { IconButton } from '../../components/IconButton.tsx';
-import { IconCheck } from '../../components/index.ts';
+import { IconCheck, useToast } from '../../components/index.ts';
 import { EmptyState } from '../../components/EmptyState.tsx';
 import type { NotificationCenterEntry } from '../../data/notification/notificationCenterTypes.ts';
 
@@ -49,6 +49,7 @@ function resolveRoute(entry: NotificationCenterEntry): string | null {
 }
 
 export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
+  const toast = useToast();
   const [entries, setEntries] = useState<NotificationCenterEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -88,12 +89,14 @@ export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
   const handleMarkAllRead = useCallback(async () => {
     if (repo) await repo.markAllAsRead();
     setEntries((prev) => prev.map((e) => ({ ...e, read: true })));
-  }, [repo]);
+    toast.info('All marked as read');
+  }, [repo, toast]);
 
   const handleClearAll = useCallback(async () => {
     if (repo) await repo.clearAll();
     setEntries([]);
-  }, [repo]);
+    toast.success('Notifications cleared');
+  }, [repo, toast]);
 
   return (
     <Screen>

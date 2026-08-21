@@ -129,9 +129,15 @@
 /* ----- Loading state ----- */
 .th-loading-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--th-space-3);
   padding: var(--th-space-12) var(--th-space-6);
+  color: var(--th-color-text-secondary);
+}
+.th-loading-state__label {
+  font-size: var(--th-font-size-sm);
   color: var(--th-color-text-secondary);
 }
 
@@ -1207,7 +1213,7 @@
   border: 3px solid var(--th-color-border);
   border-top-color: var(--th-color-burgundy);
   border-radius: 50%;
-  animation: th-spin 0.6s linear infinite;
+  animation: th-spin var(--th-duration-spin) linear infinite;
 }
 @keyframes th-spin {
   to { transform: rotate(360deg); }
@@ -1767,3 +1773,108 @@ html[data-th-motion='reduced'] .th-decor--animated {
   font-size: var(--th-font-size-sm);
   color: var(--th-color-text-secondary);
 }
+
+/* ========================================================================
+   Motion & feedback (Phase 25) — the ONE interaction layer
+   ======================================================================== */
+
+/* Pressable — shared press feedback for pill elements (interactive cards
+   and list rows keep their semantic :active transforms; use this for
+   generic clickable content). */
+.th-pressable {
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  transition: transform var(--th-motion-press), opacity var(--th-motion-fast);
+}
+.th-pressable:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+/* Toasts — one host lives in AppShell (above the bottom nav); screens
+   publish via the centralized toast hook, never screen-local overlays. */
+.th-toast-viewport {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--th-bottom-nav-height) + var(--th-safe-area-bottom) + var(--th-space-3));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: var(--th-z-modal);
+}
+.th-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  max-width: min(90vw, 420px);
+  padding: var(--th-space-3) var(--th-space-5);
+  border-radius: var(--th-radius-pill);
+  background-color: var(--th-color-surface-elevated);
+  color: var(--th-color-text-primary);
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  box-shadow: var(--th-shadow-lg);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  opacity: 1;
+  animation: th-toast-in var(--th-motion-entrance);
+}
+.th-toast--exiting {
+  animation: th-fade-out var(--th-motion-exit);
+}
+.th-toast--success { border-color: var(--th-color-success); }
+.th-toast--success .th-toast__icon { color: var(--th-color-success); }
+.th-toast--error { border-color: var(--th-color-error); }
+.th-toast--error .th-toast__icon { color: var(--th-color-error); }
+.th-toast--info { border-color: var(--th-color-burgundy); }
+.th-toast--info .th-toast__icon { color: var(--th-color-burgundy); }
+.th-toast__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+@keyframes th-toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes th-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Empty-state visual/icon — one calm entrance (no loops). `__visual` is
+   the shared component's wrapper; `__icon` is the legacy class used by
+   hand-rolled empty states — both get the same calm entrance. */
+.th-empty-state__visual,
+.th-empty-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: th-scale-in var(--th-motion-emphasized);
+}
+@keyframes th-scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Centered dialogs lift a little — the modal vocabulary (overlay fade +
+   sheet rise) applied to the shared card dialog. */
+.th-modal {
+  animation: th-dialog-in var(--th-motion-modal);
+}
+@keyframes th-dialog-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Decorative loops (spinner, decor sway) freeze under reduced motion;
+   token collapse handles transition speed, these selectors handle loop
+   freeze for interactive spinners. */
+@media (prefers-reduced-motion: reduce) {
+  .th-spinner { animation: none; }
+}
+:root[data-th-motion='reduced'] .th-spinner {
+  animation: none;
+}
+

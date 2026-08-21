@@ -68,6 +68,12 @@ keyed on the pathname in `AppShell` (`.th-route-transition`), disabled under
 the official brand art to cream everywhere via one centralized rule
 (`:root[data-th-theme='dark'] .th-brand-logo`).
 
+### Feedback (Phase 25)
+
+`AppShell` also hosts the ONE toast viewport (see `docs/design-system.md`
+"Motion & feedback"): screens call `useToast()` for save/delete/update/error
+acknowledgement; the pill renders above the bottom nav and auto-dismisses.
+
 ---
 
 ## Architecture (Phase 6 original)

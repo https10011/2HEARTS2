@@ -144,6 +144,7 @@
   --th-duration-normal: 220ms;    /* normal transition / modal presentation */
   --th-duration-slow: 360ms;      /* emphasized transition, entrances/exits */
   --th-duration-drift: 6400ms;    /* slow decorative drift (never critical) */
+  --th-duration-spin: 600ms;      /* indeterminate spinner cycle (frozen under reduced motion) */
 
   --th-ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
   --th-ease-decelerate: cubic-bezier(0, 0, 0.2, 1);   /* entrances */

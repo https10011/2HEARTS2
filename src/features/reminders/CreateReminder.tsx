@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconBack, IconBell, IconBellOff } from '../../components/index.ts';
+import { IconBack, IconBell, IconBellOff, useToast } from '../../components/index.ts';
 import type { ReminderRecurrence } from '../../data/reminder/reminderTypes.ts';
 import { REMINDER_RECURRENCES } from '../../data/reminder/reminderTypes.ts';
 import { useReminderService } from './useReminderService.ts';
@@ -30,6 +30,8 @@ export function CreateReminder() {
   const today = new Date();
   const defaultDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const defaultTime = `${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+
+  const toast = useToast();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -86,16 +88,19 @@ export function CreateReminder() {
 
       if (isEditing && reminderId) {
         await service.update(reminderId, data);
+        toast.success('Reminder updated');
       } else {
         await service.create(data);
+        toast.success('Reminder saved');
       }
       navigate(RoutePath.appReminders);
     } catch {
       setErrors(['Failed to save reminder. Please try again.']);
+      toast.error('Could not save reminder');
     } finally {
       setSaving(false);
     }
-  }, [service, title, description, scheduledDate, scheduledTime, recurrence, notificationEnabled, navigate, isEditing, reminderId]);
+  }, [service, title, description, scheduledDate, scheduledTime, recurrence, notificationEnabled, navigate, isEditing, reminderId, toast]);
 
   return (
     <div className="th-content-pad">

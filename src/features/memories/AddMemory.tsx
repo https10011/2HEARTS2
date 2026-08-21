@@ -10,13 +10,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Input } from '../../components/index.ts';
+import { Button, Input, useToast } from '../../components/index.ts';
 import { OnboardingLayout } from '../onboarding/OnboardingLayout.tsx';
 import { useMemoryService } from './useMemoryService.ts';
 
 export function AddMemory() {
   const navigate = useNavigate();
   const memoryService = useMemoryService();
+  const toast = useToast();
 
   const [title, setTitle] = useState('');
   const [caption, setCaption] = useState('');
@@ -50,10 +51,12 @@ export function AddMemory() {
         caption: caption.trim() || null,
         memoryDate: memoryDate || null,
       });
+      toast.success('Memory saved');
       navigate(`${RoutePath.appMemories}/${memory.id}`, { replace: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save memory.';
       setError(message);
+      toast.error('Could not save memory');
     } finally {
       setSaving(false);
     }

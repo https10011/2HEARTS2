@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconBack } from '../../components/index.ts';
+import { IconBack, useToast } from '../../components/index.ts';
 import type { Reminder } from '../../data/reminder/reminderTypes.ts';
 import { formatReminderDateTime } from '../../data/reminder/reminderTypes.ts';
 import { useReminderService } from './useReminderService.ts';
@@ -32,6 +32,7 @@ export function ReminderDetail() {
   const navigate = useNavigate();
   const { reminderId } = useParams<{ reminderId: string }>();
   const service = useReminderService();
+  const toast = useToast();
   const [reminder, setReminder] = useState<Reminder | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -54,13 +55,18 @@ export function ReminderDetail() {
 
   const handleDelete = useCallback(async () => {
     if (!service || !reminderId) return;
+    let deleted = true;
     try {
       await service.delete(reminderId);
     } catch {
       // Already gone or unavailable — either way, leave the detail view.
+      deleted = false;
+    }
+    if (deleted) {
+      toast.success('Reminder deleted');
     }
     navigate(RoutePath.appReminders);
-  }, [service, reminderId, navigate]);
+  }, [service, reminderId, navigate, toast]);
 
   const handleToggleNotification = useCallback(async () => {
     if (!service || !reminder) return;
