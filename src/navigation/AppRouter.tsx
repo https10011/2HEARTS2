@@ -3,9 +3,8 @@ import {
   createBrowserRouter,
   RouterProvider,
   Navigate,
-  Outlet,
 } from 'react-router-dom';
-import { RoutePath, ROUTE_DEFAULTS } from './routes';
+import { RoutePath } from './routes';
 import {
   WelcomeScreen,
   ProfileSetupScreen,
@@ -23,7 +22,6 @@ import { NotesHome, NoteEditor, NoteDetail } from '../features/notes/index.ts';
 import { MoreScreen } from '../features/app-shell/screens/MoreScreen.tsx';
 import { ImportantDatesScreen } from '../features/app-shell/screens/ImportantDatesScreen.tsx';
 import { PlaceholderScreen } from '../features/app-shell/screens/PlaceholderScreen.tsx';
-import { coreServices } from '../services/bootstrap/appBootstrap.ts';
 import { MemoriesHome, AddMemory, MemoryDetail } from '../features/memories/index.ts';
 import { TimelineHome, AddEvent, EventDetail } from '../features/timeline/index.ts';
 import { GamePlayScreen, GameResultsScreen, MemoryMatchScreen, WordScrambleScreen, CasualGamePlayScreen } from '../features/games/index.ts';
@@ -31,7 +29,7 @@ import { RemindersHome, CreateReminder, ReminderDetail } from '../features/remin
 import { PlacesHome, CreatePlace, PlaceDetail } from '../features/places/index.ts';
 import { MoodHome, MoodEntryScreen, MoodHistory } from '../features/mood/index.ts';
 import { PeriodHome, LogPeriod, CycleHistory } from '../features/period/index.ts';
-import { VaultEntry, AddVaultContent, VaultContentViewer } from '../features/vault/index.ts';
+import { VaultEntryRoute, AddVaultContentRoute, VaultContentViewerRoute } from '../features/vault/index.ts';
 import { SearchScreen } from '../features/app-shell/screens/SearchScreen.tsx';
 import { NotificationCenter } from '../features/notifications/NotificationCenter.tsx';
 import {
@@ -66,22 +64,10 @@ import {
 
 const router = createBrowserRouter([
   /**
-   * Root path — OnboardingGate evaluates app state and redirects.
+   * Root path — OnboardingGate evaluates app state and always redirects
+   * (onboarding stage for incomplete setup, /app/home once complete).
    */
-  {
-    path: '/',
-    element: (
-      <OnboardingGate>
-        <Outlet />
-      </OnboardingGate>
-    ),
-    children: [
-      {
-        index: true,
-        element: <Navigate to={ROUTE_DEFAULTS.entryForNewUser} replace />,
-      },
-    ],
-  },
+  { path: '/', element: <OnboardingGate /> },
 
   /**
    * Onboarding — not wrapped in the gate; screens navigate between each other.
@@ -216,19 +202,20 @@ const router = createBrowserRouter([
         element: <AboutScreen />,
       },
 
-      // Vault (Phase 17)
-      { path: 'vault', element: <VaultEntry appLockService={coreServices.appLock!} vaultService={undefined} /> },
-      { path: 'vault/add', element: <AddVaultContent /> },
-      { path: 'vault/:itemId', element: <VaultContentViewer /> },
-      { path: 'vault/:itemId/edit', element: <AddVaultContent /> },
+      // Vault (Phase 17; route wrappers resolve services at render time — Phase 21)
+      { path: 'vault', element: <VaultEntryRoute /> },
+      { path: 'vault/add', element: <AddVaultContentRoute /> },
+      { path: 'vault/:itemId', element: <VaultContentViewerRoute /> },
+      { path: 'vault/:itemId/edit', element: <AddVaultContentRoute /> },
 
       // Legacy foundation route
       { path: 'foundation', element: <HomeScreen /> },
     ],
   },
 
-  // Catch-all
-  { path: '*', element: <Navigate to={ROUTE_DEFAULTS.entryForNewUser} replace /> },
+  // Catch-all — hand unknown paths to the root gate so it can route by
+  // actual onboarding state (completed users must not land in onboarding).
+  { path: '*', element: <Navigate to="/" replace /> },
 ]);
 
 /**

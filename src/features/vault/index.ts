@@ -3,3 +3,5 @@ export { VaultLocked } from './VaultLocked.tsx';
 export { VaultHome } from './VaultHome.tsx';
 export { AddVaultContent } from './AddVaultContent.tsx';
 export { VaultContentViewer } from './VaultContentViewer.tsx';
+export { useVaultService } from './useVaultService.ts';
+export { VaultEntryRoute, AddVaultContentRoute, VaultContentViewerRoute } from './vaultRoutes.tsx';

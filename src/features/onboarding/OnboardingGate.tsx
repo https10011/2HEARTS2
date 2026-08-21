@@ -8,15 +8,18 @@
  *   - Completed setup → home
  *   - App-lock enabled → locked gate (future; respects AppLockService)
  *
- * This component sits ONLY at the root route. Once it redirects to
- * /onboarding/* or /app/*, those routes render directly without
- * re-entering the gate. This prevents redirect loops when onboarding
- * screens navigate between each other.
+ * This component sits ONLY at the root route. Every evaluation ends in a
+ * redirect — to /onboarding/* for incomplete setup or to /app/home for
+ * completed setup — so those routes render directly without re-entering
+ * the gate. This prevents redirect loops when onboarding screens navigate
+ * between each other, and ensures a completed user never lands back in
+ * onboarding (Phase 21 fix: the gate previously rendered an index child
+ * that always redirected to the new-user entry, even after setup).
  *
  * Shows the branded splash view during state evaluation.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { appSettingsStore, type OnboardingStage } from '../../core/appSettings.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
@@ -32,23 +35,21 @@ const STAGE_TO_ROUTE: Record<OnboardingStage, string> = {
   complete: RoutePath.appHome,
 };
 
-interface OnboardingGateProps {
-  children: React.ReactNode;
-}
-
-export function OnboardingGate({ children }: OnboardingGateProps) {
+export function OnboardingGate() {
   const navigate = useNavigate();
-  const [resolved, setResolved] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+    const go = (path: string) => {
+      if (!cancelled) navigate(path, { replace: true });
+    };
 
     const evaluate = async () => {
       const settings = appSettingsStore.getState();
 
-      // Check if setup is complete — no redirect needed, render children
+      // Completed setup — straight into the app.
       if (settings.onboardingStage === 'complete') {
-        if (!cancelled) setResolved(true);
+        go(RoutePath.appHome);
         return;
       }
 
@@ -57,12 +58,7 @@ export function OnboardingGate({ children }: OnboardingGateProps) {
       if (appState) {
         try {
           const stage = await appState.reconcileOnboardingStage();
-          if (cancelled) return;
-          if (stage === 'complete') {
-            setResolved(true);
-          } else {
-            navigate(STAGE_TO_ROUTE[stage], { replace: true });
-          }
+          go(STAGE_TO_ROUTE[stage]);
           return;
         } catch {
           // Stage reconciliation failed; fall through to redirect with persisted value
@@ -71,19 +67,13 @@ export function OnboardingGate({ children }: OnboardingGateProps) {
 
       // Use persisted stage — 'complete' case was already handled above,
       // so stage here is 'fresh' | 'owner' | 'relationship' | 'personalization'.
-      if (!cancelled) {
-        const stage = settings.onboardingStage;
-        navigate(STAGE_TO_ROUTE[stage] ?? RoutePath.onboardingWelcome, { replace: true });
-      }
+      const stage = settings.onboardingStage;
+      go(STAGE_TO_ROUTE[stage] ?? RoutePath.onboardingWelcome);
     };
 
     evaluate();
     return () => { cancelled = true; };
   }, [navigate]); // navigate is stable from react-router
 
-  if (!resolved) {
-    return <SplashScreen />;
-  }
-
-  return <>{children}</>;
+  return <SplashScreen />;
 }

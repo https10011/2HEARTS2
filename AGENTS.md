@@ -99,7 +99,13 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   dates worker via ReminderNotificationDriver)
 - Phase 19: Settings & App Management — COMPLETE (docs/settings.md; settings
   schema v3; DataManagementService; AppLockGate)
-- Phase 20+: NOT STARTED
+- Phase 20: Visual fidelity & 77-screen implementation — COMPLETE (3014dbe)
+- Phase 21: Integration, QA & hardening — COMPLETE
+  (tests/phase21-integration.test.ts; fixed vault route service wiring —
+  router captured coreServices.appLock at module scope before bootstrap and
+  never injected VaultService — and OnboardingGate/catch-all sending
+  completed users back into onboarding)
+- Phase 22+: NOT STARTED
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,
