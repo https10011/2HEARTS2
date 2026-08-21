@@ -9,7 +9,11 @@ Single source of truth for visual decisions. Change once → update everywhere.
   sources change).
 - Only consumers:
   - `src/components/BrandLogo.tsx` — the ONE brand component (`brand` full lockup,
-    `mark` hearts-only). Used on splash, onboarding, app lock, about, headers.
+    `mark` hearts-only). Used on splash, onboarding, app lock, about, headers,
+    and the bottom-nav center hub button (Phase 24).
+  - `BrandLogo` accepts `tone="light"` to recolor the SAME official asset to
+    cream for dark brand surfaces; in the dark theme every `th-brand-logo`
+    recolors automatically via one rule in `primitives.css`.
   - `src/components/decorations.tsx` — `ROSE_LILY_DECORATIONS` map +
     `RoseLilyDecoration(id, preset)`, `OnboardingArtVariant`. No feature may import
     the SVG assets directly (guarded by `tests/designTokens.test.ts`).

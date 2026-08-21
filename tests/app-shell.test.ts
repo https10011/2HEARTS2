@@ -111,11 +111,11 @@ describe('Phase 6 route structure', () => {
 // ---------------------------------------------------------------------------
 
 describe('Navigation architecture', () => {
-  it('has 5 main navigation tabs', () => {
+  it('has 5 main navigation tabs (Phase 24: Home · Notifications · Us · Notes · More)', () => {
     const tabs = [
       RoutePath.appHome,
+      RoutePath.appNotifications,
       RoutePath.appUs,
-      RoutePath.appGames,
       RoutePath.appNotes,
       RoutePath.appMore,
     ];
@@ -125,8 +125,8 @@ describe('Navigation architecture', () => {
   it('each main tab has a unique path', () => {
     const tabs = [
       RoutePath.appHome,
+      RoutePath.appNotifications,
       RoutePath.appUs,
-      RoutePath.appGames,
       RoutePath.appNotes,
       RoutePath.appMore,
     ];

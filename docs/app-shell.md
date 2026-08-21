@@ -1,10 +1,77 @@
-# TwoHearts — Main App Shell & Navigation (Phase 6)
+# TwoHearts — Main App Shell & Navigation (Phase 6, redesigned Phase 24)
 
 Phase 6 implements the main application structure: the shell layout, bottom
 navigation, home dashboard, hub screens, and navigation architecture that
 future feature phases plug into.
 
-## Architecture
+**Phase 24 (Home & Global Navigation Experience) redesigned the presentation
+of this shell** — new five-position bottom navigation with an elevated
+central TwoHearts hub button, a relationship-first Home, and token-driven
+route transitions — while keeping the Phase 6 route map and all feature
+screens intact. The Phase 24 structure:
+
+### Bottom navigation (Phase 24)
+
+Five positions, from `navConfig.ts` (`BOTTOM_NAV_ITEMS` — the single source
+of navigation vocabulary, bridged to the Icon set via `navIcons.tsx`):
+
+| Position | Destination | Route | Notes |
+|---|---|---|---|
+| 1 | Home | `/app/home` | Everyday actions |
+| 2 | Notifications | `/app/notifications` | Notification center |
+| 3 | **Us (center)** | `/app/us` | Elevated circular brand button — the relationship itself |
+| 4 | Notes | `/app/notes` | Notes & lists |
+| 5 | More | `/app/more` | Settings, search, about |
+
+The center button carries the official brand mark through `BrandLogo`
+(`tone="light"` cream recolor on the burgundy ring — the same official
+asset, never a substitute). Active states: burgundy icon/label + indicator
+dot for side items; blush halo + scale for the center hub. Press feedback:
+subtle scale on the icon wrap / ring. All values come from Phase 23 tokens.
+
+### Home (Phase 24)
+
+Home is the couple's personal space, not a dashboard of every feature:
+- **Relationship header**: owner avatar (left) — hairline — official brand
+  lockup (center) — partner avatar (right), with a subtle Rose/Lily corner
+  decoration from the centralized decoration system. Avatars are tappable
+  (owner → profile settings, partner → relationship settings), photos load
+  via `MediaStorage`, missing photos fall back to the `IconSmile` icon.
+- **Primary actions** (from `navConfig.HOME_PRIMARY_ITEMS`): Notes,
+  Reminders, Us, Games — a calm 2×2 grid with press feedback.
+- Relationship-specific features are intentionally NOT duplicated here;
+  they live in the central hub.
+
+### Us — the couple hub (Phase 24)
+
+`UsScreen` is the conceptual center of the app ("This is us"):
+- Relationship counter card (days together + next anniversary, from
+  `RelationshipService` domain truth; burgundy gradient with cream text).
+- `COUPLE_HUB_GROUPS`: **Our Story** (Memories, Timeline, Important Dates)
+  and **Our World** (Places, Mood, Period Tracker, Private Vault).
+- Footer links to profile/relationship settings.
+
+### Back behavior (Phase 24)
+
+`AppShell` owns the Android back button via the lifecycle bus:
+- Deep/nested screen → `navigate(-1)` (returns to the previous context:
+  Home → Us → Memories → back → Us).
+- Home root → no-op (never accidentally exits).
+- Degenerate cold start at a non-home route (no in-app history) → falls
+  forward to Home instead of exiting.
+
+### Motion (Phase 24)
+
+Route changes get a subtle token-driven entrance (fade + 8px rise, 200ms)
+keyed on the pathname in `AppShell` (`.th-route-transition`), disabled under
+`reduceMotion`. Scroll resets to top on each navigation. Dark theme recolors
+the official brand art to cream everywhere via one centralized rule
+(`:root[data-th-theme='dark'] .th-brand-logo`).
+
+---
+
+## Architecture (Phase 6 original)
+
 
 ### Navigation hierarchy
 

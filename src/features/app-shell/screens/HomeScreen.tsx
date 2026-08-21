@@ -1,19 +1,54 @@
 /**
- * HomeScreen (Phase 6).
+ * HomeScreen (Phase 6, redesigned Phase 24).
  *
- * Main dashboard shown after onboarding completes. Displays a greeting,
- * relationship summary card, and quick-access feature cards.
+ * Home is the couple's personal space — not a dashboard of every feature.
+ *
+ * Relationship header: the owner's avatar on the left, the official
+ * TwoHearts branding in the center, the partner's avatar on the right — the
+ * two people visually connected around the brand. Avatars are rendered from
+ * the existing profile domain (initial-based; tasteful IconSmile fallback
+ * when a profile is missing) and stay live as profiles change.
+ *
+ * Primary content is the curated everyday set (navConfig.HOME_PRIMARY_ITEMS):
+ * Notes · Reminders · Us · Games. Relationship archives (memories, timeline,
+ * places, mood, period, vault) live in the central TwoHearts hub instead.
  */
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { coreServices } from '../../../services/bootstrap/appBootstrap.ts';
 import type { RelationshipService, RelationshipSummary } from '../../../services/relationship/relationshipService.ts';
+import type { Profile } from '../../../data/relationship/relationshipTypes.ts';
 import { RoutePath } from '../../../navigation/routes.ts';
-import { IconHeart, IconGamepad, IconFileText, IconChevronRight, IconCalendar, LoadingState } from '../../../components/index.ts';
+import { BrandLogo, IconSmile, LoadingState, RoseLilyDecoration } from '../../../components/index.ts';
+import { HOME_PRIMARY_ITEMS } from '../navConfig.ts';
+import { NavIcon } from '../navIcons.tsx';
+
+interface AvatarChipProps {
+  profile: Profile | null;
+  fallbackName: string;
+  to: string;
+  label: string;
+}
+
+/** Relationship avatar: first letter of the name, or a soft face fallback. */
+function AvatarChip({ profile, fallbackName, to, label }: AvatarChipProps) {
+  const name = profile?.displayName?.trim() || fallbackName;
+  return (
+    <Link to={to} className="th-home-avatar" aria-label={label}>
+      <span className="th-home-avatar__circle">
+        {profile ? (
+          <span className="th-home-avatar__initial">{name.charAt(0).toUpperCase()}</span>
+        ) : (
+          <IconSmile size={26} />
+        )}
+      </span>
+      <span className="th-home-avatar__name">{name}</span>
+    </Link>
+  );
+}
 
 export function HomeScreen() {
-  const [greeting, setGreeting] = useState<string | null>(null);
   const [summary, setSummary] = useState<RelationshipSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,24 +58,14 @@ export function HomeScreen() {
     const loadDashboard = async () => {
       const svc = coreServices.relationship as RelationshipService | undefined;
       if (!svc) {
-        if (!cancelled) {
-          setGreeting('Welcome to TwoHearts');
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
         return;
       }
-
       try {
         const s = await svc.getSummary();
-        if (cancelled) return;
-        setSummary(s);
-        if (s.owner) {
-          setGreeting(`Hi, ${s.owner.displayName}!`);
-        } else {
-          setGreeting('Welcome to TwoHearts');
-        }
+        if (!cancelled) setSummary(s);
       } catch {
-        if (!cancelled) setGreeting('Welcome to TwoHearts');
+        // Graceful degradation — Home still renders with avatar fallbacks.
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -61,89 +86,53 @@ export function HomeScreen() {
     if (age.months > 0) ageParts.push(`${age.months} ${age.months === 1 ? 'month' : 'months'}`);
     if (ageParts.length === 0 || age.days > 0) ageParts.push(`${age.days} ${age.days === 1 ? 'day' : 'days'}`);
   }
+  const anniversaryNote =
+    summary?.daysUntilNextAnniversary === 0
+      ? 'Today is your anniversary!'
+      : summary?.daysUntilNextAnniversary !== null && summary?.daysUntilNextAnniversary !== undefined && summary.daysUntilNextAnniversary > 0
+        ? `Anniversary in ${summary.daysUntilNextAnniversary} ${summary.daysUntilNextAnniversary === 1 ? 'day' : 'days'}`
+        : null;
 
   return (
-    <div className="th-content-pad">
-      {/* Greeting */}
-      <div className="th-home-greeting">
-        <h1 className="th-home-greeting__name">{greeting}</h1>
-        <p className="th-home-greeting__subtitle">Your private couple space</p>
-      </div>
+    <div className="th-home">
+      {/* Subtle corner floral — one variation, kept quiet (Phase 23 decor) */}
+      <RoseLilyDecoration variant={2} size={118} position="top-right" opacity={0.35} />
 
-      {/* Relationship summary card */}
-      {age && (
-        <div className="th-relationship-card" style={{ marginBottom: 'var(--th-space-6)' }}>
-          <div className="th-relationship-card__title">
-            {ageParts.join(', ')} together
-          </div>
-          <div className="th-relationship-card__subtitle">
-            {summary?.nextAnniversary && summary.daysUntilNextAnniversary !== null && summary.daysUntilNextAnniversary > 0
-              ? `Next anniversary in ${summary.daysUntilNextAnniversary} ${summary.daysUntilNextAnniversary === 1 ? 'day' : 'days'}`
-              : summary?.daysUntilNextAnniversary === 0
-                ? 'Today is your anniversary!'
-                : 'Your journey continues every day'
-            }
-          </div>
+      {/* Relationship header: the two people around the official branding */}
+      <header className="th-home-header">
+        <AvatarChip
+          profile={summary?.owner ?? null}
+          fallbackName="You"
+          to={RoutePath.appMoreSettingsProfile}
+          label="Your profile"
+        />
+        <div className="th-home-header__brand">
+          <BrandLogo variant="brand" size={92} title="TwoHearts" />
+          <p className="th-home-header__line" aria-live="polite">
+            {ageParts.length > 0
+              ? `${ageParts.join(', ')} together${anniversaryNote ? ` · ${anniversaryNote}` : ''}`
+              : 'Your private couple space'}
+          </p>
         </div>
-      )}
+        <AvatarChip
+          profile={summary?.partner ?? null}
+          fallbackName="Partner"
+          to={RoutePath.appMoreSettingsRelationship}
+          label="Partner profile"
+        />
+      </header>
 
-      {/* Upcoming important dates */}
-      {summary && summary.upcomingDates.length > 0 && (
-        <div className="th-home-section" style={{ marginBottom: 'var(--th-space-6)' }}>
-          <h2 className="th-screen-subtitle" style={{ marginBottom: 'var(--th-space-3)' }}>Upcoming dates</h2>
-          <div className="th-hub-grid">
-            {summary.upcomingDates.slice(0, 3).map((d) => (
-              <div key={d.date + d.title} className="th-feature-card" style={{ cursor: 'default' }}>
-                <div className="th-feature-card__icon">
-                  <IconCalendar size={20} />
-                </div>
-                <div className="th-feature-card__body">
-                  <div className="th-feature-card__title">{d.title}</div>
-                  <div className="th-feature-card__desc">
-                    {d.daysUntil === 0 ? 'Today!' : `In ${d.daysUntil} ${d.daysUntil === 1 ? 'day' : 'days'}`}
-                    {d.recurrence === 'yearly' ? ' · yearly' : ''}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Quick-access feature cards */}
-      <div className="th-hub-grid">
-        <Link to={RoutePath.appUs} className="th-feature-card">
-          <div className="th-feature-card__icon">
-            <IconHeart size={22} />
-          </div>
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">Us</div>
-            <div className="th-feature-card__desc">Your relationship hub</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
-
-        <Link to={RoutePath.appGames} className="th-feature-card">
-          <div className="th-feature-card__icon">
-            <IconGamepad size={22} />
-          </div>
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">Games</div>
-            <div className="th-feature-card__desc">Play together</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
-
-        <Link to={RoutePath.appNotes} className="th-feature-card">
-          <div className="th-feature-card__icon">
-            <IconFileText size={22} />
-          </div>
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">Notes</div>
-            <div className="th-feature-card__desc">Private notes &amp; thoughts</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
+      {/* Everyday actions — curated, calm, exactly four */}
+      <div className="th-home-grid">
+        {HOME_PRIMARY_ITEMS.map((item) => (
+          <Link key={item.id} to={item.route} className="th-home-card">
+            <span className="th-home-card__icon">
+              <NavIcon icon={item.icon} size={24} />
+            </span>
+            <span className="th-home-card__title">{item.label}</span>
+            <span className="th-home-card__caption">{item.caption}</span>
+          </Link>
+        ))}
       </div>
     </div>
   );

@@ -2,7 +2,10 @@
 
 Authoritative mapping between the 77 approved PNG references in
 `TwoHeart UI Reference Screens/` and the implemented V1 screens/routes.
-Updated at Phase 22 (final build & release).
+Updated at Phase 22 (final build & release); Phase 24 (Home & Global
+Navigation Experience) redesigned the Home/Us/More presentation and the
+bottom navigation (Home · Notifications · Us center · Notes · More) without
+changing the route map below — see `docs/app-shell.md`.
 
 Status legend:
 - **Implemented** — a real screen wired to the local persistence layer.

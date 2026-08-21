@@ -121,7 +121,20 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   +IconCheck, +IconMapPin, +IconCamera, +IconVideo, +IconLock, +IconFile,
   +IconFileText exported from `components/index.ts`); documents:
   `docs/design-system.md`. Feature vocab emojis (mood picker, memory-match
-  tiles) remain as content. Phase 24+: NOT STARTED
+  tiles) remain as content. Phase 24 (Home & Global Navigation Experience) —
+  COMPLETE (docs/app-shell.md): five-position bottom nav
+  (Home · Notifications · Us CENTER · Notes · More) from ONE nav vocabulary
+  (`features/app-shell/navConfig.ts` + `navIcons.tsx` bridge to the Icon set);
+  center = elevated burgundy brand button (BrandLogo `tone="light"` → cream
+  recolor via `.th-brand-logo--light`; dark theme auto-recolors all brand art
+  via one rule). HomeScreen = relationship header (owner/partner avatars,
+  official brand lockup, RoseLilyDecoration corner) + 4 primary actions
+  (Notes/Reminders/Us/Games) — no relationship-feature duplication; UsScreen
+  = couple hub (Our Story / Our World groups); MoreScreen = utilities only
+  (Settings/Search/About). AppShell: back = navigate(-1) deep, no-op at Home,
+  Home-fallback without in-app history; `.th-route-transition` entrance
+  (fade+rise, reduceMotion-aware). tests/phase24-home-navigation.test.ts.
+  Phase 25+: NOT STARTED
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,

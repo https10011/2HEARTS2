@@ -1,8 +1,10 @@
 /**
- * UsScreen (Phase 6).
+ * UsScreen (Phase 6, redesigned Phase 24) — the central TwoHearts couple hub.
  *
- * Relationship hub showing partner profiles, anniversary countdown,
- * and future feature entry points (memories, timeline, etc.).
+ * Everything primarily about the couple lives here ("Our World"):
+ * the relationship counter, anniversary/important dates, profiles, and the
+ * relationship-specific features — memories, timeline, places, mood, period
+ * tracker, and the private vault (navConfig.COUPLE_HUB_GROUPS).
  */
 
 import { useEffect, useState } from 'react';
@@ -10,8 +12,9 @@ import { Link } from 'react-router-dom';
 import { coreServices } from '../../../services/bootstrap/appBootstrap.ts';
 import type { RelationshipService, RelationshipSummary } from '../../../services/relationship/relationshipService.ts';
 import type { Profile } from '../../../data/relationship/relationshipTypes.ts';
-import { RoutePath } from '../../../navigation/routes.ts';
-import { IconChevronRight, IconHeart, IconSmile, IconCalendar, IconMapPin, LoadingState } from '../../../components/index.ts';
+import { IconChevronRight, IconCalendar, LoadingState } from '../../../components/index.ts';
+import { COUPLE_HUB_GROUPS } from '../navConfig.ts';
+import { NavIcon } from '../navIcons.tsx';
 
 function formatBirthDate(dateStr: string | null): string {
   if (!dateStr) return '';
@@ -80,9 +83,12 @@ export function UsScreen() {
 
   return (
     <div className="th-content-pad">
-      <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-6)' }}>Us</h1>
+      <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-1)' }}>Us</h1>
+      <p className="th-screen-subtitle" style={{ marginBottom: 'var(--th-space-6)' }}>
+        Your relationship world
+      </p>
 
-      {/* Relationship card */}
+      {/* Relationship counter */}
       {summary && (
         <div className="th-relationship-card" style={{ marginBottom: 'var(--th-space-6)' }}>
           {summary.owner && summary.partner ? (
@@ -115,10 +121,31 @@ export function UsScreen() {
         </div>
       )}
 
+      {/* Relationship features — grouped: Our story / Our world */}
+      {COUPLE_HUB_GROUPS.map((group) => (
+        <section key={group.id} style={{ marginBottom: 'var(--th-space-6)' }}>
+          <h2 className="th-hub-section-title">{group.title}</h2>
+          <div className="th-hub-grid">
+            {group.items.map((item) => (
+              <Link key={item.id} to={item.route} className="th-feature-card">
+                <div className="th-feature-card__icon">
+                  <NavIcon icon={item.icon} size={20} />
+                </div>
+                <div className="th-feature-card__body">
+                  <div className="th-feature-card__title">{item.label}</div>
+                  <div className="th-feature-card__desc">{item.caption}</div>
+                </div>
+                <IconChevronRight size={18} className="th-feature-card__chevron" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      ))}
+
       {/* Partner profiles */}
       {summary && (summary.owner || summary.partner) && (
         <div className="th-us-profiles" style={{ marginBottom: 'var(--th-space-6)' }}>
-          <h2 className="th-screen-subtitle" style={{ marginBottom: 'var(--th-space-3)' }}>Profiles</h2>
+          <h2 className="th-hub-section-title">Profiles</h2>
           <div className="th-us-profiles-grid">
             {summary.owner && <ProfileCard profile={summary.owner} />}
             {summary.partner && <ProfileCard profile={summary.partner} />}
@@ -129,9 +156,9 @@ export function UsScreen() {
       {/* Upcoming important dates */}
       {summary && summary.upcomingDates.length > 0 && (
         <div className="th-us-dates" style={{ marginBottom: 'var(--th-space-6)' }}>
-          <h2 className="th-screen-subtitle" style={{ marginBottom: 'var(--th-space-3)' }}>Important dates</h2>
+          <h2 className="th-hub-section-title">Coming up</h2>
           <div className="th-hub-grid">
-            {summary.upcomingDates.slice(0, 4).map((d) => (
+            {summary.upcomingDates.slice(0, 3).map((d) => (
               <div key={d.date + d.title} className="th-feature-card" style={{ cursor: 'default' }}>
                 <div className="th-feature-card__icon">
                   <IconCalendar size={20} />
@@ -148,75 +175,6 @@ export function UsScreen() {
           </div>
         </div>
       )}
-
-      {/* Feature links */}
-      <div className="th-hub-grid">
-        <Link to={RoutePath.appUsMemories} className="th-feature-card">
-          <div className="th-feature-card__icon">
-            <IconHeart size={20} />
-          </div>
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">Memories</div>
-            <div className="th-feature-card__desc">Photos &amp; moments together</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
-
-        <Link to={RoutePath.appUsTimeline} className="th-feature-card">
-          <div className="th-feature-card__icon">
-            <IconCalendar size={20} />
-          </div>
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">Timeline</div>
-            <div className="th-feature-card__desc">Your story over time</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
-
-        <Link to={RoutePath.appUsReminders} className="th-feature-card">
-          <div className="th-feature-card__icon">
-            <IconCalendar size={20} />
-          </div>
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">Reminders</div>
-            <div className="th-feature-card__desc">Important dates &amp; occasions</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
-
-        <Link to={RoutePath.appPlaces} className="th-feature-card">
-          <div className="th-feature-card__icon">
-            <IconMapPin size={20} />
-          </div>
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">Our Places</div>
-            <div className="th-feature-card__desc">Meaningful locations</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
-
-        <Link to={RoutePath.appMood} className="th-feature-card">
-          <div className="th-feature-card__icon">
-            <IconSmile size={20} />
-          </div>
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">Mood</div>
-            <div className="th-feature-card__desc">How are you feeling?</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
-
-        <Link to={RoutePath.appPeriod} className="th-feature-card">
-          <div className="th-feature-card__icon">
-            <IconCalendar size={20} />
-          </div>
-          <div className="th-feature-card__body">
-            <div className="th-feature-card__title">Period Tracker</div>
-            <div className="th-feature-card__desc">Track your cycle</div>
-          </div>
-          <IconChevronRight size={18} className="th-feature-card__chevron" />
-        </Link>
-      </div>
     </div>
   );
 }

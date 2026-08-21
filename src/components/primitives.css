@@ -385,7 +385,8 @@
   overscroll-behavior: contain;
 }
 
-/* Bottom navigation bar */
+/* Bottom navigation bar — five positions (Phase 24):
+   Home · Notifications · TWOHEARTS · Notes · More */
 .th-bottom-nav {
   flex: 0 0 auto;
   display: flex;
@@ -399,6 +400,7 @@
 }
 .th-bottom-nav-item {
   flex: 1;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -408,21 +410,107 @@
   padding: var(--th-space-1) 0;
   color: var(--th-color-text-secondary);
   text-decoration: none;
-  transition: color var(--th-duration-fast) var(--th-ease-standard);
+  transition: color var(--th-motion-fast), transform var(--th-motion-press);
   -webkit-tap-highlight-color: transparent;
   cursor: pointer;
   background: none;
   border: none;
   font-family: inherit;
 }
+.th-bottom-nav-item:active {
+  transform: scale(0.94);
+}
 .th-bottom-nav-item--active {
   color: var(--th-color-burgundy);
+}
+/* Active indicator — shape signal, not color-only */
+.th-bottom-nav-dot {
+  width: 5px;
+  height: 5px;
+  margin-top: 1px;
+  border-radius: var(--th-radius-circle);
+  background-color: transparent;
+  transition: background-color var(--th-motion-fast), transform var(--th-motion-fast);
+}
+.th-bottom-nav-item--active .th-bottom-nav-dot {
+  background-color: var(--th-color-burgundy);
+  transform: scale(1.1);
 }
 .th-bottom-nav-label {
   font-size: var(--th-font-size-xs);
   font-weight: var(--th-font-weight-medium);
   line-height: 1;
   white-space: nowrap;
+}
+
+/* Central TwoHearts hub position — elevated circular brand button */
+.th-bottom-nav-item--center {
+  justify-content: flex-end;
+  padding-bottom: var(--th-space-3);
+}
+/* Official mark recolored to cream on the dark brand ring */
+.th-brand-logo--light {
+  filter: brightness(0) invert(1);
+}
+/* Dark theme: the official burgundy art becomes the cream tone everywhere,
+   so the brand stays readable on dark surfaces (one centralized rule). */
+:root[data-th-theme='dark'] .th-brand-logo {
+  filter: brightness(0) invert(1);
+}
+.th-bottom-nav-item--center:active {
+  transform: none; /* press feedback lives on the ring itself */
+}
+.th-bottom-nav-center__ring {
+  position: absolute;
+  top: calc(-1 * (var(--th-nav-center-size) / 2) - 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--th-nav-center-size);
+  height: var(--th-nav-center-size);
+  border-radius: var(--th-radius-circle);
+  background: linear-gradient(135deg, var(--th-color-burgundy) 0%, var(--th-color-burgundy-light) 100%);
+  border: var(--th-border-width-medium) solid var(--th-color-surface);
+  box-shadow: var(--th-shadow-lg);
+  transition: transform var(--th-motion-press), box-shadow var(--th-motion-standard);
+}
+.th-bottom-nav-item--center:active .th-bottom-nav-center__ring {
+  transform: translateX(-50%) scale(0.93);
+}
+.th-bottom-nav-item--center.th-bottom-nav-item--active {
+  color: var(--th-color-burgundy);
+}
+.th-bottom-nav-item--center.th-bottom-nav-item--active .th-bottom-nav-center__ring {
+  transform: translateX(-50%) scale(1.06);
+  box-shadow: var(--th-shadow-lg), 0 0 0 4px var(--th-color-blush);
+}
+
+/* Route entrance — subtle fade + rise so navigation feels alive, never slow.
+   Reduced-motion (OS + in-app) collapses this to nothing via tokens, and is
+   additionally short-circuited below. */
+.th-route-transition {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  animation: th-route-in var(--th-duration-normal) var(--th-ease-decelerate);
+}
+@keyframes th-route-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .th-route-transition { animation: none; }
+}
+:root[data-th-motion='reduced'] .th-route-transition {
+  animation: none;
 }
 
 /* App header (within app shell) */
@@ -550,10 +638,17 @@
   color: var(--th-color-burgundy);
 }
 .th-more-item__label {
-  flex: 1;
   font-size: var(--th-font-size-md);
   font-weight: var(--th-font-weight-medium);
   color: var(--th-color-text-primary);
+}
+.th-more-item__caption {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
 }
 .th-more-item__chevron {
   flex: 0 0 auto;
@@ -579,21 +674,174 @@
   opacity: 0.85;
 }
 
-/* Home greeting */
-.th-home-greeting {
-  text-align: center;
-  padding: var(--th-space-8) 0 var(--th-space-4);
+/* ===== Home (Phase 24) ===== */
+
+/* Home root — calm, personal space; the corner floral anchors here. */
+.th-home {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: var(--th-space-8) var(--th-space-4) var(--th-space-6);
+  overflow: hidden;
 }
-.th-home-greeting__name {
-  font-family: var(--th-font-family-display);
-  font-size: var(--th-font-size-2xl);
-  font-weight: var(--th-font-weight-bold);
-  color: var(--th-color-text-primary);
-  margin-bottom: var(--th-space-1);
+
+/* Relationship header: two avatars connected around the official branding */
+.th-home-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--th-space-2);
+  margin-bottom: var(--th-space-8);
 }
-.th-home-greeting__subtitle {
-  font-size: var(--th-font-size-md);
+/* Hairline linking the two avatars behind the brand mark. */
+.th-home-header::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--th-avatar-lg) / 2);
+  left: 14%;
+  right: 14%;
+  height: var(--th-border-width-medium);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--th-color-border),
+    var(--th-color-border),
+    transparent
+  );
+}
+.th-home-header__brand {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-2);
+  min-width: 0;
+}
+.th-home-header__line {
+  font-size: var(--th-font-size-sm);
   color: var(--th-color-text-secondary);
+  line-height: var(--th-line-height-normal);
+  text-align: center;
+}
+.th-home-avatar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-1);
+  width: 76px;
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--th-motion-press);
+}
+.th-home-avatar:active {
+  transform: scale(0.93);
+}
+.th-home-avatar__circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--th-avatar-lg);
+  height: var(--th-avatar-lg);
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+  border: var(--th-border-width-medium) solid var(--th-color-surface-elevated);
+  box-shadow: var(--th-shadow-md);
+}
+.th-home-avatar__initial {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-bold);
+}
+.th-home-avatar__name {
+  max-width: 76px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-medium);
+  color: var(--th-color-text-secondary);
+}
+
+/* Primary everyday actions — 2×2 grid, four curated destinations */
+.th-home-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--th-space-3);
+}
+.th-home-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--th-space-2);
+  padding: var(--th-space-5) var(--th-space-3);
+  background-color: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-lg);
+  box-shadow: var(--th-shadow-sm);
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard),
+    background-color var(--th-motion-fast);
+}
+.th-home-card:active {
+  transform: scale(0.97);
+  background-color: var(--th-color-neutral-soft);
+}
+.th-home-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--th-radius-md);
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+.th-home-card__title {
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  line-height: var(--th-line-height-tight);
+}
+.th-home-card__caption {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  line-height: var(--th-line-height-normal);
+}
+
+/* Narrow screens: keep the relationship header proportionate */
+@media (max-width: 360px) {
+  .th-home-avatar {
+    width: 64px;
+  }
+  .th-home-avatar__circle {
+    width: 52px;
+    height: 52px;
+  }
+  .th-home-avatar__name {
+    max-width: 64px;
+  }
+}
+
+/* Hub section title (couple hub groups + hub subsections) */
+.th-hub-section-title {
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--th-space-3);
 }
 
 /* Placeholder screen */

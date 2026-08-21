@@ -1,29 +1,37 @@
 /**
- * AppShell (Phase 6).
+ * AppShell (Phase 6, refined Phase 24).
  *
- * The main application layout: header area + scrollable content + bottom nav.
- * Handles Android/system back-button behavior: pressing back from a tab root
- * either navigates back within the tab or, if at the tab root, does nothing
- * (preventing accidental exit when navigation history exists).
+ * The main application layout: scrollable content + five-position bottom nav.
+ *
+ * Android/system back-button behavior (Phase 24 contract):
+ *   - Deep/nested screen → navigate(-1), returning to the previous context
+ *     (Home → Notes → back → Home; Us → Memories → back → Us).
+ *   - Home root → suppressed (never accidentally exit the application).
+ *   - Degenerate entry state (no in-app history at a non-home route) →
+ *     fall forward to Home instead of exiting.
+ *
+ * Route changes get a subtle token-driven entrance transition (fade + small
+ * rise) keyed on the pathname; scroll resets to the top on each navigation.
  */
 
-import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { appLifecycle } from '../../services/lifecycle/appLifecycleService.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { router } from '../../navigation/AppRouter.tsx';
+import { RoutePath } from '../../navigation/routes.ts';
 import { BottomNav } from './BottomNav.tsx';
 
-/** Tab root paths — back button is suppressed at these paths. */
-const TAB_ROOTS = new Set([
-  '/app/home',
-  '/app/us',
-  '/app/games',
-  '/app/notes',
-  '/app/more',
-]);
+/** History index threshold: idx > 0 means an in-app back target exists. */
+function hasInAppHistory(): boolean {
+  const idx = (window.history.state as { idx?: number } | null)?.idx;
+  return typeof idx === 'number' && idx > 0;
+}
 
 export function AppShell() {
+  const location = useLocation();
+  const contentRef = useRef<HTMLDivElement | null>(null);
+
   // Android back-button handling
   useEffect(() => {
     const unsubscribe = appLifecycle.onEvent((event) => {
@@ -33,24 +41,33 @@ export function AppShell() {
           void coreServices.notifications.reconcile();
         }
 
-        // Navigate back if we have history and aren't at a tab root
-        const location = window.location.pathname;
-        if (TAB_ROOTS.has(location)) {
-          // At tab root — don't navigate (would exit the app)
+        const path = window.location.pathname;
+        if (path === RoutePath.appHome) {
+          // At the Home root — don't navigate (would exit the app)
           return;
         }
-        // Use the router instance to go back
-        router.navigate(-1);
+        if (hasInAppHistory()) {
+          router.navigate(-1);
+        } else {
+          router.navigate(RoutePath.appHome);
+        }
       }
     });
 
     return unsubscribe;
   }, []);
 
+  // Each navigation starts at the top of the new destination.
+  useEffect(() => {
+    contentRef.current?.scrollTo({ top: 0 });
+  }, [location.pathname]);
+
   return (
     <div className="th-app-shell">
-      <div className="th-app-content">
-        <Outlet />
+      <div className="th-app-content" ref={contentRef}>
+        <div className="th-route-transition" key={location.pathname}>
+          <Outlet />
+        </div>
       </div>
       <BottomNav />
     </div>

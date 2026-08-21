@@ -20,6 +20,13 @@ import markUrl from '../assets/branding/twohearts-logo-mark.svg';
 
 export type BrandLogoVariant = 'brand' | 'mark';
 
+/**
+ * Rendering tone. The official art is composed for light surfaces; on dark
+ * brand surfaces (e.g. the burgundy center-hub button) the same official
+ * asset is recolored to the cream tone — never replaced by another asset.
+ */
+export type BrandLogoTone = 'brand' | 'light';
+
 /** Aspect ratios (width/height) of the generated brand assets. */
 export const BRAND_LOGO_ASPECT: Record<BrandLogoVariant, number> = {
   brand: 506.3152 / 433.8324,
@@ -33,12 +40,15 @@ export interface BrandLogoProps {
   size?: number;
   /** Accessible label (decorative when omitted). */
   title?: string;
+  /** 'light' recolors the official asset for dark brand surfaces. */
+  tone?: BrandLogoTone;
 }
 
-export function BrandLogo({ variant = 'brand', size = 120, title }: BrandLogoProps) {
+export function BrandLogo({ variant = 'brand', size = 120, title, tone }: BrandLogoProps) {
   return (
     <img
       src={variant === 'brand' ? brandUrl : markUrl}
+      className={`th-brand-logo${tone === 'light' ? ' th-brand-logo--light' : ''}`}
       width={size}
       height={Math.round(size / BRAND_LOGO_ASPECT[variant])}
       alt={title ?? ''}
