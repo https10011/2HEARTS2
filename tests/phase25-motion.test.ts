@@ -50,7 +50,9 @@ const GLOBAL_CSS = read('src/styles/global.css');
 function motionSection(): string {
   const start = PRIMITIVES_CSS.indexOf('Motion & feedback (Phase 25)');
   assert.ok(start >= 0, 'Motion & feedback (Phase 25) section must exist in primitives.css');
-  return PRIMITIVES_CSS.slice(start);
+  // Stop at the Phase 26 boundary (if present) so Phase 26 additions are excluded.
+  const end = PRIMITIVES_CSS.indexOf('Phase 26', start);
+  return end >= 0 ? PRIMITIVES_CSS.slice(start, end) : PRIMITIVES_CSS.slice(start);
 }
 
 // ----- 1. Centralized motion vocabulary -----

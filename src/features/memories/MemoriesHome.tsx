@@ -54,19 +54,19 @@ export function MemoriesHome() {
   // Empty state
   if (memories.length === 0) {
     return (
-      <div className="th-content-pad" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-6)' }}>
-          <IconImage size={64} style={{ opacity: 0.5, marginBottom: 'var(--th-space-4)', color: 'var(--th-color-rose-muted)' }} />
-          <h2 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-2)' }}>
-            No memories yet
-          </h2>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)', maxWidth: '28ch' }}>
+      <div className="th-content-pad">
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <IconImage size={36} />
+          </div>
+          <h3 className="th-empty-state__title">No memories yet</h3>
+          <p className="th-empty-state__desc">
             Capture your favorite moments together
           </p>
+          <Button variant="primary" onClick={() => navigate(RoutePath.appMemoriesAdd)}>
+            <IconPlus size={18} /> Add your first memory
+          </Button>
         </div>
-        <Button variant="primary" onClick={() => navigate(RoutePath.appMemoriesAdd)}>
-          <IconPlus size={18} /> Add your first memory
-        </Button>
       </div>
     );
   }
@@ -86,8 +86,7 @@ export function MemoriesHome() {
           <Link
             key={memory.id}
             to={`${RoutePath.appMemories}/${memory.id}`}
-            className="th-feature-card"
-            style={{ padding: 0, overflow: 'hidden' }}
+            className="th-feature-card th-memory-card--enhanced th-stagger-item"
           >
             {/* Placeholder thumbnail */}
             <div style={{

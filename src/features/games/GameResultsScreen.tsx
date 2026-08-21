@@ -51,7 +51,7 @@ export function GameResultsScreen() {
       </div>
 
       {/* Score card */}
-      <div className="th-relationship-card" style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
+      <div className="th-relationship-card th-relationship-card--enhanced" style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
         <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
           <div>
             <div style={{ fontSize: 'var(--th-font-size-sm)', opacity: 0.85, marginBottom: 'var(--th-space-1)' }}>Partner 1</div>
@@ -80,7 +80,7 @@ export function GameResultsScreen() {
         {result.rounds.map((r, i) => (
           <div
             key={i}
-            className="th-feature-card"
+            className="th-feature-card th-feature-card--enhanced th-stagger-item"
             style={{
               cursor: 'default',
               borderLeftColor: r.matched ? 'var(--th-color-burgundy)' : undefined,

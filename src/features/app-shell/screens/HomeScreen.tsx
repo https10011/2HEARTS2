@@ -122,10 +122,10 @@ export function HomeScreen() {
         />
       </header>
 
-      {/* Everyday actions — curated, calm, exactly four */}
+      {/* Everyday actions — curated, calm, exactly four (Phase 26 enhanced) */}
       <div className="th-home-grid">
-        {HOME_PRIMARY_ITEMS.map((item) => (
-          <Link key={item.id} to={item.route} className="th-home-card">
+        {HOME_PRIMARY_ITEMS.map((item, i) => (
+          <Link key={item.id} to={item.route} className="th-home-card th-home-card--enhanced th-stagger-item" style={{ animationDelay: `${i * 50}ms` }}>
             <span className="th-home-card__icon">
               <NavIcon icon={item.icon} size={24} />
             </span>

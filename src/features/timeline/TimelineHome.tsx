@@ -51,19 +51,19 @@ export function TimelineHome() {
   // Empty state
   if (events.length === 0) {
     return (
-      <div className="th-content-pad" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-6)' }}>
-          <IconCalendar size={64} style={{ color: 'var(--th-color-rose-muted)', opacity: 0.5, marginBottom: 'var(--th-space-4)' }} />
-          <h2 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-2)' }}>
-            No events yet
-          </h2>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)', maxWidth: '28ch' }}>
+      <div className="th-content-pad">
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <IconCalendar size={36} />
+          </div>
+          <h3 className="th-empty-state__title">No events yet</h3>
+          <p className="th-empty-state__desc">
             Start building your relationship timeline
           </p>
+          <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appTimelineAdd)}>
+            <IconPlus size={18} /> Add your first event
+          </button>
         </div>
-        <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appTimelineAdd)}>
-          <IconPlus size={18} /> Add your first event
-        </button>
       </div>
     );
   }

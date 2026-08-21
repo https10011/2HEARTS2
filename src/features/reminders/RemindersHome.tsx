@@ -79,12 +79,12 @@ export function RemindersHome() {
 
       {/* Empty state */}
       {activeReminders.length === 0 && completedReminders.length === 0 && (
-        <div className="th-empty-state" style={{ marginTop: 'var(--th-space-12)' }}>
-          <div className="th-empty-state__icon" style={{ marginBottom: 'var(--th-space-4)', color: 'var(--th-color-rose-muted)' }}>
-            <IconBell size={48} />
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <IconBell size={36} />
           </div>
-          <h3 style={{ marginBottom: 'var(--th-space-2)' }}>No reminders yet</h3>
-          <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-6)' }}>
+          <h3 className="th-empty-state__title">No reminders yet</h3>
+          <p className="th-empty-state__desc">
             Create a reminder to never miss an important moment
           </p>
           <Link to={RoutePath.appRemindersAdd} className="th-btn th-btn--primary">
@@ -111,7 +111,7 @@ export function RemindersHome() {
               <Link
                 key={reminder.id}
                 to={`${RoutePath.appRemindersDetail.replace(':reminderId', reminder.id)}`}
-                className="th-feature-card"
+                className="th-feature-card th-reminder-card--enhanced th-stagger-item"
               >
                 <div className="th-feature-card__body">
                   <div className="th-feature-card__title">{reminder.title}</div>

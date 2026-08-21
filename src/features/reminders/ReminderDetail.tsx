@@ -126,7 +126,7 @@ export function ReminderDetail() {
       </div>
 
       {/* Reminder info card */}
-      <div className="th-relationship-card" style={{ marginBottom: 'var(--th-space-6)' }}>
+      <div className="th-relationship-card th-relationship-card--enhanced" style={{ marginBottom: 'var(--th-space-6)' }}>
         <div style={{ marginBottom: 'var(--th-space-4)' }}>
           <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--th-space-1)' }}>
             Scheduled

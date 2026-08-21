@@ -12,7 +12,7 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { getDatabase } from '../../data/database/connection.ts';
 import { MoodRepository } from '../../repositories/moodRepository.ts';
 import { MoodService } from '../../services/mood/moodService.ts';
-import { IconSmile } from '../../components/index.ts';
+import { IconSmile, LoadingState } from '../../components/index.ts';
 
 import {
   type MoodEntry,
@@ -95,10 +95,7 @@ export function MoodHome() {
   if (loading) {
     return (
       <div className="th-content-pad">
-        <div className="th-loading">
-          <div className="th-loading__spinner" />
-          <p>Loading mood data...</p>
-        </div>
+        <LoadingState label="Loading mood data…" />
       </div>
     );
   }
@@ -173,11 +170,11 @@ export function MoodHome() {
       </div>
 
       {recentMoods.length === 0 ? (
-        <div className="th-card" style={{ padding: 'var(--th-space-6)', textAlign: 'center' }}>
-          <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-rose-muted)' }}>
-            <IconSmile size={32} />
+        <div className="th-card th-empty-state--enhanced" style={{ textAlign: 'center' }}>
+          <div className="th-empty-state__visual" style={{ margin: '0 auto var(--th-space-3)' }}>
+            <IconSmile size={24} />
           </div>
-          <p style={{ color: 'var(--th-color-text-secondary)' }}>No mood entries yet. Start tracking how you feel!</p>
+          <p className="th-empty-state__desc" style={{ maxWidth: 'none' }}>No mood entries yet. Start tracking how you feel!</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-2)' }}>

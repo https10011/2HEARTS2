@@ -101,14 +101,14 @@ export function PlacesHome() {
 
       {/* Empty state */}
       {!loading && places.length === 0 && (
-        <div className="th-empty-state">
-          <div className="th-empty-state__icon" style={{ color: 'var(--th-color-rose-muted)' }}>
-            <IconMapPin size={44} />
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <IconMapPin size={36} />
           </div>
           <h3 className="th-empty-state__title">
             {searchQuery ? 'No matching places' : 'No places yet'}
           </h3>
-          <p className="th-empty-state__message">
+          <p className="th-empty-state__desc">
             {searchQuery
               ? 'Try a different search term.'
               : 'Add your favorite places to remember the spots that matter to you both.'}

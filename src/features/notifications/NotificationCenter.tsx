@@ -159,22 +159,16 @@ export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="th-hub-grid--enhanced">
               {entries.map((entry) => (
                 <button
                   key={entry.id}
                   onClick={() => void handleEntryPress(entry)}
+                  className="th-feature-card th-feature-card--enhanced th-stagger-item"
                   style={{
-                    display: 'flex',
                     alignItems: 'flex-start',
-                    gap: '12px',
-                    padding: '12px',
-                    borderRadius: '12px',
-                    border: '1px solid var(--th-color-border)',
-                    background: entry.read ? 'var(--th-color-surface)' : 'var(--th-color-blush, rgba(106, 27, 43, 0.05))',
-                    cursor: 'pointer',
                     textAlign: 'left',
-                    width: '100%',
+                    background: entry.read ? undefined : 'var(--th-color-blush)',
                   }}
                 >
                   <span style={{ fontSize: '20px', marginTop: '2px' }}>

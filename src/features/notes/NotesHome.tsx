@@ -46,12 +46,14 @@ export function NotesHome() {
 
   return (
     <div className="th-content-pad">
-      <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-2)' }}>
-        Notes
-      </h1>
-      <p className="th-screen-subtitle" style={{ marginBottom: 'var(--th-space-4)' }}>
-        Private notes and thoughts
-      </p>
+      <div className="th-screen-header--enhanced">
+        <div>
+          <h1 className="th-screen-title">Notes</h1>
+          <p className="th-screen-subtitle" style={{ marginTop: 'var(--th-space-1)' }}>
+            Private notes and thoughts
+          </p>
+        </div>
+      </div>
 
       {/* Search bar */}
       <div className="th-note-search">
@@ -103,9 +105,9 @@ export function NotesHome() {
 
       {/* Empty state */}
       {!loading && !error && filteredNotes.length === 0 && (
-        <div className="th-empty-state">
-          <div className="th-empty-state__icon" style={{ color: 'var(--th-color-rose-muted)' }}>
-            <IconFileText size={40} />
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <IconFileText size={36} />
           </div>
           <h3 className="th-empty-state__title">
             {searchQuery ? 'No notes found' : 'No notes yet'}
@@ -168,7 +170,7 @@ function NoteCard({ note }: { note: NoteView }) {
 
   return (
     <div
-      className="th-note-card"
+      className="th-note-card th-note-card--enhanced th-stagger-item"
       onClick={() => navigate(`/app/notes/${note.id}`)}
       role="button"
       tabIndex={0}

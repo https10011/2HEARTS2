@@ -156,23 +156,13 @@ export function SearchScreen({ onSearch }: SearchScreenProps) {
         )}
 
         {!loading && results.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="th-hub-grid--enhanced">
             {results.map((match) => (
               <button
                 key={match.id}
                 onClick={() => handleResultPress(match)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '12px',
-                  borderRadius: '12px',
-                  border: '1px solid var(--th-color-border)',
-                  background: 'var(--th-color-surface)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  width: '100%',
-                }}
+                className="th-feature-card th-feature-card--enhanced th-stagger-item"
+                style={{ textAlign: 'left' }}
               >
                 <span style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex', flexShrink: 0 }}>
                   {(() => {

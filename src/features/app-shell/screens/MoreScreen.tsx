@@ -14,11 +14,13 @@ import { NavIcon } from '../navIcons.tsx';
 export function MoreScreen() {
   return (
     <div className="th-content-pad">
-      <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-6)' }}>More</h1>
+      <div className="th-screen-header--enhanced">
+        <h1 className="th-screen-title">More</h1>
+      </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {MORE_ITEMS.map((item) => (
-          <Link key={item.id} to={item.route} className="th-more-item">
+      <div className="th-hub-grid--enhanced" style={{ marginTop: 'var(--th-space-4)' }}>
+        {MORE_ITEMS.map((item, i) => (
+          <Link key={item.id} to={item.route} className="th-more-item th-more-item--enhanced th-stagger-item" style={{ animationDelay: `${i * 40}ms` }}>
             <div className="th-more-item__icon">
               <NavIcon icon={item.icon} size={20} />
             </div>

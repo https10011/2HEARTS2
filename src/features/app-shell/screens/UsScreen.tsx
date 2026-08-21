@@ -26,7 +26,7 @@ function formatBirthDate(dateStr: string | null): string {
 function ProfileCard({ profile }: { profile: Profile }) {
   const initial = profile.displayName.charAt(0).toUpperCase();
   return (
-    <div className="th-profile-card">
+    <div className="th-profile-card th-profile-card--enhanced">
       <div className="th-profile-card__avatar">
         <span className="th-profile-card__initial">{initial}</span>
       </div>
@@ -83,14 +83,18 @@ export function UsScreen() {
 
   return (
     <div className="th-content-pad">
-      <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-1)' }}>Us</h1>
-      <p className="th-screen-subtitle" style={{ marginBottom: 'var(--th-space-6)' }}>
-        Your relationship world
-      </p>
+      <div className="th-screen-header--enhanced">
+        <div>
+          <h1 className="th-screen-title">Us</h1>
+          <p className="th-screen-subtitle" style={{ marginTop: 'var(--th-space-1)' }}>
+            Your relationship world
+          </p>
+        </div>
+      </div>
 
       {/* Relationship counter */}
       {summary && (
-        <div className="th-relationship-card" style={{ marginBottom: 'var(--th-space-6)' }}>
+        <div className="th-relationship-card th-relationship-card--enhanced" style={{ marginBottom: 'var(--th-space-6)' }}>
           {summary.owner && summary.partner ? (
             <>
               <div className="th-relationship-card__title">
@@ -127,7 +131,7 @@ export function UsScreen() {
           <h2 className="th-hub-section-title">{group.title}</h2>
           <div className="th-hub-grid">
             {group.items.map((item) => (
-              <Link key={item.id} to={item.route} className="th-feature-card">
+              <Link key={item.id} to={item.route} className="th-feature-card th-feature-card--enhanced th-stagger-item">
                 <div className="th-feature-card__icon">
                   <NavIcon icon={item.icon} size={20} />
                 </div>
@@ -159,7 +163,7 @@ export function UsScreen() {
           <h2 className="th-hub-section-title">Coming up</h2>
           <div className="th-hub-grid">
             {summary.upcomingDates.slice(0, 3).map((d) => (
-              <div key={d.date + d.title} className="th-feature-card" style={{ cursor: 'default' }}>
+              <div key={d.date + d.title} className="th-feature-card th-feature-card--enhanced">
                 <div className="th-feature-card__icon">
                   <IconCalendar size={20} />
                 </div>

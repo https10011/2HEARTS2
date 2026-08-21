@@ -54,7 +54,13 @@ body,
 .th-bottom-nav,
 .th-card,
 .th-feature-card,
+.th-feature-card--enhanced,
 .th-home-card,
+.th-home-card--enhanced,
+.th-relationship-card,
+.th-relationship-card--enhanced,
+.th-note-card,
+.th-note-card--enhanced,
 .th-modal-sheet,
 .th-modal {
   transition:

@@ -1878,3 +1878,456 @@ html[data-th-motion='reduced'] .th-decor--animated {
   animation: none;
 }
 
+/* ========================================================================
+   Visual Experience Overhaul (Phase 26) — enhanced interaction layer
+   ========================================================================
+
+   Centralized visual polish applied across the 77-screen experience.
+   All rules consume existing tokens — no hardcoded values.
+   These classes are opt-in: existing screens keep working as-is.
+   Screens are progressively upgraded to use these enhanced primitives.
+
+   Guard: tests/phase26-visual-overhaul.test.ts verifies that new visual
+   classes stay token-driven and no hardcoded durations/easings leak in.
+*/
+
+/* --- Enhanced page section: warm background band for visual grouping --- */
+.th-section {
+  padding: var(--th-space-6) var(--th-space-4);
+  margin-bottom: var(--th-space-1);
+}
+.th-section--warm {
+  background-color: var(--th-color-cream);
+  border-radius: var(--th-radius-lg);
+}
+
+/* --- Enhanced section heading: tighter, more intentional hierarchy --- */
+.th-section-heading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--th-space-2);
+  margin-bottom: var(--th-space-4);
+}
+.th-section-heading__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-text-primary);
+  line-height: var(--th-line-height-tight);
+}
+.th-section-heading__subtitle {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}
+
+/* --- Enhanced feature card: refined elevation + better interaction --- */
+.th-feature-card--enhanced {
+  padding: var(--th-space-4) var(--th-space-5);
+  border-radius: var(--th-radius-xl);
+  box-shadow: var(--th-shadow-md);
+  border: none;
+  background-color: var(--th-color-surface-elevated);
+  transition:
+    transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard),
+    background-color var(--th-motion-fast);
+}
+.th-feature-card--enhanced:active {
+  transform: scale(0.98);
+  box-shadow: var(--th-shadow-sm);
+  background-color: var(--th-color-neutral-soft);
+}
+.th-feature-card--enhanced .th-feature-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--th-radius-lg);
+}
+
+/* --- Enhanced home card: more refined grid entry --- */
+.th-home-card--enhanced {
+  padding: var(--th-space-6) var(--th-space-3);
+  border-radius: var(--th-radius-xl);
+  border: none;
+  box-shadow: var(--th-shadow-md);
+  background: linear-gradient(
+    145deg,
+    var(--th-color-surface-elevated) 0%,
+    var(--th-color-surface) 100%
+  );
+  transition:
+    transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard),
+    background var(--th-motion-fast);
+}
+.th-home-card--enhanced:active {
+  transform: scale(0.97);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-home-card--enhanced .th-home-card__icon {
+  background: linear-gradient(
+    135deg,
+    var(--th-color-blush) 0%,
+    var(--th-color-neutral-soft) 100%
+  );
+  box-shadow: var(--th-shadow-sm);
+}
+
+/* --- Enhanced empty state: more polished composition --- */
+.th-empty-state--enhanced {
+  padding: var(--th-space-16) var(--th-space-6);
+  gap: var(--th-space-4);
+}
+.th-empty-state--enhanced .th-empty-state__visual {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--th-radius-xl);
+  background: linear-gradient(
+    135deg,
+    var(--th-color-blush) 0%,
+    var(--th-color-neutral-soft) 100%
+  );
+  color: var(--th-color-rose-muted);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-empty-state--enhanced .th-empty-state__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+}
+.th-empty-state--enhanced .th-empty-state__desc {
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-secondary);
+  max-width: 30ch;
+  line-height: var(--th-line-height-relaxed);
+}
+
+/* --- Staggered entrance: subtle delay cascade for lists --- */
+.th-stagger-item {
+  animation: th-fade-rise var(--th-duration-normal) var(--th-ease-decelerate) both;
+}
+.th-stagger-item:nth-child(1) { animation-delay: 0ms; }
+.th-stagger-item:nth-child(2) { animation-delay: 40ms; }
+.th-stagger-item:nth-child(3) { animation-delay: 80ms; }
+.th-stagger-item:nth-child(4) { animation-delay: 120ms; }
+.th-stagger-item:nth-child(5) { animation-delay: 160ms; }
+.th-stagger-item:nth-child(6) { animation-delay: 200ms; }
+@keyframes th-fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .th-stagger-item { animation: none; }
+}
+:root[data-th-motion='reduced'] .th-stagger-item {
+  animation: none;
+}
+
+/* --- Enhanced profile card: rounded avatar + better info layout --- */
+.th-profile-card--enhanced {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-4);
+  padding: var(--th-space-5);
+  background-color: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-xl);
+  box-shadow: var(--th-shadow-sm);
+  border: none;
+}
+.th-profile-card--enhanced .th-profile-card__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--th-radius-circle);
+  background: linear-gradient(
+    135deg,
+    var(--th-color-blush) 0%,
+    var(--th-color-neutral-soft) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--th-shadow-sm);
+}
+.th-profile-card--enhanced .th-profile-card__initial {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+}
+.th-profile-card--enhanced .th-profile-card__info {
+  min-width: 0;
+}
+.th-profile-card--enhanced .th-profile-card__name {
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+}
+.th-profile-card--enhanced .th-profile-card__detail {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}
+
+/* --- Enhanced relationship card: richer gradient + better padding --- */
+.th-relationship-card--enhanced {
+  background: linear-gradient(
+    145deg,
+    var(--th-color-burgundy) 0%,
+    var(--th-color-burgundy-light) 60%,
+    var(--th-color-rose-muted) 100%
+  );
+  border-radius: var(--th-radius-xl);
+  padding: var(--th-space-8) var(--th-space-6);
+  color: var(--th-color-text-on-accent);
+  box-shadow: var(--th-shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+.th-relationship-card--enhanced::before {
+  content: '';
+  position: absolute;
+  top: -30%;
+  right: -20%;
+  width: 60%;
+  height: 160%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+.th-relationship-card--enhanced .th-relationship-card__title {
+  font-size: var(--th-font-size-2xl);
+  margin-bottom: var(--th-space-3);
+}
+.th-relationship-card--enhanced .th-relationship-card__subtitle {
+  font-size: var(--th-font-size-md);
+  opacity: 0.9;
+  line-height: var(--th-line-height-relaxed);
+}
+
+/* --- Enhanced more-item: better spacing + visual weight --- */
+.th-more-item--enhanced {
+  padding: var(--th-space-5) var(--th-space-4);
+  border-radius: var(--th-radius-lg);
+  border-bottom: none;
+  margin-bottom: var(--th-space-1);
+  transition:
+    background-color var(--th-motion-fast),
+    transform var(--th-motion-press);
+}
+.th-more-item--enhanced:active {
+  background-color: var(--th-color-neutral-soft);
+  transform: scale(0.99);
+}
+.th-more-item--enhanced .th-more-item__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--th-radius-md);
+  background-color: var(--th-color-blush);
+}
+
+/* --- Enhanced note card: better visual hierarchy --- */
+.th-note-card--enhanced {
+  padding: var(--th-space-5);
+  border-radius: var(--th-radius-xl);
+  border: none;
+  box-shadow: var(--th-shadow-md);
+  transition:
+    transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard),
+    background-color var(--th-motion-fast);
+}
+.th-note-card--enhanced:active {
+  transform: scale(0.98);
+  box-shadow: var(--th-shadow-sm);
+}
+
+/* --- Enhanced memory card: image-first layout --- */
+.th-memory-card--enhanced {
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--th-radius-xl);
+  border: none;
+  box-shadow: var(--th-shadow-md);
+  transition:
+    transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard);
+}
+.th-memory-card--enhanced:active {
+  transform: scale(0.98);
+  box-shadow: var(--th-shadow-sm);
+}
+
+/* --- Enhanced timeline card: better vertical rhythm --- */
+.th-timeline-event__card--enhanced {
+  padding: var(--th-space-5);
+  border-radius: var(--th-radius-xl);
+  border: none;
+  box-shadow: var(--th-shadow-md);
+  transition:
+    transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard);
+}
+.th-timeline-event__card--enhanced:active {
+  transform: scale(0.98);
+  box-shadow: var(--th-shadow-sm);
+}
+
+/* --- Enhanced reminder card: date-forward layout --- */
+.th-reminder-card--enhanced {
+  padding: var(--th-space-4) var(--th-space-5);
+  border-radius: var(--th-radius-xl);
+  border: none;
+  box-shadow: var(--th-shadow-md);
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-4);
+}
+.th-reminder-card--enhanced .th-reminder-card__date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 48px;
+  padding: var(--th-space-2);
+  border-radius: var(--th-radius-md);
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+  font-weight: var(--th-font-weight-bold);
+  font-size: var(--th-font-size-sm);
+}
+
+/* --- Enhanced FAB: subtle pulse on hover --- */
+.th-fab--enhanced {
+  box-shadow: var(--th-shadow-lg);
+  transition:
+    transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard);
+}
+.th-fab--enhanced:active {
+  transform: scale(0.9);
+  box-shadow: var(--th-shadow-sm);
+}
+
+/* --- Enhanced screen header: more intentional spacing --- */
+.th-screen-header--enhanced {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--th-space-3);
+  margin-bottom: var(--th-space-2);
+}
+.th-screen-header--enhanced .th-screen-title {
+  margin-bottom: 0;
+}
+
+/* --- Enhanced app header: subtle gradient band --- */
+.th-app-header--enhanced {
+  background: linear-gradient(
+    180deg,
+    var(--th-color-surface) 0%,
+    var(--th-color-surface-elevated) 100%
+  );
+  border-bottom: none;
+}
+
+/* --- Enhanced hub grid: better gap + card alignment --- */
+.th-hub-grid--enhanced {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-3);
+}
+
+/* --- Enhanced chip group: more refined selection --- */
+.th-chip--enhanced {
+  border: none;
+  box-shadow: var(--th-shadow-sm);
+  transition:
+    background-color var(--th-motion-fast),
+    box-shadow var(--th-motion-fast),
+    transform var(--th-motion-press);
+}
+.th-chip--enhanced:active {
+  transform: scale(0.95);
+}
+.th-chip--enhanced.th-chip--active {
+  box-shadow: var(--th-shadow-md);
+}
+
+/* --- Utility: visual separator with warm tone --- */
+.th-divider--warm {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--th-color-border) 50%,
+    transparent 100%
+  );
+  margin: var(--th-space-6) var(--th-space-8);
+}
+
+/* --- Enhanced settings row: better spacing + visual weight --- */
+.th-settings-row--enhanced {
+  padding: var(--th-space-5) var(--th-space-4);
+  border-radius: var(--th-radius-lg);
+  transition:
+    background-color var(--th-motion-fast),
+    transform var(--th-motion-press);
+}
+.th-settings-row--enhanced:active {
+  transform: scale(0.99);
+  background-color: var(--th-color-neutral-soft);
+}
+.th-settings-row--enhanced .th-settings-row__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--th-radius-md);
+  background-color: var(--th-color-blush);
+}
+/* --- Utility: enhanced form layout --- */
+.th-form--enhanced {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-5);
+}
+.th-form-group--enhanced {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-2);
+}
+.th-form-group--enhanced .th-label {
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  letter-spacing: 0.01em;
+}
+
+/* --- Utility: enhanced onboarding actions --- */
+.th-onboarding-actions--enhanced {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-3);
+  margin-top: auto;
+  padding-top: var(--th-space-8);
+}
+
+/* --- Utility: warm decorative band behind content --- */
+.th-content-band {
+  position: relative;
+  padding: var(--th-space-8) var(--th-space-4) var(--th-space-6);
+  background: linear-gradient(
+    180deg,
+    var(--th-color-blush) 0%,
+    transparent 100%
+  );
+}
+

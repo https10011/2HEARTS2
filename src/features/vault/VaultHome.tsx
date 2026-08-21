@@ -84,14 +84,14 @@ export function VaultHome({ service }: { service?: VaultService }) {
 
       {/* Empty state */}
       {items.length === 0 && (
-        <div className="th-card" style={{ padding: 'var(--th-space-6)', textAlign: 'center' }}>
-          <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-rose-muted)' }}>
-            <IconLock size={48} />
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <IconLock size={36} />
           </div>
-          <h3 style={{ marginBottom: 'var(--th-space-2)' }}>
+          <h3 className="th-empty-state__title">
             {filter === 'all' ? 'Vault is empty' : `No ${CONTENT_TYPE_META[filter].label} items`}
           </h3>
-          <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
+          <p className="th-empty-state__desc">
             Add private photos, videos, notes, or files to your secure vault.
           </p>
           <button

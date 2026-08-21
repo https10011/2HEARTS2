@@ -157,12 +157,12 @@ export function PeriodHome() {
             </div>
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: 'var(--th-space-4) 0' }}>
-            <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-rose-muted)' }}>
-              <IconCalendar size={48} />
+          <div className="th-empty-state th-empty-state--enhanced" style={{ padding: 'var(--th-space-6) 0' }}>
+            <div className="th-empty-state__visual">
+              <IconCalendar size={36} />
             </div>
-            <h3 style={{ marginBottom: 'var(--th-space-2)' }}>No period data yet</h3>
-            <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
+            <h3 className="th-empty-state__title">No period data yet</h3>
+            <p className="th-empty-state__desc">
               Start tracking to see your cycle information.
             </p>
             <button
