@@ -1,0 +1,2035 @@
+============================================================
+TWOHEARTS — POST-V1 UI/UX & EXPERIENCE OVERHAUL ROADMAP
+============================================================
+
+PROJECT:
+TwoHearts — Private Couples Application
+
+PURPOSE OF THIS DOCUMENT:
+This document is the CONTEXT / MASTER CONTINUATION ROADMAP for
+the post-V1 visual, UX, interaction, animation, branding,
+game-system, and experience overhaul.
+
+IMPORTANT:
+
+This is NOT a replacement for the original V1 engineering
+roadmap.
+
+The original V1 roadmap defined how TwoHearts was engineered
+from the ground up.
+
+Phases 1–22 have already been completed.
+
+This document begins the NEXT DEVELOPMENT STAGE:
+
+PHASE 23+
+
+The purpose of Phase 23+ is NOT to rebuild the application.
+
+The purpose is to transform the existing technically functional
+TwoHearts V1 into a polished, expressive, emotionally warm,
+alive, visually distinctive couples application.
+
+The existing architecture, persistence, services, repositories,
+game engine, routing, local-first design, and V1 boundaries
+must remain intact unless a change is genuinely required to
+support the approved UX/design improvements.
+
+============================================================
+CURRENT V1 STATUS
+============================================================
+
+V1 IS COMPLETE.
+
+Completed engineering phases:
+
+PHASE 1 — Engineering Foundation
+STATUS: COMPLETE
+COMMIT:
+e21e523
+
+PHASE 2 — Local-First Data & Persistence Foundation
+STATUS: COMPLETE
+COMMIT: ab1ce1d
+[COMMIT RECORDED IN GIT HISTORY]
+
+PHASE 3 — Core App Services & Device Foundation
+STATUS: COMPLETE
+COMMIT: 262efe3
+[COMMIT RECORDED IN GIT HISTORY]
+
+PHASE 4 — Application State & Relationship Foundation
+STATUS: COMPLETE
+COMMIT: 7c186f3
+
+PHASE 5 — Onboarding & App Entry Experience
+STATUS: COMPLETE
+COMMIT: e325a8e
+
+PHASE 6 — Main App Shell & Navigation
+STATUS: COMPLETE
+COMMIT: 2679647
+
+PHASE 7 — Memories
+STATUS: COMPLETE
+COMMIT: 6b81e70
+
+PHASE 8 — Notes
+STATUS: COMPLETE
+COMMIT: b5267ef
+
+PHASE 9 — Timeline & Relationship History
+STATUS: COMPLETE
+COMMIT: 522c6ef
+
+PHASE 10 — Relationship / Home Features
+STATUS: COMPLETE
+COMMIT:
+f56d8a3
+
+PHASE 11 — Couple Mini-Games
+STATUS: COMPLETE
+COMMIT:
+63bb2ae
+
+PHASE 12 — Fun / Casual Games
+STATUS: COMPLETE
+COMMIT:
+df709e2
+
+PHASE 13 — Reminders
+STATUS: COMPLETE
+COMMIT:
+2552606
+
+PHASE 14 — Our Places
+STATUS: COMPLETE
+COMMIT:
+bd583c4
+
+PHASE 15 — Mood / How Are You?
+STATUS: COMPLETE
+COMMIT:
+0871f7a
+
+PHASE 16 — Period Tracker
+STATUS: COMPLETE
+COMMIT:
+1d15843
+
+PHASE 17 — Private Vault
+STATUS: COMPLETE
+COMMIT:
+3924728
+
+PHASE 18 — Search & Notification Center
+STATUS: COMPLETE
+COMMIT:
+9b14f92
+
+PHASE 19 — Settings & App Management
+STATUS: COMPLETE
+COMMIT:
+d808cf6
+
+PHASE 20 — Visual Fidelity / 77-Screen Implementation
+STATUS: COMPLETE
+COMMIT:
+3014dbe
+
+PHASE 21 — Integration, QA & Hardening
+STATUS: COMPLETE
+COMMIT:
+cade3ad
+
+PHASE 22 — Final Build, Documentation & Release
+STATUS: COMPLETE
+COMMIT:
+ebb89b6
+
+CURRENT RELEASE CHECKPOINT:
+
+master:
+ebb89b6
+
+master == origin/master
+Working tree clean
+V1 build verified
+V1 tests verified
+APK produced
+No V2/cloud functionality
+
+============================================================
+IMPORTANT V1 BOUNDARY
+============================================================
+
+TwoHearts remains:
+
+LOCAL-FIRST
+OFFLINE-FIRST
+PRIVATE
+ANDROID-FIRST
+CAPACITOR
+REACT + TYPESCRIPT + VITE
+
+V1 CORE:
+
+Local database
+Local filesystem
+Local media
+Local notifications
+Local settings
+Local relationship data
+Local games
+Local vault
+Local search
+Local reminders
+Local mood
+Local period tracking
+
+DO NOT introduce:
+
+Firebase
+Supabase
+Cloud database
+Cloud storage
+Online synchronization
+Online chat
+FCM/server push
+Remote authentication
+V2 communication architecture
+
+unless explicitly authorized as V2 work.
+
+The post-V1 phases in this document are still improvements
+to the V1 application.
+
+They are NOT permission to introduce V2.
+
+============================================================
+MOST IMPORTANT POST-V1 PRINCIPLE
+============================================================
+
+THE APPLICATION ALREADY WORKS.
+
+DO NOT REBUILD TWOHEARTS FROM SCRATCH.
+
+DO NOT REPLACE THE ARCHITECTURE.
+
+DO NOT THROW AWAY EXISTING SERVICES.
+
+DO NOT DUPLICATE EXISTING SYSTEMS.
+
+DO NOT CREATE PARALLEL DATA ARCHITECTURES.
+
+DO NOT REIMPLEMENT FEATURES THAT ALREADY WORK.
+
+Instead:
+
+KEEP:
+
+UI
+↓
+Hooks / State
+↓
+Services
+↓
+Repositories
+↓
+Local Persistence
+
+KEEP the existing game engine.
+
+KEEP existing database architecture.
+
+KEEP existing routing architecture.
+
+KEEP existing notification architecture.
+
+KEEP existing media architecture.
+
+KEEP existing security boundaries.
+
+KEEP existing V1 offline-first behavior.
+
+The new phases should primarily improve:
+
+DESIGN
+UX
+INTERACTION
+ANIMATION
+BRANDING
+VISUAL HIERARCHY
+SYSTEM-WIDE CONSISTENCY
+GAME EXPERIENCE
+POLISH
+EMOTIONAL CHARACTER
+
+============================================================
+DESIGN PROBLEM THIS ROADMAP SOLVES
+============================================================
+
+The existing application is technically functional and
+architecturally strong.
+
+However, the current interface can still feel:
+
+flat
+plain
+static
+panel-heavy
+generic
+mechanical
+without enough depth
+without enough motion
+without enough emotional personality
+
+The goal is NOT merely:
+
+"make the colors match."
+
+The goal is:
+
+MAKE TWOHEARTS FEEL ALIVE.
+
+The user should feel that they are interacting with an
+actual polished couples application rather than navigating
+a collection of forms, panels, tabs and buttons.
+
+The experience should have:
+
+subtle motion
+depth
+responsive interactions
+visual hierarchy
+warmth
+personality
+micro-interactions
+meaningful transitions
+beautiful empty states
+better feedback
+better loading states
+better screen transitions
+better button behavior
+better cards
+better navigation behavior
+better game feedback
+better use of the approved visual identity
+
+Animations must remain:
+
+SUBTLE
+FAST
+OPTIMIZED
+PURPOSEFUL
+
+Do NOT turn TwoHearts into an over-animated application.
+
+============================================================
+AUTHORITATIVE DESIGN SOURCES
+============================================================
+
+Agents MUST understand the following before working:
+
+1. MasterPrompt.txt
+2. TwoHeartsRDMap.txt
+3. This roadmap
+4. Existing repository architecture
+5. Existing implemented screens
+6. Existing design tokens
+7. Existing components
+8. Existing game architecture
+9. Existing 77 approved visual references
+10. Official TwoHearts branding assets provided in the repo
+
+The agent should inspect the repository thoroughly before
+changing anything.
+
+Do not assume that a feature is missing simply because it is
+not visually obvious.
+
+Inspect the actual implementation.
+
+============================================================
+77 APPROVED SCREEN REFERENCES
+============================================================
+
+The 77 PNG references remain the visual authority.
+
+However:
+
+THE POST-V1 WORK IS NOT A REQUIREMENT TO REBUILD ALL 77
+SCREENS FROM SCRATCH.
+
+Most of the 77 screens already exist.
+
+The purpose is to improve their:
+
+visual fidelity
+UX
+interaction
+animation
+hierarchy
+branding
+depth
+consistency
+responsiveness
+
+If a screen already exists:
+
+IMPROVE IT.
+
+Do not create a duplicate screen.
+
+If an existing screen is already good:
+
+PRESERVE IT.
+
+If the reference is ambiguous:
+
+Use the approved specification, repository architecture,
+design system and overall TwoHearts visual language.
+
+============================================================
+CREATIVE FREEDOM
+============================================================
+
+Agents have CREATIVE FREEDOM.
+
+They may introduce:
+
+better animations
+micro-interactions
+transition effects
+subtle blur
+depth
+card motion
+press feedback
+hover/active states where applicable
+loading transitions
+better empty states
+better visual feedback
+better typography hierarchy
+better spacing
+decorative elements
+subtle parallax where appropriate
+optimized screen transitions
+better gesture feedback
+better game feedback
+
+BUT:
+
+Creative freedom exists INSIDE the TwoHearts design language.
+
+Do not:
+
+replace the overall visual identity
+ignore the approved screens
+introduce unrelated themes
+make the app look like another application
+overuse animations
+sacrifice usability
+sacrifice performance
+break accessibility
+break the existing architecture
+
+The agent may surprise the user with tasteful improvements.
+
+The agent must NOT surprise the user by changing the product
+concept.
+
+============================================================
+OFFICIAL TWOHEARTS BRANDING
+============================================================
+
+The user will provide an official TwoHearts logo asset.
+
+The logo will be placed inside the repository.
+
+This asset becomes the authoritative branding source.
+
+DO NOT generate replacement emoji logos.
+
+DO NOT create duplicate logo implementations.
+
+Create ONE authoritative branding component/system.
+
+For example:
+
+BrandLogo
+or an equivalent centralized branding component.
+
+The system should support the logo wherever required:
+
+Splash
+Home
+App Lock
+About
+Navigation
+Center navigation button
+Branding areas
+Other approved locations
+
+The goal is:
+
+CHANGE ONE SOURCE
+↓
+BRANDING UPDATES EVERYWHERE
+
+If the official logo asset is replaced later,
+the application should automatically use the new asset
+through the centralized branding system.
+
+============================================================
+SYSTEM-WIDE DESIGN CUSTOMIZATION
+============================================================
+
+THIS IS A CRITICAL REQUIREMENT.
+
+TwoHearts must have centralized design architecture.
+
+The user should NOT need to manually edit dozens of screens
+to change one visual property.
+
+Examples:
+
+CHANGE LOGO
+↓
+Every logo location updates.
+
+CHANGE PRIMARY BURGUNDY
+↓
+All relevant UI updates.
+
+CHANGE FONT SCALE
+↓
+The entire application updates.
+
+CHANGE CORNER RADIUS
+↓
+Relevant cards/buttons/components update.
+
+CHANGE SPACING TOKEN
+↓
+Relevant components update.
+
+CHANGE ANIMATION SPEED
+↓
+Relevant animations update.
+
+CHANGE DARK MODE
+↓
+The entire application updates.
+
+The system should use:
+
+design tokens
+theme variables
+shared components
+centralized metadata
+shared primitives
+centralized branding
+centralized motion tokens
+centralized typography
+centralized spacing
+centralized color system
+
+Avoid hardcoded visual values when a shared token is
+appropriate.
+
+============================================================
+REAL-TIME CUSTOMIZATION
+============================================================
+
+Settings must behave like a modern application.
+
+For example:
+
+If the user changes text size:
+
+SELECT LARGE
+↓
+UI updates immediately
+
+No restart should be required unless technically unavoidable.
+
+If the user switches:
+
+LIGHT → DARK
+
+the application should transition naturally and update
+system-wide.
+
+The experience should feel similar to polished modern mobile
+applications.
+
+Theme changes should affect:
+
+backgrounds
+cards
+text
+icons
+navigation
+inputs
+modals
+buttons
+empty states
+game interfaces
+settings
+feature screens
+
+where applicable.
+
+============================================================
+NEW HOME SCREEN CONCEPT
+============================================================
+
+The Home screen should receive a major redesign.
+
+The desired structure:
+
+TOP AREA:
+
+LEFT:
+User profile/avatar
+
+CENTER:
+Official TwoHearts logo
+
+RIGHT:
+Partner / special person's avatar
+
+The exact spacing and proportions are left to the designer/agent
+while respecting the approved visual language.
+
+The central branding should feel intentional and emotionally
+significant.
+
+Below the relationship header:
+
+PRIMARY HOME FEATURES:
+
+Notes
+Reminders
+Us
+Games
+
+The agent may determine the best spacing, card structure,
+iconography and presentation.
+
+The Home screen should feel:
+
+personal
+warm
+romantic
+clean
+alive
+premium
+not cluttered
+
+The bottom navigation remains.
+
+============================================================
+NEW BOTTOM NAVIGATION CONCEPT
+============================================================
+
+The application will have FIVE primary navigation positions.
+
+LEFT → RIGHT:
+
+1. Home
+2. Notifications
+3. CENTRAL TWOHEARTS / COUPLE HUB
+4. Notes
+5. Settings / More
+
+The exact final naming/iconography may be refined by the agent
+based on the existing architecture and approved specification.
+
+THE CENTER ITEM IS SPECIAL.
+
+It should be visually larger than the other navigation items.
+
+The center navigation button should be:
+
+A larger circular element
+
+Containing the official TwoHearts logo.
+
+It should feel like the heart of the application.
+
+Possible tasteful effects:
+
+subtle elevation
+soft shadow
+press animation
+small scale feedback
+subtle glow
+gentle transition
+
+Do not overdo it.
+
+============================================================
+CENTRAL TWOHEARTS COUPLE HUB
+============================================================
+
+The central TwoHearts navigation button becomes the primary
+access point for everything specifically about the couple.
+
+Examples:
+
+Us
+Our Memories
+Our Timeline
+Our Places
+Private Vault
+Mood
+Period Tracker
+Relationship Counter
+Important Dates
+Other relationship-specific features
+
+These should NOT be repeatedly displayed as separate primary
+items on the Home screen.
+
+The Home screen should remain focused.
+
+The center TwoHearts hub becomes the:
+
+"OUR WORLD"
+
+or equivalent relationship hub.
+
+The agent may choose the final presentation and naming while
+preserving this concept.
+
+============================================================
+ROSE & LILY DECORATIVE SYSTEM
+============================================================
+
+The user will provide approximately 20 different
+rose/lily PNG variations.
+
+These assets will be stored in the repository.
+
+They become part of the TwoHearts decorative visual system.
+
+IMPORTANT:
+
+DO NOT place all 20 flowers on every screen.
+
+Instead:
+
+The agent should intelligently select from the available
+assets.
+
+Different screens may use different variations.
+
+The agent may control:
+
+size
+rotation
+opacity
+position
+cropping
+orientation
+layering
+placement
+number of decorations
+
+The flowers may appear in:
+
+backgrounds
+corners
+empty states
+headers
+feature screens
+relationship screens
+special moments
+games where appropriate
+
+The decoration must remain subtle.
+
+It should enhance the screen rather than obscure content.
+
+The overall visual concept should feel:
+
+romantic
+warm
+organic
+personal
+elegant
+
+The agent has creative freedom to determine where each flower
+variation works best.
+
+============================================================
+VISUAL DEPTH SYSTEM
+============================================================
+
+TwoHearts should no longer feel like flat panels.
+
+Introduce tasteful depth using:
+
+layering
+shadows
+elevation
+blur
+translucency where appropriate
+background decoration
+card hierarchy
+scale
+motion
+spacing
+foreground/background separation
+
+Do not turn everything into glassmorphism.
+
+Depth should be used selectively.
+
+============================================================
+SCREEN TRANSITIONS
+============================================================
+
+Navigation should not feel instantaneous and mechanical.
+
+Examples:
+
+Home → Us
+Us → Memories
+Memories → Detail
+Games → Game
+Settings → Theme
+Notes → Editor
+
+should have subtle transitions.
+
+Possible techniques:
+
+fade
+slide
+scale
+shared-element-like motion where practical
+opacity transitions
+content stagger
+soft easing
+
+Animations should:
+
+feel fast
+feel natural
+not delay navigation
+not consume unnecessary resources
+
+============================================================
+BUTTON INTERACTION SYSTEM
+============================================================
+
+Buttons should have meaningful feedback.
+
+Examples:
+
+press
+release
+disabled
+loading
+success
+error
+
+Possible interaction:
+
+subtle scale-down
+shadow change
+highlight
+ripple
+opacity
+micro-motion
+
+The interaction should make the user feel:
+
+"I pressed something."
+
+Avoid exaggerated bouncing.
+
+============================================================
+CARDS & COMPONENT INTERACTION
+============================================================
+
+Cards may have:
+
+press feedback
+subtle elevation
+content transitions
+image transitions
+selection state
+
+Shared components should handle this consistently.
+
+Do not implement the same animation independently on 20
+screens.
+
+Centralize reusable behavior.
+
+============================================================
+LOADING STATES
+============================================================
+
+Replace abrupt content appearance where appropriate with
+polished loading states.
+
+Possible:
+
+fade-in
+skeleton
+progress indicator
+content reveal
+
+Do not create unnecessary loading screens for instantaneous
+local operations.
+
+============================================================
+EMPTY STATES
+============================================================
+
+Empty states should feel intentional.
+
+Instead of:
+
+"Nothing here."
+
+Use:
+
+appropriate illustration
+flower decoration where appropriate
+friendly copy
+clear action
+subtle animation if appropriate
+
+The empty state should communicate that the application is
+waiting for the user's story to be created.
+
+============================================================
+FEEDBACK SYSTEM
+============================================================
+
+Create consistent feedback for:
+
+success
+error
+save
+delete
+complete
+favorite
+selection
+game answer
+reminder completion
+settings changes
+
+Possible mechanisms:
+
+toast
+inline message
+modal
+micro-animation
+icon transition
+
+Use the least intrusive mechanism appropriate to the action.
+
+============================================================
+GAME SYSTEM OVERHAUL
+============================================================
+
+THE EXISTING GAME ENGINE MUST REMAIN THE FOUNDATION.
+
+Do NOT create separate game engines for each game.
+
+The existing architecture should be extended.
+
+Current game categories include:
+
+COUPLE GAMES
+
+Who Knows Who Better
+Guess My Answer
+Would You Rather
+Couple Trivia
+This or That
+Finish My Sentence
+Other approved couple games
+
+CASUAL GAMES
+
+Memory Match
+Word Scramble
+Trivia
+Riddle Room
+Other approved games
+
+============================================================
+GAME RELIABILITY
+============================================================
+
+Some games may currently have loading or initialization issues.
+
+Audit EVERY AVAILABLE GAME.
+
+For each game verify:
+
+game opens
+content loads
+game state initializes
+question/card loads
+input works
+answer works
+score updates
+next round works
+completion works
+results work
+restart works
+back navigation works
+state resets correctly
+
+Fix the ROOT CAUSE.
+
+Do not mask errors.
+
+============================================================
+GAME LEVEL SYSTEM
+============================================================
+
+Introduce a reusable progression system into the game engine.
+
+Every supported game should have levels.
+
+Example:
+
+Level 1
+Level 2
+Level 3
+...
+up to approximately Level 500 where meaningful.
+
+Not every game needs exactly identical mechanics.
+
+The engine should support:
+
+level
+difficulty
+progression
+score scaling
+content scaling
+challenge scaling
+completion state
+
+============================================================
+GAME DIFFICULTY
+============================================================
+
+Provide difficulty where appropriate:
+
+EASY
+MEDIUM
+HARD
+
+Additional difficulty tiers may be introduced if they make
+sense.
+
+Difficulty must actually affect gameplay.
+
+Do not simply rename the same difficulty.
+
+============================================================
+MEMORY MATCH EXAMPLE
+============================================================
+
+Example progression:
+
+LEVEL 1:
+
+8 cards
+4 matching pairs
+one-card-at-a-time interaction
+
+Higher levels may increase:
+
+card count
+pair count
+memory complexity
+time pressure
+number of mismatches allowed
+board size
+
+Example:
+
+Level 1:
+8 cards
+
+Level 10:
+larger board
+
+Level 50:
+much larger board
+
+Level 100+:
+advanced challenge
+
+Level 500:
+maximum supported challenge
+
+Exact progression is the agent's responsibility.
+
+Do not make levels artificially repetitive.
+
+============================================================
+GAME ENGINE EXTENSIBILITY
+============================================================
+
+The reusable engine should be capable of supporting:
+
+game ID
+game type
+level
+difficulty
+question/content set
+session state
+score
+streak
+attempts
+time
+progress
+completion
+results
+restart
+replay
+
+Not every field needs to be displayed in every game.
+
+The engine should support games without forcing every game
+into identical UI.
+
+============================================================
+GAME ANIMATIONS
+============================================================
+
+Games should feel especially alive.
+
+Examples:
+
+card flip
+correct answer feedback
+incorrect answer feedback
+score animation
+progress animation
+level completion
+new level transition
+streak animation
+result reveal
+button feedback
+countdown where appropriate
+
+Keep animations lightweight and performant.
+
+============================================================
+GAME CONTENT
+============================================================
+
+Game content should remain separate from engine logic.
+
+The architecture should remain:
+
+GAME UI
+↓
+GAME SERVICE
+↓
+GAME ENGINE
+↓
+LOCAL GAME CONTENT
+
+Do not hardcode every question into UI components.
+
+Owner customization must remain possible.
+
+============================================================
+PHASE 23+ STRUCTURE
+============================================================
+
+The following phases represent the recommended continuation.
+
+They may be split further if necessary.
+
+Do not compress major work into one phase merely to finish
+quickly.
+
+============================================================
+PHASE 23 — DESIGN SYSTEM & BRANDING OVERHAUL
+============================================================
+
+Purpose:
+
+Establish the final TwoHearts visual language.
+
+Tasks:
+
+Official logo integration
+Central BrandLogo architecture
+Global color tokens
+Typography system
+Spacing system
+Radius system
+Shadow/elevation system
+Motion tokens
+Theme architecture
+Dark mode architecture
+Text scaling architecture
+Icon system
+Decorative asset architecture
+Rose/lily asset system
+Shared component audit
+Remove visual duplication
+Remove hardcoded visual values where appropriate
+
+Requirement:
+
+Changing a centralized design source must propagate
+throughout the application.
+
+Run system-wide customization tests.
+
+Do NOT rebuild feature functionality.
+
+============================================================
+PHASE 24 — HOME & GLOBAL NAVIGATION EXPERIENCE
+============================================================
+
+Purpose:
+
+Implement the redesigned Home and navigation concept.
+
+Tasks:
+
+Redesigned Home
+Profile/avatar header
+Central TwoHearts logo
+Partner avatar
+Notes
+Reminders
+Us
+Games
+Five-position bottom navigation
+Central TwoHearts navigation button
+Central couple hub
+Navigation animations
+Press feedback
+Active states
+Back navigation
+Responsive behavior
+
+Everything relationship-specific should be accessible from
+the central TwoHearts hub.
+
+Do not clutter Home.
+
+============================================================
+PHASE 25 — SYSTEM-WIDE MOTION & MICRO-INTERACTIONS
+============================================================
+
+Purpose:
+
+Make the entire application feel alive.
+
+Tasks:
+
+Screen transitions
+Button feedback
+Card interactions
+Modal transitions
+Toast transitions
+Loading states
+Empty-state animations
+Save feedback
+Delete feedback
+Selection feedback
+Navigation feedback
+Theme transitions
+Text-size transitions
+Reduced-motion handling where appropriate
+
+Create reusable animation primitives.
+
+Do not duplicate animation logic across screens.
+
+============================================================
+PHASE 26 — VISUAL EXPERIENCE OVERHAUL
+============================================================
+
+Purpose:
+
+Improve the existing 77 screens without destroying their
+approved design intent.
+
+For each screen:
+
+Review visual hierarchy
+Review spacing
+Review typography
+Review colors
+Review cards
+Review buttons
+Review icons
+Review states
+Review interaction
+Review animation
+Review empty state
+Review responsive behavior
+
+Track:
+
+NOT STARTED
+IN PROGRESS
+COMPLETE
+VERIFIED
+
+Do not invent replacement screens where an approved screen
+already exists.
+
+============================================================
+PHASE 27 — DECORATIVE & EMOTIONAL DESIGN PASS
+============================================================
+
+Purpose:
+
+Introduce the romantic identity of TwoHearts.
+
+Tasks:
+
+Rose/lily placement
+Background decoration
+Relationship-themed illustrations
+Warm empty states
+Subtle decorative animation
+Visual storytelling
+Personalization touches
+Special relationship moments
+
+Do not overdecorate.
+
+Every decoration must support hierarchy.
+
+============================================================
+PHASE 28 — GAMES ENGINE & GAMEPLAY OVERHAUL
+============================================================
+
+Purpose:
+
+Make every game reliable, replayable and progressively
+challenging.
+
+Tasks:
+
+Audit all games
+Fix loading issues
+Fix state initialization
+Fix restart behavior
+Extend reusable game engine
+Level system
+Difficulty system
+Progression
+Scoring
+Streaks where appropriate
+Game animations
+Result animations
+Replay
+Level completion
+Game-specific challenge scaling
+Content validation
+
+Target:
+
+Up to approximately 500 levels per game where meaningful.
+
+Do not generate meaningless difficulty inflation.
+
+============================================================
+PHASE 29 — GAME VISUAL & UX POLISH
+============================================================
+
+Purpose:
+
+Give games their own polished identity while keeping them
+inside the TwoHearts design system.
+
+Tasks:
+
+Game headers
+Progress indicators
+Level indicators
+Difficulty selector
+Question transitions
+Card animations
+Answer feedback
+Score animations
+Result screens
+Replay flow
+Level-up experience
+Game-specific visual treatment
+
+All games must remain consistent with the global design
+system.
+
+============================================================
+PHASE 30 — SETTINGS & REAL-TIME CUSTOMIZATION
+============================================================
+
+Purpose:
+
+Verify that personalization behaves like a modern application.
+
+Test:
+
+Light mode
+Dark mode
+Text size
+Theme changes
+Branding
+Animations
+Preferences
+App lock
+Notification settings
+
+Requirements:
+
+Changes should update immediately wherever possible.
+
+No screen should require manual reload to reflect a setting
+that is designed to be real-time.
+
+============================================================
+PHASE 31 — FULL UX CONSISTENCY PASS
+============================================================
+
+Purpose:
+
+Ensure the application feels like ONE application.
+
+Audit:
+
+Home
+Navigation
+Notes
+Memories
+Timeline
+Games
+Reminders
+Places
+Mood
+Period Tracker
+Vault
+Search
+Notifications
+Settings
+Onboarding
+App Lock
+
+Verify:
+
+same typography
+same spacing language
+same buttons
+same cards
+same animation language
+same icon language
+same feedback
+same branding
+same theme behavior
+
+Remove inconsistencies.
+
+============================================================
+PHASE 32 — PERFORMANCE & ACCESSIBILITY POLISH
+============================================================
+
+Purpose:
+
+Ensure the new visual system does not damage performance.
+
+Audit:
+
+animation performance
+memory usage
+large media
+large datasets
+screen transitions
+image loading
+decorative PNG loading
+game rendering
+theme switching
+text scaling
+low-end Android behavior
+
+Optimize:
+
+lazy loading
+asset loading
+image sizes
+animations
+DOM/render complexity
+unnecessary rerenders
+
+Preserve offline-first performance.
+
+============================================================
+PHASE 33 — FINAL VISUAL QA
+============================================================
+
+Purpose:
+
+Final manual and automated visual/UX verification.
+
+Verify:
+
+77 approved screens
+Home
+Navigation
+Branding
+Dark mode
+Text size
+Animations
+Games
+Rose/lily system
+Empty states
+Loading states
+Error states
+Dialogs
+Back behavior
+Responsive behavior
+
+Compare against:
+
+MasterPrompt
+TwoHeartsRDMap
+77 PNG references
+This roadmap
+Actual repository behavior
+
+Record:
+
+PASS
+MINOR ISSUE
+MAJOR ISSUE
+
+Fix all major issues.
+
+============================================================
+PHASE 34 — FINAL POST-V1 RELEASE POLISH
+============================================================
+
+Purpose:
+
+Final checkpoint for the enhanced TwoHearts V1.
+
+Tasks:
+
+Full test suite
+TypeScript
+Production build
+Capacitor sync
+Android APK
+GitHub Actions
+Security audit
+Offline audit
+Storage audit
+Performance audit
+Dependency audit
+Design-system audit
+Branding audit
+Game audit
+Customization audit
+Navigation audit
+77-screen status
+Documentation update
+Customization guide update
+Architecture documentation update
+Final roadmap update
+Final Git checkpoint
+
+Requirement:
+
+TwoHearts must remain:
+
+PRIVATE
+OFFLINE-FIRST
+LOCAL-FIRST
+ANDROID-FIRST
+
+No V2 functionality.
+
+============================================================
+SYSTEM-WIDE CUSTOMIZATION FINAL REQUIREMENT
+============================================================
+
+Before declaring the post-V1 redesign complete, the agent MUST
+perform a dedicated system-wide customization audit.
+
+The goal is to prove:
+
+ONE CHANGE
+↓
+EVERY RELEVANT SCREEN UPDATES
+
+Examples:
+
+Replace official logo asset
+→ all logo locations update.
+
+Change primary brand color
+→ all relevant components update.
+
+Change typography scale
+→ all screens update.
+
+Change theme
+→ entire application updates.
+
+Change text size
+→ entire application updates.
+
+Change shared button behavior
+→ all shared buttons update.
+
+Change shared card styling
+→ all shared cards update.
+
+Change motion token
+→ relevant animations update.
+
+If the agent discovers duplicated implementations,
+centralize them where safe.
+
+============================================================
+ARCHITECTURAL PRESERVATION RULE
+============================================================
+
+THIS IS CRITICAL.
+
+Post-V1 design work must NOT destroy the existing architecture.
+
+Maintain:
+
+UI
+↓
+Hooks / State
+↓
+Services
+↓
+Repositories
+↓
+Local persistence
+
+Maintain:
+
+Game UI
+↓
+Game Service
+↓
+Game Engine
+↓
+Local Content
+
+Maintain:
+
+Design tokens
+↓
+Shared components
+↓
+Feature UI
+
+Do not create feature-specific copies of global systems.
+
+============================================================
+NO REGRESSION RULE
+============================================================
+
+Every post-V1 phase must verify that previously working
+features still work.
+
+No design phase may silently break:
+
+database
+persistence
+media
+notifications
+vault
+search
+games
+settings
+navigation
+app lock
+onboarding
+
+============================================================
+PHASE CONTROL RULE
+============================================================
+
+At the end of EVERY post-V1 phase:
+
+1. Inspect repository before modifying anything.
+2. Read MasterPrompt.txt.
+3. Read TwoHeartsRDMap.txt.
+4. Read this roadmap.
+5. Understand the existing implementation.
+6. Determine the exact current state.
+7. Implement ONLY the authorized phase.
+8. Do not begin future phases.
+9. Preserve existing architecture.
+10. Run appropriate tests.
+11. Run TypeScript validation.
+12. Run production build.
+13. Run Capacitor sync where applicable.
+14. Inspect Git diff.
+15. Check for unintended files.
+16. Check for secrets.
+17. Check for cloud/V2 code.
+18. Check for regressions.
+19. Verify the phase-specific requirements.
+20. Commit the phase.
+21. Push the phase.
+22. Confirm master == origin/master.
+23. Confirm working tree clean.
+24. Confirm branch cleanup.
+25. Produce a detailed final report.
+26. STOP.
+
+Never automatically begin the next phase.
+
+The user must explicitly authorize the next phase.
+
+============================================================
+FAILSAFE / PREFLIGHT REQUIREMENTS
+============================================================
+
+Before every phase:
+
+VERIFY CURRENT GIT STATE.
+
+Confirm:
+
+current branch
+current HEAD
+origin/master
+working tree
+latest commit
+
+Verify the previous phase was actually:
+
+committed
+pushed
+present on origin/master
+
+Do not trust an APK build alone.
+
+SOURCE CODE ON MASTER IS THE AUTHORITY.
+
+If the previous phase's code is not present on origin/master:
+
+STOP.
+
+Do not continue.
+
+Inspect the discrepancy and report it.
+
+============================================================
+PHASE SCOPE FAILSAFE
+============================================================
+
+Before coding:
+
+Determine:
+
+What is already implemented?
+What is incomplete?
+What belongs to this phase?
+What belongs to a future phase?
+
+Do not rebuild working systems.
+
+Do not introduce future-phase functionality.
+
+============================================================
+TEST FAILSAFE
+============================================================
+
+If tests fail:
+
+Investigate the root cause.
+
+Do not:
+
+delete tests
+weaken tests
+skip tests
+change assertions merely to pass
+mask failures
+
+Fix the actual issue.
+
+============================================================
+VISUAL FAILSAFE
+============================================================
+
+If a visual reference exists:
+
+Use it.
+
+If the existing implementation already follows it:
+
+Preserve it.
+
+If it does not:
+
+Improve it.
+
+Do not create duplicate screens.
+
+============================================================
+PERFORMANCE FAILSAFE
+============================================================
+
+Animations and decorations must not make the application
+slow.
+
+Avoid:
+
+heavy continuous animations
+unnecessary GPU effects
+large unoptimized images
+massive DOM trees
+unnecessary rerenders
+
+Prefer:
+
+CSS transitions
+transform/opacity animation
+GPU-friendly effects
+lazy asset loading
+optimized PNGs
+reusable animation primitives
+
+============================================================
+SECURITY FAILSAFE
+============================================================
+
+Never introduce:
+
+hardcoded secrets
+credentials
+API keys
+cloud services
+remote authentication
+network dependencies
+
+Vault remains protected.
+
+Sensitive information must not enter logs.
+
+============================================================
+FINAL PRODUCT VISION
+============================================================
+
+TwoHearts should feel like:
+
+A private digital space made specifically for two people.
+
+It should feel:
+
+romantic
+warm
+personal
+premium
+alive
+smooth
+responsive
+emotionally expressive
+simple to understand
+fun to interact with
+
+It should NOT feel like:
+
+a generic dashboard
+a collection of CRUD forms
+a template
+a plain administrative application
+a collection of disconnected panels
+
+The difference should come from:
+
+design
+motion
+interaction
+branding
+depth
+personalization
+content
+micro-interactions
+gameplay
+visual storytelling
+
+============================================================
+FINAL EXPERIENCE GOAL
+============================================================
+
+When the user:
+
+opens TwoHearts
+
+sees the two avatars
+
+sees the official TwoHearts logo
+
+navigates through the application
+
+opens the couple hub
+
+opens memories
+
+plays a game
+
+changes the theme
+
+changes text size
+
+adds a reminder
+
+views their places
+
+opens their vault
+
+switches screens
+
+presses buttons
+
+completes a game
+
+adds a memory
+
+uses dark mode
+
+returns to Home
+
+the application should feel like:
+
+ONE COHESIVE PRODUCT.
+
+Not separate screens.
+
+Not separate features.
+
+ONE SYSTEM.
+
+============================================================
+POST-V1 ROADMAP STATUS
+============================================================
+
+PHASE 1–22:
+COMPLETE
+
+PHASE 23:
+NEXT
+
+PHASE 24:
+NOT STARTED
+
+PHASE 25:
+NOT STARTED
+
+PHASE 26:
+NOT STARTED
+
+PHASE 27:
+NOT STARTED
+
+PHASE 28:
+NOT STARTED
+
+PHASE 29:
+NOT STARTED
+
+PHASE 30:
+NOT STARTED
+
+PHASE 31:
+NOT STARTED
+
+PHASE 32:
+NOT STARTED
+
+PHASE 33:
+NOT STARTED
+
+PHASE 34:
+NOT STARTED
+
+============================================================
+IMPORTANT NOTE ABOUT THE ORIGINAL V1 ROADMAP
+============================================================
+
+The original roadmap may contain historical phase numbering
+that differs from the current implementation history.
+
+DO NOT use the old CURRENT STATUS section from an outdated
+roadmap copy as the authoritative repository state.
+
+The actual Git history, current repository, MasterPrompt,
+TwoHeartsRDMap, and this document should be reconciled.
+
+The repository's actual implementation state takes priority
+over stale status text.
+
+============================================================
+V2
+============================================================
+
+V2 remains separate.
+
+Do not begin V2 during Phase 23–34.
+
+Potential V2 functionality:
+
+Firebase communication bridge
+Two-person chat
+Online communication
+Remote notifications
+Synchronization where required
+Online presence
+
+V2 must preserve:
+
+LOCAL V1 CORE
+      │
+      ├── Local database
+      ├── Local filesystem
+      ├── Local notifications
+      └── Offline functionality
+              │
+              ▼
+       OPTIONAL V2 BRIDGE
+
+============================================================
+FINAL RULE
+============================================================
+
+DO NOT SACRIFICE THE ARCHITECTURE FOR VISUALS.
+
+DO NOT SACRIFICE THE UX FOR ARCHITECTURE.
+
+DO NOT SACRIFICE PERFORMANCE FOR ANIMATION.
+
+DO NOT SACRIFICE THE APPROVED DESIGN LANGUAGE FOR CREATIVITY.
+
+DO NOT SACRIFICE CREATIVITY FOR A BORING IMPLEMENTATION.
+
+TwoHearts should remain technically sound while becoming
+visually expressive and emotionally alive.
+
+============================================================
+END OF TWOHEARTS POST-V1 ROADMAP
+============================================================
