@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
+import { getDatabase } from '../../data/database/connection.ts';
 import { MoodRepository } from '../../repositories/moodRepository.ts';
 import { MoodService } from '../../services/mood/moodService.ts';
 import { AppError } from '../../services/errors/appError.ts';
@@ -19,9 +20,9 @@ import {
 } from '../../data/mood/moodTypes.ts';
 
 let _moodService: MoodService | null = null;
-function getMoodService(adapter?: unknown): MoodService {
+async function getMoodService(): Promise<MoodService> {
   if (!_moodService) {
-    const repo = new MoodRepository(adapter as never);
+    const repo = new MoodRepository(await getDatabase());
     _moodService = new MoodService(repo);
   }
   return _moodService;
@@ -50,7 +51,7 @@ export function MoodEntryScreen() {
     if (!entryId) return;
     const load = async () => {
       try {
-        const service = getMoodService();
+        const service = await getMoodService();
         const entry = await service.getById(entryId);
         if (entry) {
           setSelectedMood(entry.moodValue);
@@ -74,7 +75,7 @@ export function MoodEntryScreen() {
     setSaving(true);
 
     try {
-      const service = getMoodService();
+      const service = await getMoodService();
       const profileId = 'owner'; // Placeholder — real app uses profile context
       const today = todayKey();
 

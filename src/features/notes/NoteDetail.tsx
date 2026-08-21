@@ -11,25 +11,7 @@ import { useNoteService } from './useNoteService.ts';
 import type { NoteView } from '../../services/note/noteService.ts';
 import { IconTrash, IconEdit } from '../../components/index.ts';
 
-const CATEGORY_LABELS: Record<string, string> = {
-  general: 'General',
-  shared: 'Shared',
-  private: 'Private',
-  'love-letter': 'Love Letter',
-  gratitude: 'Gratitude',
-  idea: 'Idea',
-  reminder: 'Reminder',
-};
-
-const CATEGORY_COLORS: Record<string, string> = {
-  general: 'var(--th-color-burgundy)',
-  shared: '#8B5E3C',
-  private: '#4A5568',
-  'love-letter': '#C53030',
-  gratitude: '#2F855A',
-  idea: '#6B46C1',
-  reminder: '#D69E2E',
-};
+import { NOTE_CATEGORY_LABELS as CATEGORY_LABELS, NOTE_CATEGORY_COLORS as CATEGORY_COLORS } from './categoryMeta.ts';
 
 export function NoteDetail() {
   const navigate = useNavigate();

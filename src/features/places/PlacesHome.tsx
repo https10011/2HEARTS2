@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
+import { getDatabase } from '../../data/database/connection.ts';
 import { PlaceRepository } from '../../repositories/placeRepository.ts';
 import { PlaceService } from '../../services/place/placeService.ts';
 import { IconPlus, IconChevronRight } from '../../components/index.ts';
@@ -16,9 +17,9 @@ import type { Place } from '../../data/place/placeTypes.ts';
 const CATEGORY_OPTIONS = ['All', 'Restaurant', 'Vacation', 'Home', 'Adventure', 'Special', 'Other'] as const;
 
 let _placeService: PlaceService | null = null;
-function getPlaceService(adapter?: unknown): PlaceService {
+async function getPlaceService(): Promise<PlaceService> {
   if (!_placeService) {
-    const repo = new PlaceRepository(adapter as never);
+    const repo = new PlaceRepository(await getDatabase());
     _placeService = new PlaceService(repo);
   }
   return _placeService;
@@ -34,7 +35,7 @@ export function PlacesHome() {
   const loadPlaces = useCallback(async () => {
     try {
       setLoading(true);
-      const service = getPlaceService();
+      const service = await getPlaceService();
       const data = searchQuery.trim()
         ? await service.search(searchQuery)
         : activeCategory === 'All'

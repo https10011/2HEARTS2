@@ -8,14 +8,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
+import { getDatabase } from '../../data/database/connection.ts';
 import { PlaceRepository } from '../../repositories/placeRepository.ts';
 import { PlaceService } from '../../services/place/placeService.ts';
 import type { Place } from '../../data/place/placeTypes.ts';
 
 let _placeService: PlaceService | null = null;
-function getPlaceService(adapter?: unknown): PlaceService {
+async function getPlaceService(): Promise<PlaceService> {
   if (!_placeService) {
-    const repo = new PlaceRepository(adapter as never);
+    const repo = new PlaceRepository(await getDatabase());
     _placeService = new PlaceService(repo);
   }
   return _placeService;
@@ -32,7 +33,7 @@ export function PlaceDetail() {
     if (!placeId) return;
     const load = async () => {
       try {
-        const service = getPlaceService();
+        const service = await getPlaceService();
         const data = await service.getById(placeId);
         setPlace(data);
       } catch {
@@ -47,7 +48,7 @@ export function PlaceDetail() {
   const handleDelete = useCallback(async () => {
     if (!placeId) return;
     try {
-      const service = getPlaceService();
+      const service = await getPlaceService();
       await service.delete(placeId);
       navigate(RoutePath.appPlaces);
     } catch {

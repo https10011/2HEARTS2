@@ -9,6 +9,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
+import { getDatabase } from '../../data/database/connection.ts';
 import { PlaceRepository } from '../../repositories/placeRepository.ts';
 import { PlaceService } from '../../services/place/placeService.ts';
 import { AppError } from '../../services/errors/appError.ts';
@@ -17,9 +18,9 @@ import { AppError } from '../../services/errors/appError.ts';
 const CATEGORY_OPTIONS = ['Restaurant', 'Vacation', 'Home', 'Adventure', 'Special', 'Other'] as const;
 
 let _placeService: PlaceService | null = null;
-function getPlaceService(adapter?: unknown): PlaceService {
+async function getPlaceService(): Promise<PlaceService> {
   if (!_placeService) {
-    const repo = new PlaceRepository(adapter as never);
+    const repo = new PlaceRepository(await getDatabase());
     _placeService = new PlaceService(repo);
   }
   return _placeService;
@@ -47,7 +48,7 @@ export function CreatePlace() {
     if (!placeId) return;
     const load = async () => {
       try {
-        const service = getPlaceService();
+        const service = await getPlaceService();
         const place = await service.getById(placeId);
         if (place) {
           setName(place.name);
@@ -75,7 +76,7 @@ export function CreatePlace() {
     setSaving(true);
 
     try {
-      const service = getPlaceService();
+      const service = await getPlaceService();
       const data = {
         name,
         address: address || null,

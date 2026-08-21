@@ -5,12 +5,13 @@
  * recurrence selection, and notification toggle.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { IconBack } from '../../components/index.ts';
 import type { ReminderRecurrence } from '../../data/reminder/reminderTypes.ts';
 import { REMINDER_RECURRENCES } from '../../data/reminder/reminderTypes.ts';
+import { useReminderService } from './useReminderService.ts';
 
 const RECURRENCE_LABELS: Record<ReminderRecurrence, string> = {
   none: 'One-time',
@@ -24,6 +25,7 @@ export function CreateReminder() {
   const navigate = useNavigate();
   const { reminderId } = useParams<{ reminderId: string }>();
   const isEditing = Boolean(reminderId);
+  const service = useReminderService();
 
   const today = new Date();
   const defaultDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -37,6 +39,24 @@ export function CreateReminder() {
   const [notificationEnabled, setNotificationEnabled] = useState(true);
   const [errors, setErrors] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+
+  // Edit mode: prefill the form from the persisted reminder.
+  useEffect(() => {
+    if (!service || !reminderId) return;
+    let cancelled = false;
+    service.getById(reminderId).then((existing) => {
+      if (cancelled || !existing) return;
+      setTitle(existing.title);
+      setDescription(existing.description ?? '');
+      setScheduledDate(existing.scheduledDate);
+      setScheduledTime(existing.scheduledTime);
+      setRecurrence(existing.recurrence);
+      setNotificationEnabled(existing.notificationEnabled);
+    }).catch(() => {
+      if (!cancelled) setErrors(['Could not load this reminder.']);
+    });
+    return () => { cancelled = true; };
+  }, [service, reminderId]);
 
   const handleSave = useCallback(async () => {
     const validationErrors: string[] = [];
@@ -54,8 +74,7 @@ export function CreateReminder() {
     setSaving(true);
 
     try {
-      // In a real implementation, this would call the ReminderService
-      // For now, we save to the repository if available
+      if (!service) throw new Error('Reminders unavailable');
       const data = {
         title: title.trim(),
         description: description.trim() || null,
@@ -65,16 +84,18 @@ export function CreateReminder() {
         notificationEnabled,
       };
 
-      // Placeholder: navigate back on save
-      // In full implementation: await reminderService.create(data);
-      console.log('Saving reminder:', data);
+      if (isEditing && reminderId) {
+        await service.update(reminderId, data);
+      } else {
+        await service.create(data);
+      }
       navigate(RoutePath.appReminders);
-    } catch (cause) {
+    } catch {
       setErrors(['Failed to save reminder. Please try again.']);
     } finally {
       setSaving(false);
     }
-  }, [title, description, scheduledDate, scheduledTime, recurrence, notificationEnabled, navigate, isEditing, reminderId]);
+  }, [service, title, description, scheduledDate, scheduledTime, recurrence, notificationEnabled, navigate, isEditing, reminderId]);
 
   return (
     <div className="th-content-pad">

@@ -9,6 +9,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
+import { getDatabase } from '../../data/database/connection.ts';
 import { MoodRepository } from '../../repositories/moodRepository.ts';
 import { MoodService } from '../../services/mood/moodService.ts';
 
@@ -21,9 +22,9 @@ import {
 } from '../../data/mood/moodTypes.ts';
 
 let _moodService: MoodService | null = null;
-function getMoodService(adapter?: unknown): MoodService {
+async function getMoodService(): Promise<MoodService> {
   if (!_moodService) {
-    const repo = new MoodRepository(adapter as never);
+    const repo = new MoodRepository(await getDatabase());
     _moodService = new MoodService(repo);
   }
   return _moodService;
@@ -49,7 +50,7 @@ export function MoodHome() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const service = getMoodService();
+      const service = await getMoodService();
       // Use a placeholder profileId — in real app would come from context
       const profileId = 'owner';
       const today = todayKey();
@@ -71,7 +72,7 @@ export function MoodHome() {
   const handleQuickMood = async (mood: MoodValue) => {
     setSaving(true);
     try {
-      const service = getMoodService();
+      const service = await getMoodService();
       const profileId = 'owner';
       const today = todayKey();
       const entry = await service.record({

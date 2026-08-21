@@ -21,14 +21,13 @@ import { GamesHubScreen } from '../features/app-shell/screens/GamesHubScreen.tsx
 import { NotesHome, NoteEditor, NoteDetail } from '../features/notes/index.ts';
 import { MoreScreen } from '../features/app-shell/screens/MoreScreen.tsx';
 import { ImportantDatesScreen } from '../features/app-shell/screens/ImportantDatesScreen.tsx';
-import { PlaceholderScreen } from '../features/app-shell/screens/PlaceholderScreen.tsx';
 import { MemoriesHome, AddMemory, MemoryDetail } from '../features/memories/index.ts';
 import { TimelineHome, AddEvent, EventDetail } from '../features/timeline/index.ts';
 import { GamePlayScreen, GameResultsScreen, MemoryMatchScreen, WordScrambleScreen, CasualGamePlayScreen } from '../features/games/index.ts';
 import { RemindersHome, CreateReminder, ReminderDetail } from '../features/reminders/index.ts';
 import { PlacesHome, CreatePlace, PlaceDetail } from '../features/places/index.ts';
 import { MoodHome, MoodEntryScreen, MoodHistory } from '../features/mood/index.ts';
-import { PeriodHome, LogPeriod, CycleHistory } from '../features/period/index.ts';
+import { PeriodHome, LogPeriod, CycleHistory, PeriodCalendarScreen, PeriodSettingsScreen } from '../features/period/index.ts';
 import { VaultEntryRoute, AddVaultContentRoute, VaultContentViewerRoute } from '../features/vault/index.ts';
 import { SearchScreen } from '../features/app-shell/screens/SearchScreen.tsx';
 import { NotificationCenter } from '../features/notifications/NotificationCenter.tsx';
@@ -157,9 +156,9 @@ const router = createBrowserRouter([
       // Period Tracker (Phase 16)
       { path: 'period', element: <PeriodHome /> },
       { path: 'period/log', element: <LogPeriod /> },
-      { path: 'period/calendar', element: <PlaceholderScreen title="Period Calendar" description="View your cycle calendar." /> },
+      { path: 'period/calendar', element: <PeriodCalendarScreen /> },
       { path: 'period/history', element: <CycleHistory /> },
-      { path: 'period/settings', element: <PlaceholderScreen title="Period Settings" description="Configure cycle preferences." /> },
+      { path: 'period/settings', element: <PeriodSettingsScreen /> },
       { path: 'period/:entryId', element: <LogPeriod /> },
       { path: 'period/:entryId/edit', element: <LogPeriod /> },
 

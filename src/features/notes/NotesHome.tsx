@@ -11,27 +11,14 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { IconPlus, IconSearch, IconChevronRight } from '../../components/index.ts';
 import { useNoteService } from './useNoteService.ts';
 import type { NoteView } from '../../services/note/noteService.ts';
+import { NOTE_CATEGORY_LABELS, NOTE_CATEGORY_COLORS } from './categoryMeta.ts';
 
 const CATEGORY_LABELS: Record<string, string> = {
   all: 'All',
-  general: 'General',
-  shared: 'Shared',
-  private: 'Private',
-  'love-letter': 'Love Letter',
-  gratitude: 'Gratitude',
-  idea: 'Idea',
-  reminder: 'Reminder',
+  ...NOTE_CATEGORY_LABELS,
 };
 
-const CATEGORY_COLORS: Record<string, string> = {
-  general: 'var(--th-color-burgundy)',
-  shared: '#8B5E3C',
-  private: '#4A5568',
-  'love-letter': '#C53030',
-  gratitude: '#2F855A',
-  idea: '#6B46C1',
-  reminder: '#D69E2E',
-};
+const CATEGORY_COLORS = NOTE_CATEGORY_COLORS;
 
 export function NotesHome() {
   const navigate = useNavigate();

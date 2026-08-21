@@ -9,14 +9,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
+import { getDatabase } from '../../data/database/connection.ts';
 import { PeriodRepository } from '../../repositories/periodRepository.ts';
 import { PeriodService } from '../../services/period/periodService.ts';
 import type { PeriodSummary } from '../../services/period/periodService.ts';
 
 let _periodService: PeriodService | null = null;
-function getPeriodService(adapter?: unknown): PeriodService {
+async function getPeriodService(): Promise<PeriodService> {
   if (!_periodService) {
-    const repo = new PeriodRepository(adapter as never);
+    const repo = new PeriodRepository(await getDatabase());
     _periodService = new PeriodService(repo);
   }
   return _periodService;
@@ -38,7 +39,7 @@ export function PeriodHome() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const service = getPeriodService();
+      const service = await getPeriodService();
       const profileId = 'owner';
       const data = await service.getSummary(profileId);
       setSummary(data);
@@ -70,12 +71,22 @@ export function PeriodHome() {
     <div className="th-content-pad">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--th-space-4)' }}>
         <h1 className="th-screen-title">Period Tracker</h1>
-        <button
-          className="th-btn th-btn--primary th-btn--sm"
-          onClick={() => navigate(RoutePath.appPeriodLog)}
-        >
-          Log Period
-        </button>
+        <div style={{ display: 'flex', gap: 'var(--th-space-2)', alignItems: 'center' }}>
+          <button
+            className="th-btn th-btn--ghost"
+            onClick={() => navigate(RoutePath.appPeriodSettings)}
+            style={{ minWidth: '44px', padding: 'var(--th-space-2)' }}
+            aria-label="Period settings"
+          >
+            ⚙️
+          </button>
+          <button
+            className="th-btn th-btn--primary th-btn--sm"
+            onClick={() => navigate(RoutePath.appPeriodLog)}
+          >
+            Log Period
+          </button>
+        </div>
       </div>
 
       {/* Cycle status card */}

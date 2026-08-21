@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
+import { getDatabase } from '../../data/database/connection.ts';
 import { PeriodRepository } from '../../repositories/periodRepository.ts';
 import { PeriodService } from '../../services/period/periodService.ts';
 import { AppError } from '../../services/errors/appError.ts';
@@ -20,9 +21,9 @@ const FLOW_OPTIONS: Array<{ value: FlowLevel; label: string; emoji: string }> = 
 ];
 
 let _periodService: PeriodService | null = null;
-function getPeriodService(adapter?: unknown): PeriodService {
+async function getPeriodService(): Promise<PeriodService> {
   if (!_periodService) {
-    const repo = new PeriodRepository(adapter as never);
+    const repo = new PeriodRepository(await getDatabase());
     _periodService = new PeriodService(repo);
   }
   return _periodService;
@@ -53,7 +54,7 @@ export function LogPeriod() {
     if (!entryId) return;
     const load = async () => {
       try {
-        const service = getPeriodService();
+        const service = await getPeriodService();
         const entry = await service.getEntryById(entryId);
         if (entry) {
           setStartDate(entry.startDate);
@@ -76,7 +77,7 @@ export function LogPeriod() {
     setSaving(true);
 
     try {
-      const service = getPeriodService();
+      const service = await getPeriodService();
       const profileId = 'owner';
 
       if (isEditing && entryId) {

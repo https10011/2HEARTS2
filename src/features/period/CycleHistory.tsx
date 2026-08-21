@@ -9,15 +9,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
+import { getDatabase } from '../../data/database/connection.ts';
 import { PeriodRepository } from '../../repositories/periodRepository.ts';
 import { PeriodService } from '../../services/period/periodService.ts';
 import type { PeriodEntry } from '../../data/period/periodTypes.ts';
 import { diffDays } from '../../data/period/periodTypes.ts';
 
 let _periodService: PeriodService | null = null;
-function getPeriodService(adapter?: unknown): PeriodService {
+async function getPeriodService(): Promise<PeriodService> {
   if (!_periodService) {
-    const repo = new PeriodRepository(adapter as never);
+    const repo = new PeriodRepository(await getDatabase());
     _periodService = new PeriodService(repo);
   }
   return _periodService;
@@ -45,7 +46,7 @@ export function CycleHistory() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const service = getPeriodService();
+      const service = await getPeriodService();
       const profileId = 'owner';
       const data = await service.listEntries(profileId);
       setEntries(data);

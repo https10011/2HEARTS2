@@ -105,7 +105,15 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   router captured coreServices.appLock at module scope before bootstrap and
   never injected VaultService — and OnboardingGate/catch-all sending
   completed users back into onboarding)
-- Phase 22+: NOT STARTED
+- Phase 22: Final build, documentation & release — COMPLETE
+  (docs/phase-22-release.md, docs/screens.md 77-reference map; fixed
+  reminders UI never wired to persistence (new useReminderService hook),
+  places/mood/period screens built repositories with undefined adapters
+  (now getDatabase()-backed), period calendar/settings were
+  PlaceholderScreen stubs (now PeriodCalendarScreen/PeriodSettingsScreen;
+  PlaceholderScreen deleted), note category meta centralized in
+  features/notes/categoryMeta.ts; debug console.log calls removed)
+- Phase 23+: NOT STARTED
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,

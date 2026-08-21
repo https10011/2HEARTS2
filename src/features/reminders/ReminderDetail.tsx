@@ -11,6 +11,7 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { IconBack } from '../../components/index.ts';
 import type { Reminder } from '../../data/reminder/reminderTypes.ts';
 import { formatReminderDateTime } from '../../data/reminder/reminderTypes.ts';
+import { useReminderService } from './useReminderService.ts';
 
 const STATUS_LABELS: Record<string, string> = {
   active: 'Active',
@@ -30,27 +31,58 @@ const RECURRENCE_LABELS: Record<string, string> = {
 export function ReminderDetail() {
   const navigate = useNavigate();
   const { reminderId } = useParams<{ reminderId: string }>();
+  const service = useReminderService();
   const [reminder, setReminder] = useState<Reminder | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
-    // In full implementation, fetch from repository
-    // For now, show loading then graceful fallback
-    setLoading(false);
-  }, [reminderId]);
+    if (!service || !reminderId) return;
+    let cancelled = false;
+    service.getById(reminderId)
+      .then((found) => {
+        if (!cancelled) {
+          setReminder(found);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [service, reminderId]);
 
   const handleDelete = useCallback(async () => {
-    // In full implementation: await reminderService.delete(reminderId);
-    console.log('Deleting reminder:', reminderId);
+    if (!service || !reminderId) return;
+    try {
+      await service.delete(reminderId);
+    } catch {
+      // Already gone or unavailable — either way, leave the detail view.
+    }
     navigate(RoutePath.appReminders);
-  }, [reminderId, navigate]);
+  }, [service, reminderId, navigate]);
 
   const handleToggleNotification = useCallback(async () => {
-    if (!reminder) return;
-    // In full implementation: await reminderService.update(id, { notificationEnabled: !reminder.notificationEnabled });
-    setReminder({ ...reminder, notificationEnabled: !reminder.notificationEnabled });
-  }, [reminder]);
+    if (!service || !reminder) return;
+    try {
+      const updated = await service.update(reminder.id, {
+        notificationEnabled: !reminder.notificationEnabled,
+      });
+      setReminder(updated);
+    } catch {
+      // Keep current state on failure.
+    }
+  }, [service, reminder]);
+
+  const handleComplete = useCallback(async () => {
+    if (!service || !reminder) return;
+    try {
+      const updated = await service.complete(reminder.id);
+      setReminder(updated);
+    } catch {
+      // Keep current state on failure.
+    }
+  }, [service, reminder]);
 
   if (loading) {
     return (
@@ -149,11 +181,7 @@ export function ReminderDetail() {
         {reminder.status === 'active' && (
           <button
             className="th-btn th-btn--primary th-btn--full"
-            onClick={async () => {
-              // In full implementation: await reminderService.complete(reminderId);
-              console.log('Completing reminder:', reminderId);
-              setReminder({ ...reminder, status: 'completed' });
-            }}
+            onClick={handleComplete}
           >
             ✅ Mark Complete
           </button>

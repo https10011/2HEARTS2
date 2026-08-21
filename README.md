@@ -4,11 +4,15 @@ A private, offline-first, local-first couples application for Android, built wit
 **React + TypeScript + Capacitor**. The app runs entirely on-device — no backend,
 no cloud database, no mandatory internet connection (V1 architectural boundary).
 
-This repository contains the **Phase 1 engineering foundation**, **Phase 2
-local-first persistence foundation**, **Phase 3 core services**, **Phase 4
-relationship & application state foundation**, **Phase 5 onboarding & app entry
-experience**, **Phase 6 main app shell & navigation**, and **Phase 7 Memories**.
-Feature screens (notes, games, reminders, vault, etc.) are added in later phases.
+This repository contains the **complete V1 release** (Phases 1–22): the
+engineering foundation, local-first persistence, core services, relationship
+and application state, onboarding, the main app shell, and every V1 feature —
+Memories, Notes, Timeline, Games (6 couple + 4 casual), Reminders, Places,
+Mood, Period Tracker, Private Vault, global Search, Notification Center, and
+Settings with data management — plus the Phase 21 integration/QA hardening and
+the Phase 22 final build, documentation, and release checkpoint. See
+`docs/screens.md` for the full 77-reference screen map and
+`docs/phase-22-release.md` for the release-readiness report.
 
 ## Technology stack
 
@@ -63,7 +67,7 @@ npm install          # install dependencies
 npm run dev          # start Vite dev server (http://localhost:5173)
 npm run build        # TypeScript check + production build → dist/
 npm run typecheck    # TypeScript only
-npm test             # Persistence unit tests (sql.js in Node, no mocks)
+npm test             # Full test suite (542 tests, real sql.js in Node, no mocks)
 ```
 
 ## Android / Capacitor build
@@ -131,11 +135,21 @@ testing status.
 
 See **`docs/app-shell.md`** for the Phase 6 main app shell and navigation:
 bottom tab navigation, home dashboard, hub screens (Us, Games, Notes, More),
-feature placeholder routes, back-button behavior, and testing status.
+feature routing, back-button behavior, and testing status.
 
 See **`docs/memories.md`** for the Phase 7 Memories feature: memory data model,
 repository, service, media handling, CRUD screens (home, add, detail),
 local-first storage, and testing status.
+
+See **`docs/settings.md`** for the settings & app-management architecture
+(schema v3, data management, app-lock gate).
+
+See **`docs/screens.md`** for the Phase 22 screen-status map: all 77 approved
+visual references mapped to implemented routes/screens, with explicit
+design-only callouts.
+
+See **`docs/phase-22-release.md`** for the final V1 release-readiness report:
+failsafe checks, audits, fixes, verification results, and known limitations.
 
 ## Authoritative specifications
 

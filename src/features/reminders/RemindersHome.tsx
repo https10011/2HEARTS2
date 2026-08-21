@@ -10,35 +10,26 @@ import { Link, useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { IconBack, IconChevronRight } from '../../components/index.ts';
 import type { Reminder } from '../../data/reminder/reminderTypes.ts';
-import { ReminderRepository } from '../../repositories/reminderRepository.ts';
-import { ReminderService } from '../../services/reminder/reminderService.ts';
 import { formatReminderDateTime } from '../../data/reminder/reminderTypes.ts';
-
-let repo: ReminderRepository | null = null;
-
-/** Initialize with a database adapter — called from bootstrap. */
-export function initReminders(repository: ReminderRepository, _svc: ReminderService) {
-  repo = repository;
-}
+import { useReminderService } from './useReminderService.ts';
 
 export function RemindersHome() {
   const navigate = useNavigate();
+  const service = useReminderService();
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadReminders = useCallback(async () => {
+    if (!service) return;
     try {
-      // Attempt to load from repository
-      if (repo) {
-        const list = await repo.list();
-        setReminders(list);
-      }
+      const list = await service.list();
+      setReminders(list);
     } catch {
       // Graceful degradation — show empty state
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [service]);
 
   useEffect(() => {
     loadReminders();

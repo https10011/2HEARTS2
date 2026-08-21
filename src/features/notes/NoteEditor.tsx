@@ -11,16 +11,7 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { useNoteService } from './useNoteService.ts';
 import type { NoteCategory } from '../../data/note/noteTypes.ts';
 import { NOTE_CATEGORIES } from '../../data/note/noteTypes.ts';
-
-const CATEGORY_LABELS: Record<string, string> = {
-  general: 'General',
-  shared: 'Shared',
-  private: 'Private',
-  'love-letter': 'Love Letter',
-  gratitude: 'Gratitude',
-  idea: 'Idea',
-  reminder: 'Reminder',
-};
+import { NOTE_CATEGORY_LABELS as CATEGORY_LABELS } from './categoryMeta.ts';
 
 export function NoteEditor() {
   const navigate = useNavigate();
