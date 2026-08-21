@@ -146,7 +146,13 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   `th-spin` keyframe app-wide) + visible caption; `--th-duration-spin` token;
   theme flips transition surface colors via ONE scoped rule in global.css;
   inline hardcoded transitions eliminated (MoodEntry, PeriodHome);
-  `IconInfo` added to centralized Icon set. Phase 26+: NOT STARTED
+  `IconInfo` added to centralized Icon set. Phase 26 (Visual Experience Overhaul)
+  — COMPLETE (docs/phase26-screen-audit.md): centralized CSS enhancement layer
+  in primitives.css (+453 lines, token-driven: enhanced cards, empty states,
+  relationship cards, profile cards, more items, note/memory/reminder cards,
+  timeline events, FABs, settings rows, screen headers, stagger items, chips,
+  warm dividers, content bands); 28 files polished across all screen groups;
+  77-screen audit tracked in docs/phase26-screen-audit.md. Phase 27+: NOT STARTED
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,
