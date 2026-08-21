@@ -101,8 +101,11 @@ export function ReminderDetail() {
   if (!reminder) {
     return (
       <div className="th-content-pad">
-        <div className="th-empty-state">
-          <h3>Reminder not found</h3>
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <IconBack size={36} />
+          </div>
+          <h3 className="th-empty-state__title">Reminder not found</h3>
           <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appReminders)}>
             Back to Reminders
           </button>

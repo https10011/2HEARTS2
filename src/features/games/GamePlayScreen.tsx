@@ -139,8 +139,11 @@ export function GamePlayScreen() {
   if (!definition || !gt) {
     return (
       <div className="th-content-pad">
-        <div className="th-empty-state">
-          <h3>Game not found</h3>
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <span style={{ fontSize: '2rem' }}>?</span>
+          </div>
+          <h3 className="th-empty-state__title">Game not found</h3>
           <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appGames)}>
             Back to Games
           </button>

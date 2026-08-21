@@ -27,28 +27,26 @@ const CASUAL_GAME_ROUTES: Partial<Record<GameType, string>> = {
 export function GamesHubScreen() {
   return (
     <div className="th-content-pad">
-      <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-2)' }}>Games</h1>
-      <p className="th-screen-subtitle" style={{ marginBottom: 'var(--th-space-6)' }}>
-        Play together and have fun
-      </p>
+      <div className="th-screen-header--enhanced">
+        <div>
+          <h1 className="th-screen-title">Games</h1>
+          <p className="th-screen-subtitle" style={{ marginTop: 'var(--th-space-1)' }}>
+            Play together and have fun
+          </p>
+        </div>
+      </div>
 
       {/* Couple Games */}
-      <h2 style={{
-        fontSize: 'var(--th-font-size-sm)',
-        fontWeight: 'var(--th-font-weight-semibold)',
-        color: 'var(--th-color-text-secondary)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-        marginBottom: 'var(--th-space-3)',
-      }}>
+      <h2 className="th-hub-section-title" style={{ marginTop: 'var(--th-space-4)' }}>
         Couple Games
       </h2>
-      <div className="th-hub-grid" style={{ marginBottom: 'var(--th-space-8)' }}>
-        {COUPLE_GAME_DEFINITIONS.map((game) => (
+      <div className="th-hub-grid--enhanced" style={{ marginBottom: 'var(--th-space-8)' }}>
+        {COUPLE_GAME_DEFINITIONS.map((game, i) => (
           <Link
             key={game.type}
             to={`${RoutePath.appGames}/${game.type}`}
-            className="th-feature-card"
+            className="th-feature-card th-feature-card--enhanced th-stagger-item"
+            style={{ animationDelay: `${i * 40}ms` }}
           >
             <div className="th-feature-card__body">
               <div className="th-feature-card__title">{game.title}</div>
@@ -60,22 +58,16 @@ export function GamesHubScreen() {
       </div>
 
       {/* Casual Games */}
-      <h2 style={{
-        fontSize: 'var(--th-font-size-sm)',
-        fontWeight: 'var(--th-font-weight-semibold)',
-        color: 'var(--th-color-text-secondary)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-        marginBottom: 'var(--th-space-3)',
-      }}>
+      <h2 className="th-hub-section-title">
         Fun & Casual
       </h2>
-      <div className="th-hub-grid">
-        {CASUAL_GAME_DEFINITIONS.map((game) => (
+      <div className="th-hub-grid--enhanced">
+        {CASUAL_GAME_DEFINITIONS.map((game, i) => (
           <Link
             key={game.type}
             to={CASUAL_GAME_ROUTES[game.type] ?? `${RoutePath.appGames}/${game.type}`}
-            className="th-feature-card"
+            className="th-feature-card th-feature-card--enhanced th-stagger-item"
+            style={{ animationDelay: `${i * 40}ms` }}
           >
             <div className="th-feature-card__body">
               <div className="th-feature-card__title">{game.title}</div>

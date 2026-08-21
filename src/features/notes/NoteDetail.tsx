@@ -86,8 +86,10 @@ export function NoteDetail() {
   if (error || !note) {
     return (
       <div className="th-content-pad">
-        <div className="th-empty-state">
-          <div className="th-empty-state__icon"><IconFileText size={40} /></div>
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <IconFileText size={36} />
+          </div>
           <h3 className="th-empty-state__title">Note not found</h3>
           <p className="th-empty-state__desc">{error ?? 'This note may have been deleted.'}</p>
           <button

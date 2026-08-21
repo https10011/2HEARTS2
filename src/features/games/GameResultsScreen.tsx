@@ -23,8 +23,11 @@ export function GameResultsScreen() {
   if (!result || !definition) {
     return (
       <div className="th-content-pad">
-        <div className="th-empty-state">
-          <h3>No results to display</h3>
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <span style={{ fontSize: '2rem' }}>?</span>
+          </div>
+          <h3 className="th-empty-state__title">No results to display</h3>
           <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appGames)}>
             Back to Games
           </button>

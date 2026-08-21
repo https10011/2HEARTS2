@@ -73,12 +73,12 @@ export function PlaceDetail() {
   if (!place) {
     return (
       <div className="th-content-pad">
-        <div className="th-empty-state">
-          <div className="th-empty-state__icon" style={{ color: 'var(--th-color-rose-muted)' }}>
-            <IconMapPin size={44} />
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <IconMapPin size={36} />
           </div>
           <h3 className="th-empty-state__title">Place not found</h3>
-          <p className="th-empty-state__message">This place may have been deleted.</p>
+          <p className="th-empty-state__desc">This place may have been deleted.</p>
           <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appPlaces)}>
             Back to Places
           </button>

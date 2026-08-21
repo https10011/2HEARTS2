@@ -166,16 +166,20 @@ export function ImportantDatesScreen() {
       )}
 
       {dates.length === 0 && !showForm ? (
-        <div style={{ textAlign: 'center', padding: 'var(--th-space-12) 0', color: 'var(--th-color-text-secondary)' }}>
-          <p style={{ marginBottom: 'var(--th-space-3)' }}>No important dates yet.</p>
+        <div className="th-empty-state th-empty-state--enhanced">
+          <div className="th-empty-state__visual">
+            <IconPlus size={36} />
+          </div>
+          <h3 className="th-empty-state__title">No important dates yet</h3>
+          <p className="th-empty-state__desc">Add dates to remember the moments that matter</p>
           <button className="th-btn th-btn--primary" onClick={() => setShowForm(true)}>
             <IconPlus size={18} /> Add your first date
           </button>
         </div>
       ) : (
-        <div className="th-hub-grid">
+        <div className="th-hub-grid--enhanced">
           {dates.map((d) => (
-            <div key={d.id} className="th-feature-card" style={{ cursor: 'default' }}>
+            <div key={d.id} className="th-feature-card th-feature-card--enhanced th-stagger-item" style={{ cursor: 'default' }}>
               <div className="th-feature-card__body">
                 <div className="th-feature-card__title">{d.title}</div>
                 <div className="th-feature-card__desc">
