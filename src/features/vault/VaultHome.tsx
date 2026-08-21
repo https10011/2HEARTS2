@@ -10,15 +10,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import type { VaultService } from '../../services/vault/vaultService.ts';
-import { IconPlus } from '../../components/index.ts';
+import { IconPlus, IconLock } from '../../components/index.ts';
 import type { VaultItem, VaultContentType } from '../../data/vault/vaultTypes.ts';
-
-const TYPE_ICONS: Record<VaultContentType, string> = {
-  photo: '🖼️',
-  video: '🎬',
-  note: '📝',
-  file: '📁',
-};
+import { CONTENT_TYPE_META, CONTENT_TYPE_ORDER } from './contentTypeMeta.tsx';
 
 export function VaultHome({ service }: { service?: VaultService }) {
   const navigate = useNavigate();
@@ -76,14 +70,14 @@ export function VaultHome({ service }: { service?: VaultService }) {
 
       {/* Filter tabs */}
       <div style={{ display: 'flex', gap: 'var(--th-space-2)', marginBottom: 'var(--th-space-4)', overflowX: 'auto' }}>
-        {(['all', 'photo', 'video', 'note', 'file'] as const).map((type) => (
+        {(['all', ...CONTENT_TYPE_ORDER] as const).map((type) => (
           <button
             key={type}
             className={`th-btn th-btn--sm ${filter === type ? 'th-btn--primary' : 'th-btn--outline'}`}
             onClick={() => setFilter(type)}
             style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
           >
-            {type === 'all' ? 'All' : `${TYPE_ICONS[type]} ${type.charAt(0).toUpperCase() + type.slice(1)}`}
+            {type === 'all' ? 'All' : CONTENT_TYPE_META[type].label}
           </button>
         ))}
       </div>
@@ -91,11 +85,13 @@ export function VaultHome({ service }: { service?: VaultService }) {
       {/* Empty state */}
       {items.length === 0 && (
         <div className="th-card" style={{ padding: 'var(--th-space-6)', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 'var(--th-space-2)' }}>🔐</div>
+          <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-rose-muted)' }}>
+            <IconLock size={48} />
+          </div>
           <h3 style={{ marginBottom: 'var(--th-space-2)' }}>
-            {filter === 'all' ? 'Vault is empty' : `No ${filter} items`}
+            {filter === 'all' ? 'Vault is empty' : `No ${CONTENT_TYPE_META[filter].label} items`}
           </h3>
-          <p style={{ color: 'var(--th-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
+          <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
             Add private photos, videos, notes, or files to your secure vault.
           </p>
           <button
@@ -117,13 +113,18 @@ export function VaultHome({ service }: { service?: VaultService }) {
               onClick={() => navigate(RoutePath.appVaultDetail.replace(':itemId', item.id))}
               style={{ padding: 'var(--th-space-3)', textAlign: 'left' }}
             >
-              <div style={{ fontSize: '2rem', marginBottom: 'var(--th-space-2)' }}>
-                {TYPE_ICONS[item.contentType]}
-              </div>
-              <div style={{ fontWeight: 500, fontSize: 'var(--th-text-sm)', marginBottom: 'var(--th-space-1)' }}>
+              {(() => {
+                const Meta = CONTENT_TYPE_META[item.contentType];
+                return (
+                  <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-burgundy)' }}>
+                    <Meta.Icon size={28} />
+                  </div>
+                );
+              })()}
+              <div style={{ fontWeight: 500, fontSize: 'var(--th-font-size-sm)', marginBottom: 'var(--th-space-1)' }}>
                 {item.title}
               </div>
-              <div style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-tertiary)' }}>
+              <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
                 {new Date(item.createdAt).toLocaleDateString()}
               </div>
             </button>

@@ -8,7 +8,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import type { VaultItem } from '../../data/vault/vaultTypes.ts';
+import { IconLock } from '../../components/index.ts';
+import type { VaultItem, VaultContentType } from '../../data/vault/vaultTypes.ts';
+import { CONTENT_TYPE_META } from './contentTypeMeta.tsx';
 
 interface VaultContentViewerProps {
   service?: {
@@ -18,12 +20,10 @@ interface VaultContentViewerProps {
   };
 }
 
-const TYPE_ICONS: Record<string, string> = {
-  photo: '🖼️',
-  video: '🎬',
-  note: '📝',
-  file: '📁',
-};
+function TypeIcon({ contentType, size }: { contentType: VaultContentType; size: number }) {
+  const Meta = CONTENT_TYPE_META[contentType] ?? CONTENT_TYPE_META.file;
+  return <Meta.Icon size={size} />;
+}
 
 export function VaultContentViewer({ service }: VaultContentViewerProps) {
   const navigate = useNavigate();
@@ -97,9 +97,11 @@ export function VaultContentViewer({ service }: VaultContentViewerProps) {
     return (
       <div className="th-content-pad">
         <div className="th-card" style={{ padding: 'var(--th-space-6)', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 'var(--th-space-2)' }}>🔐</div>
+          <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-rose-muted)' }}>
+            <IconLock size={48} />
+          </div>
           <h3 style={{ marginBottom: 'var(--th-space-2)' }}>Item not found</h3>
-          <p style={{ color: 'var(--th-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
+          <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
             This vault item may have been deleted.
           </p>
           <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appVault)}>
@@ -115,7 +117,7 @@ export function VaultContentViewer({ service }: VaultContentViewerProps) {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--th-space-4)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)' }}>
-          <span style={{ fontSize: '1.5rem' }}>{TYPE_ICONS[item.contentType] || '📄'}</span>
+          <TypeIcon contentType={item.contentType} size={24} />
           <h1 className="th-screen-title" style={{ margin: 0 }}>
             {editing ? 'Edit Item' : item.title}
           </h1>
@@ -184,10 +186,10 @@ export function VaultContentViewer({ service }: VaultContentViewerProps) {
 
             {item.contentType !== 'note' && (
               <div style={{ textAlign: 'center', padding: 'var(--th-space-4)' }}>
-                <div style={{ fontSize: '3rem', marginBottom: 'var(--th-space-2)' }}>
-                  {TYPE_ICONS[item.contentType]}
+                <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-burgundy)' }}>
+                  <TypeIcon contentType={item.contentType} size={48} />
                 </div>
-                <p style={{ color: 'var(--th-text-secondary)' }}>
+                <p style={{ color: 'var(--th-color-text-secondary)' }}>
                   {item.contentType === 'photo' && 'Photo content'}
                   {item.contentType === 'video' && 'Video content'}
                   {item.contentType === 'file' && 'File content'}
@@ -196,20 +198,20 @@ export function VaultContentViewer({ service }: VaultContentViewerProps) {
             )}
 
             {item.description && (
-              <div style={{ borderTop: '1px solid var(--th-border)', paddingTop: 'var(--th-space-3)', marginTop: 'var(--th-space-3)' }}>
-                <p style={{ fontSize: 'var(--th-text-sm)', color: 'var(--th-text-secondary)', margin: 0, fontStyle: 'italic' }}>
+              <div style={{ borderTop: '1px solid var(--th-color-border)', paddingTop: 'var(--th-space-3)', marginTop: 'var(--th-space-3)' }}>
+                <p style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', margin: 0, fontStyle: 'italic' }}>
                   {item.description}
                 </p>
               </div>
             )}
 
             {/* Metadata */}
-            <div style={{ borderTop: '1px solid var(--th-border)', paddingTop: 'var(--th-space-3)', marginTop: 'var(--th-space-3)' }}>
-              <p style={{ margin: 0, fontSize: 'var(--th-text-xs)', color: 'var(--th-text-tertiary)' }}>
+            <div style={{ borderTop: '1px solid var(--th-color-border)', paddingTop: 'var(--th-space-3)', marginTop: 'var(--th-space-3)' }}>
+              <p style={{ margin: 0, fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
                 Added {new Date(item.createdAt).toLocaleDateString()}
               </p>
               {item.updatedAt !== item.createdAt && (
-                <p style={{ margin: 0, fontSize: 'var(--th-text-xs)', color: 'var(--th-text-tertiary)' }}>
+                <p style={{ margin: 0, fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
                   Updated {new Date(item.updatedAt).toLocaleDateString()}
                 </p>
               )}

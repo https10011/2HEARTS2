@@ -22,11 +22,10 @@ export function SplashScreen() {
   return (
     <div className="th-splash">
       <div className="th-splash-content">
-        {/* TwoHearts logo — authoritative BrandLogo component (Phase 20) */}
+        {/* Official TwoHearts logo — one BrandLogo component, one asset (Phase 23) */}
         <div className="th-splash-logo">
-          <BrandLogo variant="badge" size={80} />
+          <BrandLogo variant="brand" size={180} title="TwoHearts" />
         </div>
-        <h1 className="th-splash-title">TwoHearts</h1>
         <p className="th-splash-subtitle">Your private couple space</p>
       </div>
     </div>

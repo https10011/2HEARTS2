@@ -11,7 +11,7 @@ import { coreServices } from '../../../services/bootstrap/appBootstrap.ts';
 import type { RelationshipService, RelationshipSummary } from '../../../services/relationship/relationshipService.ts';
 import type { Profile } from '../../../data/relationship/relationshipTypes.ts';
 import { RoutePath } from '../../../navigation/routes.ts';
-import { IconChevronRight, IconHeart, IconCalendar, IconMapPin, LoadingState } from '../../../components/index.ts';
+import { IconChevronRight, IconHeart, IconSmile, IconCalendar, IconMapPin, LoadingState } from '../../../components/index.ts';
 
 function formatBirthDate(dateStr: string | null): string {
   if (!dateStr) return '';
@@ -196,8 +196,8 @@ export function UsScreen() {
         </Link>
 
         <Link to={RoutePath.appMood} className="th-feature-card">
-          <div className="th-feature-card__icon" style={{ fontSize: '1.25rem' }}>
-            😊
+          <div className="th-feature-card__icon">
+            <IconSmile size={20} />
           </div>
           <div className="th-feature-card__body">
             <div className="th-feature-card__title">Mood</div>
@@ -207,8 +207,8 @@ export function UsScreen() {
         </Link>
 
         <Link to={RoutePath.appPeriod} className="th-feature-card">
-          <div className="th-feature-card__icon" style={{ fontSize: '1.25rem' }}>
-            📅
+          <div className="th-feature-card__icon">
+            <IconCalendar size={20} />
           </div>
           <div className="th-feature-card__body">
             <div className="th-feature-card__title">Period Tracker</div>

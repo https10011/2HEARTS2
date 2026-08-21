@@ -140,14 +140,14 @@ export function PeriodCalendarScreen() {
           <div className="th-card" style={{ padding: 'var(--th-space-4)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--th-space-3)' }}>
               <button className="th-btn th-btn--ghost" onClick={prevMonth} style={{ minWidth: '44px' }} aria-label="Previous month">‹</button>
-              <div style={{ fontWeight: 600, fontSize: 'var(--th-text-base)' }}>{monthLabel}</div>
+              <div style={{ fontWeight: 600, fontSize: 'var(--th-font-size-md)' }}>{monthLabel}</div>
               <button className="th-btn th-btn--ghost" onClick={nextMonth} style={{ minWidth: '44px' }} aria-label="Next month">›</button>
             </div>
 
             {/* Weekday header */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginBottom: 'var(--th-space-1)' }}>
               {WEEKDAY_LABELS.map((w) => (
-                <div key={w} style={{ textAlign: 'center', fontSize: 'var(--th-text-xs)', color: 'var(--th-text-secondary)', padding: 'var(--th-space-1)' }}>
+                <div key={w} style={{ textAlign: 'center', fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', padding: 'var(--th-space-1)' }}>
                   {w}
                 </div>
               ))}
@@ -166,16 +166,16 @@ export function PeriodCalendarScreen() {
                     style={{
                       textAlign: 'center',
                       padding: 'var(--th-space-2) 0',
-                      borderRadius: 'var(--th-radius-full, 999px)',
-                      fontSize: 'var(--th-text-sm)',
+                      borderRadius: 'var(--th-radius-circle)',
+                      fontSize: 'var(--th-font-size-sm)',
                       fontWeight: isToday ? 700 : 400,
                       background: isPeriod
-                        ? 'var(--th-primary)'
+                        ? 'var(--th-color-burgundy)'
                         : isPredicted
-                          ? 'var(--th-accent, #e8a0b4)'
+                          ? 'var(--th-color-pink)'
                           : 'transparent',
-                      color: isPeriod || isPredicted ? 'var(--th-color-text-on-primary, #fff)' : 'var(--th-text-primary)',
-                      outline: isToday ? '2px solid var(--th-primary)' : 'none',
+                      color: isPeriod || isPredicted ? 'var(--th-color-text-on-accent)' : 'var(--th-color-text-primary)',
+                      outline: isToday ? '2px solid var(--th-color-burgundy)' : 'none',
                       outlineOffset: '-2px',
                       opacity: isPredicted ? 0.7 : 1,
                     }}
@@ -189,17 +189,17 @@ export function PeriodCalendarScreen() {
 
           {/* Legend */}
           <div className="th-card" style={{ marginTop: 'var(--th-space-4)', padding: 'var(--th-space-4)' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-2)', fontSize: 'var(--th-text-sm)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-2)', fontSize: 'var(--th-font-size-sm)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)' }}>
-                <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--th-primary)', display: 'inline-block' }} />
+                <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--th-color-burgundy)', display: 'inline-block' }} />
                 Logged period day
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)' }}>
-                <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--th-accent, #e8a0b4)', opacity: 0.7, display: 'inline-block' }} />
+                <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--th-color-pink)', opacity: 0.7, display: 'inline-block' }} />
                 Estimated upcoming period
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)' }}>
-                <span style={{ width: 16, height: 16, borderRadius: '50%', outline: '2px solid var(--th-primary)', outlineOffset: '-2px', display: 'inline-block' }} />
+                <span style={{ width: 16, height: 16, borderRadius: '50%', outline: '2px solid var(--th-color-burgundy)', outlineOffset: '-2px', display: 'inline-block' }} />
                 Today
               </div>
             </div>

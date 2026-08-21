@@ -12,6 +12,7 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { getDatabase } from '../../data/database/connection.ts';
 import { MoodRepository } from '../../repositories/moodRepository.ts';
 import { MoodService } from '../../services/mood/moodService.ts';
+import { IconSmile } from '../../components/index.ts';
 import type { MoodEntry } from '../../data/mood/moodTypes.ts';
 import { MOOD_LABELS } from '../../data/mood/moodTypes.ts';
 
@@ -84,9 +85,11 @@ export function MoodHistory() {
 
       {entries.length === 0 ? (
         <div className="th-card" style={{ padding: 'var(--th-space-6)', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 'var(--th-space-2)' }}>📝</div>
+          <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-rose-muted)' }}>
+            <IconSmile size={48} />
+          </div>
           <h3 style={{ marginBottom: 'var(--th-space-2)' }}>No mood entries yet</h3>
-          <p style={{ color: 'var(--th-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
+          <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
             Start tracking how you feel each day.
           </p>
           <button
@@ -100,7 +103,7 @@ export function MoodHistory() {
         <div>
           {grouped.map((group) => (
             <div key={group.month} style={{ marginBottom: 'var(--th-space-6)' }}>
-              <h2 style={{ fontSize: 'var(--th-text-sm)', color: 'var(--th-text-secondary)', marginBottom: 'var(--th-space-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <h2 style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {group.month}
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-2)' }}>
@@ -114,12 +117,12 @@ export function MoodHistory() {
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontWeight: 500 }}>{MOOD_LABELS[entry.moodValue]}</span>
-                        <span style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-secondary)' }}>
+                        <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
                           {new Date(entry.entryDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                         </span>
                       </div>
                       {entry.note && (
-                        <p style={{ fontSize: 'var(--th-text-sm)', color: 'var(--th-text-secondary)', margin: 'var(--th-space-1) 0 0', fontStyle: 'italic' }}>
+                        <p style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', margin: 'var(--th-space-1) 0 0', fontStyle: 'italic' }}>
                           "{entry.note}"
                         </p>
                       )}

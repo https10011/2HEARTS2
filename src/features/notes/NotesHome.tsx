@@ -8,7 +8,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconPlus, IconSearch, IconChevronRight } from '../../components/index.ts';
+import { IconPlus, IconSearch, IconChevronRight, IconFileText } from '../../components/index.ts';
 import { useNoteService } from './useNoteService.ts';
 import type { NoteView } from '../../services/note/noteService.ts';
 import { NOTE_CATEGORY_LABELS, NOTE_CATEGORY_COLORS } from './categoryMeta.ts';
@@ -104,7 +104,9 @@ export function NotesHome() {
       {/* Empty state */}
       {!loading && !error && filteredNotes.length === 0 && (
         <div className="th-empty-state">
-          <div className="th-empty-state__icon">📝</div>
+          <div className="th-empty-state__icon" style={{ color: 'var(--th-color-rose-muted)' }}>
+            <IconFileText size={40} />
+          </div>
           <h3 className="th-empty-state__title">
             {searchQuery ? 'No notes found' : 'No notes yet'}
           </h3>

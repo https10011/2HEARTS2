@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Input, Modal, IconHeart } from '../../components/index.ts';
+import { Button, Input, Modal, IconHeart , IconCheck } from '../../components/index.ts';
 import { appSettingsStore, useAppSettings } from '../../core/appSettings.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { safeUserMessage } from '../../services/errors/appError.ts';
@@ -260,7 +260,7 @@ export function SecuritySettingsScreen() {
               }}
               trailing={
                 settings.lockTimeoutSeconds === option.seconds ? (
-                  <span style={{ color: 'var(--th-color-burgundy)', fontWeight: 'bold' }}>✓</span>
+                  <span style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex' }}><IconCheck size={16} /></span>
                 ) : null
               }
             />

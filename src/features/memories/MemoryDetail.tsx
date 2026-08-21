@@ -10,7 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import type { MemoryWithMedia } from '../../services/memory/memoryService.ts';
 import { useMemoryService } from './useMemoryService.ts';
-import { Button, IconButton, IconBack, LoadingState } from '../../components/index.ts';
+import { Button, IconButton, IconBack, IconCamera, IconVideo, LoadingState } from '../../components/index.ts';
 import { Modal } from '../../components/index.ts';
 
 export function MemoryDetail() {
@@ -158,7 +158,7 @@ export function MemoryDetail() {
                     color: 'var(--th-color-rose-muted)',
                   }}
                 >
-                  {media.kind === 'photo' ? '📷' : '🎬'}
+                  {media.kind === 'photo' ? <IconCamera size={40} /> : <IconVideo size={40} />}
                 </div>
               ))}
             </div>

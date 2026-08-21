@@ -5,13 +5,17 @@
  * engine with registered feature providers.
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, type ComponentType } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Screen } from '../../../components/Screen.tsx';
 import { Header } from '../../../components/Header.tsx';
 import { IconButton } from '../../../components/IconButton.tsx';
 import { Input } from '../../../components/Input.tsx';
 import { EmptyState } from '../../../components/EmptyState.tsx';
+import {
+  IconCamera, IconCalendar, IconMapPin, IconBell, IconFileText, IconFile, IconSearch,
+  type IconProps,
+} from '../../../components/index.ts';
 import type { SearchMatch, SearchResults } from '../../../services/search/searchEngine.ts';
 import { RoutePath } from '../../../navigation/routes.ts';
 
@@ -23,12 +27,12 @@ const KIND_LABELS: Record<string, string> = {
   note: 'Note',
 };
 
-const KIND_ICONS: Record<string, string> = {
-  memory: '📸',
-  timeline: '📅',
-  place: '📍',
-  reminder: '⏰',
-  note: '📝',
+const KIND_ICONS: Record<string, ComponentType<IconProps>> = {
+  memory: IconCamera,
+  timeline: IconCalendar,
+  place: IconMapPin,
+  reminder: IconBell,
+  note: IconFileText,
 };
 
 /** Resolve navigation route for a search match. */
@@ -123,10 +127,11 @@ export function SearchScreen({ onSearch }: SearchScreenProps) {
               top: '50%',
               transform: 'translateY(-50%)',
               opacity: 0.5,
-              fontSize: '16px',
+              color: 'var(--th-color-text-secondary)',
+              display: 'inline-flex',
             }}
           >
-            🔍
+            <IconSearch size={16} />
           </span>
         </div>
 
@@ -169,8 +174,11 @@ export function SearchScreen({ onSearch }: SearchScreenProps) {
                   width: '100%',
                 }}
               >
-                <span style={{ fontSize: '24px' }}>
-                  {KIND_ICONS[match.kind] ?? '📄'}
+                <span style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex', flexShrink: 0 }}>
+                  {(() => {
+                    const KindIcon = KIND_ICONS[match.kind] ?? IconFile;
+                    return <KindIcon size={24} />;
+                  })()}
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
@@ -199,11 +207,11 @@ export function SearchScreen({ onSearch }: SearchScreenProps) {
                     display: 'inline-block',
                     fontSize: '10px',
                     fontWeight: 500,
-                    color: 'var(--th-color-primary)',
+                    color: 'var(--th-color-burgundy)',
                     marginTop: '4px',
                     padding: '2px 6px',
                     borderRadius: '4px',
-                    background: 'var(--th-color-primary-subtle)',
+                    background: 'var(--th-color-blush)',
                   }}>
                     {KIND_LABELS[match.kind] ?? match.kind}
                   </span>

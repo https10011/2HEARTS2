@@ -13,12 +13,9 @@ import { PeriodRepository } from '../../repositories/periodRepository.ts';
 import { PeriodService } from '../../services/period/periodService.ts';
 import { AppError } from '../../services/errors/appError.ts';
 import type { FlowLevel } from '../../data/period/periodTypes.ts';
+import { FLOW_META, FLOW_ORDER, flowDotStyle } from './flowMeta.ts';
 
-const FLOW_OPTIONS: Array<{ value: FlowLevel; label: string; emoji: string }> = [
-  { value: 'light', label: 'Light', emoji: '💧' },
-  { value: 'medium', label: 'Medium', emoji: '🩸' },
-  { value: 'heavy', label: 'Heavy', emoji: '🔴' },
-];
+const FLOW_OPTIONS = FLOW_ORDER.map((value) => ({ value, label: FLOW_META[value].label }));
 
 let _periodService: PeriodService | null = null;
 async function getPeriodService(): Promise<PeriodService> {
@@ -155,7 +152,7 @@ export function LogPeriod() {
             min={startDate}
           />
           {!endDate && (
-            <p style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-tertiary)', marginTop: 'var(--th-space-1)' }}>
+            <p style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', marginTop: 'var(--th-space-1)' }}>
               Leave empty if still ongoing
             </p>
           )}
@@ -173,7 +170,7 @@ export function LogPeriod() {
                 onClick={() => setFlowLevel(opt.value)}
                 style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--th-space-1)' }}
               >
-                <span style={{ fontSize: '1.25rem' }}>{opt.emoji}</span>
+                <span aria-hidden="true" style={flowDotStyle(opt.value)} />
                 <span>{opt.label}</span>
               </button>
             ))}

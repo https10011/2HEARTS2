@@ -16,7 +16,7 @@
 
 /* ----- Color tokens ----- */
 :root {
-  /* Brand accent — burgundy family (used strategically, never screen-flooding) */
+  /* Brand palette — primitives (single source for all hex values) */
   --th-color-burgundy: #6A1B2B;
   --th-color-burgundy-light: #8E3147;
   --th-color-burgundy-dark: #4A0F1D;
@@ -25,9 +25,18 @@
   --th-color-cream: #FDF6F0;
   --th-color-blush: #F6E1DE;
   --th-color-rose-muted: #C9808B;
+  --th-color-pink: #E8A0B4;
   --th-color-beige: #EDE0D4;
   --th-color-charcoal: #2B2420;
   --th-color-neutral-soft: #F2E9E4;
+
+  /* Semantic brand aliases — prefer these in feature code so a palette
+     change stays centralized under one name. */
+  --th-color-brand-primary: var(--th-color-burgundy);
+  --th-color-brand-secondary: var(--th-color-burgundy-light);
+  --th-color-brand-deep: var(--th-color-burgundy-dark);
+  --th-color-brand-soft: var(--th-color-rose-muted);
+  --th-color-brand-wash: var(--th-color-blush);
 
   /* Semantic surface tokens */
   --th-color-bg: var(--th-color-cream);
@@ -38,9 +47,11 @@
   --th-color-text-on-accent: #FFF8F3;
   --th-color-border: #E8DAD3;
   --th-color-divider: #EFE3DC;
+  --th-color-overlay: rgba(43, 36, 32, 0.45); /* modal/lock scrim */
 
   /* Feedback */
   --th-color-success: #4F7A5A;
+  --th-color-success-bg: #E9F3EA;
   --th-color-warning: #B07A1E;
   --th-color-error: #A33A2A;
   --th-color-error-bg: #F7E7E3;
@@ -90,11 +101,19 @@
   --th-radius-pill: 9999px;
   --th-radius-circle: 50%;
 
-  /* ----- Shadows / elevation ----- */
+  /* ----- Shadows / elevation -----
+     Soft, warm-depth shadows; layered toward burgundy/charcoal—not gray. */
   --th-shadow-sm: 0 1px 2px rgba(74, 15, 29, 0.06), 0 1px 3px rgba(43, 36, 32, 0.05);
   --th-shadow-md: 0 2px 6px rgba(74, 15, 29, 0.08), 0 1px 4px rgba(43, 36, 32, 0.06);
   --th-shadow-lg: 0 6px 16px rgba(74, 15, 29, 0.1), 0 2px 6px rgba(43, 36, 32, 0.07);
+  --th-shadow-nav: 0 -1px 3px rgba(74, 15, 29, 0.04);
   --th-shadow-focus: 0 0 0 3px rgba(142, 49, 71, 0.28);
+
+  /* ----- Layering (z-index scale) ----- */
+  --th-z-nav: 10;      /* bottom navigation */
+  --th-z-fab: 100;     /* floating action button */
+  --th-z-modal: 1000;  /* modal overlays */
+  --th-z-lock: 1100;   /* app-lock gate (above everything) */
 
   /* ----- Borders ----- */
   --th-border-width-thin: 1px;
@@ -114,13 +133,31 @@
   --th-safe-area-left: env(safe-area-inset-left, 0px);
   --th-safe-area-right: env(safe-area-inset-right, 0px);
 
-  /* ----- Animation timing ----- */
-  --th-duration-fast: 120ms;
-  --th-duration-normal: 220ms;
-  --th-duration-slow: 360ms;
+  /* ----- Motion tokens -----
+     Durations + easings are primitives; the semantic motion pairs below are
+     what components should consume so interaction language stays unified.
+     `prefers-reduced-motion` AND the in-app reduce-motion setting both
+     collapse durations near-instant (see bottom of file). */
+  --th-duration-fast: 120ms;      /* fast interaction (color, press feedback) */
+  --th-duration-normal: 220ms;    /* normal transition / modal presentation */
+  --th-duration-slow: 360ms;      /* emphasized transition, entrances/exits */
+  --th-duration-drift: 6400ms;    /* slow decorative drift (never critical) */
+
   --th-ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --th-ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
-  --th-ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  --th-ease-decelerate: cubic-bezier(0, 0, 0.2, 1);   /* entrances */
+  --th-ease-accelerate: cubic-bezier(0.4, 0, 1, 1);   /* exits */
+  --th-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);   /* emphasized moves */
+  --th-ease-press: cubic-bezier(0.3, 0, 0.2, 1);      /* press feedback */
+
+  /* Semantic motion pairs: use these in transitions/animations. */
+  --th-motion-fast: var(--th-duration-fast) var(--th-ease-standard);
+  --th-motion-standard: var(--th-duration-normal) var(--th-ease-standard);
+  --th-motion-emphasized: var(--th-duration-slow) var(--th-ease-emphasized);
+  --th-motion-entrance: var(--th-duration-normal) var(--th-ease-decelerate);
+  --th-motion-exit: var(--th-duration-fast) var(--th-ease-accelerate);
+  --th-motion-press: var(--th-duration-fast) var(--th-ease-press);
+  --th-motion-modal: var(--th-duration-normal) var(--th-ease-decelerate);
+  --th-motion-drift: var(--th-duration-drift) ease-in-out;
 }
 
 /**
@@ -137,6 +174,7 @@
   --th-color-blush: #3A2A28;
   --th-color-neutral-soft: #2E2620;
   --th-color-beige: #463A32;
+  --th-color-pink: #B08797;
   --th-color-text-primary: #F5ECE4;
   --th-color-charcoal: #F5ECE4;
   --th-color-text-secondary: #C4B2A9;
@@ -145,24 +183,29 @@
   --th-color-divider: #3A2F29;
   --th-color-burgundy: #C9808B;
   --th-color-burgundy-light: #D99AA6;
-  --th-color-burgundy-dark: #8E3147;
+  --th-color-burgundy-dark: #7E2C40;
   --th-color-error-bg: #452019;
+  --th-color-success-bg: #25392B;
+  --th-color-overlay: rgba(0, 0, 0, 0.6);
 
   --th-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
   --th-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.35);
   --th-shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --th-shadow-nav: 0 -1px 3px rgba(0, 0, 0, 0.4);
   --th-shadow-focus: 0 0 0 3px rgba(201, 128, 139, 0.4);
 }
 
 /**
  * Reduced motion (Phase 19): honor both the OS setting and the in-app
- * preference (`data-th-motion="reduced"`, set by core/appSettings).
+ * preference (`data-th-motion="reduced"`, set by core/appSettings). Both
+ * collapse interaction durations to near-instant and freeze decorative drift.
  */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --th-duration-fast: 1ms;
     --th-duration-normal: 1ms;
     --th-duration-slow: 1ms;
+    --th-duration-drift: 1ms;
   }
 }
 
@@ -170,4 +213,5 @@
   --th-duration-fast: 1ms;
   --th-duration-normal: 1ms;
   --th-duration-slow: 1ms;
+  --th-duration-drift: 1ms;
 }

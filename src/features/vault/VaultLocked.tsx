@@ -7,6 +7,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { IconLock } from '../../components/index.ts';
 
 interface VaultLockedProps {
   onUnlock: () => void;
@@ -48,9 +49,11 @@ export function VaultLocked({ onUnlock }: VaultLockedProps) {
   return (
     <div className="th-content-pad" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
       <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-8)' }}>
-        <div style={{ fontSize: '4rem', marginBottom: 'var(--th-space-3)' }}>🔒</div>
+        <div style={{ marginBottom: 'var(--th-space-3)', color: 'var(--th-color-burgundy)' }}>
+          <IconLock size={56} />
+        </div>
         <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-2)' }}>Vault Locked</h1>
-        <p style={{ color: 'var(--th-text-secondary)' }}>
+        <p style={{ color: 'var(--th-color-text-secondary)' }}>
           Enter your PIN to access private content.
         </p>
       </div>
@@ -72,7 +75,7 @@ export function VaultLocked({ onUnlock }: VaultLockedProps) {
           inputMode="numeric"
           pattern="[0-9]*"
           maxLength={8}
-          style={{ textAlign: 'center', fontSize: 'var(--th-text-lg)', letterSpacing: '0.3em', marginBottom: 'var(--th-space-4)' }}
+          style={{ textAlign: 'center', fontSize: 'var(--th-font-size-lg)', letterSpacing: '0.3em', marginBottom: 'var(--th-space-4)' }}
         />
 
         <button

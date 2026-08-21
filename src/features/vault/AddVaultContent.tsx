@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { AppError } from '../../services/errors/appError.ts';
 import type { VaultContentType } from '../../data/vault/vaultTypes.ts';
+import { CONTENT_TYPE_META, CONTENT_TYPE_ORDER } from './contentTypeMeta.tsx';
 
 interface AddVaultContentProps {
   service?: {
@@ -18,12 +19,10 @@ interface AddVaultContentProps {
   };
 }
 
-const CONTENT_TYPE_OPTIONS: Array<{ value: VaultContentType; label: string; icon: string; description: string }> = [
-  { value: 'note', label: 'Private Note', icon: '📝', description: 'Text content stored securely' },
-  { value: 'photo', label: 'Photo', icon: '🖼️', description: 'Protected photo (coming soon)' },
-  { value: 'video', label: 'Video', icon: '🎬', description: 'Protected video (coming soon)' },
-  { value: 'file', label: 'File', icon: '📁', description: 'Any file type (coming soon)' },
-];
+const CONTENT_TYPE_OPTIONS = CONTENT_TYPE_ORDER.map((value) => ({
+  value,
+  ...CONTENT_TYPE_META[value],
+}));
 
 export function AddVaultContent({ service }: AddVaultContentProps) {
   const navigate = useNavigate();
@@ -89,8 +88,8 @@ export function AddVaultContent({ service }: AddVaultContentProps) {
                 onClick={() => setContentType(opt.value)}
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--th-space-1)', padding: 'var(--th-space-3)' }}
               >
-                <span style={{ fontSize: '1.5rem' }}>{opt.icon}</span>
-                <span style={{ fontSize: 'var(--th-text-xs)' }}>{opt.label}</span>
+                <opt.Icon size={22} />
+                <span style={{ fontSize: 'var(--th-font-size-xs)' }}>{opt.label}</span>
               </button>
             ))}
           </div>
@@ -128,10 +127,15 @@ export function AddVaultContent({ service }: AddVaultContentProps) {
         {/* Non-note types show placeholder */}
         {contentType !== 'note' && (
           <div className="th-card" style={{ padding: 'var(--th-space-4)', textAlign: 'center' }}>
-            <div style={{ fontSize: '2rem', marginBottom: 'var(--th-space-2)' }}>
-              {CONTENT_TYPE_OPTIONS.find(o => o.value === contentType)?.icon}
-            </div>
-            <p style={{ color: 'var(--th-text-secondary)', fontSize: 'var(--th-text-sm)' }}>
+            {(() => {
+              const Selected = CONTENT_TYPE_OPTIONS.find((o) => o.value === contentType);
+              return (
+                <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-burgundy)' }}>
+                  {Selected ? <Selected.Icon size={32} /> : null}
+                </div>
+              );
+            })()}
+            <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)' }}>
               {contentType === 'photo' && 'Photo upload will be available in a future update.'}
               {contentType === 'video' && 'Video upload will be available in a future update.'}
               {contentType === 'file' && 'File upload will be available in a future update.'}

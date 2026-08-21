@@ -142,15 +142,15 @@ export function MoodEntryScreen() {
                 gap: 'var(--th-space-1)',
                 padding: 'var(--th-space-3)',
                 borderRadius: 'var(--th-radius-md)',
-                border: isSelected ? '2px solid var(--th-primary)' : '2px solid var(--th-border)',
-                background: isSelected ? 'var(--th-primary-light, rgba(106, 27, 43, 0.08))' : 'var(--th-surface)',
+                border: isSelected ? '2px solid var(--th-color-burgundy)' : '2px solid var(--th-color-border)',
+                background: isSelected ? 'var(--th-color-burgundy-light, rgba(106, 27, 43, 0.08))' : 'var(--th-color-surface)',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
                 transform: isSelected ? 'scale(1.05)' : 'scale(1)',
               }}
             >
               <span style={{ fontSize: '2rem' }}>{MOOD_EMOJI[mood]}</span>
-              <span style={{ fontSize: 'var(--th-text-xs)', fontWeight: isSelected ? 600 : 400 }}>
+              <span style={{ fontSize: 'var(--th-font-size-xs)', fontWeight: isSelected ? 600 : 400 }}>
                 {MOOD_LABELS[mood]}
               </span>
             </button>
@@ -170,7 +170,7 @@ export function MoodEntryScreen() {
           maxLength={500}
           style={{ resize: 'vertical' }}
         />
-        <div style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-tertiary)', textAlign: 'right', marginTop: 'var(--th-space-1)' }}>
+        <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textAlign: 'right', marginTop: 'var(--th-space-1)' }}>
           {note.length}/500
         </div>
       </div>

@@ -11,6 +11,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
+import { IconCheck, IconClose } from '../../components/index.ts';
 import { createSession, recordCasualAnswer, completeCasualGame } from '../../services/game/gameEngine.ts';
 import type { GameSession, GameType } from '../../data/game/gameTypes.ts';
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
@@ -182,7 +183,9 @@ export function CasualGamePlayScreen() {
                 >
                   <div className="th-feature-card__body">
                     <div className="th-feature-card__title" style={{ fontSize: 'var(--th-font-size-sm)' }}>
-                      {isCorrect ? '✅' : '❌'} Q{i + 1}: {r.question.text.length > 50 ? r.question.text.slice(0, 50) + '...' : r.question.text}
+                      <span style={{ color: isCorrect ? 'var(--th-color-burgundy)' : 'var(--th-color-text-secondary)', display: 'inline-flex', verticalAlign: '-2px', marginRight: 'var(--th-space-1)' }}>
+                      {isCorrect ? <IconCheck size={14} /> : <IconClose size={14} />}
+                    </span>Q{i + 1}: {r.question.text.length > 50 ? r.question.text.slice(0, 50) + '...' : r.question.text}
                     </div>
                     <div className="th-feature-card__desc">
                       Your answer: {a?.answer || '(none)'}
@@ -256,8 +259,8 @@ export function CasualGamePlayScreen() {
             borderRadius: 'var(--th-radius-md)',
             marginBottom: 'var(--th-space-4)',
             fontWeight: 'var(--th-font-weight-semibold)',
-            background: feedback === 'correct' ? 'var(--th-color-success-bg, #e8f5e9)' : 'var(--th-color-error-bg, #fce4ec)',
-            color: feedback === 'correct' ? 'var(--th-color-success, #2e7d32)' : 'var(--th-color-error, #c62828)',
+            background: feedback === 'correct' ? 'var(--th-color-success-bg)' : 'var(--th-color-error-bg)',
+            color: feedback === 'correct' ? 'var(--th-color-success)' : 'var(--th-color-error)',
           }}
         >
           {feedback === 'correct' ? 'Correct!' : `Wrong! The answer was: ${currentQuestion.correctAnswer ?? currentQuestion.options?.[0]}`}

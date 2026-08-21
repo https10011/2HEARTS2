@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Modal } from '../../components/index.ts';
+import { Button, Modal, IconCheck } from '../../components/index.ts';
 import {
   appSettingsStore,
   useAppSettings,
@@ -89,9 +89,9 @@ export function AppearanceSettingsScreen() {
                   role="radio"
                   aria-checked="true"
                   aria-label={`${TEXT_SIZE_LABELS[size]} selected`}
-                  style={{ color: 'var(--th-color-burgundy)', fontWeight: 'bold' }}
+                  style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex' }}
                 >
-                  ✓
+                  <IconCheck size={16} />
                 </span>
               ) : null
             }

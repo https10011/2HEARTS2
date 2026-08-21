@@ -27,12 +27,9 @@ export function AboutScreen() {
     <SettingsScreen title="About TwoHearts" backTo={RoutePath.appMore}>
       <div style={{ textAlign: 'center', margin: 'var(--th-space-4) 0' }}>
         <div style={{ margin: '0 auto var(--th-space-3)', width: 'fit-content' }}>
-          {/* Authoritative brand badge — one component (Phase 20) */}
-          <BrandLogo variant="badge" size={72} />
+          {/* Official logo — one BrandLogo component, one asset (Phase 23) */}
+          <BrandLogo variant="brand" size={160} title="TwoHearts" />
         </div>
-        <h2 style={{ margin: 0, fontFamily: 'var(--th-font-family-display)', color: 'var(--th-color-burgundy)' }}>
-          {APP_INFO.name}
-        </h2>
         <p style={{ margin: 'var(--th-space-1) 0 0', color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)' }}>
           Version {APP_INFO.version}
         </p>

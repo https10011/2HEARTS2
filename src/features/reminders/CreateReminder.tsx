@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconBack } from '../../components/index.ts';
+import { IconBack, IconBell, IconBellOff } from '../../components/index.ts';
 import type { ReminderRecurrence } from '../../data/reminder/reminderTypes.ts';
 import { REMINDER_RECURRENCES } from '../../data/reminder/reminderTypes.ts';
 import { useReminderService } from './useReminderService.ts';
@@ -206,7 +206,7 @@ export function CreateReminder() {
             type="button"
             style={{ minWidth: '48px', padding: 'var(--th-space-2)' }}
           >
-            {notificationEnabled ? '🔔' : '🔕'}
+            {notificationEnabled ? <IconBell size={18} /> : <IconBellOff size={18} />}
           </button>
         </div>
 

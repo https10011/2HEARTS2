@@ -7,6 +7,7 @@
 
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
+import { IconHeart, IconClose } from '../../components/index.ts';
 import type { GameResult, GameType } from '../../data/game/gameTypes.ts';
 
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
@@ -87,7 +88,9 @@ export function GameResultsScreen() {
           >
             <div className="th-feature-card__body">
               <div className="th-feature-card__title" style={{ fontSize: 'var(--th-font-size-sm)' }}>
-                {r.matched ? '💕' : '💫'} Q{i + 1}: {r.question.length > 50 ? r.question.slice(0, 50) + '...' : r.question}
+                <span style={{ color: r.matched ? 'var(--th-color-burgundy)' : 'var(--th-color-text-secondary)', display: 'inline-flex', verticalAlign: '-2px', marginRight: 'var(--th-space-1)' }}>
+                  {r.matched ? <IconHeart size={14} /> : <IconClose size={14} />}
+                </span>Q{i + 1}: {r.question.length > 50 ? r.question.slice(0, 50) + '...' : r.question}
               </div>
               <div className="th-feature-card__desc">
                 P1: {r.player1Answer || '(no answer)'} · P2: {r.player2Answer || '(no answer)'}

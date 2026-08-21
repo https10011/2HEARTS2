@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button } from '../../components/index.ts';
+import { Button, OnboardingArt } from '../../components/index.ts';
 import { OnboardingLayout } from './OnboardingLayout.tsx';
 
 export function SetupCompleteScreen() {
@@ -26,26 +26,9 @@ export function SetupCompleteScreen() {
   return (
     <OnboardingLayout currentPath={RoutePath.onboardingComplete} showBack={false}>
       <div className="th-onboarding-form th-onboarding-complete">
-        {/* Celebration illustration */}
+        {/* Celebration illustration (centralized decorative art — Phase 23) */}
         <div className="th-welcome-illustration">
-          <svg
-            width="120"
-            height="120"
-            viewBox="0 0 120 120"
-            fill="none"
-            aria-hidden="true"
-          >
-            <circle cx="60" cy="60" r="56" fill="var(--th-color-blush)" stroke="var(--th-color-burgundy)" strokeWidth="2" opacity="0.4" />
-            <path
-              d="M60 80C60 80 38 66 38 52C38 44 44 38 52 38C56 38 59 40 60 42C61 40 64 38 68 38C76 38 82 44 82 52C82 66 60 80 60 80Z"
-              fill="var(--th-color-burgundy)"
-            />
-            {/* Sparkle decorations */}
-            <circle cx="35" cy="40" r="2" fill="var(--th-color-rose-muted)" />
-            <circle cx="85" cy="38" r="2.5" fill="var(--th-color-rose-muted)" />
-            <circle cx="30" cy="65" r="1.5" fill="var(--th-color-burgundy-light)" />
-            <circle cx="90" cy="62" r="2" fill="var(--th-color-burgundy-light)" />
-          </svg>
+          <OnboardingArt variant="celebration-heart" size={120} />
         </div>
 
         <h2 className="th-onboarding-heading">You're all set!</h2>

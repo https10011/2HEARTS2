@@ -13,6 +13,7 @@ import { getDatabase } from '../../data/database/connection.ts';
 import { PeriodRepository } from '../../repositories/periodRepository.ts';
 import { PeriodService } from '../../services/period/periodService.ts';
 import type { PeriodSummary } from '../../services/period/periodService.ts';
+import { IconSettings, IconCalendar, IconFileText } from '../../components/index.ts';
 
 let _periodService: PeriodService | null = null;
 async function getPeriodService(): Promise<PeriodService> {
@@ -78,7 +79,7 @@ export function PeriodHome() {
             style={{ minWidth: '44px', padding: 'var(--th-space-2)' }}
             aria-label="Period settings"
           >
-            ⚙️
+            <IconSettings size={20} />
           </button>
           <button
             className="th-btn th-btn--primary th-btn--sm"
@@ -95,17 +96,37 @@ export function PeriodHome() {
           <div>
             {cycle.inPeriod ? (
               <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-3)' }}>
-                <div style={{ fontSize: '2rem', marginBottom: 'var(--th-space-1)' }}>🔴</div>
-                <div style={{ fontWeight: 600, fontSize: 'var(--th-text-lg)' }}>Day {cycle.currentPeriodDay} of Period</div>
-                <div style={{ color: 'var(--th-text-secondary)', fontSize: 'var(--th-text-sm)' }}>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    display: 'inline-block',
+                    width: '16px',
+                    height: '16px',
+                    borderRadius: 'var(--th-radius-circle)',
+                    background: 'var(--th-color-burgundy)',
+                    marginBottom: 'var(--th-space-1)',
+                  }}
+                />
+                <div style={{ fontWeight: 600, fontSize: 'var(--th-font-size-lg)' }}>Day {cycle.currentPeriodDay} of Period</div>
+                <div style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)' }}>
                   Started {formatDate(cycle.lastPeriodStart)}
                 </div>
               </div>
             ) : (
               <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-3)' }}>
-                <div style={{ fontSize: '2rem', marginBottom: 'var(--th-space-1)' }}>📊</div>
-                <div style={{ fontWeight: 600, fontSize: 'var(--th-text-lg)' }}>Cycle Day {cycle.currentCycleDay}</div>
-                <div style={{ color: 'var(--th-text-secondary)', fontSize: 'var(--th-text-sm)' }}>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    display: 'inline-block',
+                    width: '16px',
+                    height: '16px',
+                    borderRadius: 'var(--th-radius-circle)',
+                    background: 'var(--th-color-rose-muted)',
+                    marginBottom: 'var(--th-space-1)',
+                  }}
+                />
+                <div style={{ fontWeight: 600, fontSize: 'var(--th-font-size-lg)' }}>Cycle Day {cycle.currentCycleDay}</div>
+                <div style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)' }}>
                   {cycle.daysUntilNext > 0
                     ? `Next period in ~${cycle.daysUntilNext} days`
                     : 'Period expected soon'}
@@ -118,28 +139,30 @@ export function PeriodHome() {
               <div style={{
                 height: '8px',
                 borderRadius: '4px',
-                background: 'var(--th-border)',
+                background: 'var(--th-color-border)',
                 overflow: 'hidden',
               }}>
                 <div style={{
                   height: '100%',
                   width: `${Math.min(100, (cycle.currentCycleDay / cycle.cycleLength) * 100)}%`,
                   borderRadius: '4px',
-                  background: cycle.inPeriod ? 'var(--th-primary)' : 'var(--th-accent, #e8a0b4)',
+                  background: cycle.inPeriod ? 'var(--th-color-burgundy)' : 'var(--th-color-pink)',
                   transition: 'width 0.3s ease',
                 }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--th-space-1)' }}>
-                <span style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-tertiary)' }}>Day 1</span>
-                <span style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-tertiary)' }}>Day {cycle.cycleLength}</span>
+                <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>Day 1</span>
+                <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>Day {cycle.cycleLength}</span>
               </div>
             </div>
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: 'var(--th-space-4) 0' }}>
-            <div style={{ fontSize: '3rem', marginBottom: 'var(--th-space-2)' }}>📅</div>
+            <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-rose-muted)' }}>
+              <IconCalendar size={48} />
+            </div>
             <h3 style={{ marginBottom: 'var(--th-space-2)' }}>No period data yet</h3>
-            <p style={{ color: 'var(--th-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
+            <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
               Start tracking to see your cycle information.
             </p>
             <button
@@ -159,16 +182,20 @@ export function PeriodHome() {
           onClick={() => navigate(RoutePath.appPeriodCalendar)}
           style={{ padding: 'var(--th-space-3)', textAlign: 'center' }}
         >
-          <div style={{ fontSize: '1.5rem', marginBottom: 'var(--th-space-1)' }}>📆</div>
-          <div style={{ fontWeight: 500, fontSize: 'var(--th-text-sm)' }}>Calendar</div>
+          <div style={{ marginBottom: 'var(--th-space-1)', color: 'var(--th-color-burgundy)' }}>
+            <IconCalendar size={24} />
+          </div>
+          <div style={{ fontWeight: 500, fontSize: 'var(--th-font-size-sm)' }}>Calendar</div>
         </button>
         <button
           className="th-card th-card--clickable"
           onClick={() => navigate(RoutePath.appPeriodHistory)}
           style={{ padding: 'var(--th-space-3)', textAlign: 'center' }}
         >
-          <div style={{ fontSize: '1.5rem', marginBottom: 'var(--th-space-1)' }}>📋</div>
-          <div style={{ fontWeight: 500, fontSize: 'var(--th-text-sm)' }}>History</div>
+          <div style={{ marginBottom: 'var(--th-space-1)', color: 'var(--th-color-burgundy)' }}>
+            <IconFileText size={24} />
+          </div>
+          <div style={{ fontWeight: 500, fontSize: 'var(--th-font-size-sm)' }}>History</div>
         </button>
       </div>
 
@@ -176,7 +203,7 @@ export function PeriodHome() {
       {summary && summary.totalCycles > 0 && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--th-space-3)' }}>
-            <h2 style={{ fontSize: 'var(--th-text-base)', fontWeight: 600 }}>Recent Entries</h2>
+            <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 600 }}>Recent Entries</h2>
             <button
               className="th-btn th-btn--outline th-btn--sm"
               onClick={() => navigate(RoutePath.appPeriodHistory)}
@@ -189,13 +216,13 @@ export function PeriodHome() {
           <div style={{ display: 'flex', gap: 'var(--th-space-3)', marginBottom: 'var(--th-space-3)' }}>
             {summary.averageCycleLength && (
               <div className="th-card" style={{ flex: 1, padding: 'var(--th-space-3)', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-secondary)' }}>Avg Cycle</div>
+                <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>Avg Cycle</div>
                 <div style={{ fontWeight: 600 }}>{summary.averageCycleLength} days</div>
               </div>
             )}
             {summary.averagePeriodDuration && (
               <div className="th-card" style={{ flex: 1, padding: 'var(--th-space-3)', textAlign: 'center' }}>
-                <div style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-secondary)' }}>Avg Duration</div>
+                <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>Avg Duration</div>
                 <div style={{ fontWeight: 600 }}>{summary.averagePeriodDuration} days</div>
               </div>
             )}

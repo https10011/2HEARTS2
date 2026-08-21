@@ -12,6 +12,7 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { getDatabase } from '../../data/database/connection.ts';
 import { MoodRepository } from '../../repositories/moodRepository.ts';
 import { MoodService } from '../../services/mood/moodService.ts';
+import { IconSmile } from '../../components/index.ts';
 
 import {
   type MoodEntry,
@@ -110,7 +111,7 @@ export function MoodHome() {
 
       {/* Today's mood */}
       <div className="th-card" style={{ padding: 'var(--th-space-4)', marginBottom: 'var(--th-space-4)' }}>
-        <h3 style={{ fontSize: 'var(--th-text-sm)', color: 'var(--th-text-secondary)', marginBottom: 'var(--th-space-3)' }}>
+        <h3 style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-3)' }}>
           {todayMood ? "Today's mood" : "How are you feeling today?"}
         </h3>
 
@@ -119,11 +120,11 @@ export function MoodHome() {
             <div style={{ fontSize: '3rem', marginBottom: 'var(--th-space-2)' }}>
               {todayMood.moodEmoji}
             </div>
-            <div style={{ fontWeight: 600, fontSize: 'var(--th-text-lg)' }}>
+            <div style={{ fontWeight: 600, fontSize: 'var(--th-font-size-lg)' }}>
               {MOOD_LABELS[todayMood.moodValue]}
             </div>
             {todayMood.note && (
-              <p style={{ color: 'var(--th-text-secondary)', marginTop: 'var(--th-space-2)', fontStyle: 'italic' }}>
+              <p style={{ color: 'var(--th-color-text-secondary)', marginTop: 'var(--th-space-2)', fontStyle: 'italic' }}>
                 "{todayMood.note}"
               </p>
             )}
@@ -149,11 +150,11 @@ export function MoodHome() {
                   alignItems: 'center',
                   gap: 'var(--th-space-1)',
                   padding: 'var(--th-space-2)',
-                  fontSize: 'var(--th-text-sm)',
+                  fontSize: 'var(--th-font-size-sm)',
                 }}
               >
                 <span style={{ fontSize: '1.5rem' }}>{MOOD_EMOJI[mood]}</span>
-                <span style={{ fontSize: 'var(--th-text-xs)' }}>{MOOD_LABELS[mood]}</span>
+                <span style={{ fontSize: 'var(--th-font-size-xs)' }}>{MOOD_LABELS[mood]}</span>
               </button>
             ))}
           </div>
@@ -162,7 +163,7 @@ export function MoodHome() {
 
       {/* Mood history */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--th-space-3)' }}>
-        <h2 style={{ fontSize: 'var(--th-text-base)', fontWeight: 600 }}>Recent Moods</h2>
+        <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 600 }}>Recent Moods</h2>
         <button
           className="th-btn th-btn--outline th-btn--sm"
           onClick={() => navigate(RoutePath.appMoodHistory)}
@@ -173,8 +174,10 @@ export function MoodHome() {
 
       {recentMoods.length === 0 ? (
         <div className="th-card" style={{ padding: 'var(--th-space-6)', textAlign: 'center' }}>
-          <div style={{ fontSize: '2rem', marginBottom: 'var(--th-space-2)' }}>📝</div>
-          <p style={{ color: 'var(--th-text-secondary)' }}>No mood entries yet. Start tracking how you feel!</p>
+          <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-rose-muted)' }}>
+            <IconSmile size={32} />
+          </div>
+          <p style={{ color: 'var(--th-color-text-secondary)' }}>No mood entries yet. Start tracking how you feel!</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-2)' }}>
@@ -187,12 +190,12 @@ export function MoodHome() {
               <span style={{ fontSize: '1.5rem' }}>{entry.moodEmoji}</span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 500 }}>{MOOD_LABELS[entry.moodValue]}</div>
-                <div style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-secondary)' }}>
+                <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
                   {new Date(entry.entryDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                 </div>
               </div>
               {entry.note && (
-                <div style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-tertiary)', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {entry.note}
                 </div>
               )}

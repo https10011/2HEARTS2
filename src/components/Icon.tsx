@@ -8,7 +8,7 @@ import type { SVGProps } from 'react';
  * whole set. Stroke-based for crisp scaling at any text-size setting.
  */
 
-type IconProps = SVGProps<SVGSVGElement> & { size?: number };
+export type IconProps = SVGProps<SVGSVGElement> & { size?: number };
 
 function base({ size = 24, ...rest }: IconProps) {
   return {
@@ -36,6 +36,15 @@ export function IconClose(props: IconProps) {
   return (
     <svg {...base(props)} aria-hidden="true">
       <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  );
+}
+
+/** Selection/state checkmark. */
+export function IconCheck(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <polyline points="20 6 9 17 4 12" />
     </svg>
   );
 }
@@ -90,6 +99,28 @@ export function IconHeart(props: IconProps) {
   );
 }
 
+/** Mood feature icon. */
+export function IconSmile(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+      <line x1="9" y1="9" x2="9.01" y2="9" />
+      <line x1="15" y1="9" x2="15.01" y2="9" />
+    </svg>
+  );
+}
+
+export function IconImage(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+      <circle cx="8.5" cy="8.5" r="1.5" />
+      <polyline points="21 15 16 10 5 21" />
+    </svg>
+  );
+}
+
 export function IconGamepad(props: IconProps) {
   return (
     <svg {...base(props)} aria-hidden="true">
@@ -109,6 +140,16 @@ export function IconFileText(props: IconProps) {
       <polyline points="14 2 14 8 20 8" />
       <line x1="8" y1="13" x2="16" y2="13" />
       <line x1="8" y1="17" x2="13" y2="17" />
+    </svg>
+  );
+}
+
+/** Generic file (Vault 'file' type) — plain document variant. */
+export function IconFile(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
     </svg>
   );
 }
@@ -150,6 +191,44 @@ export function IconMapPin(props: IconProps) {
     <svg {...base(props)} aria-hidden="true">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
       <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+export function IconBellOff(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      <path d="m18.63 13.39l.86 2.9a9.84 9.84 0 0 0-2.86.28l-2.29-2.57" />
+      <path d="M18.86 9.45a6 6 0 0 0-6-7.45 6 6 0 0 0-6 5.45c0 2.13-.43 4.02-1.43 5.46L4.23 13.63" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  );
+}
+
+export function IconCamera(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <path d="M4 7h3l2-3h6l2 3h3v14H4V7z" />
+      <circle cx="12" cy="13" r="3.5" />
+    </svg>
+  );
+}
+
+export function IconVideo(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <rect x="2" y="6" width="13" height="12" rx="2" />
+      <polyline points="15 10 22 6 22 18 15 14" />
+    </svg>
+  );
+}
+
+export function IconLock(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <rect x="4" y="10" width="16" height="11" rx="2" />
+      <path d="M8 10V7a4 4 0 0 1 8 0v3" />
     </svg>
   );
 }

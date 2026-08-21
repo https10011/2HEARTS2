@@ -113,7 +113,15 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   PlaceholderScreen stubs (now PeriodCalendarScreen/PeriodSettingsScreen;
   PlaceholderScreen deleted), note category meta centralized in
   features/notes/categoryMeta.ts; debug console.log calls removed)
-- Phase 23+: NOT STARTED
+- Phase 23: Design system & branding overhaul — COMPLETE. Brand/decorations
+  centralized via `BrandLogo` + `decorations.tsx` (guarded by
+  `tests/designTokens.test.ts`); official owner assets regenerated into
+  `src/assets/{branding,decorations}`; feature-emoji icons eliminated
+  (MasterPrompt §22) — icon set in `components/Icon.tsx` (+IconSmile,
+  +IconCheck, +IconMapPin, +IconCamera, +IconVideo, +IconLock, +IconFile,
+  +IconFileText exported from `components/index.ts`); documents:
+  `docs/design-system.md`. Feature vocab emojis (mood picker, memory-match
+  tiles) remain as content. Phase 24+: NOT STARTED
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,

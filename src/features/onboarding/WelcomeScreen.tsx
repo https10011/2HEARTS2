@@ -7,7 +7,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button } from '../../components/index.ts';
+import { Button, OnboardingArt } from '../../components/index.ts';
 import { OnboardingLayout } from './OnboardingLayout.tsx';
 import { useOnboarding } from './useOnboarding.ts';
 
@@ -23,24 +23,9 @@ export function WelcomeScreen() {
   return (
     <OnboardingLayout currentPath={RoutePath.onboardingWelcome} showBack={false}>
       <div className="th-onboarding-welcome">
-        {/* Illustration area */}
+        {/* Illustration (centralized decorative art — Phase 23) */}
         <div className="th-welcome-illustration">
-          <svg
-            width="160"
-            height="160"
-            viewBox="0 0 160 160"
-            fill="none"
-            aria-hidden="true"
-          >
-            <circle cx="80" cy="80" r="76" fill="var(--th-color-blush)" stroke="var(--th-color-burgundy)" strokeWidth="2" opacity="0.5" />
-            <circle cx="60" cy="72" r="28" fill="var(--th-color-surface)" stroke="var(--th-color-burgundy-light)" strokeWidth="1.5" />
-            <circle cx="100" cy="72" r="28" fill="var(--th-color-surface)" stroke="var(--th-color-burgundy-light)" strokeWidth="1.5" />
-            <path
-              d="M80 108C80 108 66 98 66 88C66 82 72 78 76 78C78 78 79 79 80 80C81 79 82 78 84 78C88 78 94 82 94 88C94 98 80 108 80 108Z"
-              fill="var(--th-color-burgundy)"
-              opacity="0.8"
-            />
-          </svg>
+          <OnboardingArt variant="couple-hearts" size={160} />
         </div>
 
         <h2 className="th-onboarding-heading">Welcome to TwoHearts</h2>

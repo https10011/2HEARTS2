@@ -11,6 +11,7 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { getDatabase } from '../../data/database/connection.ts';
 import { PlaceRepository } from '../../repositories/placeRepository.ts';
 import { PlaceService } from '../../services/place/placeService.ts';
+import { IconMapPin } from '../../components/index.ts';
 import type { Place } from '../../data/place/placeTypes.ts';
 
 let _placeService: PlaceService | null = null;
@@ -71,7 +72,9 @@ export function PlaceDetail() {
     return (
       <div className="th-content-pad">
         <div className="th-empty-state">
-          <div className="th-empty-state__icon" style={{ fontSize: '3rem' }}>📍</div>
+          <div className="th-empty-state__icon" style={{ color: 'var(--th-color-rose-muted)' }}>
+            <IconMapPin size={44} />
+          </div>
           <h3 className="th-empty-state__title">Place not found</h3>
           <p className="th-empty-state__message">This place may have been deleted.</p>
           <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appPlaces)}>
@@ -91,7 +94,9 @@ export function PlaceDetail() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--th-space-4)' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)', marginBottom: 'var(--th-space-1)' }}>
-            <span style={{ fontSize: '1.5rem' }}>📍</span>
+            <span style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex' }}>
+              <IconMapPin size={24} />
+            </span>
             <h1 className="th-screen-title" style={{ margin: 0 }}>{place.name}</h1>
           </div>
           {place.category && (
@@ -130,7 +135,7 @@ export function PlaceDetail() {
         {hasCoordinates && (
           <div style={{ marginBottom: 'var(--th-space-3)' }}>
             <p className="th-label" style={{ marginBottom: 'var(--th-space-1)' }}>Coordinates</p>
-            <p style={{ margin: 0, fontSize: 'var(--th-text-sm)', color: 'var(--th-text-secondary)' }}>
+            <p style={{ margin: 0, fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
               {place.latitude?.toFixed(6)}, {place.longitude?.toFixed(6)}
             </p>
           </div>
@@ -145,12 +150,12 @@ export function PlaceDetail() {
         )}
 
         {/* Metadata */}
-        <div style={{ borderTop: '1px solid var(--th-border)', paddingTop: 'var(--th-space-3)', marginTop: 'var(--th-space-2)' }}>
-          <p style={{ margin: 0, fontSize: 'var(--th-text-xs)', color: 'var(--th-text-tertiary)' }}>
+        <div style={{ borderTop: '1px solid var(--th-color-border)', paddingTop: 'var(--th-space-3)', marginTop: 'var(--th-space-2)' }}>
+          <p style={{ margin: 0, fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
             Added {new Date(place.createdAt).toLocaleDateString()}
           </p>
           {place.updatedAt !== place.createdAt && (
-            <p style={{ margin: 0, fontSize: 'var(--th-text-xs)', color: 'var(--th-text-tertiary)' }}>
+            <p style={{ margin: 0, fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
               Updated {new Date(place.updatedAt).toLocaleDateString()}
             </p>
           )}

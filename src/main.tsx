@@ -30,18 +30,8 @@ function SplashView() {
         gap: 'var(--th-space-4)',
       }}
     >
-      {/* Authoritative brand mark — one component (Phase 20) */}
-      <BrandLogo variant="badge" size={80} />
-      <h1
-        style={{
-          fontFamily: 'var(--th-font-family-display)',
-          fontSize: 'var(--th-font-size-xl)',
-          color: 'var(--th-color-burgundy)',
-          fontWeight: 'var(--th-font-weight-semibold)',
-        }}
-      >
-        TwoHearts
-      </h1>
+      {/* Official TwoHearts logo — one BrandLogo component, one asset (Phase 23) */}
+      <BrandLogo variant="brand" size={160} title="TwoHearts" />
     </main>
   );
 }

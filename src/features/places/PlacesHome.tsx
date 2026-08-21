@@ -11,7 +11,7 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { getDatabase } from '../../data/database/connection.ts';
 import { PlaceRepository } from '../../repositories/placeRepository.ts';
 import { PlaceService } from '../../services/place/placeService.ts';
-import { IconPlus, IconChevronRight } from '../../components/index.ts';
+import { IconPlus, IconChevronRight, IconMapPin } from '../../components/index.ts';
 import type { Place } from '../../data/place/placeTypes.ts';
 
 const CATEGORY_OPTIONS = ['All', 'Restaurant', 'Vacation', 'Home', 'Adventure', 'Special', 'Other'] as const;
@@ -102,8 +102,8 @@ export function PlacesHome() {
       {/* Empty state */}
       {!loading && places.length === 0 && (
         <div className="th-empty-state">
-          <div className="th-empty-state__icon" style={{ fontSize: '3rem' }}>
-            📍
+          <div className="th-empty-state__icon" style={{ color: 'var(--th-color-rose-muted)' }}>
+            <IconMapPin size={44} />
           </div>
           <h3 className="th-empty-state__title">
             {searchQuery ? 'No matching places' : 'No places yet'}
@@ -136,11 +136,13 @@ export function PlacesHome() {
             >
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)', marginBottom: 'var(--th-space-1)' }}>
-                  <span style={{ fontSize: '1.25rem' }}>📍</span>
-                  <h3 style={{ fontWeight: 600, fontSize: 'var(--th-text-base)' }}>{place.name}</h3>
+                  <span style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex' }}>
+                    <IconMapPin size={18} />
+                  </span>
+                  <h3 style={{ fontWeight: 600, fontSize: 'var(--th-font-size-md)' }}>{place.name}</h3>
                 </div>
                 {(place.city || place.state || place.country) && (
-                  <p style={{ fontSize: 'var(--th-text-sm)', color: 'var(--th-text-secondary)', margin: 0 }}>
+                  <p style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', margin: 0 }}>
                     {[place.city, place.state, place.country].filter(Boolean).join(', ')}
                   </p>
                 )}

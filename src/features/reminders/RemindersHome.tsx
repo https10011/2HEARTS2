@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconBack, IconChevronRight } from '../../components/index.ts';
+import { IconBack, IconChevronRight, IconBell } from '../../components/index.ts';
 import type { Reminder } from '../../data/reminder/reminderTypes.ts';
 import { formatReminderDateTime } from '../../data/reminder/reminderTypes.ts';
 import { useReminderService } from './useReminderService.ts';
@@ -80,7 +80,9 @@ export function RemindersHome() {
       {/* Empty state */}
       {activeReminders.length === 0 && completedReminders.length === 0 && (
         <div className="th-empty-state" style={{ marginTop: 'var(--th-space-12)' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 'var(--th-space-4)' }}>🔔</div>
+          <div style={{ marginBottom: 'var(--th-space-4)', color: 'var(--th-color-rose-muted)' }}>
+            <IconBell size={48} />
+          </div>
           <h3 style={{ marginBottom: 'var(--th-space-2)' }}>No reminders yet</h3>
           <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-6)' }}>
             Create a reminder to never miss an important moment
@@ -161,8 +163,8 @@ export function RemindersHome() {
                     {reminder.title}
                   </div>
                   <div className="th-feature-card__desc">
-                    {reminder.status === 'completed' ? '✅ Completed' :
-                     reminder.status === 'missed' ? '⏰ Missed' : '🔕 Dismissed'}
+                    {reminder.status === 'completed' ? 'Completed' :
+                     reminder.status === 'missed' ? 'Missed' : 'Dismissed'}
                     {' · '}
                     {formatReminderDateTime(reminder.scheduledDate, reminder.scheduledTime)}
                   </div>

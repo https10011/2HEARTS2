@@ -82,8 +82,8 @@ export function PeriodSettingsScreen() {
     <div className="th-card" style={{ padding: 'var(--th-space-4)', marginBottom: 'var(--th-space-3)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontWeight: 600, fontSize: 'var(--th-text-base)' }}>{label}</div>
-          <div style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-secondary)' }}>
+          <div style={{ fontWeight: 600, fontSize: 'var(--th-font-size-md)' }}>{label}</div>
+          <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
             {value} {unit}
           </div>
         </div>
@@ -135,14 +135,14 @@ export function PeriodSettingsScreen() {
           {stepper('Typical cycle length', cycleDays, setCycleDays, CYCLE_MIN, CYCLE_MAX, 'days')}
           {stepper('Typical period length', periodDays, setPeriodDays, PERIOD_MIN, PERIOD_MAX, 'days')}
 
-          <p style={{ fontSize: 'var(--th-text-xs)', color: 'var(--th-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
+          <p style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
             These values are used for on-device predictions only. All period
             tracking data stays on this device.
           </p>
 
           {error && <p className="th-form-error" style={{ marginBottom: 'var(--th-space-3)' }}>{error}</p>}
           {saved && (
-            <p style={{ color: 'var(--th-color-success, #2e7d32)', fontSize: 'var(--th-text-sm)', marginBottom: 'var(--th-space-3)' }}>
+            <p style={{ color: 'var(--th-color-success)', fontSize: 'var(--th-font-size-sm)', marginBottom: 'var(--th-space-3)' }}>
               Settings saved.
             </p>
           )}

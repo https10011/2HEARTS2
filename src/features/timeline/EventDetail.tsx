@@ -9,7 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { useTimelineService } from './useTimelineService.ts';
 import type { TimelineEventView } from '../../services/timeline/timelineService.ts';
-import { IconTrash, IconEdit } from '../../components/index.ts';
+import { IconTrash, IconEdit, IconCalendar } from '../../components/index.ts';
 
 export function EventDetail() {
   const navigate = useNavigate();
@@ -92,7 +92,7 @@ export function EventDetail() {
     return (
       <div className="th-content-pad">
         <div className="th-empty-state">
-          <div className="th-empty-state__icon">📅</div>
+          <div className="th-empty-state__icon"><IconCalendar size={40} /></div>
           <h3 className="th-empty-state__title">Event not found</h3>
           <p className="th-empty-state__desc">{error ?? 'This event may have been deleted.'}</p>
           <button

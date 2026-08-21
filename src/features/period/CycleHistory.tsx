@@ -13,6 +13,8 @@ import { getDatabase } from '../../data/database/connection.ts';
 import { PeriodRepository } from '../../repositories/periodRepository.ts';
 import { PeriodService } from '../../services/period/periodService.ts';
 import type { PeriodEntry } from '../../data/period/periodTypes.ts';
+import { IconCalendar } from '../../components/index.ts';
+import { FLOW_META, flowDotStyle } from './flowMeta.ts';
 import { diffDays } from '../../data/period/periodTypes.ts';
 
 let _periodService: PeriodService | null = null;
@@ -31,12 +33,6 @@ function formatDate(dateStr: string): string {
     year: 'numeric',
   });
 }
-
-const FLOW_EMOJI: Record<string, string> = {
-  light: '💧',
-  medium: '🩸',
-  heavy: '🔴',
-};
 
 export function CycleHistory() {
   const navigate = useNavigate();
@@ -80,9 +76,11 @@ export function CycleHistory() {
 
       {entries.length === 0 ? (
         <div className="th-card" style={{ padding: 'var(--th-space-6)', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: 'var(--th-space-2)' }}>📅</div>
+          <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-rose-muted)' }}>
+            <IconCalendar size={48} />
+          </div>
           <h3 style={{ marginBottom: 'var(--th-space-2)' }}>No period entries yet</h3>
-          <p style={{ color: 'var(--th-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
+          <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
             Start logging to see your cycle history.
           </p>
           <button
@@ -115,24 +113,25 @@ export function CycleHistory() {
                       {entry.endDate ? ` — ${formatDate(entry.endDate)}` : ' — Ongoing'}
                     </div>
                     <div style={{ display: 'flex', gap: 'var(--th-space-3)', marginTop: 'var(--th-space-1)' }}>
-                      <span style={{ fontSize: 'var(--th-text-sm)', color: 'var(--th-text-secondary)' }}>
-                        {FLOW_EMOJI[entry.flowLevel]} {entry.flowLevel}
+                      <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: 'var(--th-space-1)' }}>
+                        <span aria-hidden="true" style={flowDotStyle(entry.flowLevel)} />
+                        {FLOW_META[entry.flowLevel]?.label ?? entry.flowLevel}
                       </span>
                       {duration && (
-                        <span style={{ fontSize: 'var(--th-text-sm)', color: 'var(--th-text-secondary)' }}>
+                        <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
                           {duration} days
                         </span>
                       )}
                     </div>
                   </div>
                   {cycleLength && cycleLength > 15 && cycleLength < 60 && (
-                    <span className="th-badge" style={{ fontSize: 'var(--th-text-xs)' }}>
+                    <span className="th-badge" style={{ fontSize: 'var(--th-font-size-xs)' }}>
                       {cycleLength}d cycle
                     </span>
                   )}
                 </div>
                 {entry.note && (
-                  <p style={{ fontSize: 'var(--th-text-sm)', color: 'var(--th-text-secondary)', fontStyle: 'italic', margin: 0 }}>
+                  <p style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', fontStyle: 'italic', margin: 0 }}>
                     "{entry.note}"
                   </p>
                 )}

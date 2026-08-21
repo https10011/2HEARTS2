@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { Screen } from '../../components/Screen.tsx';
 import { Header } from '../../components/Header.tsx';
 import { IconButton } from '../../components/IconButton.tsx';
+import { IconCheck } from '../../components/index.ts';
 import { EmptyState } from '../../components/EmptyState.tsx';
 import type { NotificationCenterEntry } from '../../data/notification/notificationCenterTypes.ts';
 
@@ -25,9 +26,9 @@ interface NotificationCenterProps {
 }
 
 const KIND_LABELS: Record<string, string> = {
-  reminder: '⏰ Reminder',
-  anniversary: '💕 Anniversary',
-  system: 'ℹ️ System',
+  reminder: 'Reminder',
+  anniversary: 'Anniversary',
+  system: 'System',
 };
 
 /** Simple feature-to-route mapping for navigation targets. */
@@ -106,7 +107,7 @@ export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
         right={
           entries.some((e) => !e.read) ? (
             <IconButton label="Mark all as read" onClick={() => void handleMarkAllRead()}>
-              ✓
+              <IconCheck size={18} />
             </IconButton>
           ) : undefined
         }
@@ -145,7 +146,7 @@ export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'var(--th-color-error, #dc3545)',
+                  color: 'var(--th-color-error)',
                   fontSize: '13px',
                   cursor: 'pointer',
                   padding: '4px 8px',
@@ -167,7 +168,7 @@ export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
                     padding: '12px',
                     borderRadius: '12px',
                     border: '1px solid var(--th-color-border)',
-                    background: entry.read ? 'var(--th-color-surface)' : 'var(--th-color-primary-subtle, rgba(106, 27, 43, 0.05))',
+                    background: entry.read ? 'var(--th-color-surface)' : 'var(--th-color-blush, rgba(106, 27, 43, 0.05))',
                     cursor: 'pointer',
                     textAlign: 'left',
                     width: '100%',
@@ -185,7 +186,7 @@ export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
                     }}>
                       <span style={{
                         fontSize: '11px',
-                        color: 'var(--th-color-primary)',
+                        color: 'var(--th-color-burgundy)',
                         fontWeight: 500,
                       }}>
                         {KIND_LABELS[entry.kind] ?? entry.kind}

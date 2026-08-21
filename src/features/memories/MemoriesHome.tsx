@@ -10,7 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import type { MemoryWithMedia } from '../../services/memory/memoryService.ts';
 import { useMemoryService } from './useMemoryService.ts';
-import { Button, IconPlus, IconChevronRight, LoadingState } from '../../components/index.ts';
+import { Button, IconPlus, IconImage, IconChevronRight, LoadingState } from '../../components/index.ts';
 
 export function MemoriesHome() {
   const navigate = useNavigate();
@@ -56,11 +56,7 @@ export function MemoriesHome() {
     return (
       <div className="th-content-pad" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
         <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-6)' }}>
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--th-color-rose-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ opacity: 0.5, marginBottom: 'var(--th-space-4)' }}>
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <polyline points="21 15 16 10 5 21" />
-          </svg>
+          <IconImage size={64} style={{ opacity: 0.5, marginBottom: 'var(--th-space-4)', color: 'var(--th-color-rose-muted)' }} />
           <h2 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-2)' }}>
             No memories yet
           </h2>
@@ -105,11 +101,7 @@ export function MemoriesHome() {
               borderRadius: 'var(--th-radius-md) 0 0 var(--th-radius-md)',
               color: 'var(--th-color-rose-muted)',
             }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <polyline points="21 15 16 10 5 21" />
-              </svg>
+              <IconImage size={24} />
             </div>
 
             <div className="th-feature-card__body" style={{ padding: 'var(--th-space-3)' }}>

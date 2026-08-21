@@ -50,7 +50,7 @@ export function AppLockGate({ children }: { children: ReactNode }) {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 1000, // matches --th-z-modal; covers everything in-app
+        zIndex: 'var(--th-z-lock)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -61,17 +61,8 @@ export function AppLockGate({ children }: { children: ReactNode }) {
       }}
       aria-label="TwoHearts is locked"
     >
-      {/* Authoritative brand badge — one component (Phase 20) */}
-      <BrandLogo variant="badge" size={72} />
-      <h1
-        style={{
-          margin: 0,
-          fontFamily: 'var(--th-font-family-display)',
-          color: 'var(--th-color-burgundy)',
-        }}
-      >
-        TwoHearts
-      </h1>
+      {/* Official hearts mark — one BrandLogo component, one asset (Phase 23) */}
+      <BrandLogo variant="mark" size={88} title="TwoHearts" />
       <p style={{ margin: 0, color: 'var(--th-color-text-secondary)' }}>Enter your PIN to unlock.</p>
       <form
         style={{ width: '100%', maxWidth: '320px' }}

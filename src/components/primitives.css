@@ -139,12 +139,12 @@
 .th-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(43, 36, 32, 0.45);
+  background-color: var(--th-color-overlay);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 1000;
-  animation: th-fade-in var(--th-duration-normal) var(--th-ease-decelerate);
+  z-index: var(--th-z-modal);
+  animation: th-fade-in var(--th-motion-modal);
 }
 .th-modal-sheet {
   width: 100%;
@@ -184,8 +184,6 @@
   gap: var(--th-space-3);
 }
 .th-splash-logo {
-  width: 80px;
-  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -397,7 +395,7 @@
   padding-bottom: var(--th-safe-area-bottom);
   background-color: var(--th-color-surface);
   border-top: var(--th-border-width-thin) solid var(--th-color-divider);
-  box-shadow: 0 -1px 3px rgba(74, 15, 29, 0.04);
+  box-shadow: var(--th-shadow-nav);
 }
 .th-bottom-nav-item {
   flex: 1;
@@ -876,7 +874,7 @@
 }
 .th-btn--danger {
   background-color: var(--th-color-error);
-  color: #fff;
+  color: var(--th-color-text-on-accent);
 }
 .th-btn--sm {
   min-height: 36px;
@@ -967,6 +965,50 @@
   to { transform: rotate(360deg); }
 }
 
+/* ========================================================================
+   Decorations (Phase 23) — Rose/Lily floras + shared soft art
+   ======================================================================== */
+
+/**
+ * .th-decor wraps ONE Rose/Lily <img> at an anchored corner of the nearest
+ * positioned ancestor (+ a few px inset). pointer-events:none + aria-hidden
+ * so decorations never interfere with taps or a11y. `opacity/transform` are
+ * controlled inline by RoseLilyDecoration.
+ */
+.th-decor {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  margin: var(--th-space-4);
+}
+.th-decor--top-left { top: 0; left: 0; }
+.th-decor--top-right { top: 0; right: 0; }
+.th-decor--bottom-left { bottom: 0; left: 0; }
+.th-decor--bottom-right { bottom: 0; right: 0; }
+.th-decor--center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Gentle sway — disabled under reduce-motion (OS or in-app). */
+.th-decor--animated {
+  animation: th-sway var(--th-motion-drift) infinite;
+  transform-origin: 50% 85%;
+}
+@keyframes th-sway {
+  0%, 100% { transform: rotate(-2.2deg); }
+  50% { transform: rotate(2.2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .th-decor--animated { animation: none; }
+}
+html[data-th-motion='reduced'] .th-decor--animated {
+  animation: none;
+}
+
 /* FAB */
 .th-fab {
   position: fixed;
@@ -985,7 +1027,7 @@
   cursor: pointer;
   transition: transform var(--th-duration-fast) var(--th-ease-standard),
     box-shadow var(--th-duration-fast) var(--th-ease-standard);
-  z-index: 100;
+  z-index: var(--th-z-fab);
 }
 .th-fab:active {
   transform: scale(0.92);
@@ -1247,13 +1289,14 @@
 .th-memory-card {
   aspect-ratio: 1;
   border-radius: var(--th-radius-md);
-  border: 2px solid var(--th-color-neutral-border);
+  border: var(--th-border-width-medium) solid var(--th-color-border);
   background: var(--th-color-surface);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color var(--th-duration-normal) var(--th-ease-standard),
+    border-color var(--th-duration-normal) var(--th-ease-standard);
   -webkit-tap-highlight-color: transparent;
   padding: 0;
   font-size: clamp(1.5rem, 4vw, 2.25rem);
@@ -1266,7 +1309,7 @@
 }
 
 .th-memory-card--revealed {
-  background: var(--th-color-surface-secondary);
+  background: var(--th-color-neutral-soft);
   border-color: var(--th-color-burgundy);
 }
 
@@ -1277,7 +1320,7 @@
 }
 
 .th-memory-card--matched .th-memory-card__face {
-  color: var(--th-color-text-on-primary, #fff);
+  color: var(--th-color-text-on-accent);
 }
 
 .th-memory-card__face {

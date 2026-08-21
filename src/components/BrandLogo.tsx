@@ -1,74 +1,50 @@
 /**
- * BrandLogo — the ONE authoritative TwoHearts brand mark (Phase 20).
+ * BrandLogo — the ONE authoritative TwoHearts brand mark (Phase 23).
  *
- * System-wide customization contract: changing this component (or the
- * underlying src/assets/branding SVG) propagates to every consumer —
- * splash, onboarding, app lock, about, any future header.
+ * Renders the OFFICIAL owner-provided artwork (`TwoHearts-Logo-BrandName/`)
+ * via the generated runtime assets in src/assets/branding/ — never an inline
+ * SVG recreation. Customization contract: replace the official source SVG,
+ * re-run `node scripts/generate-design-assets.mjs`, and every approved
+ * location (splash, onboarding, app lock, about, headers) updates at once.
  *
- * Two approved marks:
- *   - 'badge'  — solid burgundy circle with a single heart (in-app badges)
- *   - 'brand'  — two overlapping hearts (onboarding/splash identity)
+ * Variants:
+ *   - 'brand' — full logo: interlocked hearts + "TwoHearts" + tagline
+ *   - 'mark'  — interlocked hearts only
  *
- * Both are pure SVG influenced by design tokens, so the brand color change
- * centrally propagates; no per-screen hardcoded logos exist.
+ * The official raster art includes a white outline, so both variants read
+ * on light and dark surfaces.
  */
 
-export type BrandLogoVariant = 'badge' | 'brand';
+import brandUrl from '../assets/branding/twohearts-logo.svg';
+import markUrl from '../assets/branding/twohearts-logo-mark.svg';
+
+export type BrandLogoVariant = 'brand' | 'mark';
+
+/** Aspect ratios (width/height) of the generated brand assets. */
+export const BRAND_LOGO_ASPECT: Record<BrandLogoVariant, number> = {
+  brand: 506.3152 / 433.8324,
+  mark: 306.7499 / 285,
+};
 
 export interface BrandLogoProps {
-  /** Variant: 'badge' (single heart circle) or 'brand' (overlapping hearts). */
+  /** 'brand' (full logo) or 'mark' (hearts only). */
   variant?: BrandLogoVariant;
-  /** Outer size in px. */
+  /** Rendered width in px (height follows the official aspect ratio). */
   size?: number;
   /** Accessible label (decorative when omitted). */
   title?: string;
 }
 
-export function BrandLogo({ variant = 'badge', size = 72, title }: BrandLogoProps) {
-  const a11y = title
-    ? { role: 'img' as const, 'aria-label': title }
-    : { 'aria-hidden': true as const };
-  if (variant === 'brand') {
-    return (
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 120 120"
-        fill="none"
-        {...a11y}
-      >
-        <path
-          d="M58 38c-6-9-20-9-24 1-3 8 4 16 24 27 20-11 27-19 24-27-4-10-18-10-24-1z"
-          fill="var(--th-color-burgundy)"
-        />
-        <path
-          d="M42 52c-4-6-13-6-15 0-2 5 3 10 15 17 12-7 17-12 15-17-2-6-11-6-15 0z"
-          fill="var(--th-color-blush)"
-        />
-      </svg>
-    );
-  }
+export function BrandLogo({ variant = 'brand', size = 120, title }: BrandLogoProps) {
   return (
-    <svg
+    <img
+      src={variant === 'brand' ? brandUrl : markUrl}
       width={size}
-      height={size}
-      viewBox="0 0 80 80"
-      fill="none"
-      {...a11y}
-    >
-      <circle
-        cx="40"
-        cy="40"
-        r="38"
-        fill="var(--th-color-burgundy)"
-        stroke="var(--th-color-burgundy-dark)"
-        strokeWidth="2"
-      />
-      <path
-        d="M40 58C40 58 18 44 18 30C18 22 24 16 32 16C36 16 39 18 40 20C41 18 44 16 48 16C56 16 62 22 62 30C62 44 40 58 40 58Z"
-        fill="var(--th-color-text-on-accent)"
-        opacity="0.95"
-      />
-    </svg>
+      height={Math.round(size / BRAND_LOGO_ASPECT[variant])}
+      alt={title ?? ''}
+      role={title ? 'img' : undefined}
+      aria-hidden={title ? undefined : true}
+      style={{ display: 'block', maxWidth: '100%', height: 'auto' }}
+    />
   );
 }

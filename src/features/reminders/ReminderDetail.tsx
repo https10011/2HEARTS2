@@ -161,7 +161,7 @@ export function ReminderDetail() {
               Notification
             </div>
             <div style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 'var(--th-font-weight-semibold)' }}>
-              {reminder.notificationEnabled ? '🔔 Enabled' : '🔕 Disabled'}
+              {reminder.notificationEnabled ? 'Enabled' : 'Disabled'}
             </div>
           </div>
         </div>
@@ -174,7 +174,7 @@ export function ReminderDetail() {
           className="th-btn th-btn--secondary th-btn--full"
           onClick={handleToggleNotification}
         >
-          {reminder.notificationEnabled ? '🔕 Disable Notification' : '🔔 Enable Notification'}
+          {reminder.notificationEnabled ? 'Disable Notification' : 'Enable Notification'}
         </button>
 
         {/* Mark complete (only for active) */}
@@ -183,7 +183,7 @@ export function ReminderDetail() {
             className="th-btn th-btn--primary th-btn--full"
             onClick={handleComplete}
           >
-            ✅ Mark Complete
+            Mark Complete
           </button>
         )}
 
@@ -200,7 +200,7 @@ export function ReminderDetail() {
           <button
             className="th-btn th-btn--secondary th-btn--full"
             onClick={() => setShowDeleteConfirm(true)}
-            style={{ color: 'var(--th-color-error, #c62828)' }}
+            style={{ color: 'var(--th-color-error)' }}
           >
             Delete Reminder
           </button>
@@ -216,7 +216,7 @@ export function ReminderDetail() {
             <button
               className="th-btn th-btn--primary"
               onClick={handleDelete}
-              style={{ flex: 1, background: 'var(--th-color-error, #c62828)' }}
+              style={{ flex: 1, background: 'var(--th-color-error)' }}
             >
               Confirm Delete
             </button>

@@ -198,7 +198,7 @@ export function WordScrambleScreen() {
             color: 'var(--th-color-text-primary)',
             letterSpacing: '8px',
             padding: 'var(--th-space-4)',
-            background: 'var(--th-color-surface-secondary)',
+            background: 'var(--th-color-neutral-soft)',
             borderRadius: 'var(--th-radius-md)',
           }}
         >
@@ -220,8 +220,8 @@ export function WordScrambleScreen() {
             borderRadius: 'var(--th-radius-md)',
             marginBottom: 'var(--th-space-4)',
             fontWeight: 'var(--th-font-weight-semibold)',
-            background: feedback === 'correct' ? 'var(--th-color-success-bg, #e8f5e9)' : 'var(--th-color-error-bg, #fce4ec)',
-            color: feedback === 'correct' ? 'var(--th-color-success, #2e7d32)' : 'var(--th-color-error, #c62828)',
+            background: feedback === 'correct' ? 'var(--th-color-success-bg)' : 'var(--th-color-error-bg)',
+            color: feedback === 'correct' ? 'var(--th-color-success)' : 'var(--th-color-error)',
           }}
         >
           {feedback === 'correct' ? 'Correct!' : `The answer was: ${correctAnswer}`}

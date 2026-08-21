@@ -9,7 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { useNoteService } from './useNoteService.ts';
 import type { NoteView } from '../../services/note/noteService.ts';
-import { IconTrash, IconEdit } from '../../components/index.ts';
+import { IconTrash, IconEdit, IconFileText } from '../../components/index.ts';
 
 import { NOTE_CATEGORY_LABELS as CATEGORY_LABELS, NOTE_CATEGORY_COLORS as CATEGORY_COLORS } from './categoryMeta.ts';
 
@@ -84,7 +84,7 @@ export function NoteDetail() {
     return (
       <div className="th-content-pad">
         <div className="th-empty-state">
-          <div className="th-empty-state__icon">📄</div>
+          <div className="th-empty-state__icon"><IconFileText size={40} /></div>
           <h3 className="th-empty-state__title">Note not found</h3>
           <p className="th-empty-state__desc">{error ?? 'This note may have been deleted.'}</p>
           <button
