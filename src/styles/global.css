@@ -65,7 +65,12 @@ body,
 .th-screen-warm,
 .th-card-emotional,
 .th-modal-sheet,
-.th-modal {
+.th-modal,
+.th-game-question,
+.th-game-result-card,
+.th-game-intro__icon,
+.th-game-level-up__icon,
+.th-scramble-display--enhanced {
   transition:
     background-color var(--th-duration-normal) var(--th-ease-standard),
     border-color var(--th-duration-normal) var(--th-ease-standard);
