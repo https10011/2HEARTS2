@@ -8,7 +8,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconPlus, IconChevronRight, IconCalendar } from '../../components/index.ts';
+import { IconPlus, IconChevronRight, IconCalendar, RoseLilyDecoration } from '../../components/index.ts';
 import { useTimelineService } from './useTimelineService.ts';
 import type { TimelineEventView } from '../../services/timeline/timelineService.ts';
 
@@ -51,18 +51,21 @@ export function TimelineHome() {
   // Empty state
   if (events.length === 0) {
     return (
-      <div className="th-content-pad">
-        <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
-            <IconCalendar size={36} />
+      <div className="th-content-pad th-screen-warm">
+        <RoseLilyDecoration variant={11} size={110} position="bottom-right" opacity={0.15} animated />
+        <div className="th-empty-emotional">
+          <div className="th-empty-emotional__visual th-scale-in">
+            <IconCalendar size={42} />
           </div>
-          <h3 className="th-empty-state__title">No events yet</h3>
-          <p className="th-empty-state__desc">
-            Start building your relationship timeline
+          <h3 className="th-empty-emotional__title">No events yet</h3>
+          <p className="th-empty-emotional__message">
+            Your story together is just beginning — start writing the next chapter
           </p>
-          <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appTimelineAdd)}>
-            <IconPlus size={18} /> Add your first event
-          </button>
+          <div className="th-empty-emotional__action">
+            <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appTimelineAdd)}>
+              <IconPlus size={18} /> Add your first event
+            </button>
+          </div>
         </div>
       </div>
     );

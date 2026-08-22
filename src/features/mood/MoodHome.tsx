@@ -12,7 +12,7 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { getDatabase } from '../../data/database/connection.ts';
 import { MoodRepository } from '../../repositories/moodRepository.ts';
 import { MoodService } from '../../services/mood/moodService.ts';
-import { IconSmile, LoadingState } from '../../components/index.ts';
+import { IconSmile, LoadingState, RoseLilyDecoration } from '../../components/index.ts';
 
 import {
   type MoodEntry,
@@ -170,11 +170,15 @@ export function MoodHome() {
       </div>
 
       {recentMoods.length === 0 ? (
-        <div className="th-card th-empty-state--enhanced" style={{ textAlign: 'center' }}>
-          <div className="th-empty-state__visual" style={{ margin: '0 auto var(--th-space-3)' }}>
-            <IconSmile size={24} />
+        <div className="th-empty-emotional" style={{ marginTop: 'var(--th-space-4)' }}>
+          <RoseLilyDecoration variant={18} size={80} position="bottom-right" opacity={0.1} animated />
+          <div className="th-empty-emotional__visual th-scale-in">
+            <IconSmile size={36} />
           </div>
-          <p className="th-empty-state__desc" style={{ maxWidth: 'none' }}>No mood entries yet. Start tracking how you feel!</p>
+          <h3 className="th-empty-emotional__title">No moods yet</h3>
+          <p className="th-empty-emotional__message">
+            Start tracking how you feel — it's a beautiful way to understand each other
+          </p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-2)' }}>

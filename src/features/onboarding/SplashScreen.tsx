@@ -20,7 +20,7 @@ export function SplashScreen() {
   if (!visible) return null;
 
   return (
-    <div className="th-splash">
+    <div className="th-splash th-welcome-glow">
       <div className="th-splash-content">
         {/* Official TwoHearts logo — one BrandLogo component, one asset (Phase 23) */}
         <div className="th-splash-logo">

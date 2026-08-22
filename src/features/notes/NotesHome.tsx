@@ -8,7 +8,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconPlus, IconSearch, IconChevronRight, IconFileText } from '../../components/index.ts';
+import { IconPlus, IconSearch, IconChevronRight, IconFileText, RoseLilyDecoration } from '../../components/index.ts';
 import { useNoteService } from './useNoteService.ts';
 import type { NoteView } from '../../services/note/noteService.ts';
 import { NOTE_CATEGORY_LABELS, NOTE_CATEGORY_COLORS } from './categoryMeta.ts';
@@ -105,26 +105,29 @@ export function NotesHome() {
 
       {/* Empty state */}
       {!loading && !error && filteredNotes.length === 0 && (
-        <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
-            <IconFileText size={36} />
+        <div className="th-empty-emotional" style={{ marginTop: 'var(--th-space-4)' }}>
+          {!searchQuery && <RoseLilyDecoration variant={14} size={100} position="bottom-right" opacity={0.12} animated />}
+          <div className="th-empty-emotional__visual th-scale-in">
+            <IconFileText size={42} />
           </div>
-          <h3 className="th-empty-state__title">
+          <h3 className="th-empty-emotional__title">
             {searchQuery ? 'No notes found' : 'No notes yet'}
           </h3>
-          <p className="th-empty-state__desc">
+          <p className="th-empty-emotional__message">
             {searchQuery
               ? 'Try a different search term.'
-              : 'Start writing — create your first note.'}
+              : 'A quiet place for your thoughts, plans, and everything in between.'}
           </p>
-          {!searchQuery && (
-            <button
-              className="th-btn th-btn--primary"
-              onClick={() => navigate(RoutePath.appNotesAdd)}
-            >
-              Create Note
-            </button>
-          )}
+          <div className="th-empty-emotional__action">
+            {!searchQuery && (
+              <button
+                className="th-btn th-btn--primary"
+                onClick={() => navigate(RoutePath.appNotesAdd)}
+              >
+                Create Note
+              </button>
+            )}
+          </div>
         </div>
       )}
 

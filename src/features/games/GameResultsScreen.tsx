@@ -7,7 +7,7 @@
 
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconHeart, IconClose } from '../../components/index.ts';
+import { IconHeart, IconClose, RoseLilyDecoration } from '../../components/index.ts';
 import type { GameResult, GameType } from '../../data/game/gameTypes.ts';
 
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
@@ -37,7 +37,8 @@ export function GameResultsScreen() {
   }
 
   return (
-    <div className="th-content-pad">
+    <div className="th-content-pad th-screen-warm">
+      <RoseLilyDecoration variant={4} size={90} position="top-right" opacity={0.15} animated />
       {/* Title */}
       <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-6)' }}>
         <h1 style={{

@@ -11,7 +11,7 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { getDatabase } from '../../data/database/connection.ts';
 import { PlaceRepository } from '../../repositories/placeRepository.ts';
 import { PlaceService } from '../../services/place/placeService.ts';
-import { IconPlus, IconChevronRight, IconMapPin } from '../../components/index.ts';
+import { IconPlus, IconChevronRight, IconMapPin, RoseLilyDecoration } from '../../components/index.ts';
 import type { Place } from '../../data/place/placeTypes.ts';
 
 const CATEGORY_OPTIONS = ['All', 'Restaurant', 'Vacation', 'Home', 'Adventure', 'Special', 'Other'] as const;
@@ -101,26 +101,29 @@ export function PlacesHome() {
 
       {/* Empty state */}
       {!loading && places.length === 0 && (
-        <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
-            <IconMapPin size={36} />
+        <div className="th-empty-emotional" style={{ marginTop: 'var(--th-space-4)' }}>
+          {!searchQuery && <RoseLilyDecoration variant={9} size={100} position="bottom-left" opacity={0.12} animated />}
+          <div className="th-empty-emotional__visual th-scale-in">
+            <IconMapPin size={42} />
           </div>
-          <h3 className="th-empty-state__title">
+          <h3 className="th-empty-emotional__title">
             {searchQuery ? 'No matching places' : 'No places yet'}
           </h3>
-          <p className="th-empty-state__desc">
+          <p className="th-empty-emotional__message">
             {searchQuery
               ? 'Try a different search term.'
-              : 'Add your favorite places to remember the spots that matter to you both.'}
+              : 'Add the spots that matter to you both — the restaurants, the hideaways, the memories in between.'}
           </p>
-          {!searchQuery && (
-            <button
-              className="th-btn th-btn--primary"
-              onClick={() => navigate(RoutePath.appPlacesAdd)}
-            >
-              Add Your First Place
-            </button>
-          )}
+          <div className="th-empty-emotional__action">
+            {!searchQuery && (
+              <button
+                className="th-btn th-btn--primary"
+                onClick={() => navigate(RoutePath.appPlacesAdd)}
+              >
+                Add Your First Place
+              </button>
+            )}
+          </div>
         </div>
       )}
 

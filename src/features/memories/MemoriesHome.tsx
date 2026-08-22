@@ -10,7 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import type { MemoryWithMedia } from '../../services/memory/memoryService.ts';
 import { useMemoryService } from './useMemoryService.ts';
-import { Button, IconPlus, IconImage, IconChevronRight, LoadingState } from '../../components/index.ts';
+import { Button, IconPlus, IconImage, IconChevronRight, LoadingState, RoseLilyDecoration } from '../../components/index.ts';
 
 export function MemoriesHome() {
   const navigate = useNavigate();
@@ -54,18 +54,21 @@ export function MemoriesHome() {
   // Empty state
   if (memories.length === 0) {
     return (
-      <div className="th-content-pad">
-        <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
-            <IconImage size={36} />
+      <div className="th-content-pad th-screen-warm">
+        <RoseLilyDecoration variant={3} size={120} position="top-right" opacity={0.15} animated />
+        <div className="th-empty-emotional">
+          <div className="th-empty-emotional__visual th-scale-in">
+            <IconImage size={42} />
           </div>
-          <h3 className="th-empty-state__title">No memories yet</h3>
-          <p className="th-empty-state__desc">
-            Capture your favorite moments together
+          <h3 className="th-empty-emotional__title">No memories yet</h3>
+          <p className="th-empty-emotional__message">
+            This is a place waiting for your favorite moments together
           </p>
-          <Button variant="primary" onClick={() => navigate(RoutePath.appMemoriesAdd)}>
-            <IconPlus size={18} /> Add your first memory
-          </Button>
+          <div className="th-empty-emotional__action">
+            <Button variant="primary" onClick={() => navigate(RoutePath.appMemoriesAdd)}>
+              <IconPlus size={18} /> Add your first memory
+            </Button>
+          </div>
         </div>
       </div>
     );

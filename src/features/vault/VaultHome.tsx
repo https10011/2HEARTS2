@@ -10,7 +10,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import type { VaultService } from '../../services/vault/vaultService.ts';
-import { IconPlus, IconLock } from '../../components/index.ts';
+import { IconPlus, IconLock, RoseLilyDecoration } from '../../components/index.ts';
 import type { VaultItem, VaultContentType } from '../../data/vault/vaultTypes.ts';
 import { CONTENT_TYPE_META, CONTENT_TYPE_ORDER } from './contentTypeMeta.tsx';
 
@@ -84,22 +84,25 @@ export function VaultHome({ service }: { service?: VaultService }) {
 
       {/* Empty state */}
       {items.length === 0 && (
-        <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
-            <IconLock size={36} />
+        <div className="th-empty-emotional" style={{ marginTop: 'var(--th-space-4)' }}>
+          <RoseLilyDecoration variant={16} size={90} position="bottom-right" opacity={0.12} animated />
+          <div className="th-empty-emotional__visual th-scale-in">
+            <IconLock size={42} />
           </div>
-          <h3 className="th-empty-state__title">
-            {filter === 'all' ? 'Vault is empty' : `No ${CONTENT_TYPE_META[filter].label} items`}
+          <h3 className="th-empty-emotional__title">
+            {filter === 'all' ? 'Your private vault' : `No ${CONTENT_TYPE_META[filter].label} items`}
           </h3>
-          <p className="th-empty-state__desc">
-            Add private photos, videos, notes, or files to your secure vault.
+          <p className="th-empty-emotional__message">
+            A secure place for your most private moments together
           </p>
-          <button
-            className="th-btn th-btn--primary"
-            onClick={() => navigate(RoutePath.appVaultAdd)}
-          >
-            Add Content
-          </button>
+          <div className="th-empty-emotional__action">
+            <button
+              className="th-btn th-btn--primary"
+              onClick={() => navigate(RoutePath.appVaultAdd)}
+            >
+              Add Content
+            </button>
+          </div>
         </div>
       )}
 

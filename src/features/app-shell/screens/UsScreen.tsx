@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 import { coreServices } from '../../../services/bootstrap/appBootstrap.ts';
 import type { RelationshipService, RelationshipSummary } from '../../../services/relationship/relationshipService.ts';
 import type { Profile } from '../../../data/relationship/relationshipTypes.ts';
-import { IconChevronRight, IconCalendar, LoadingState } from '../../../components/index.ts';
+import { IconChevronRight, IconCalendar, LoadingState, RoseLilyDecoration } from '../../../components/index.ts';
 import { COUPLE_HUB_GROUPS } from '../navConfig.ts';
 import { NavIcon } from '../navIcons.tsx';
 
@@ -82,7 +82,10 @@ export function UsScreen() {
   }
 
   return (
-    <div className="th-content-pad">
+    <div className="th-content-pad th-screen-warm">
+      {/* Subtle floral accent for the relationship hub (Phase 27) */}
+      <RoseLilyDecoration variant={5} size={100} position="top-right" opacity={0.2} animated />
+
       <div className="th-screen-header--enhanced">
         <div>
           <h1 className="th-screen-title">Us</h1>
@@ -94,7 +97,7 @@ export function UsScreen() {
 
       {/* Relationship counter */}
       {summary && (
-        <div className="th-relationship-card th-relationship-card--enhanced" style={{ marginBottom: 'var(--th-space-6)' }}>
+        <div className="th-relationship-card th-relationship-card--enhanced th-card-emotional" style={{ marginBottom: 'var(--th-space-6)' }}>
           {summary.owner && summary.partner ? (
             <>
               <div className="th-relationship-card__title">
@@ -170,6 +173,7 @@ export function UsScreen() {
                 <div className="th-feature-card__body">
                   <div className="th-feature-card__title">{d.title}</div>
                   <div className="th-feature-card__desc">
+                    {d.recurrence === 'yearly' && <span className="th-milestone-dot" />}
                     {d.daysUntil === 0 ? 'Today!' : `In ${d.daysUntil} ${d.daysUntil === 1 ? 'day' : 'days'}`}
                     {d.recurrence === 'yearly' ? ' · yearly' : ''}
                   </div>

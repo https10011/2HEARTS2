@@ -2331,3 +2331,166 @@ html[data-th-motion='reduced'] .th-decor--animated {
   );
 }
 
+
+
+/*
+   ========================================================================
+   Decorative & Emotional Design Pass (Phase 27)
+   ========================================================================
+
+   Reusable emotional/decorative primitives layered on Phases 23-26.
+   All rules consume existing tokens.
+   Decorations are purely visual and never interfere with interaction.
+*/
+
+/* --- Ambient decorative animation --- */
+@keyframes th-decor-drift {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(1.5deg); }
+}
+@keyframes th-decor-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+@keyframes th-decor-sway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(3deg); }
+}
+
+/* --- Decorative wrapper: ambient container for florals --- */
+.th-decor-ambient {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  animation: th-decor-drift var(--th-duration-drift, 6400ms) ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.th-decor-ambient--pulse {
+  animation:
+    th-decor-drift var(--th-duration-drift, 6400ms) ease-in-out infinite,
+    th-decor-pulse 4800ms ease-in-out infinite;
+}
+.th-decor-ambient--sway {
+  animation: th-decor-sway 5200ms ease-in-out infinite;
+}
+:root[data-th-motion='reduced'] .th-decor-ambient,
+:root[data-th-motion='reduced'] .th-decor-ambient--pulse,
+:root[data-th-motion='reduced'] .th-decor-ambient--sway,
+html[data-th-motion='reduced'] .th-decor-ambient,
+html[data-th-motion='reduced'] .th-decor-ambient--pulse,
+html[data-th-motion='reduced'] .th-decor-ambient--sway {
+  animation: none !important;
+}
+
+/* --- Emotional empty state: warm radial glow + structured layout --- */
+.th-empty-emotional {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--th-space-10) var(--th-space-6);
+  position: relative;
+}
+.th-empty-emotional::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, var(--th-color-blush) 0%, transparent 70%);
+  opacity: 0.35;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.th-empty-emotional__visual {
+  position: relative; z-index: 1; margin-bottom: var(--th-space-5);
+}
+.th-empty-emotional__title {
+  position: relative; z-index: 1;
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin-bottom: var(--th-space-2);
+  line-height: var(--th-line-height-tight);
+}
+.th-empty-emotional__message {
+  position: relative; z-index: 1;
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-secondary);
+  max-width: 280px;
+  line-height: var(--th-line-height-relaxed);
+  margin-bottom: var(--th-space-6);
+}
+.th-empty-emotional__action {
+  position: relative; z-index: 1;
+}
+:root[data-th-theme='dark'] .th-empty-emotional::before {
+  opacity: 0.15;
+}
+
+/* --- Romantic screen wrapper: subtle warm gradient at top --- */
+.th-screen-warm { position: relative; }
+.th-screen-warm::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 220px;
+  background: linear-gradient(180deg, var(--th-color-blush) 0%, transparent 100%);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+:root[data-th-theme='dark'] .th-screen-warm::before { opacity: 0.2; }
+
+/* --- Paired decorative element for couple contexts --- */
+.th-paired-decor {
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--th-space-2); pointer-events: none;
+}
+.th-paired-decor > * { opacity: 0.5; }
+
+/* --- Section warm separator: gradient line between sections --- */
+.th-separator-warm {
+  height: 2px; margin: var(--th-space-5) var(--th-space-4);
+  background: linear-gradient(90deg, transparent 0%, var(--th-color-rose-muted) 50%, transparent 100%);
+  opacity: 0.3; border: none;
+}
+
+/* --- Emotional card: accent bar on top --- */
+.th-card-emotional {
+  position: relative; overflow: hidden;
+}
+.th-card-emotional::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--th-color-burgundy) 0%, var(--th-color-rose-muted) 50%, var(--th-color-burgundy) 100%);
+  opacity: 0.6;
+}
+:root[data-th-theme='dark'] .th-card-emotional::after { opacity: 0.4; }
+
+/* --- Milestone accent dot for anniversary/date markers --- */
+.th-milestone-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--th-color-burgundy); opacity: 0.6;
+  margin-right: var(--th-space-2); flex-shrink: 0;
+}
+:root[data-th-theme='dark'] .th-milestone-dot { background: var(--th-color-rose-muted); }
+
+/* --- Couple header backdrop: warm radial behind relationship headers --- */
+.th-couple-header-backdrop {
+  position: relative; overflow: hidden;
+}
+.th-couple-header-backdrop::before {
+  content: ''; position: absolute; inset: -20px;
+  background: radial-gradient(ellipse at 50% 30%, var(--th-color-blush) 0%, transparent 65%);
+  opacity: 0.55; pointer-events: none; z-index: 0;
+}
+:root[data-th-theme='dark'] .th-couple-header-backdrop::before { opacity: 0.2; }
+
+/* --- Welcome glow: soft radial behind splash/welcome screens --- */
+.th-welcome-glow { position: relative; }
+.th-welcome-glow::after {
+  content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, var(--th-color-burgundy) 0%, transparent 70%);
+  opacity: 0.06; pointer-events: none;
+  top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0;
+}
+:root[data-th-theme='dark'] .th-welcome-glow::after { opacity: 0.04; }

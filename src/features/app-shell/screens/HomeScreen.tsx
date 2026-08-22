@@ -94,12 +94,14 @@ export function HomeScreen() {
         : null;
 
   return (
-    <div className="th-home">
+    <div className="th-home th-screen-warm">
       {/* Subtle corner floral — one variation, kept quiet (Phase 23 decor) */}
       <RoseLilyDecoration variant={2} size={118} position="top-right" opacity={0.35} />
+      {/* Ambient floral bottom-left for warmth (Phase 27) */}
+      <RoseLilyDecoration variant={7} size={90} position="bottom-left" opacity={0.18} animated />
 
       {/* Relationship header: the two people around the official branding */}
-      <header className="th-home-header">
+      <header className="th-home-header th-couple-header-backdrop">
         <AvatarChip
           profile={summary?.owner ?? null}
           fallbackName="You"

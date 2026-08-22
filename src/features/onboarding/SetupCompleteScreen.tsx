@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, OnboardingArt } from '../../components/index.ts';
+import { Button, OnboardingArt, RoseLilyDecoration } from '../../components/index.ts';
 import { OnboardingLayout } from './OnboardingLayout.tsx';
 
 export function SetupCompleteScreen() {
@@ -25,7 +25,9 @@ export function SetupCompleteScreen() {
 
   return (
     <OnboardingLayout currentPath={RoutePath.onboardingComplete} showBack={false}>
-      <div className="th-onboarding-form th-onboarding-complete">
+      <div className="th-onboarding-form th-onboarding-complete th-welcome-glow">
+        <RoseLilyDecoration variant={6} size={80} position="top-left" opacity={0.15} animated />
+        <RoseLilyDecoration variant={15} size={75} position="bottom-right" opacity={0.12} animated />
         {/* Celebration illustration (centralized decorative art — Phase 23) */}
         <div className="th-welcome-illustration">
           <OnboardingArt variant="celebration-heart" size={120} />

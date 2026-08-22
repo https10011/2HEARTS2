@@ -7,7 +7,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, OnboardingArt } from '../../components/index.ts';
+import { Button, OnboardingArt, RoseLilyDecoration } from '../../components/index.ts';
 import { OnboardingLayout } from './OnboardingLayout.tsx';
 import { useOnboarding } from './useOnboarding.ts';
 
@@ -22,7 +22,10 @@ export function WelcomeScreen() {
 
   return (
     <OnboardingLayout currentPath={RoutePath.onboardingWelcome} showBack={false}>
-      <div className="th-onboarding-welcome">
+      <div className="th-onboarding-welcome th-welcome-glow">
+        {/* Subtle floral accents framing the welcome (Phase 27) */}
+        <RoseLilyDecoration variant={1} size={80} position="top-left" opacity={0.12} animated />
+        <RoseLilyDecoration variant={12} size={70} position="bottom-right" opacity={0.1} animated />
         {/* Illustration (centralized decorative art — Phase 23) */}
         <div className="th-welcome-illustration">
           <OnboardingArt variant="couple-hearts" size={160} />

@@ -26,7 +26,7 @@ const CASUAL_GAME_ROUTES: Partial<Record<GameType, string>> = {
 
 export function GamesHubScreen() {
   return (
-    <div className="th-content-pad">
+    <div className="th-content-pad th-screen-warm">
       <div className="th-screen-header--enhanced">
         <div>
           <h1 className="th-screen-title">Games</h1>
