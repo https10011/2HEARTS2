@@ -18,6 +18,57 @@ export type GameType =
   | 'casual-trivia'
   | 'riddle-room';
 
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
+export interface LevelConfig {
+  /** 1-based level number (1–500). */
+  level: number;
+  /** Derived difficulty band from level. */
+  difficulty: Difficulty;
+  /** Number of questions/challenges for this level. */
+  challengeCount: number;
+  /** Scoring multiplier (1.0 = baseline). */
+  scoreMultiplier: number;
+  /** Game-specific config keyed by game type. */
+  params: Record<string, unknown>;
+}
+
+export interface LevelProgress {
+  /** Highest completed level per game. */
+  highestCompleted: Record<string, number>;
+  /** Current streak per game (consecutive levels completed). */
+  streaks: Record<string, number>;
+  /** Best streak per game. */
+  bestStreaks: Record<string, number>;
+}
+
+/** Resolve a level number into a LevelConfig. Pure function — no side effects. */
+export function resolveLevelConfig(level: number): LevelConfig {
+  const clamped = Math.max(1, Math.min(500, Math.floor(level)));
+  let difficulty: Difficulty;
+  if (clamped <= 50) difficulty = 'easy';
+  else if (clamped <= 200) difficulty = 'medium';
+  else difficulty = 'hard';
+
+  return {
+    level: clamped,
+    difficulty,
+    challengeCount: resolveChallengeCount(clamped),
+    scoreMultiplier: resolveScoreMultiplier(clamped),
+    params: {},
+  };
+}
+
+function resolveChallengeCount(level: number): number {
+  // Base 5 at level 1, scaling up
+  return Math.min(20, 5 + Math.floor(level / 25));
+}
+
+function resolveScoreMultiplier(level: number): number {
+  // 1.0 at level 1, up to ~3.0 at level 500
+  return Math.round((1 + (level - 1) * 0.004) * 100) / 100;
+}
+
 /** Category grouping for Games Hub display. */
 export type GameCategory = 'couple' | 'casual';
 
@@ -91,6 +142,12 @@ export interface GameSession {
   casualScore?: number;
   /** Casual game total moves/attempts. */
   casualMoves?: number;
+  /** Current level (1-based). */
+  level?: number;
+  /** Current difficulty. */
+  difficulty?: Difficulty;
+  /** Streak of consecutive level completions. */
+  streak?: number;
 }
 
 export interface MemoryCard {
@@ -166,4 +223,21 @@ export interface GameState {
   currentTurn: PlayerRole;
   /** Whether we're in the results phase. */
   showingResults: boolean;
+}
+
+/** Content validation result. */
+export interface ContentValidation {
+  ok: boolean;
+  errors: string[];
+}
+
+/** Game-specific level parameters for memory match. */
+export interface MemoryMatchParams {
+  pairs: number;
+}
+
+/** Game-specific level parameters for word scramble. */
+export interface WordScrambleParams {
+  wordCount: number;
+  minWordLength: number;
 }
