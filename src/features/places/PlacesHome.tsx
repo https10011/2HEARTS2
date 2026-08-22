@@ -142,7 +142,7 @@ export function PlacesHome() {
                   <span style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex' }}>
                     <IconMapPin size={18} />
                   </span>
-                  <h3 style={{ fontWeight: 600, fontSize: 'var(--th-font-size-md)' }}>{place.name}</h3>
+                  <h3 style={{ fontWeight: 'var(--th-font-weight-semibold)', fontSize: 'var(--th-font-size-md)' }}>{place.name}</h3>
                 </div>
                 {(place.city || place.state || place.country) && (
                   <p style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', margin: 0 }}>

@@ -124,7 +124,7 @@ export function VaultHome({ service }: { service?: VaultService }) {
                   </div>
                 );
               })()}
-              <div style={{ fontWeight: 500, fontSize: 'var(--th-font-size-sm)', marginBottom: 'var(--th-space-1)' }}>
+              <div style={{ fontWeight: 'var(--th-font-weight-medium)', fontSize: 'var(--th-font-size-sm)', marginBottom: 'var(--th-space-1)' }}>
                 {item.title}
               </div>
               <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>

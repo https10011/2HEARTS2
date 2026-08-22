@@ -140,7 +140,7 @@ export function PeriodCalendarScreen() {
           <div className="th-card" style={{ padding: 'var(--th-space-4)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--th-space-3)' }}>
               <button className="th-btn th-btn--ghost" onClick={prevMonth} style={{ minWidth: '44px' }} aria-label="Previous month">‹</button>
-              <div style={{ fontWeight: 600, fontSize: 'var(--th-font-size-md)' }}>{monthLabel}</div>
+              <div style={{ fontWeight: 'var(--th-font-weight-semibold)', fontSize: 'var(--th-font-size-md)' }}>{monthLabel}</div>
               <button className="th-btn th-btn--ghost" onClick={nextMonth} style={{ minWidth: '44px' }} aria-label="Next month">›</button>
             </div>
 

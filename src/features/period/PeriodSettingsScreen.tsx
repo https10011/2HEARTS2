@@ -82,7 +82,7 @@ export function PeriodSettingsScreen() {
     <div className="th-card" style={{ padding: 'var(--th-space-4)', marginBottom: 'var(--th-space-3)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontWeight: 600, fontSize: 'var(--th-font-size-md)' }}>{label}</div>
+          <div style={{ fontWeight: 'var(--th-font-weight-semibold)', fontSize: 'var(--th-font-size-md)' }}>{label}</div>
           <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
             {value} {unit}
           </div>

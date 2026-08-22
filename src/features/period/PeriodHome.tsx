@@ -107,7 +107,7 @@ export function PeriodHome() {
                     marginBottom: 'var(--th-space-1)',
                   }}
                 />
-                <div style={{ fontWeight: 600, fontSize: 'var(--th-font-size-lg)' }}>Day {cycle.currentPeriodDay} of Period</div>
+                <div style={{ fontWeight: 'var(--th-font-weight-semibold)', fontSize: 'var(--th-font-size-lg)' }}>Day {cycle.currentPeriodDay} of Period</div>
                 <div style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)' }}>
                   Started {formatDate(cycle.lastPeriodStart)}
                 </div>
@@ -125,7 +125,7 @@ export function PeriodHome() {
                     marginBottom: 'var(--th-space-1)',
                   }}
                 />
-                <div style={{ fontWeight: 600, fontSize: 'var(--th-font-size-lg)' }}>Cycle Day {cycle.currentCycleDay}</div>
+                <div style={{ fontWeight: 'var(--th-font-weight-semibold)', fontSize: 'var(--th-font-size-lg)' }}>Cycle Day {cycle.currentCycleDay}</div>
                 <div style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)' }}>
                   {cycle.daysUntilNext > 0
                     ? `Next period in ~${cycle.daysUntilNext} days`
@@ -157,20 +157,22 @@ export function PeriodHome() {
             </div>
           </div>
         ) : (
-          <div className="th-empty-state th-empty-state--enhanced" style={{ padding: 'var(--th-space-6) 0' }}>
-            <div className="th-empty-state__visual">
+          <div className="th-empty-emotional" style={{ marginTop: 'var(--th-space-4)' }}>
+            <div className="th-empty-emotional__visual th-scale-in">
               <IconCalendar size={36} />
             </div>
-            <h3 className="th-empty-state__title">No period data yet</h3>
-            <p className="th-empty-state__desc">
+            <h3 className="th-empty-emotional__title">No period data yet</h3>
+            <p className="th-empty-emotional__message">
               Start tracking to see your cycle information.
             </p>
-            <button
-              className="th-btn th-btn--primary"
-              onClick={() => navigate(RoutePath.appPeriodLog)}
-            >
-              Log Your First Period
-            </button>
+            <div className="th-empty-emotional__action">
+              <button
+                className="th-btn th-btn--primary"
+                onClick={() => navigate(RoutePath.appPeriodLog)}
+              >
+                Log Your First Period
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -185,7 +187,7 @@ export function PeriodHome() {
           <div style={{ marginBottom: 'var(--th-space-1)', color: 'var(--th-color-burgundy)' }}>
             <IconCalendar size={24} />
           </div>
-          <div style={{ fontWeight: 500, fontSize: 'var(--th-font-size-sm)' }}>Calendar</div>
+          <div style={{ fontWeight: 'var(--th-font-weight-medium)', fontSize: 'var(--th-font-size-sm)' }}>Calendar</div>
         </button>
         <button
           className="th-card th-card--clickable"
@@ -195,7 +197,7 @@ export function PeriodHome() {
           <div style={{ marginBottom: 'var(--th-space-1)', color: 'var(--th-color-burgundy)' }}>
             <IconFileText size={24} />
           </div>
-          <div style={{ fontWeight: 500, fontSize: 'var(--th-font-size-sm)' }}>History</div>
+          <div style={{ fontWeight: 'var(--th-font-weight-medium)', fontSize: 'var(--th-font-size-sm)' }}>History</div>
         </button>
       </div>
 
@@ -203,7 +205,7 @@ export function PeriodHome() {
       {summary && summary.totalCycles > 0 && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--th-space-3)' }}>
-            <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 600 }}>Recent Entries</h2>
+            <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 'var(--th-font-weight-semibold)' }}>Recent Entries</h2>
             <button
               className="th-btn th-btn--outline th-btn--sm"
               onClick={() => navigate(RoutePath.appPeriodHistory)}
@@ -217,13 +219,13 @@ export function PeriodHome() {
             {summary.averageCycleLength && (
               <div className="th-card" style={{ flex: 1, padding: 'var(--th-space-3)', textAlign: 'center' }}>
                 <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>Avg Cycle</div>
-                <div style={{ fontWeight: 600 }}>{summary.averageCycleLength} days</div>
+                <div style={{ fontWeight: 'var(--th-font-weight-semibold)' }}>{summary.averageCycleLength} days</div>
               </div>
             )}
             {summary.averagePeriodDuration && (
               <div className="th-card" style={{ flex: 1, padding: 'var(--th-space-3)', textAlign: 'center' }}>
                 <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>Avg Duration</div>
-                <div style={{ fontWeight: 600 }}>{summary.averagePeriodDuration} days</div>
+                <div style={{ fontWeight: 'var(--th-font-weight-semibold)' }}>{summary.averagePeriodDuration} days</div>
               </div>
             )}
           </div>

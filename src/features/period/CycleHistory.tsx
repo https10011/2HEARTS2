@@ -108,7 +108,7 @@ export function CycleHistory() {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--th-space-2)' }}>
                   <div>
-                    <div style={{ fontWeight: 600 }}>
+                    <div style={{ fontWeight: 'var(--th-font-weight-semibold)' }}>
                       {formatDate(entry.startDate)}
                       {entry.endDate ? ` — ${formatDate(entry.endDate)}` : ' — Ongoing'}
                     </div>

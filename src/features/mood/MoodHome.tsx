@@ -117,7 +117,7 @@ export function MoodHome() {
             <div style={{ fontSize: '3rem', marginBottom: 'var(--th-space-2)' }}>
               {todayMood.moodEmoji}
             </div>
-            <div style={{ fontWeight: 600, fontSize: 'var(--th-font-size-lg)' }}>
+            <div style={{ fontWeight: 'var(--th-font-weight-semibold)', fontSize: 'var(--th-font-size-lg)' }}>
               {MOOD_LABELS[todayMood.moodValue]}
             </div>
             {todayMood.note && (
@@ -160,7 +160,7 @@ export function MoodHome() {
 
       {/* Mood history */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--th-space-3)' }}>
-        <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 600 }}>Recent Moods</h2>
+        <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 'var(--th-font-weight-semibold)' }}>Recent Moods</h2>
         <button
           className="th-btn th-btn--outline th-btn--sm"
           onClick={() => navigate(RoutePath.appMoodHistory)}
@@ -190,7 +190,7 @@ export function MoodHome() {
             >
               <span style={{ fontSize: '1.5rem' }}>{entry.moodEmoji}</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 500 }}>{MOOD_LABELS[entry.moodValue]}</div>
+                <div style={{ fontWeight: 'var(--th-font-weight-medium)' }}>{MOOD_LABELS[entry.moodValue]}</div>
                 <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
                   {new Date(entry.entryDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                 </div>

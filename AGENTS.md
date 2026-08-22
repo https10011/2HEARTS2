@@ -165,7 +165,12 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   fix, 650 total tests passing. Phase 30 (settings & real-time customization)
   — COMPLETE: settings architecture audit verified (useSyncExternalStore +
   AppRootProvider + CSS tokens), added game classes to theme-transition list
-  for smooth light/dark flips during gameplay, 650 total tests passing
+  for smooth light/dark flips during gameplay, 650 total tests passing.
+  Phase 31 (full UX consistency pass) — COMPLETE: standardized empty states
+  across all feature home screens (RemindersHome, PeriodHome → th-empty-emotional),
+  replaced 16 hardcoded font weights with CSS tokens across 8 files, verified
+  typography/spacing/buttons/cards/icons/motion/feedback/theme consistency,
+  docs/phase31-ux-consistency-audit.md, 650 total tests passing
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,

@@ -116,7 +116,7 @@ export function MoodHistory() {
                     <span style={{ fontSize: '1.75rem' }}>{entry.moodEmoji}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 500 }}>{MOOD_LABELS[entry.moodValue]}</span>
+                        <span style={{ fontWeight: 'var(--th-font-weight-medium)' }}>{MOOD_LABELS[entry.moodValue]}</span>
                         <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
                           {new Date(entry.entryDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                         </span>

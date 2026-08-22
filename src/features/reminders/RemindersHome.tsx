@@ -79,17 +79,19 @@ export function RemindersHome() {
 
       {/* Empty state */}
       {activeReminders.length === 0 && completedReminders.length === 0 && (
-        <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
+        <div className="th-empty-emotional">
+          <div className="th-empty-emotional__visual th-scale-in">
             <IconBell size={36} />
           </div>
-          <h3 className="th-empty-state__title">No reminders yet</h3>
-          <p className="th-empty-state__desc">
+          <h3 className="th-empty-emotional__title">No reminders yet</h3>
+          <p className="th-empty-emotional__message">
             Create a reminder to never miss an important moment
           </p>
-          <Link to={RoutePath.appRemindersAdd} className="th-btn th-btn--primary">
-            Create Reminder
-          </Link>
+          <div className="th-empty-emotional__action">
+            <Link to={RoutePath.appRemindersAdd} className="th-btn th-btn--primary">
+              Create Reminder
+            </Link>
+          </div>
         </div>
       )}
 
