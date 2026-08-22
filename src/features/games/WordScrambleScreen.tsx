@@ -7,13 +7,16 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import {
   createWordScrambleSession,
   scrambleWord,
   validateScrambleGuess,
+  resolveWordScrambleCount,
+  selectQuestionsForLevel,
 } from '../../services/game/gameEngine.ts';
+import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 import type { GameSession } from '../../data/game/gameTypes.ts';
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
 import { IconBack } from '../../components/index.ts';
@@ -22,9 +25,20 @@ type GamePhase = 'intro' | 'playing' | 'results';
 
 export function WordScrambleScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const passedLevel = (location.state as { level?: number })?.level ?? 1;
+
+  const [currentLevel, setCurrentLevel] = useState(passedLevel);
+  const levelConfig = resolveLevelConfig(currentLevel);
+  const wordCount = resolveWordScrambleCount(currentLevel);
+
   const definition = getGameDefinition('word-scramble');
-  const questions = definition?.questions ?? [];
-  const wordCount = 10;
+  const allQuestions = definition?.questions ?? [];
+  // Level-aware: select words based on level
+  const questions = useMemo(
+    () => selectQuestionsForLevel(allQuestions, currentLevel, wordCount),
+    [allQuestions, currentLevel, wordCount],
+  );
 
   const [phase, setPhase] = useState<GamePhase>('intro');
   const [session, setSession] = useState<GameSession | null>(null);
@@ -42,12 +56,21 @@ export function WordScrambleScreen() {
 
   const startGame = useCallback(() => {
     const s = createWordScrambleSession(wordCount);
+    s.level = currentLevel;
+    s.difficulty = levelConfig.difficulty;
     setSession(s);
     setPhase('playing');
     setGuess('');
     setFeedback(null);
     setErrors([]);
-  }, [wordCount]);
+  }, [wordCount, currentLevel, levelConfig.difficulty]);
+
+  const goToNextLevel = useCallback(() => {
+    const next = currentLevel + 1;
+    setCurrentLevel(next);
+    setPhase('intro');
+    setSession(null);
+  }, [currentLevel]);
 
   const handleSubmit = useCallback(() => {
     if (!session || !correctAnswer) return;
@@ -93,6 +116,14 @@ export function WordScrambleScreen() {
           <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-3)' }}>
             Word Scramble
           </h1>
+          <div style={{ display: 'flex', gap: 'var(--th-space-2)', justifyContent: 'center', marginBottom: 'var(--th-space-2)' }}>
+            <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-burgundy)', fontWeight: 'var(--th-font-weight-semibold)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-blush)' }}>
+              Level {currentLevel}
+            </span>
+            <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-neutral-soft)' }}>
+              {levelConfig.difficulty}
+            </span>
+          </div>
           <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)', maxWidth: '36ch', margin: '0 auto' }}>
             Unscramble love-themed words!
           </p>
@@ -130,7 +161,7 @@ export function WordScrambleScreen() {
           <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-2)' }}>
             Game Complete!
           </h1>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)' }}>Word Scramble</p>
+          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)' }}>Word Scramble — Level {currentLevel}</p>
         </div>
 
         <div className="th-relationship-card" style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
@@ -144,8 +175,11 @@ export function WordScrambleScreen() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
-          <button className="th-btn th-btn--primary th-btn--full" onClick={startGame}>
-            Play Again
+          <button className="th-btn th-btn--primary th-btn--full" onClick={goToNextLevel}>
+            Next Level
+          </button>
+          <button className="th-btn th-btn--secondary th-btn--full" onClick={startGame}>
+            Replay Level {currentLevel}
           </button>
           <button className="th-btn th-btn--secondary th-btn--full" onClick={() => navigate(RoutePath.appGames)}>
             Back to Games

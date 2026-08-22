@@ -8,7 +8,7 @@
  * Uses the GameService for all state transitions.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { GameService } from '../../services/game/gameService.ts';
@@ -21,7 +21,7 @@ type GamePhase = 'intro' | 'playing' | 'turn-transition' | 'results';
 export function GamePlayScreen() {
   const navigate = useNavigate();
   const { gameType } = useParams<{ gameType: string }>();
-  const service = new GameService();
+  const service = useMemo(() => new GameService(), []);
 
   const [phase, setPhase] = useState<GamePhase>('intro');
   const [session, setSession] = useState<GameSession | null>(null);

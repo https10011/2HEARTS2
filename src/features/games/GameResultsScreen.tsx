@@ -9,6 +9,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { IconHeart, IconClose, RoseLilyDecoration } from '../../components/index.ts';
 import type { GameResult, GameType } from '../../data/game/gameTypes.ts';
+import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
 
@@ -16,9 +17,13 @@ export function GameResultsScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const { gameType } = useParams<{ gameType: string }>();
-  const result = (location.state as { result?: GameResult })?.result;
+  const state = location.state as { result?: GameResult; gameType?: GameType; level?: number; streak?: number } | null;
+  const result = state?.result;
   const gt = (gameType ?? result?.gameType) as GameType | undefined;
   const definition = gt ? getGameDefinition(gt) : undefined;
+  const currentLevel = state?.level ?? 1;
+  const streak = state?.streak ?? 0;
+  const levelConfig = resolveLevelConfig(currentLevel);
 
   if (!result || !definition) {
     return (
@@ -52,6 +57,19 @@ export function GameResultsScreen() {
         <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)' }}>
           {definition.title}
         </p>
+        <div style={{ display: 'flex', gap: 'var(--th-space-2)', justifyContent: 'center', marginTop: 'var(--th-space-2)' }}>
+          <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-burgundy)', fontWeight: 'var(--th-font-weight-semibold)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-blush)' }}>
+            Level {currentLevel}
+          </span>
+          <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-neutral-soft)' }}>
+            {levelConfig.difficulty}
+          </span>
+          {streak > 0 && (
+            <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-success)', fontWeight: 'var(--th-font-weight-semibold)', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-success-bg)' }}>
+              {streak} streak
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Score card */}
@@ -104,13 +122,18 @@ export function GameResultsScreen() {
         ))}
       </div>
 
-      {/* Actions */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
+      {/* Actions */}        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
         <button
           className="th-btn th-btn--primary th-btn--full"
-          onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true })}
+          onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true, state: { level: currentLevel + 1 } })}
         >
-          Play Again
+          Next Level (Level {currentLevel + 1})
+        </button>
+        <button
+          className="th-btn th-btn--secondary th-btn--full"
+          onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true, state: { level: currentLevel } })}
+        >
+          Replay Level {currentLevel}
         </button>
         <button
           className="th-btn th-btn--secondary th-btn--full"

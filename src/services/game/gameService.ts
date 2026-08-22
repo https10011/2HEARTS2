@@ -11,6 +11,7 @@
 import { AppError } from '../errors/appError.ts';
 import { systemClock, type Clock } from '../../utils/time.ts';
 import type { GameDefinition, GameSession, GameType, PlayerRole } from '../../data/game/gameTypes.ts';
+import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 import {
   completeGame,
   computeScores,
@@ -99,6 +100,17 @@ export class GameService {
     const idx = session.currentRound;
     if (idx >= definition.questionsPerRound) return null;
     return definition.questions[idx] ?? null;
+  }
+
+  /** Starts a new game at a specific level with appropriate difficulty. */
+  startGameAtLevel(gameType: GameType, level: number): GameServiceResult & { levelConfig: ReturnType<typeof resolveLevelConfig> } {
+    const definition = this.getDefinition(gameType);
+    const levelConfig = resolveLevelConfig(level);
+    const session = createSession(gameType, this.clock);
+    session.level = level;
+    session.difficulty = levelConfig.difficulty;
+    session.streak = 0;
+    return { session, definition, levelConfig };
   }
 
   /** Gets the definition for a game type. */

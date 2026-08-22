@@ -13,6 +13,7 @@ import { newId } from '../../utils/ids.ts';
 import { nowIso, systemClock, type Clock } from '../../utils/time.ts';
 import type {
   GameDefinition,
+  GameQuestion,
   GameResult,
   GameRound,
   GameSession,
@@ -178,6 +179,83 @@ function scoreRound(round: GameRound, definition: GameDefinition): RoundScore {
 
 function normalizeAnswer(answer: string): string {
   return answer.toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+// ---------------------------------------------------------------------------
+// Content selection for level-based progression
+// ---------------------------------------------------------------------------
+
+/**
+ * Selects questions for a given level from the full question pool.
+ * Uses level as a seed for deterministic but varied selection.
+ * Returns challengeCount questions (from LevelConfig).
+ */
+export function selectQuestionsForLevel(
+  allQuestions: GameQuestion[],
+  level: number,
+  challengeCount: number,
+): GameQuestion[] {
+  if (allQuestions.length === 0) return [];
+  const count = Math.min(challengeCount, allQuestions.length);
+  // Deterministic shuffle based on level seed
+  const shuffled = seededShuffle([...allQuestions], level);
+  return shuffled.slice(0, count);
+}
+
+/** Deterministic Fisher-Yates shuffle seeded by a number. */
+function seededShuffle<T>(arr: T[], seed: number): T[] {
+  let s = seed;
+  for (let i = arr.length - 1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) & 0x7fffffff;
+    const j = s % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/**
+ * Selects memory match pair count based on level.
+ * Level 1: 3 pairs (6 cards), scaling up to 12 pairs (24 cards) at high levels.
+ */
+export function resolveMemoryMatchPairs(level: number): number {
+  const base = 3;
+  const max = 12;
+  const scaling = Math.floor(level / 10);
+  return Math.min(max, base + scaling);
+}
+
+/**
+ * Selects word count for word scramble based on level.
+ * Level 1: 5 words, scaling up to 15 at high levels.
+ */
+export function resolveWordScrambleCount(level: number): number {
+  const base = 5;
+  const max = 15;
+  const scaling = Math.floor(level / 20);
+  return Math.min(max, base + scaling);
+}
+
+// ---------------------------------------------------------------------------
+// Content validation
+// ---------------------------------------------------------------------------
+
+/** Validates a game definition for structural integrity. */
+export function validateGameContent(def: GameDefinition): import('../../data/game/gameTypes.ts').ContentValidation {
+  const errors: string[] = [];
+  if (!def.type) errors.push('Missing game type');
+  if (!def.title) errors.push('Missing title');
+  if (def.questionsPerRound <= 0) errors.push('Invalid questionsPerRound');
+  if (def.type !== 'memory-match' && def.questions.length === 0) {
+    errors.push('No questions defined');
+  }
+  if (def.questions.length > 0 && def.questionsPerRound > def.questions.length) {
+    errors.push(`questionsPerRound (${def.questionsPerRound}) exceeds available questions (${def.questions.length})`);
+  }
+  for (const q of def.questions) {
+    if (!q.id) errors.push('Question missing id');
+    if (!q.text) errors.push(`Question ${q.id} missing text`);
+  }
+  return { ok: errors.length === 0, errors };
 }
 
 // ---------------------------------------------------------------------------

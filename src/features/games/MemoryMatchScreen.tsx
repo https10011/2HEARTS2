@@ -6,33 +6,41 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import {
   createMemoryMatchSession,
   flipCard,
   resetUnmatchedCards,
+  resolveMemoryMatchPairs,
 } from '../../services/game/gameEngine.ts';
+import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 import type { GameSession, MemoryCard } from '../../data/game/gameTypes.ts';
 import { IconBack } from '../../components/index.ts';
 
 type GamePhase = 'intro' | 'playing' | 'results';
 
-const PAIR_COUNT = 8; // 16 cards total
-
 export function MemoryMatchScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const passedLevel = (location.state as { level?: number })?.level ?? 1;
 
   const [phase, setPhase] = useState<GamePhase>('intro');
   const [session, setSession] = useState<GameSession | null>(null);
   const [pendingFlipBack, setPendingFlipBack] = useState<number[] | null>(null);
   const [locked, setLocked] = useState(false);
+  const [currentLevel, setCurrentLevel] = useState(passedLevel);
+
+  const levelConfig = resolveLevelConfig(currentLevel);
+  const pairCount = resolveMemoryMatchPairs(currentLevel);
 
   const startGame = useCallback(() => {
-    const s = createMemoryMatchSession(PAIR_COUNT);
+    const s = createMemoryMatchSession(pairCount);
+    s.level = currentLevel;
+    s.difficulty = levelConfig.difficulty;
     setSession(s);
     setPhase('playing');
-  }, []);
+  }, [pairCount, currentLevel, levelConfig.difficulty]);
 
   const handleCardFlip = useCallback(
     (index: number) => {
@@ -86,6 +94,13 @@ export function MemoryMatchScreen() {
     return () => clearTimeout(timer);
   }, [pendingFlipBack, session]);
 
+  const goToNextLevel = useCallback(() => {
+    const next = currentLevel + 1;
+    setCurrentLevel(next);
+    setPhase('intro');
+    setSession(null);
+  }, [currentLevel]);
+
   if (phase === 'intro') {
     return (
       <div className="th-content-pad" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
@@ -93,11 +108,19 @@ export function MemoryMatchScreen() {
           <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-3)' }}>
             Memory Match
           </h1>
+          <div style={{ display: 'flex', gap: 'var(--th-space-2)', justifyContent: 'center', marginBottom: 'var(--th-space-2)' }}>
+            <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-burgundy)', fontWeight: 'var(--th-font-weight-semibold)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-blush)' }}>
+              Level {currentLevel}
+            </span>
+            <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-neutral-soft)' }}>
+              {levelConfig.difficulty}
+            </span>
+          </div>
           <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)', maxWidth: '36ch', margin: '0 auto' }}>
             Flip cards and find all matching pairs!
           </p>
           <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)', marginTop: 'var(--th-space-3)' }}>
-            {PAIR_COUNT} pairs to find
+            {pairCount} pairs to find
           </p>
         </div>
         <button className="th-btn th-btn--primary" onClick={startGame}>
@@ -116,7 +139,7 @@ export function MemoryMatchScreen() {
 
   if (phase === 'results') {
     const moves = session?.board?.moves ?? 0;
-    const pairs = session?.board?.totalPairs ?? PAIR_COUNT;
+    const pairs = session?.board?.totalPairs ?? pairCount;
     const efficiency = pairs > 0 ? Math.round((pairs / Math.max(moves, pairs)) * 100) : 0;
 
     let message: string;
@@ -131,7 +154,7 @@ export function MemoryMatchScreen() {
           <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-2)' }}>
             Game Complete!
           </h1>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)' }}>Memory Match</p>
+          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)' }}>Memory Match — Level {currentLevel}</p>
         </div>
 
         <div className="th-relationship-card" style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
@@ -145,8 +168,11 @@ export function MemoryMatchScreen() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
-          <button className="th-btn th-btn--primary th-btn--full" onClick={startGame}>
-            Play Again
+          <button className="th-btn th-btn--primary th-btn--full" onClick={goToNextLevel}>
+            Next Level
+          </button>
+          <button className="th-btn th-btn--secondary th-btn--full" onClick={startGame}>
+            Replay Level {currentLevel}
           </button>
           <button className="th-btn th-btn--secondary th-btn--full" onClick={() => navigate(RoutePath.appGames)}>
             Back to Games
