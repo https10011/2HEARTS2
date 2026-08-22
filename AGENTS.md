@@ -157,7 +157,12 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   overhaul) — COMPLETE: LevelConfig/Difficulty types, resolveLevelConfig
   (1-500 levels, easy/medium/hard bands), selectQuestionsForLevel (seeded shuffle),
   GameService.startGameAtLevel, all games level progression, gameProgression.ts
-  localStorage persistence, game animation CSS primitives, 650 total tests passing
+  localStorage persistence, game animation CSS primitives, 650 total tests passing.
+  Phase 29 (game visual & UX polish) — COMPLETE (b01ca3b): shared game UX
+  CSS primitives (intro/header/question/feedback/result/level-up/progress-dots/
+  badges/round-breakdown/scramble-display), polished all 5 game screens with
+  shared classes, celebration level-up results, staggered entrance, emoji→icon
+  fix, 650 total tests passing
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,
