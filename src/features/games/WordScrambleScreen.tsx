@@ -1,5 +1,5 @@
 /**
- * WordScrambleScreen (Phase 12).
+ * WordScrambleScreen (Phase 12, Phase 29 visual polish).
  *
  * Word Scramble — unscramble love-themed words one at a time.
  * Uses createWordScrambleSession + scrambleWord + validateScrambleGuess
@@ -34,7 +34,6 @@ export function WordScrambleScreen() {
 
   const definition = getGameDefinition('word-scramble');
   const allQuestions = definition?.questions ?? [];
-  // Level-aware: select words based on level
   const questions = useMemo(
     () => selectQuestionsForLevel(allQuestions, currentLevel, wordCount),
     [allQuestions, currentLevel, wordCount],
@@ -52,7 +51,7 @@ export function WordScrambleScreen() {
 
   const scrambled = useMemo(() => {
     return correctAnswer ? scrambleWord(correctAnswer) : '';
-  }, [correctAnswer]); // Recomputes when word changes
+  }, [correctAnswer]);
 
   const startGame = useCallback(() => {
     const s = createWordScrambleSession(wordCount);
@@ -89,7 +88,6 @@ export function WordScrambleScreen() {
     setSession(result.session);
     setFeedback(result.correct ? 'correct' : 'incorrect');
 
-    // Brief delay before advancing
     setTimeout(() => {
       setFeedback(null);
       setGuess('');
@@ -109,42 +107,31 @@ export function WordScrambleScreen() {
     [handleSubmit, feedback],
   );
 
+  // --- Intro phase ---
   if (phase === 'intro') {
     return (
-      <div className="th-content-pad" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-8)' }}>
-          <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-3)' }}>
-            Word Scramble
-          </h1>
-          <div style={{ display: 'flex', gap: 'var(--th-space-2)', justifyContent: 'center', marginBottom: 'var(--th-space-2)' }}>
-            <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-burgundy)', fontWeight: 'var(--th-font-weight-semibold)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-blush)' }}>
-              Level {currentLevel}
-            </span>
-            <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-neutral-soft)' }}>
-              {levelConfig.difficulty}
-            </span>
-          </div>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)', maxWidth: '36ch', margin: '0 auto' }}>
-            Unscramble love-themed words!
-          </p>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)', marginTop: 'var(--th-space-3)' }}>
-            {wordCount} words to unscramble
-          </p>
+      <div className="th-content-pad th-game-intro th-game-enter">
+        <div className="th-game-intro__icon">
+          <span style={{ fontSize: '1.8rem' }}>Aa</span>
         </div>
-        <button className="th-btn th-btn--primary" onClick={startGame}>
-          Start Game
-        </button>
-        <button
-          className="th-btn th-btn--secondary"
-          onClick={() => navigate(RoutePath.appGames)}
-          style={{ marginTop: 'var(--th-space-3)' }}
-        >
+        <h1 className="th-game-intro__title">Word Scramble</h1>
+        <div className="th-game-badge-group" style={{ marginBottom: 'var(--th-space-3)' }}>
+          <span className="th-game-level-badge th-badge-enter">Level {currentLevel}</span>
+          <span className="th-game-difficulty-badge">{levelConfig.difficulty}</span>
+        </div>
+        <p className="th-game-intro__desc">Unscramble love-themed words!</p>
+        <p className="th-game-intro__meta">{wordCount} words to unscramble</p>
+        <div style={{ marginTop: 'var(--th-space-6)' }}>
+          <button className="th-btn th-btn--primary th-pressable" onClick={startGame}>Start Game</button>
+        </div>
+        <button className="th-btn th-btn--secondary" onClick={() => navigate(RoutePath.appGames)} style={{ marginTop: 'var(--th-space-3)' }}>
           Back to Games
         </button>
       </div>
     );
   }
 
+  // --- Results phase ---
   if (phase === 'results') {
     const score = session?.casualScore ?? 0;
     const accuracy = wordCount > 0 ? Math.round((score / wordCount) * 100) : 0;
@@ -156,32 +143,37 @@ export function WordScrambleScreen() {
     else message = 'Words are tricky!';
 
     return (
-      <div className="th-content-pad">
-        <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-6)' }}>
-          <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-2)' }}>
-            Game Complete!
-          </h1>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)' }}>Word Scramble — Level {currentLevel}</p>
+      <div className="th-content-pad th-game-screen">
+        {/* Level-up celebration */}
+        <div className="th-game-level-up th-result-enter">
+          <div className="th-game-level-up__icon th-badge-enter">
+            <span style={{ fontSize: '1.4rem' }}>Aa</span>
+          </div>
+          <div className="th-game-level-up__text">Level Complete!</div>
+          <div className="th-game-level-up__sub">Word Scramble</div>
         </div>
 
-        <div className="th-relationship-card" style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
-          <div style={{ fontSize: 'var(--th-font-size-3xl)', fontWeight: 'var(--th-font-weight-bold)', fontFamily: 'var(--th-font-family-display)', marginBottom: 'var(--th-space-2)' }}>
-            {score} / {wordCount}
-          </div>
-          <div style={{ fontSize: 'var(--th-font-size-sm)', opacity: 0.85 }}>words unscrambled ({accuracy}% accuracy)</div>
-          <div style={{ marginTop: 'var(--th-space-3)', fontSize: 'var(--th-font-size-md)', opacity: 0.9 }}>
-            {message}
-          </div>
+        <div className="th-game-badge-group th-result-enter-delayed" style={{ marginBottom: 'var(--th-space-4)' }}>
+          <span className="th-game-level-badge">Level {currentLevel}</span>
+          <span className="th-game-difficulty-badge">{levelConfig.difficulty}</span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
-          <button className="th-btn th-btn--primary th-btn--full" onClick={goToNextLevel}>
+        {/* Score card */}
+        <div className="th-game-result-card th-result-enter-delayed">
+          <div className="th-game-result-card__score">{score} / {wordCount}</div>
+          <div className="th-game-result-card__label">words unscrambled ({accuracy}% accuracy)</div>
+          <div className="th-game-result-card__message">{message}</div>
+        </div>
+
+        {/* Actions */}
+        <div className="th-game-actions th-result-enter-delayed-2">
+          <button className="th-btn th-btn--primary th-btn--full th-pressable" onClick={goToNextLevel}>
             Next Level
           </button>
-          <button className="th-btn th-btn--secondary th-btn--full" onClick={startGame}>
+          <button className="th-btn th-btn--secondary th-btn--full th-pressable" onClick={startGame}>
             Replay Level {currentLevel}
           </button>
-          <button className="th-btn th-btn--secondary th-btn--full" onClick={() => navigate(RoutePath.appGames)}>
+          <button className="th-btn th-btn--secondary th-btn--full th-pressable" onClick={() => navigate(RoutePath.appGames)}>
             Back to Games
           </button>
         </div>
@@ -189,26 +181,18 @@ export function WordScrambleScreen() {
     );
   }
 
-  // Playing phase
+  // --- Playing phase ---
   const progress = (currentWordIndex / wordCount) * 100;
 
   return (
-    <div className="th-content-pad">
+    <div className="th-content-pad th-game-screen">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'var(--th-space-4)' }}>
-        <button
-          className="th-btn th-btn--ghost"
-          onClick={() => navigate(RoutePath.appGames)}
-          style={{ minWidth: 'auto', padding: 'var(--th-space-2)' }}
-        >
+      <div className="th-game-header">
+        <button className="th-btn th-btn--ghost th-game-header__back" onClick={() => navigate(RoutePath.appGames)}>
           <IconBack size={20} />
         </button>
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
-            Word Scramble
-          </span>
-        </div>
-        <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', minWidth: '40px', textAlign: 'right' }}>
+        <div className="th-game-header__title">Word Scramble</div>
+        <span className="th-game-header__counter">
           {currentWordIndex + 1}/{wordCount}
         </span>
       </div>
@@ -218,46 +202,22 @@ export function WordScrambleScreen() {
         <div className="th-progress-bar__fill" style={{ width: `${progress}%` }} />
       </div>
 
-      {/* Scrambled word */}
-      <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-8)' }}>
-        <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)', marginBottom: 'var(--th-space-2)' }}>
+      {/* Scrambled word card */}
+      <div className={`th-game-question th-game-enter ${feedback === 'correct' ? 'th-game-correct' : ''} ${feedback === 'incorrect' ? 'th-game-incorrect' : ''}`} key={currentWordIndex}>
+        <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)', marginBottom: 'var(--th-space-3)' }}>
           Unscramble this word:
         </p>
-        <div
-          className="th-scramble-display"
-          style={{
-            fontFamily: 'var(--th-font-family-display)',
-            fontSize: 'var(--th-font-size-2xl)',
-            fontWeight: 'var(--th-font-weight-bold)',
-            color: 'var(--th-color-text-primary)',
-            letterSpacing: '8px',
-            padding: 'var(--th-space-4)',
-            background: 'var(--th-color-neutral-soft)',
-            borderRadius: 'var(--th-radius-md)',
-          }}
-        >
+        <div className="th-scramble-display--enhanced">
           {scrambled.toUpperCase()}
         </div>
         {currentQuestion?.category && (
-          <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: 'var(--th-space-2)', display: 'block' }}>
-            {currentQuestion.category}
-          </span>
+          <span className="th-game-question__category">{currentQuestion.category}</span>
         )}
       </div>
 
       {/* Feedback */}
       {feedback && (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: 'var(--th-space-3)',
-            borderRadius: 'var(--th-radius-md)',
-            marginBottom: 'var(--th-space-4)',
-            fontWeight: 'var(--th-font-weight-semibold)',
-            background: feedback === 'correct' ? 'var(--th-color-success-bg)' : 'var(--th-color-error-bg)',
-            color: feedback === 'correct' ? 'var(--th-color-success)' : 'var(--th-color-error)',
-          }}
-        >
+        <div className={`th-game-feedback th-game-${feedback}`}>
           {feedback === 'correct' ? 'Correct!' : `The answer was: ${correctAnswer}`}
         </div>
       )}
@@ -288,18 +248,16 @@ export function WordScrambleScreen() {
       {/* Submit */}
       {!feedback && (
         <button
-          className="th-btn th-btn--primary th-btn--full"
+          className="th-btn th-btn--primary th-btn--full th-pressable"
           onClick={handleSubmit}
         >
           Submit
         </button>
       )}
 
-      {/* Score so far */}
-      <div style={{ textAlign: 'center', marginTop: 'var(--th-space-4)' }}>
-        <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
-          Score: {session?.casualScore ?? 0} / {currentWordIndex + (feedback === 'correct' ? 1 : 0)}
-        </span>
+      {/* Score */}
+      <div className="th-game-score">
+        Score: <span className="th-game-score__number">{session?.casualScore ?? 0}</span> / {currentWordIndex + (feedback === 'correct' ? 1 : 0)}
       </div>
     </div>
   );

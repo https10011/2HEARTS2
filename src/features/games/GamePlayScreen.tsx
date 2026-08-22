@@ -1,5 +1,5 @@
 /**
- * GamePlayScreen (Phase 11).
+ * GamePlayScreen (Phase 11, Phase 29 visual polish).
  *
  * Shared game play screen for all couple mini-games.
  * Handles: question display, answer input, turn management,
@@ -14,7 +14,7 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { GameService } from '../../services/game/gameService.ts';
 import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 import type { GameSession, GameType, PlayerRole } from '../../data/game/gameTypes.ts';
-import { IconBack } from '../../components/index.ts';
+import { IconBack, IconHeart } from '../../components/index.ts';
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
 
 type GamePhase = 'intro' | 'playing' | 'turn-transition' | 'results';
@@ -71,16 +71,13 @@ export function GamePlayScreen() {
     setErrors([]);
     setSubmitted(true);
 
-    // Record answer
     const answerText = definition?.scoringType === 'choice'
       ? (q.options?.[selectedOption ?? 0] ?? '')
       : answer;
 
     const updated = service.answerQuestion(session, gt, currentTurn, answerText, selectedOption);
 
-    // Check if game is complete
     if (updated.session.completed || session.currentRound >= (definition?.questionsPerRound ?? 10) - 1) {
-      // This was the last question, check if all rounds are complete
       const completedRounds = updated.session.rounds.filter((r) => r.complete).length;
       if (completedRounds >= (definition?.questionsPerRound ?? 10)) {
         const finished = service.finishGame(updated.session, gt);
@@ -93,7 +90,6 @@ export function GamePlayScreen() {
 
     setSession(updated.session);
 
-    // After short delay, advance
     setTimeout(() => {
       setSubmitted(false);
       setAnswer('');
@@ -103,7 +99,6 @@ export function GamePlayScreen() {
         setCurrentTurn('player2');
         setPhase('turn-transition');
       } else if (definition?.turnBased && currentTurn === 'player2') {
-        // Both answered, advance to next question
         setCurrentTurn('player1');
         const nextResult = service.advanceToNext(updated.session, gt);
         if (nextResult) {
@@ -116,12 +111,10 @@ export function GamePlayScreen() {
           });
         }
       } else {
-        // Non-turn-based: check if both answered current question
         const currentRound = updated.session.rounds.find(
           (r) => r.questionIndex === session.currentRound,
         );
         if (currentRound?.complete) {
-          // Both answered, advance
           const next = service.advanceToNext(updated.session, gt);
           if (next) {
             setSession(next.session);
@@ -138,81 +131,63 @@ export function GamePlayScreen() {
         }
       }
     }, 600);
-  }, [session, gt, definition, currentTurn, answer, selectedOption, service, navigate]);
+  }, [session, gt, definition, currentTurn, answer, selectedOption, service, navigate, passedLevel]);
 
+  // --- Error / not found state ---
   if (!definition || !gt) {
     return (
-      <div className="th-content-pad">
+      <div className="th-content-pad th-game-screen">
         <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
-            <span style={{ fontSize: '2rem' }}>?</span>
-          </div>
+          <div className="th-empty-state__visual"><span style={{ fontSize: '2rem' }}>?</span></div>
           <h3 className="th-empty-state__title">Game not found</h3>
-          <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appGames)}>
-            Back to Games
-          </button>
+          <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appGames)}>Back to Games</button>
         </div>
       </div>
     );
   }
 
-  // Intro phase
+  // --- Intro phase ---
   if (phase === 'intro') {
     return (
-      <div className="th-content-pad" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-8)' }}>
-          <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-3)' }}>
-            {definition.title}
-          </h1>
-          <div style={{ display: 'flex', gap: 'var(--th-space-2)', justifyContent: 'center', marginBottom: 'var(--th-space-2)' }}>
-            <span className="th-chip th-chip--enhanced" style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-burgundy)', fontWeight: 'var(--th-font-weight-semibold)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Level {passedLevel}
-            </span>
-            <span className="th-chip" style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              {levelConfig.difficulty}
-            </span>
-          </div>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)', maxWidth: '36ch', margin: '0 auto' }}>
-            {definition.description}
-          </p>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)', marginTop: 'var(--th-space-3)' }}>
-            {definition.questionsPerRound} questions
-          </p>
+      <div className="th-content-pad th-game-intro th-game-enter">
+        <div className="th-game-intro__icon">
+          <IconHeart size={28} />
         </div>
-        <button className="th-btn th-btn--primary" onClick={startGame}>
-          Start Game
-        </button>
-        <button
-          className="th-btn th-btn--secondary"
-          onClick={() => navigate(RoutePath.appGames)}
-          style={{ marginTop: 'var(--th-space-3)' }}
-        >
+        <h1 className="th-game-intro__title">{definition.title}</h1>
+        <div className="th-game-badge-group" style={{ marginBottom: 'var(--th-space-3)' }}>
+          <span className="th-game-level-badge th-badge-enter">Level {passedLevel}</span>
+          <span className="th-game-difficulty-badge">{levelConfig.difficulty}</span>
+        </div>
+        <p className="th-game-intro__desc">{definition.description}</p>
+        <p className="th-game-intro__meta">{definition.questionsPerRound} questions</p>
+        <div style={{ marginTop: 'var(--th-space-6)' }}>
+          <button className="th-btn th-btn--primary" onClick={startGame}>Start Game</button>
+        </div>
+        <button className="th-btn th-btn--secondary" onClick={() => navigate(RoutePath.appGames)} style={{ marginTop: 'var(--th-space-3)' }}>
           Back to Games
         </button>
       </div>
     );
   }
 
-  // Turn transition phase (for turn-based games)
+  // --- Turn transition phase ---
   if (phase === 'turn-transition') {
     return (
-      <div className="th-content-pad" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
-        <div style={{ textAlign: 'center' }}>
-          <h2 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-2)' }}>
-            {currentTurn === 'player1' ? "Partner 1's Turn" : "Partner 2's Turn"}
-          </h2>
-          <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-6)' }}>
-            Pass the device to the other partner
-          </p>
-          <button className="th-btn th-btn--primary" onClick={() => setPhase('playing')}>
-            I'm Ready
-          </button>
+      <div className="th-content-pad th-game-intro th-game-enter">
+        <div className="th-game-turn-badge">
+          {currentTurn === 'player1' ? "Partner 1's Turn" : "Partner 2's Turn"}
         </div>
+        <p className="th-game-intro__desc" style={{ marginTop: 'var(--th-space-4)' }}>
+          Pass the device to the other partner
+        </p>
+        <button className="th-btn th-btn--primary" style={{ marginTop: 'var(--th-space-6)' }} onClick={() => setPhase('playing')}>
+          I'm Ready
+        </button>
       </div>
     );
   }
 
-  // Playing phase
+  // --- Playing phase ---
   if (!session) {
     setPhase('intro');
     return null;
@@ -229,54 +204,37 @@ export function GamePlayScreen() {
   }
 
   return (
-    <div className="th-content-pad">
+    <div className="th-content-pad th-game-screen">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'var(--th-space-4)' }}>
-        <button className="th-btn th-btn--ghost" onClick={() => navigate(RoutePath.appGames)} style={{ minWidth: 'auto', padding: 'var(--th-space-2)' }}>
+      <div className="th-game-header">
+        <button className="th-btn th-btn--ghost th-game-header__back" onClick={() => navigate(RoutePath.appGames)}>
           <IconBack size={20} />
         </button>
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
-            {definition.title}
-          </span>
-        </div>
-        <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', minWidth: '40px', textAlign: 'right' }}>
+        <div className="th-game-header__title">{definition.title}</div>
+        <span className="th-game-header__counter">
           {session!.currentRound + 1}/{definition.questionsPerRound}
         </span>
       </div>
 
       {/* Progress bar */}
-      <div className="th-progress-bar" style={{ marginBottom: 'var(--th-space-6)' }}>
+      <div className="th-progress-bar" style={{ marginBottom: 'var(--th-space-4)' }}>
         <div className="th-progress-bar__fill" style={{ width: `${progress}%` }} />
       </div>
 
       {/* Turn indicator for turn-based */}
       {definition.turnBased && (
         <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-4)' }}>
-          <span style={{
-            fontSize: 'var(--th-font-size-sm)',
-            fontWeight: 'var(--th-font-weight-semibold)',
-            color: 'var(--th-color-burgundy)',
-          }}>
+          <span className="th-game-turn-badge">
             {currentTurn === 'player1' ? "Partner 1" : "Partner 2"} — Answer this question
           </span>
         </div>
       )}
 
-      {/* Question */}
-      <div style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
-        <h2 style={{
-          fontFamily: 'var(--th-font-family-display)',
-          fontSize: 'var(--th-font-size-xl)',
-          color: 'var(--th-color-text-primary)',
-          lineHeight: 'var(--th-line-height-tight)',
-        }}>
-          {currentQuestion.text}
-        </h2>
+      {/* Question card */}
+      <div className="th-game-question th-game-enter" key={session.currentRound}>
+        <h2 className="th-game-question__text">{currentQuestion.text}</h2>
         {currentQuestion.category && (
-          <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            {currentQuestion.category}
-          </span>
+          <span className="th-game-question__category">{currentQuestion.category}</span>
         )}
       </div>
 
@@ -316,12 +274,17 @@ export function GamePlayScreen() {
 
       {/* Submit */}
       <button
-        className="th-btn th-btn--primary th-btn--full"
+        className="th-btn th-btn--primary th-btn--full th-pressable"
         onClick={handleAnswer}
         disabled={submitted}
       >
         {submitted ? 'Answered!' : 'Submit Answer'}
       </button>
+
+      {/* Score */}
+      <div className="th-game-score">
+        Round {session.currentRound + 1} of {definition.questionsPerRound}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 /**
- * CasualGamePlayScreen (Phase 12).
+ * CasualGamePlayScreen (Phase 12, Phase 29 visual polish).
  *
  * Shared play screen for casual single-player games (trivia, riddle room).
  * Uses the same question/answer model as couple games but with single-player
@@ -11,13 +11,12 @@
 import { useState, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconCheck, IconClose } from '../../components/index.ts';
+import { IconCheck, IconClose, IconBack, IconSmile } from '../../components/index.ts';
 import { createSession, recordCasualAnswer, completeCasualGame } from '../../services/game/gameEngine.ts';
 import type { GameSession, GameType } from '../../data/game/gameTypes.ts';
 import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
 import { recordLevelCompletion } from '../../services/game/gameProgression.ts';
-import { IconBack } from '../../components/index.ts';
 
 type GamePhase = 'intro' | 'playing' | 'results';
 
@@ -54,7 +53,6 @@ export function CasualGamePlayScreen() {
     const question = definition.questions[questionIndex];
     if (!question) return;
 
-    // Validate
     if (definition.scoringType === 'choice') {
       if (selectedOption === undefined) {
         setErrors(['Please select an option.']);
@@ -85,7 +83,6 @@ export function CasualGamePlayScreen() {
       setTextAnswer('');
 
       if (result.gameOver) {
-        // Persist progression
         if (gt) {
           const score = result.session.casualScore ?? 0;
           recordLevelCompletion(gt, passedLevel, score);
@@ -93,7 +90,7 @@ export function CasualGamePlayScreen() {
         setPhase('results');
       }
     }, 1200);
-  }, [session, gt, definition, selectedOption, textAnswer]);
+  }, [session, gt, definition, selectedOption, textAnswer, passedLevel]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -104,50 +101,44 @@ export function CasualGamePlayScreen() {
     [handleSubmit, feedback],
   );
 
+  // --- Not found state ---
   if (!definition || !gt) {
     return (
-      <div className="th-content-pad">
+      <div className="th-content-pad th-game-screen">
         <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
-            <span style={{ fontSize: '2rem' }}>?</span>
-          </div>
+          <div className="th-empty-state__visual"><span style={{ fontSize: '2rem' }}>?</span></div>
           <h3 className="th-empty-state__title">Game not found</h3>
-          <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appGames)}>
-            Back to Games
-          </button>
+          <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appGames)}>Back to Games</button>
         </div>
       </div>
     );
   }
 
+  // --- Intro phase ---
   if (phase === 'intro') {
     return (
-      <div className="th-content-pad" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-8)' }}>
-          <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-3)' }}>
-            {definition.title}
-          </h1>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)', maxWidth: '36ch', margin: '0 auto' }}>
-            {definition.description}
-          </p>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)', marginTop: 'var(--th-space-3)' }}>
-            {definition.questionsPerRound} questions
-          </p>
+      <div className="th-content-pad th-game-intro th-game-enter">
+        <div className="th-game-intro__icon">
+          <IconSmile size={28} />
         </div>
-        <button className="th-btn th-btn--primary" onClick={startGame}>
-          Start Game
-        </button>
-        <button
-          className="th-btn th-btn--secondary"
-          onClick={() => navigate(RoutePath.appGames)}
-          style={{ marginTop: 'var(--th-space-3)' }}
-        >
+        <h1 className="th-game-intro__title">{definition.title}</h1>
+        <div className="th-game-badge-group" style={{ marginBottom: 'var(--th-space-3)' }}>
+          <span className="th-game-level-badge th-badge-enter">Level {passedLevel}</span>
+          <span className="th-game-difficulty-badge">{levelConfig.difficulty}</span>
+        </div>
+        <p className="th-game-intro__desc">{definition.description}</p>
+        <p className="th-game-intro__meta">{definition.questionsPerRound} questions</p>
+        <div style={{ marginTop: 'var(--th-space-6)' }}>
+          <button className="th-btn th-btn--primary" onClick={startGame}>Start Game</button>
+        </div>
+        <button className="th-btn th-btn--secondary" onClick={() => navigate(RoutePath.appGames)} style={{ marginTop: 'var(--th-space-3)' }}>
           Back to Games
         </button>
       </div>
     );
   }
 
+  // --- Results phase ---
   if (phase === 'results') {
     const score = session?.casualScore ?? 0;
     const total = definition.questionsPerRound;
@@ -160,37 +151,31 @@ export function CasualGamePlayScreen() {
     else message = 'Keep trying!';
 
     return (
-      <div className="th-content-pad">
-        <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-6)' }}>
-          <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-2)' }}>
-            Game Complete!
-          </h1>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)' }}>{definition.title}</p>
-          <div style={{ display: 'flex', gap: 'var(--th-space-2)', justifyContent: 'center', marginTop: 'var(--th-space-2)' }}>
-            <span className="th-chip th-chip--enhanced" style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-burgundy)', fontWeight: 'var(--th-font-weight-semibold)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Level {passedLevel}
-            </span>
-            <span className="th-chip" style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              {levelConfig.difficulty}
-            </span>
-          </div>
+      <div className="th-content-pad th-game-screen">
+        {/* Level-up celebration header */}
+        <div className="th-game-level-up th-result-enter">
+          <div className="th-game-level-up__icon th-badge-enter">1</div>
+          <div className="th-game-level-up__text">Level Complete!</div>
+          <div className="th-game-level-up__sub">{definition.title}</div>
         </div>
 
-        <div className="th-relationship-card th-relationship-card--enhanced th-card-emotional" style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
-          <div style={{ fontSize: 'var(--th-font-size-3xl)', fontWeight: 'var(--th-font-weight-bold)', fontFamily: 'var(--th-font-family-display)', marginBottom: 'var(--th-space-2)' }}>
-            {score} / {total}
-          </div>
-          <div style={{ fontSize: 'var(--th-font-size-sm)', opacity: 0.85 }}>correct ({accuracy}% accuracy)</div>
-          <div style={{ marginTop: 'var(--th-space-3)', fontSize: 'var(--th-font-size-md)', opacity: 0.9 }}>
-            {message}
-          </div>
+        <div className="th-game-badge-group th-result-enter-delayed" style={{ marginBottom: 'var(--th-space-4)' }}>
+          <span className="th-game-level-badge">Level {passedLevel}</span>
+          <span className="th-game-difficulty-badge">{levelConfig.difficulty}</span>
+        </div>
+
+        {/* Score card */}
+        <div className="th-game-result-card th-result-enter-delayed">
+          <div className="th-game-result-card__score">{score} / {total}</div>
+          <div className="th-game-result-card__label">correct ({accuracy}% accuracy)</div>
+          <div className="th-game-result-card__message">{message}</div>
         </div>
 
         {/* Round breakdown */}
-        <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 'var(--th-font-weight-semibold)', marginBottom: 'var(--th-space-3)' }}>
+        <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 'var(--th-font-weight-semibold)', marginBottom: 'var(--th-space-3)' }} className="th-result-enter-delayed-2">
           Round Breakdown
         </h2>
-        <div className="th-hub-grid" style={{ marginBottom: 'var(--th-space-6)' }}>
+        <div className="th-hub-grid th-result-enter-delayed-2" style={{ marginBottom: 'var(--th-space-6)' }}>
           {session?.rounds
             .filter((r) => r.complete)
             .map((r, i) => {
@@ -199,14 +184,15 @@ export function CasualGamePlayScreen() {
               return (
                 <div
                   key={i}
-                  className="th-feature-card th-feature-card--enhanced th-stagger-item"
-                  style={{ cursor: 'default', borderLeftColor: isCorrect ? 'var(--th-color-burgundy)' : undefined }}
+                  className={`th-feature-card th-feature-card--enhanced th-stagger-item th-game-round ${isCorrect ? 'th-game-round--correct' : 'th-game-round--incorrect'}`}
+                  style={{ cursor: 'default' }}
                 >
                   <div className="th-feature-card__body">
                     <div className="th-feature-card__title" style={{ fontSize: 'var(--th-font-size-sm)' }}>
                       <span style={{ color: isCorrect ? 'var(--th-color-burgundy)' : 'var(--th-color-text-secondary)', display: 'inline-flex', verticalAlign: '-2px', marginRight: 'var(--th-space-1)' }}>
-                      {isCorrect ? <IconCheck size={14} /> : <IconClose size={14} />}
-                    </span>Q{i + 1}: {r.question.text.length > 50 ? r.question.text.slice(0, 50) + '...' : r.question.text}
+                        {isCorrect ? <IconCheck size={14} /> : <IconClose size={14} />}
+                      </span>
+                      Q{i + 1}: {r.question.text.length > 50 ? r.question.text.slice(0, 50) + '...' : r.question.text}
                     </div>
                     <div className="th-feature-card__desc">
                       Your answer: {a?.answer || '(none)'}
@@ -220,14 +206,15 @@ export function CasualGamePlayScreen() {
             })}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
-          <button className="th-btn th-btn--primary th-btn--full" onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true, state: { level: passedLevel + 1 } })}>
+        {/* Actions */}
+        <div className="th-game-actions">
+          <button className="th-btn th-btn--primary th-btn--full th-pressable" onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true, state: { level: passedLevel + 1 } })}>
             Next Level
           </button>
-          <button className="th-btn th-btn--secondary th-btn--full" onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true, state: { level: passedLevel } })}>
+          <button className="th-btn th-btn--secondary th-btn--full th-pressable" onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true, state: { level: passedLevel } })}>
             Replay Level {passedLevel}
           </button>
-          <button className="th-btn th-btn--secondary th-btn--full" onClick={() => navigate(RoutePath.appGames)}>
+          <button className="th-btn th-btn--secondary th-btn--full th-pressable" onClick={() => navigate(RoutePath.appGames)}>
             Back to Games
           </button>
         </div>
@@ -235,14 +222,13 @@ export function CasualGamePlayScreen() {
     );
   }
 
-  // Playing phase
+  // --- Playing phase ---
   const questionIndex = session?.currentRound ?? 0;
   const currentQuestion = definition.questions[questionIndex];
   const progress = (questionIndex / definition.questionsPerRound) * 100;
 
   if (!currentQuestion) {
     const { result } = completeCasualGame(session!);
-    // Persist progression
     if (gt) {
       const score = result.casualResult?.score ?? 0;
       recordLevelCompletion(gt, passedLevel, score);
@@ -254,62 +240,35 @@ export function CasualGamePlayScreen() {
   }
 
   return (
-    <div className="th-content-pad">
+    <div className="th-content-pad th-game-screen">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'var(--th-space-4)' }}>
-        <button
-          className="th-btn th-btn--ghost"
-          onClick={() => navigate(RoutePath.appGames)}
-          style={{ minWidth: 'auto', padding: 'var(--th-space-2)' }}
-        >
+      <div className="th-game-header">
+        <button className="th-btn th-btn--ghost th-game-header__back" onClick={() => navigate(RoutePath.appGames)}>
           <IconBack size={20} />
         </button>
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
-            {definition.title}
-          </span>
-        </div>
-        <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', minWidth: '40px', textAlign: 'right' }}>
+        <div className="th-game-header__title">{definition.title}</div>
+        <span className="th-game-header__counter">
           {questionIndex + 1}/{definition.questionsPerRound}
         </span>
       </div>
 
       {/* Progress bar */}
-      <div className="th-progress-bar" style={{ marginBottom: 'var(--th-space-6)' }}>
+      <div className="th-progress-bar" style={{ marginBottom: 'var(--th-space-4)' }}>
         <div className="th-progress-bar__fill" style={{ width: `${progress}%` }} />
       </div>
 
       {/* Feedback */}
       {feedback && (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: 'var(--th-space-3)',
-            borderRadius: 'var(--th-radius-md)',
-            marginBottom: 'var(--th-space-4)',
-            fontWeight: 'var(--th-font-weight-semibold)',
-            background: feedback === 'correct' ? 'var(--th-color-success-bg)' : 'var(--th-color-error-bg)',
-            color: feedback === 'correct' ? 'var(--th-color-success)' : 'var(--th-color-error)',
-          }}
-        >
+        <div className={`th-game-feedback th-game-${feedback} ${feedback === 'correct' ? 'th-game-correct' : 'th-game-incorrect'}`}>
           {feedback === 'correct' ? 'Correct!' : `Wrong! The answer was: ${currentQuestion.correctAnswer ?? currentQuestion.options?.[0]}`}
         </div>
       )}
 
-      {/* Question */}
-      <div style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
-        <h2 style={{
-          fontFamily: 'var(--th-font-family-display)',
-          fontSize: 'var(--th-font-size-xl)',
-          color: 'var(--th-color-text-primary)',
-          lineHeight: 'var(--th-line-height-tight)',
-        }}>
-          {currentQuestion.text}
-        </h2>
+      {/* Question card */}
+      <div className={`th-game-question ${!feedback ? 'th-game-enter' : ''}`} key={questionIndex}>
+        <h2 className="th-game-question__text">{currentQuestion.text}</h2>
         {currentQuestion.category && (
-          <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginTop: 'var(--th-space-2)' }}>
-            {currentQuestion.category}
-          </span>
+          <span className="th-game-question__category">{currentQuestion.category}</span>
         )}
       </div>
 
@@ -351,17 +310,15 @@ export function CasualGamePlayScreen() {
             </div>
           )}
 
-          <button className="th-btn th-btn--primary th-btn--full" onClick={handleSubmit}>
+          <button className="th-btn th-btn--primary th-btn--full th-pressable" onClick={handleSubmit}>
             Submit
           </button>
         </>
       )}
 
-      {/* Score so far */}
-      <div style={{ textAlign: 'center', marginTop: 'var(--th-space-4)' }}>
-        <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
-          Score: {session?.casualScore ?? 0} / {questionIndex + (feedback === 'correct' ? 1 : 0)}
-        </span>
+      {/* Score */}
+      <div className="th-game-score">
+        Score: <span className="th-game-score__number">{session?.casualScore ?? 0}</span> / {questionIndex + (feedback === 'correct' ? 1 : 0)}
       </div>
     </div>
   );

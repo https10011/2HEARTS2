@@ -1,8 +1,8 @@
 /**
- * GameResultsScreen (Phase 11).
+ * GameResultsScreen (Phase 11, Phase 29 visual polish).
  *
  * Displays game results: score comparison, per-round breakdown,
- * fun result message, and replay option.
+ * fun result message, level-up celebration, and replay/next-level options.
  */
 
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -30,7 +30,6 @@ export function GameResultsScreen() {
   useEffect(() => {
     if (persisted.current || !gt || !result) return;
     persisted.current = true;
-    // Calculate a score for persistence (match count for couple games, casual score for casual games)
     const score = result.casualResult?.score ?? result.player1Score ?? 0;
     recordLevelCompletion(gt, currentLevel, score);
   }, [gt, result, currentLevel]);
@@ -38,94 +37,79 @@ export function GameResultsScreen() {
   const progress = gt ? getGameProgressSummary(gt) : null;
   const streak = progress?.streak ?? 0;
 
+  // --- No results ---
   if (!result || !definition) {
     return (
-      <div className="th-content-pad">
+      <div className="th-content-pad th-game-screen">
         <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
-            <span style={{ fontSize: '2rem' }}>?</span>
-          </div>
+          <div className="th-empty-state__visual"><span style={{ fontSize: '2rem' }}>?</span></div>
           <h3 className="th-empty-state__title">No results to display</h3>
-          <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appGames)}>
-            Back to Games
-          </button>
+          <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appGames)}>Back to Games</button>
         </div>
       </div>
     );
   }
 
+  const winner = result.player1Score > result.player2Score ? 1
+    : result.player2Score > result.player1Score ? 2 : 0;
+
   return (
-    <div className="th-content-pad th-screen-warm">
+    <div className="th-content-pad th-game-screen th-screen-warm">
       <RoseLilyDecoration variant={4} size={90} position="top-right" opacity={0.15} animated />
-      {/* Title */}
-      <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-6)' }}>
-        <h1 style={{
-          fontFamily: 'var(--th-font-family-display)',
-          fontSize: 'var(--th-font-size-2xl)',
-          color: 'var(--th-color-text-primary)',
-          marginBottom: 'var(--th-space-2)',
-        }}>
-          Game Complete!
-        </h1>
-        <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)' }}>
-          {definition.title}
-        </p>
-        <div style={{ display: 'flex', gap: 'var(--th-space-2)', justifyContent: 'center', marginTop: 'var(--th-space-2)' }}>
-          <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-burgundy)', fontWeight: 'var(--th-font-weight-semibold)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-blush)' }}>
-            Level {currentLevel}
-          </span>
-          <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-neutral-soft)' }}>
-            {levelConfig.difficulty}
-          </span>
-          {streak > 0 && (
-            <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-success)', fontWeight: 'var(--th-font-weight-semibold)', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-success-bg)' }}>
-              {streak} streak
-            </span>
-          )}
+
+      {/* Level-up celebration */}
+      <div className="th-game-level-up th-result-enter">
+        <div className="th-game-level-up__icon th-badge-enter">
+          {winner === 0 ? <span style={{ fontSize: '1.4rem' }}>=</span> : <IconHeart size={28} />}
         </div>
+        <div className="th-game-level-up__text">
+          {winner === 0 ? "It's a Tie!" : 'Level Complete!'}
+        </div>
+        <div className="th-game-level-up__sub">{definition.title}</div>
+      </div>
+
+      {/* Badges */}
+      <div className="th-game-badge-group th-result-enter-delayed" style={{ marginBottom: 'var(--th-space-4)' }}>
+        <span className="th-game-level-badge">Level {currentLevel}</span>
+        <span className="th-game-difficulty-badge">{levelConfig.difficulty}</span>
+        {streak > 0 && (
+          <span className="th-game-streak-badge">{streak} streak</span>
+        )}
       </div>
 
       {/* Score card */}
-      <div className="th-relationship-card th-relationship-card--enhanced" style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+      <div className="th-game-result-card th-result-enter-delayed">
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', position: 'relative', zIndex: 1 }}>
           <div>
-            <div style={{ fontSize: 'var(--th-font-size-sm)', opacity: 0.85, marginBottom: 'var(--th-space-1)' }}>Partner 1</div>
-            <div style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', fontWeight: 'var(--th-font-weight-bold)' }}>
-              {result.player1Score}
-            </div>
+            <div className="th-game-result-card__label" style={{ marginBottom: 'var(--th-space-1)' }}>Partner 1</div>
+            <div className="th-game-result-card__score">{result.player1Score}</div>
           </div>
-          <div style={{ fontSize: 'var(--th-font-size-xl)', opacity: 0.6 }}>vs</div>
+          <div style={{ fontSize: 'var(--th-font-size-xl)', opacity: 0.6, position: 'relative', zIndex: 1 }}>vs</div>
           <div>
-            <div style={{ fontSize: 'var(--th-font-size-sm)', opacity: 0.85, marginBottom: 'var(--th-space-1)' }}>Partner 2</div>
-            <div style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', fontWeight: 'var(--th-font-weight-bold)' }}>
-              {result.player2Score}
-            </div>
+            <div className="th-game-result-card__label" style={{ marginBottom: 'var(--th-space-1)' }}>Partner 2</div>
+            <div className="th-game-result-card__score">{result.player2Score}</div>
           </div>
         </div>
-        <div style={{ marginTop: 'var(--th-space-3)', fontSize: 'var(--th-font-size-md)', opacity: 0.9 }}>
-          {result.message}
-        </div>
+        <div className="th-game-result-card__message">{result.message}</div>
       </div>
 
       {/* Round breakdown */}
-      <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 'var(--th-font-weight-semibold)', marginBottom: 'var(--th-space-3)' }}>
+      <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 'var(--th-font-weight-semibold)', marginBottom: 'var(--th-space-3)' }} className="th-result-enter-delayed-2">
         Round Breakdown
       </h2>
-      <div className="th-hub-grid" style={{ marginBottom: 'var(--th-space-6)' }}>
+      <div className="th-hub-grid th-result-enter-delayed-2" style={{ marginBottom: 'var(--th-space-6)' }}>
         {result.rounds.map((r, i) => (
           <div
             key={i}
-            className="th-feature-card th-feature-card--enhanced th-stagger-item"
-            style={{
-              cursor: 'default',
-              borderLeftColor: r.matched ? 'var(--th-color-burgundy)' : undefined,
-            }}
+            className={`th-feature-card th-feature-card--enhanced th-stagger-item th-game-round ${r.matched ? 'th-game-round--matched' : ''}`}
+            style={{ cursor: 'default' }}
           >
             <div className="th-feature-card__body">
               <div className="th-feature-card__title" style={{ fontSize: 'var(--th-font-size-sm)' }}>
                 <span style={{ color: r.matched ? 'var(--th-color-burgundy)' : 'var(--th-color-text-secondary)', display: 'inline-flex', verticalAlign: '-2px', marginRight: 'var(--th-space-1)' }}>
                   {r.matched ? <IconHeart size={14} /> : <IconClose size={14} />}
-                </span>Q{i + 1}: {r.question.length > 50 ? r.question.slice(0, 50) + '...' : r.question}
+                </span>
+                Q{i + 1}: {r.question.length > 50 ? r.question.slice(0, 50) + '...' : r.question}
               </div>
               <div className="th-feature-card__desc">
                 P1: {r.player1Answer || '(no answer)'} · P2: {r.player2Answer || '(no answer)'}
@@ -135,21 +119,22 @@ export function GameResultsScreen() {
         ))}
       </div>
 
-      {/* Actions */}        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
+      {/* Actions */}
+      <div className="th-game-actions">
         <button
-          className="th-btn th-btn--primary th-btn--full"
+          className="th-btn th-btn--primary th-btn--full th-pressable"
           onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true, state: { level: currentLevel + 1 } })}
         >
           Next Level (Level {currentLevel + 1})
         </button>
         <button
-          className="th-btn th-btn--secondary th-btn--full"
+          className="th-btn th-btn--secondary th-btn--full th-pressable"
           onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true, state: { level: currentLevel } })}
         >
           Replay Level {currentLevel}
         </button>
         <button
-          className="th-btn th-btn--secondary th-btn--full"
+          className="th-btn th-btn--secondary th-btn--full th-pressable"
           onClick={() => navigate(RoutePath.appGames)}
         >
           Back to Games

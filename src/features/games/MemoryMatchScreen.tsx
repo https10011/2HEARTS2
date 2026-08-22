@@ -1,5 +1,5 @@
 /**
- * MemoryMatchScreen (Phase 12).
+ * MemoryMatchScreen (Phase 12, Phase 29 visual polish).
  *
  * Memory Match card game — flip cards to find matching pairs.
  * Uses createMemoryMatchSession + flipCard from the shared game engine.
@@ -16,7 +16,7 @@ import {
 } from '../../services/game/gameEngine.ts';
 import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 import type { GameSession, MemoryCard } from '../../data/game/gameTypes.ts';
-import { IconBack } from '../../components/index.ts';
+import { IconBack, IconHeart } from '../../components/index.ts';
 
 type GamePhase = 'intro' | 'playing' | 'results';
 
@@ -58,21 +58,17 @@ export function MemoryMatchScreen() {
       setSession(result.session);
 
       if (result.gameOver) {
-        // Brief delay before showing results
         setTimeout(() => setPhase('results'), 800);
         return;
       }
 
       if (board.firstFlippedIndex === null) {
-        // First card of pair — just revealed, nothing to check yet
         return;
       }
 
-      // Second card — check match
       if (result.matched) {
-        // Match found — no flip back needed
+        // Match found
       } else {
-        // No match — lock and flip back after delay
         setLocked(true);
         setPendingFlipBack([board.firstFlippedIndex, index]);
       }
@@ -80,7 +76,6 @@ export function MemoryMatchScreen() {
     [session, locked],
   );
 
-  // Handle flip-back after non-match delay
   useEffect(() => {
     if (!pendingFlipBack || !session) return;
 
@@ -101,42 +96,31 @@ export function MemoryMatchScreen() {
     setSession(null);
   }, [currentLevel]);
 
+  // --- Intro phase ---
   if (phase === 'intro') {
     return (
-      <div className="th-content-pad" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-8)' }}>
-          <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-3)' }}>
-            Memory Match
-          </h1>
-          <div style={{ display: 'flex', gap: 'var(--th-space-2)', justifyContent: 'center', marginBottom: 'var(--th-space-2)' }}>
-            <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-burgundy)', fontWeight: 'var(--th-font-weight-semibold)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-blush)' }}>
-              Level {currentLevel}
-            </span>
-            <span style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', padding: '2px 8px', borderRadius: 'var(--th-radius-sm)', background: 'var(--th-color-neutral-soft)' }}>
-              {levelConfig.difficulty}
-            </span>
-          </div>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)', maxWidth: '36ch', margin: '0 auto' }}>
-            Flip cards and find all matching pairs!
-          </p>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)', marginTop: 'var(--th-space-3)' }}>
-            {pairCount} pairs to find
-          </p>
+      <div className="th-content-pad th-game-intro th-game-enter">
+        <div className="th-game-intro__icon">
+          <IconHeart size={28} />
         </div>
-        <button className="th-btn th-btn--primary" onClick={startGame}>
-          Start Game
-        </button>
-        <button
-          className="th-btn th-btn--secondary"
-          onClick={() => navigate(RoutePath.appGames)}
-          style={{ marginTop: 'var(--th-space-3)' }}
-        >
+        <h1 className="th-game-intro__title">Memory Match</h1>
+        <div className="th-game-badge-group" style={{ marginBottom: 'var(--th-space-3)' }}>
+          <span className="th-game-level-badge th-badge-enter">Level {currentLevel}</span>
+          <span className="th-game-difficulty-badge">{levelConfig.difficulty}</span>
+        </div>
+        <p className="th-game-intro__desc">Flip cards and find all matching pairs!</p>
+        <p className="th-game-intro__meta">{pairCount} pairs to find</p>
+        <div style={{ marginTop: 'var(--th-space-6)' }}>
+          <button className="th-btn th-btn--primary th-pressable" onClick={startGame}>Start Game</button>
+        </div>
+        <button className="th-btn th-btn--secondary" onClick={() => navigate(RoutePath.appGames)} style={{ marginTop: 'var(--th-space-3)' }}>
           Back to Games
         </button>
       </div>
     );
   }
 
+  // --- Results phase ---
   if (phase === 'results') {
     const moves = session?.board?.moves ?? 0;
     const pairs = session?.board?.totalPairs ?? pairCount;
@@ -149,32 +133,35 @@ export function MemoryMatchScreen() {
     else message = 'Practice makes perfect!';
 
     return (
-      <div className="th-content-pad">
-        <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-6)' }}>
-          <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-2)' }}>
-            Game Complete!
-          </h1>
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)' }}>Memory Match — Level {currentLevel}</p>
+      <div className="th-content-pad th-game-screen">
+        {/* Level-up celebration */}
+        <div className="th-game-level-up th-result-enter">
+          <div className="th-game-level-up__icon th-badge-enter"><IconHeart size={28} /></div>
+          <div className="th-game-level-up__text">Level Complete!</div>
+          <div className="th-game-level-up__sub">Memory Match</div>
         </div>
 
-        <div className="th-relationship-card" style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
-          <div style={{ fontSize: 'var(--th-font-size-3xl)', fontWeight: 'var(--th-font-weight-bold)', fontFamily: 'var(--th-font-family-display)', marginBottom: 'var(--th-space-2)' }}>
-            {pairs} / {pairs}
-          </div>
-          <div style={{ fontSize: 'var(--th-font-size-sm)', opacity: 0.85 }}>pairs found in {moves} moves</div>
-          <div style={{ marginTop: 'var(--th-space-3)', fontSize: 'var(--th-font-size-md)', opacity: 0.9 }}>
-            {message}
-          </div>
+        <div className="th-game-badge-group th-result-enter-delayed" style={{ marginBottom: 'var(--th-space-4)' }}>
+          <span className="th-game-level-badge">Level {currentLevel}</span>
+          <span className="th-game-difficulty-badge">{levelConfig.difficulty}</span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
-          <button className="th-btn th-btn--primary th-btn--full" onClick={goToNextLevel}>
+        {/* Score card */}
+        <div className="th-game-result-card th-result-enter-delayed">
+          <div className="th-game-result-card__score">{pairs} / {pairs}</div>
+          <div className="th-game-result-card__label">pairs found in {moves} moves</div>
+          <div className="th-game-result-card__message">{message}</div>
+        </div>
+
+        {/* Actions */}
+        <div className="th-game-actions th-result-enter-delayed-2">
+          <button className="th-btn th-btn--primary th-btn--full th-pressable" onClick={goToNextLevel}>
             Next Level
           </button>
-          <button className="th-btn th-btn--secondary th-btn--full" onClick={startGame}>
+          <button className="th-btn th-btn--secondary th-btn--full th-pressable" onClick={startGame}>
             Replay Level {currentLevel}
           </button>
-          <button className="th-btn th-btn--secondary th-btn--full" onClick={() => navigate(RoutePath.appGames)}>
+          <button className="th-btn th-btn--secondary th-btn--full th-pressable" onClick={() => navigate(RoutePath.appGames)}>
             Back to Games
           </button>
         </div>
@@ -182,33 +169,25 @@ export function MemoryMatchScreen() {
     );
   }
 
-  // Playing phase
+  // --- Playing phase ---
   const board = session?.board;
   if (!board) return null;
 
   return (
-    <div className="th-content-pad">
+    <div className="th-content-pad th-game-screen">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'var(--th-space-4)' }}>
-        <button
-          className="th-btn th-btn--ghost"
-          onClick={() => navigate(RoutePath.appGames)}
-          style={{ minWidth: 'auto', padding: 'var(--th-space-2)' }}
-        >
+      <div className="th-game-header">
+        <button className="th-btn th-btn--ghost th-game-header__back" onClick={() => navigate(RoutePath.appGames)}>
           <IconBack size={20} />
         </button>
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
-            Memory Match
-          </span>
-        </div>
-        <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', minWidth: '40px', textAlign: 'right' }}>
+        <div className="th-game-header__title">Memory Match</div>
+        <span className="th-game-header__counter">
           {board.matchedPairs}/{board.totalPairs}
         </span>
       </div>
 
       {/* Progress bar */}
-      <div className="th-progress-bar" style={{ marginBottom: 'var(--th-space-4)' }}>
+      <div className="th-progress-bar" style={{ marginBottom: 'var(--th-space-3)' }}>
         <div
           className="th-progress-bar__fill"
           style={{ width: `${(board.matchedPairs / board.totalPairs) * 100}%` }}
@@ -216,14 +195,12 @@ export function MemoryMatchScreen() {
       </div>
 
       {/* Moves counter */}
-      <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-4)' }}>
-        <span style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
-          Moves: {board.moves}
-        </span>
+      <div className="th-game-score">
+        Moves: <span className="th-game-score__number">{board.moves}</span>
       </div>
 
       {/* Card grid */}
-      <div className="th-memory-grid">
+      <div className="th-memory-grid th-memory-grid--enhanced" style={{ marginTop: 'var(--th-space-4)' }}>
         {board.cards.map((card, index) => (
           <MemoryCardView
             key={card.id}
