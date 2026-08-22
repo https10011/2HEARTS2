@@ -19,25 +19,18 @@ import rl04 from '../assets/decorations/rose-lily-04.svg';
 import rl05 from '../assets/decorations/rose-lily-05.svg';
 import rl06 from '../assets/decorations/rose-lily-06.svg';
 import rl07 from '../assets/decorations/rose-lily-07.svg';
-import rl08 from '../assets/decorations/rose-lily-08.svg';
 import rl09 from '../assets/decorations/rose-lily-09.svg';
-import rl10 from '../assets/decorations/rose-lily-10.svg';
 import rl11 from '../assets/decorations/rose-lily-11.svg';
 import rl12 from '../assets/decorations/rose-lily-12.svg';
-import rl13 from '../assets/decorations/rose-lily-13.svg';
 import rl14 from '../assets/decorations/rose-lily-14.svg';
 import rl15 from '../assets/decorations/rose-lily-15.svg';
 import rl16 from '../assets/decorations/rose-lily-16.svg';
-import rl17 from '../assets/decorations/rose-lily-17.svg';
 import rl18 from '../assets/decorations/rose-lily-18.svg';
-import rl19 from '../assets/decorations/rose-lily-19.svg';
-import rl20 from '../assets/decorations/rose-lily-20.svg';
 
 /** Approved Rose/Lily variants, numbered like the source files (01–20). */
 const ROSE_LILY_SRC = {
-  1: rl01, 2: rl02, 3: rl03, 4: rl04, 5: rl05, 6: rl06, 7: rl07, 8: rl08,
-  9: rl09, 10: rl10, 11: rl11, 12: rl12, 13: rl13, 14: rl14, 15: rl15,
-  16: rl16, 17: rl17, 18: rl18, 19: rl19, 20: rl20,
+  1: rl01, 2: rl02, 3: rl03, 4: rl04, 5: rl05, 6: rl06, 7: rl07,
+  9: rl09, 11: rl11, 12: rl12, 14: rl14, 15: rl15, 16: rl16, 18: rl18,
 } as const;
 
 export type RoseLilyVariant = keyof typeof ROSE_LILY_SRC;

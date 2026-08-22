@@ -170,7 +170,12 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   across all feature home screens (RemindersHome, PeriodHome → th-empty-emotional),
   replaced 16 hardcoded font weights with CSS tokens across 8 files, verified
   typography/spacing/buttons/cards/icons/motion/feedback/theme consistency,
-  docs/phase31-ux-consistency-audit.md, 650 total tests passing
+  docs/phase31-ux-consistency-audit.md, 650 total tests passing.
+  Phase 32 (performance & accessibility polish) — COMPLETE: removed 6 unused
+  Rose/Lily SVG assets from build (~900KB saved), added CSS containment to
+  decorative elements, verified all 20 keyframe animations are compositor-friendly,
+  reduced-motion verified, touch targets verified, contrast audited, offline-first
+  preserved, docs/phase32-performance-accessibility-audit.md, 650 tests passing
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,

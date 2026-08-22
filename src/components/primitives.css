@@ -1236,6 +1236,7 @@
   user-select: none;
   z-index: 0;
   margin: var(--th-space-4);
+  contain: content;
 }
 .th-decor--top-left { top: 0; left: 0; }
 .th-decor--top-right { top: 0; right: 0; }
@@ -2364,6 +2365,7 @@ html[data-th-motion='reduced'] .th-decor--animated {
   z-index: 0;
   animation: th-decor-drift var(--th-duration-drift, 6400ms) ease-in-out infinite;
   will-change: transform, opacity;
+  contain: content;
 }
 .th-decor-ambient--pulse {
   animation:
