@@ -574,3 +574,241 @@ describe('Phase 28 — Edge cases', () => {
     assert.equal(session.player2Score, 0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Game progression persistence (Phase 28)
+// ---------------------------------------------------------------------------
+
+/** Minimal in-memory localStorage mock for Node test environment. */
+function createLocalStorageMock(): Storage {
+  const store = new Map<string, string>();
+  return {
+    get length() { return store.size; },
+    clear() { store.clear(); },
+    getItem(key: string) { return store.get(key) ?? null; },
+    setItem(key: string, value: string) { store.set(key, String(value)); },
+    removeItem(key: string) { store.delete(key); },
+    key(index: number) { return [...store.keys()][index] ?? null; },
+  };
+}
+
+// Dynamic import to avoid module-level side effects
+async function loadProgressionModule() {
+  // Set up mock localStorage
+  const mock = createLocalStorageMock();
+  (globalThis as Record<string, unknown>).localStorage = mock;
+  return await import('../src/services/game/gameProgression.ts');
+}
+
+describe('Phase 28 — Game progression persistence', () => {
+  it('loads empty progression on first access', async () => {
+    const { loadProgression } = await loadProgressionModule();
+    const p = loadProgression();
+    assert.deepEqual(p.highestCompleted, {});
+    assert.deepEqual(p.bestScores, {});
+    assert.deepEqual(p.streaks, {});
+    assert.deepEqual(p.bestStreaks, {});
+    assert.deepEqual(p.totalGamesPlayed, {});
+  });
+
+  it('records level completion and advances highest completed', async () => {
+    const { recordLevelCompletion, getHighestCompletedLevel, getNextUnlockedLevel } = await loadProgressionModule();
+    recordLevelCompletion('memory-match', 1, 80);
+    assert.equal(getHighestCompletedLevel('memory-match'), 1);
+    assert.equal(getNextUnlockedLevel('memory-match'), 2);
+
+    recordLevelCompletion('memory-match', 2, 90);
+    assert.equal(getHighestCompletedLevel('memory-match'), 2);
+    assert.equal(getNextUnlockedLevel('memory-match'), 3);
+  });
+
+  it('does not downgrade highest completed level', async () => {
+    const { recordLevelCompletion, getHighestCompletedLevel } = await loadProgressionModule();
+    recordLevelCompletion('word-scramble', 5, 100);
+    recordLevelCompletion('word-scramble', 3, 80); // Lower level
+    assert.equal(getHighestCompletedLevel('word-scramble'), 5); // Still 5
+  });
+
+  it('tracks streaks for consecutive levels', async () => {
+    const { recordLevelCompletion, getStreak } = await loadProgressionModule();
+    recordLevelCompletion('casual-trivia', 1, 50);
+    assert.equal(getStreak('casual-trivia'), 1);
+
+    recordLevelCompletion('casual-trivia', 2, 60);
+    assert.equal(getStreak('casual-trivia'), 2);
+
+    recordLevelCompletion('casual-trivia', 3, 70);
+    assert.equal(getStreak('casual-trivia'), 3);
+  });
+
+  it('resets streak on non-consecutive level', async () => {
+    const { recordLevelCompletion, getStreak } = await loadProgressionModule();
+    recordLevelCompletion('riddle-room', 1, 50);
+    recordLevelCompletion('riddle-room', 2, 60);
+    assert.equal(getStreak('riddle-room'), 2);
+
+    recordLevelCompletion('riddle-room', 5, 100); // Skip levels
+    assert.equal(getStreak('riddle-room'), 1); // Reset to 1
+  });
+
+  it('tracks best streak', async () => {
+    const { recordLevelCompletion, getBestStreak, recordLevelFailure } = await loadProgressionModule();
+    recordLevelCompletion('who-knows-who-better', 1, 50);
+    recordLevelCompletion('who-knows-who-better', 2, 60);
+    recordLevelFailure('who-knows-who-better'); // Reset streak
+    recordLevelCompletion('who-knows-who-better', 3, 70);
+    assert.equal(getBestStreak('who-knows-who-better'), 2); // Best was 2
+  });
+
+  it('tracks best score', async () => {
+    const { recordLevelCompletion, getBestScore } = await loadProgressionModule();
+    recordLevelCompletion('memory-match', 1, 80);
+    assert.equal(getBestScore('memory-match'), 80);
+
+    recordLevelCompletion('memory-match', 2, 90);
+    assert.equal(getBestScore('memory-match'), 90);
+
+    recordLevelCompletion('memory-match', 3, 70); // Lower score
+    assert.equal(getBestScore('memory-match'), 90); // Still 90
+  });
+
+  it('counts total games played', async () => {
+    const { recordLevelCompletion, getTotalGamesPlayed } = await loadProgressionModule();
+    recordLevelCompletion('memory-match', 1, 80);
+    recordLevelCompletion('memory-match', 2, 90);
+    assert.equal(getTotalGamesPlayed('memory-match'), 2);
+  });
+
+  it('records failure resets streak', async () => {
+    const { recordLevelCompletion, recordLevelFailure, getStreak } = await loadProgressionModule();
+    recordLevelCompletion('word-scramble', 1, 50);
+    recordLevelCompletion('word-scramble', 2, 60);
+    assert.equal(getStreak('word-scramble'), 2);
+
+    recordLevelFailure('word-scramble');
+    assert.equal(getStreak('word-scramble'), 0);
+  });
+
+  it('resets game progression for a specific game', async () => {
+    const { recordLevelCompletion, resetGameProgression, getHighestCompletedLevel, getStreak } = await loadProgressionModule();
+    recordLevelCompletion('memory-match', 5, 100);
+    recordLevelCompletion('word-scramble', 3, 80);
+
+    resetGameProgression('memory-match');
+    assert.equal(getHighestCompletedLevel('memory-match'), 0);
+    assert.equal(getStreak('memory-match'), 0);
+    // word-scramble should be untouched
+    assert.equal(getHighestCompletedLevel('word-scramble'), 3);
+  });
+
+  it('generates valid level progress from storage', async () => {
+    const { recordLevelCompletion, toLevelProgress } = await loadProgressionModule();
+    recordLevelCompletion('memory-match', 3, 90);
+    recordLevelCompletion('word-scramble', 2, 70);
+
+    const progress = toLevelProgress();
+    assert.equal(progress.highestCompleted['memory-match'], 3);
+    assert.equal(progress.highestCompleted['word-scramble'], 2);
+    assert.ok(typeof progress.streaks['memory-match'] === 'number');
+    assert.ok(typeof progress.bestStreaks['word-scramble'] === 'number');
+  });
+
+  it('persists across load calls (simulates app restart)', async () => {
+    const { recordLevelCompletion, loadProgression } = await loadProgressionModule();
+    recordLevelCompletion('casual-trivia', 1, 50);
+    recordLevelCompletion('casual-trivia', 2, 60);
+    recordLevelCompletion('casual-trivia', 3, 70);
+
+    // Simulate app restart — reload from storage
+    const fresh = loadProgression();
+    assert.equal(fresh.highestCompleted['casual-trivia'], 3);
+    assert.equal(fresh.streaks['casual-trivia'], 3);
+    assert.equal(fresh.bestScores['casual-trivia'], 70);
+    assert.equal(fresh.totalGamesPlayed['casual-trivia'], 3);
+  });
+
+  it('clamps next unlocked level to 500', async () => {
+    const { recordLevelCompletion, getNextUnlockedLevel } = await loadProgressionModule();
+    recordLevelCompletion('memory-match', 500, 100);
+    assert.equal(getNextUnlockedLevel('memory-match'), 500); // Capped at 500
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Content selection helpers (Phase 28)
+// ---------------------------------------------------------------------------
+
+describe('Phase 28 — Content selection helpers', () => {
+  it('selectQuestionsForLevel returns requested count', async () => {
+    const { selectQuestionsForLevel } = await import('../src/services/game/gameEngine.ts');
+    const questions = [
+      { id: 'q1', text: 'Q1', correctAnswer: 'A1' },
+      { id: 'q2', text: 'Q2', correctAnswer: 'A2' },
+      { id: 'q3', text: 'Q3', correctAnswer: 'A3' },
+      { id: 'q4', text: 'Q4', correctAnswer: 'A4' },
+      { id: 'q5', text: 'Q5', correctAnswer: 'A5' },
+    ];
+    const selected = selectQuestionsForLevel(questions, 1, 3);
+    assert.equal(selected.length, 3);
+  });
+
+  it('selectQuestionsForLevel caps at available questions', async () => {
+    const { selectQuestionsForLevel } = await import('../src/services/game/gameEngine.ts');
+    const questions = [
+      { id: 'q1', text: 'Q1', correctAnswer: 'A1' },
+      { id: 'q2', text: 'Q2', correctAnswer: 'A2' },
+    ];
+    const selected = selectQuestionsForLevel(questions, 1, 10);
+    assert.equal(selected.length, 2); // Capped to available
+  });
+
+  it('selectQuestionsForLevel is deterministic for same level', async () => {
+    const { selectQuestionsForLevel } = await import('../src/services/game/gameEngine.ts');
+    const questions = [
+      { id: 'q1', text: 'Q1', correctAnswer: 'A1' },
+      { id: 'q2', text: 'Q2', correctAnswer: 'A2' },
+      { id: 'q3', text: 'Q3', correctAnswer: 'A3' },
+      { id: 'q4', text: 'Q4', correctAnswer: 'A4' },
+      { id: 'q5', text: 'Q5', correctAnswer: 'A5' },
+    ];
+    const a = selectQuestionsForLevel(questions, 42, 3);
+    const b = selectQuestionsForLevel(questions, 42, 3);
+    assert.deepEqual(a.map(q => q.id), b.map(q => q.id));
+  });
+
+  it('selectQuestionsForLevel varies by level', async () => {
+    const { selectQuestionsForLevel } = await import('../src/services/game/gameEngine.ts');
+    const questions = [
+      { id: 'q1', text: 'Q1', correctAnswer: 'A1' },
+      { id: 'q2', text: 'Q2', correctAnswer: 'A2' },
+      { id: 'q3', text: 'Q3', correctAnswer: 'A3' },
+      { id: 'q4', text: 'Q4', correctAnswer: 'A4' },
+      { id: 'q5', text: 'Q5', correctAnswer: 'A5' },
+      { id: 'q6', text: 'Q6', correctAnswer: 'A6' },
+      { id: 'q7', text: 'Q7', correctAnswer: 'A7' },
+      { id: 'q8', text: 'Q8', correctAnswer: 'A8' },
+      { id: 'q9', text: 'Q9', correctAnswer: 'A9' },
+      { id: 'q10', text: 'Q10', correctAnswer: 'A10' },
+    ];
+    const a = selectQuestionsForLevel(questions, 1, 5);
+    const b = selectQuestionsForLevel(questions, 10, 5);
+    // Different levels should produce different selections (at least one differs)
+    const aIds = a.map(q => q.id).join(',');
+    const bIds = b.map(q => q.id).join(',');
+    assert.notEqual(aIds, bIds, 'Different levels should select different questions');
+  });
+
+  it('resolveMemoryMatchPairs scales with level', async () => {
+    const { resolveMemoryMatchPairs } = await import('../src/services/game/gameEngine.ts');
+    assert.equal(resolveMemoryMatchPairs(1), 3);
+    assert.ok(resolveMemoryMatchPairs(50) > 3);
+    assert.ok(resolveMemoryMatchPairs(200) >= resolveMemoryMatchPairs(50));
+  });
+
+  it('resolveWordScrambleCount scales with level', async () => {
+    const { resolveWordScrambleCount } = await import('../src/services/game/gameEngine.ts');
+    assert.equal(resolveWordScrambleCount(1), 5);
+    assert.ok(resolveWordScrambleCount(50) > 5);
+    assert.ok(resolveWordScrambleCount(200) >= resolveWordScrambleCount(50));
+  });
+});

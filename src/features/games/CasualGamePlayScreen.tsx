@@ -9,12 +9,14 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { IconCheck, IconClose } from '../../components/index.ts';
 import { createSession, recordCasualAnswer, completeCasualGame } from '../../services/game/gameEngine.ts';
 import type { GameSession, GameType } from '../../data/game/gameTypes.ts';
+import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
+import { recordLevelCompletion } from '../../services/game/gameProgression.ts';
 import { IconBack } from '../../components/index.ts';
 
 type GamePhase = 'intro' | 'playing' | 'results';
@@ -22,8 +24,11 @@ type GamePhase = 'intro' | 'playing' | 'results';
 export function CasualGamePlayScreen() {
   const navigate = useNavigate();
   const { gameType } = useParams<{ gameType: string }>();
+  const location = useLocation();
   const gt = gameType as GameType | undefined;
   const definition = gt ? getGameDefinition(gt) : undefined;
+  const passedLevel = (location.state as { level?: number })?.level ?? 1;
+  const levelConfig = resolveLevelConfig(passedLevel);
 
   const [phase, setPhase] = useState<GamePhase>('intro');
   const [session, setSession] = useState<GameSession | null>(null);
@@ -80,6 +85,11 @@ export function CasualGamePlayScreen() {
       setTextAnswer('');
 
       if (result.gameOver) {
+        // Persist progression
+        if (gt) {
+          const score = result.session.casualScore ?? 0;
+          recordLevelCompletion(gt, passedLevel, score);
+        }
         setPhase('results');
       }
     }, 1200);
@@ -156,9 +166,17 @@ export function CasualGamePlayScreen() {
             Game Complete!
           </h1>
           <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)' }}>{definition.title}</p>
+          <div style={{ display: 'flex', gap: 'var(--th-space-2)', justifyContent: 'center', marginTop: 'var(--th-space-2)' }}>
+            <span className="th-chip th-chip--enhanced" style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-burgundy)', fontWeight: 'var(--th-font-weight-semibold)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Level {passedLevel}
+            </span>
+            <span className="th-chip" style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              {levelConfig.difficulty}
+            </span>
+          </div>
         </div>
 
-        <div className="th-relationship-card th-relationship-card--enhanced" style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
+        <div className="th-relationship-card th-relationship-card--enhanced th-card-emotional" style={{ marginBottom: 'var(--th-space-6)', textAlign: 'center' }}>
           <div style={{ fontSize: 'var(--th-font-size-3xl)', fontWeight: 'var(--th-font-weight-bold)', fontFamily: 'var(--th-font-family-display)', marginBottom: 'var(--th-space-2)' }}>
             {score} / {total}
           </div>
@@ -203,8 +221,11 @@ export function CasualGamePlayScreen() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
-          <button className="th-btn th-btn--primary th-btn--full" onClick={startGame}>
-            Play Again
+          <button className="th-btn th-btn--primary th-btn--full" onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true, state: { level: passedLevel + 1 } })}>
+            Next Level
+          </button>
+          <button className="th-btn th-btn--secondary th-btn--full" onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true, state: { level: passedLevel } })}>
+            Replay Level {passedLevel}
           </button>
           <button className="th-btn th-btn--secondary th-btn--full" onClick={() => navigate(RoutePath.appGames)}>
             Back to Games
@@ -221,8 +242,13 @@ export function CasualGamePlayScreen() {
 
   if (!currentQuestion) {
     const { result } = completeCasualGame(session!);
+    // Persist progression
+    if (gt) {
+      const score = result.casualResult?.score ?? 0;
+      recordLevelCompletion(gt, passedLevel, score);
+    }
     navigate(`${RoutePath.appGames}/${gt}/results`, {
-      state: { result, gameType: gt },
+      state: { result, gameType: gt, level: passedLevel },
     });
     return null;
   }

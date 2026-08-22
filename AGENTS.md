@@ -154,10 +154,10 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   warm dividers, content bands); 28 files polished across all screen groups;
   77-screen audit tracked in docs/phase26-screen-audit.md. Phase 27 (decorative &
   emotional design pass) — COMPLETE (1539781). Phase 28 (games engine & gameplay
-  overhaul) — IN PROGRESS (342aa46): LevelConfig/Difficulty types, resolveLevelConfig
+  overhaul) — COMPLETE: LevelConfig/Difficulty types, resolveLevelConfig
   (1-500 levels, easy/medium/hard bands), selectQuestionsForLevel (seeded shuffle),
-  GameService.startGameAtLevel, MemoryMatchScreen/WordScrambleScreen level progression,
-  GameResultsScreen next-level flow, 50 new game engine tests (631 total passing)
+  GameService.startGameAtLevel, all games level progression, gameProgression.ts
+  localStorage persistence, game animation CSS primitives, 650 total tests passing
 
 ## Phase 3 core services (src/services/)
 - bootstrap/appBootstrap.ts — ordered startup stages; critical (persistence,

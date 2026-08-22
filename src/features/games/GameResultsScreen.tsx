@@ -10,8 +10,9 @@ import { RoutePath } from '../../navigation/routes.ts';
 import { IconHeart, IconClose, RoseLilyDecoration } from '../../components/index.ts';
 import type { GameResult, GameType } from '../../data/game/gameTypes.ts';
 import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
-
+import { recordLevelCompletion, getGameProgressSummary } from '../../services/game/gameProgression.ts';
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
+import { useEffect, useRef } from 'react';
 
 export function GameResultsScreen() {
   const navigate = useNavigate();
@@ -22,8 +23,20 @@ export function GameResultsScreen() {
   const gt = (gameType ?? result?.gameType) as GameType | undefined;
   const definition = gt ? getGameDefinition(gt) : undefined;
   const currentLevel = state?.level ?? 1;
-  const streak = state?.streak ?? 0;
   const levelConfig = resolveLevelConfig(currentLevel);
+
+  // Persist progression on mount (once)
+  const persisted = useRef(false);
+  useEffect(() => {
+    if (persisted.current || !gt || !result) return;
+    persisted.current = true;
+    // Calculate a score for persistence (match count for couple games, casual score for casual games)
+    const score = result.casualResult?.score ?? result.player1Score ?? 0;
+    recordLevelCompletion(gt, currentLevel, score);
+  }, [gt, result, currentLevel]);
+
+  const progress = gt ? getGameProgressSummary(gt) : null;
+  const streak = progress?.streak ?? 0;
 
   if (!result || !definition) {
     return (

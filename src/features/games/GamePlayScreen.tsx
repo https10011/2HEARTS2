@@ -9,9 +9,10 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { GameService } from '../../services/game/gameService.ts';
+import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 import type { GameSession, GameType, PlayerRole } from '../../data/game/gameTypes.ts';
 import { IconBack } from '../../components/index.ts';
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
@@ -20,8 +21,11 @@ type GamePhase = 'intro' | 'playing' | 'turn-transition' | 'results';
 
 export function GamePlayScreen() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { gameType } = useParams<{ gameType: string }>();
   const service = useMemo(() => new GameService(), []);
+  const passedLevel = (location.state as { level?: number })?.level ?? 1;
+  const levelConfig = useMemo(() => resolveLevelConfig(passedLevel), [passedLevel]);
 
   const [phase, setPhase] = useState<GamePhase>('intro');
   const [session, setSession] = useState<GameSession | null>(null);
@@ -36,14 +40,14 @@ export function GamePlayScreen() {
 
   const startGame = useCallback(() => {
     if (!gt) return;
-    const result = service.startGame(gt);
+    const result = service.startGameAtLevel(gt, passedLevel);
     setSession(result.session);
     if (definition?.turnBased) {
       setPhase('turn-transition');
     } else {
       setPhase('playing');
     }
-  }, [gt, definition, service]);
+  }, [gt, definition, service, passedLevel]);
 
   const handleAnswer = useCallback(() => {
     if (!session || !gt) return;
@@ -81,7 +85,7 @@ export function GamePlayScreen() {
       if (completedRounds >= (definition?.questionsPerRound ?? 10)) {
         const finished = service.finishGame(updated.session, gt);
         navigate(`${RoutePath.appGames}/results`, {
-          state: { result: finished.result, gameType: gt },
+          state: { result: finished.result, gameType: gt, level: passedLevel },
         });
         return;
       }
@@ -108,7 +112,7 @@ export function GamePlayScreen() {
         } else {
           const finResult = service.finishGame(updated.session, gt);
           navigate(`${RoutePath.appGames}/results`, {
-            state: { result: finResult.result, gameType: gt },
+            state: { result: finResult.result, gameType: gt, level: passedLevel },
           });
         }
       } else {
@@ -125,7 +129,7 @@ export function GamePlayScreen() {
           } else {
             const finished = service.finishGame(updated.session, gt);
             navigate(`${RoutePath.appGames}/results`, {
-              state: { result: finished.result, gameType: gt },
+              state: { result: finished.result, gameType: gt, level: passedLevel },
             });
           }
         } else {
@@ -160,6 +164,14 @@ export function GamePlayScreen() {
           <h1 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-2xl)', color: 'var(--th-color-text-primary)', marginBottom: 'var(--th-space-3)' }}>
             {definition.title}
           </h1>
+          <div style={{ display: 'flex', gap: 'var(--th-space-2)', justifyContent: 'center', marginBottom: 'var(--th-space-2)' }}>
+            <span className="th-chip th-chip--enhanced" style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-burgundy)', fontWeight: 'var(--th-font-weight-semibold)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Level {passedLevel}
+            </span>
+            <span className="th-chip" style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              {levelConfig.difficulty}
+            </span>
+          </div>
           <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-md)', maxWidth: '36ch', margin: '0 auto' }}>
             {definition.description}
           </p>
