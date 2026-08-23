@@ -1,0 +1,1218 @@
+‎TWOHEARTS VISUAL PRODUCTIZATION DIRECTIVE
+‎
+‎Document Type: Authoritative Visual/Product Direction
+‎Status: DIRECTIVE — NOT A DEVELOPMENT PHASE
+‎Applies To: Current V1 repository and all future visual/UX work
+‎Priority: High
+‎Product: TwoHearts
+‎
+‎---
+‎
+1. ‎PURPOSE OF THIS DOCUMENT
+‎
+‎This document records an important product-level direction for the
+‎TwoHearts application.
+‎
+‎TwoHearts has already gone through extensive engineering,
+‎UI/UX, design-system, motion, game, accessibility, performance,
+‎and visual QA work.
+‎
+‎The application is functional and architecturally established.
+‎
+‎However, the current implementation has exposed a significant
+‎presentation problem.
+‎
+‎Some screens and components technically exist and function
+‎correctly, but visually they can still feel like:
+‎
+· ‎generic HTML/CSS interfaces
+· ‎template-based application panels
+· ‎collections of cards
+· ‎minimally styled web components
+· ‎a developer prototype rather than a finished product
+‎
+‎That is not the intended identity of TwoHearts.
+‎
+‎TwoHearts should ultimately feel like a real, standalone,
+‎beautiful, emotionally warm couples application.
+‎
+‎This document establishes the visual direction required to close
+‎that gap.
+‎
+‎---
+‎
+1. ‎THE CORE PROBLEM
+‎
+‎The problem is NOT primarily:
+‎
+· ‎architecture
+· ‎database design
+· ‎storage architecture
+· ‎game-engine architecture
+· ‎navigation architecture
+· ‎backend architecture
+· ‎security architecture
+‎
+‎The problem is primarily visual/product completeness.
+‎
+‎Examples of the current deficiencies that must be considered include:
+‎
+· ‎missing or insufficient logo presentation
+· ‎generic-looking buttons
+· ‎generic-looking cards
+· ‎insufficient decorative identity
+· ‎missing floral presentation
+· ‎missing or underdeveloped avatar creation
+· ‎missing or underdeveloped profile picture picker
+· ‎insufficient profile personalization
+· ‎weak onboarding visual identity
+· ‎missing visual elements that existed in the original references
+· ‎screens that technically work but do not feel emotionally designed
+· ‎screens that look like HTML panels instead of an intentional mobile product
+‎
+‎These deficiencies should be treated as a visual productization
+‎problem, not as evidence that the underlying application
+‎architecture needs to be replaced.
+‎
+‎---
+‎
+1. ‎IMPORTANT MISSING SCREEN
+‎
+‎The original TwoHearts UI reference system contains 77 approved
+‎screen references.
+‎
+‎A known problem is that the repository/application does not
+‎currently contain the expected first-launch reference:
+‎
+‎"02-Welcome-FirstLaunch.png"
+‎
+‎This screen must be treated as a real missing-reference problem.
+‎
+‎Before inventing anything, future agents must investigate:
+‎
+· ‎"TwoHearts UI Reference Screens/"
+· ‎onboarding implementation
+· ‎repository documentation
+· ‎"MasterPrompt.txt"
+· ‎"TwoHeartsRDMap.txt"
+· ‎Post-V1 roadmap
+· ‎Git history where available
+· ‎other image/reference directories
+‎
+‎Determine whether the reference:
+‎
+1. ‎exists under another filename,
+2. ‎exists in another directory,
+3. ‎was omitted from the current repository,
+4. ‎was replaced by another screen,
+5. ‎or is genuinely unavailable.
+‎
+‎If the original reference cannot be recovered, the screen must be
+‎reconstructed using the surrounding TwoHearts onboarding visual
+‎language and documented product intent.
+‎
+‎It must NOT simply be left missing because the rest of onboarding
+‎works.
+‎
+‎---
+‎
+1. ‎THE 77 REFERENCE SCREENS
+‎
+‎The repository contains:
+‎
+‎"TwoHearts UI Reference Screens/"
+‎
+‎These references represent the original visual intent of
+‎TwoHearts.
+‎
+‎They should be treated as an important visual source of truth.
+‎
+‎Future visual work should inspect the references for:
+‎
+· ‎composition
+· ‎spacing
+· ‎typography
+· ‎colors
+· ‎gradients
+· ‎backgrounds
+· ‎buttons
+· ‎cards
+· ‎icons
+· ‎decorative elements
+· ‎flowers
+· ‎illustrations
+· ‎avatars
+· ‎profile presentation
+· ‎navigation
+· ‎headers
+· ‎empty states
+· ‎visual hierarchy
+· ‎screen-specific personality
+‎
+‎The objective is NOT necessarily to reproduce every PNG
+‎pixel-for-pixel.
+‎
+‎The objective is to preserve and recover the design intent
+‎contained in the references.
+‎
+‎---
+‎
+1. ‎TWO VALID VISUAL STRATEGIES
+‎
+‎Future agents are explicitly allowed to use either of two
+‎strategies depending on the quality and completeness of the
+‎reference material.
+‎
+‎STRATEGY A — REFERENCE-LED
+‎
+‎When the reference screen provides strong visual direction:
+‎
+‎Use it as the foundation.
+‎
+‎Preserve its:
+‎
+· ‎visual hierarchy
+· ‎color relationships
+· ‎gradients
+· ‎major composition
+· ‎decorative elements
+· ‎button concepts
+· ‎floral concepts
+· ‎relationship presentation
+· ‎screen personality
+‎
+‎Then improve it with modern implementation quality:
+‎
+· ‎better spacing
+· ‎better typography
+· ‎stronger hierarchy
+· ‎responsive behavior
+· ‎better animations
+· ‎better interaction feedback
+· ‎accessibility
+· ‎dark mode
+· ‎text scaling
+· ‎performance
+‎
+‎The reference establishes the direction.
+‎
+‎The implementation may improve the execution.
+‎
+‎---
+‎
+‎STRATEGY B — CREATIVE TWOHEARTS REDESIGN
+‎
+‎When a reference is incomplete, visually weak, unavailable, or
+‎when the current implementation clearly feels like a generic
+‎template, the agent is explicitly allowed to redesign the visual
+‎presentation.
+‎
+‎The agent may use strong independent design judgment.
+‎
+‎The agent may:
+‎
+· ‎redesign layouts
+· ‎improve backgrounds
+· ‎introduce better gradients
+· ‎improve card composition
+· ‎redesign buttons
+· ‎introduce richer visual hierarchy
+· ‎improve onboarding
+· ‎improve avatar presentation
+· ‎improve profile creation
+· ‎improve empty states
+· ‎improve decorative composition
+· ‎add tasteful illustrations
+· ‎create more meaningful visual storytelling
+· ‎add subtle atmospheric effects
+· ‎create better game presentation
+· ‎improve celebration states
+· ‎create more sophisticated transitions
+‎
+‎However, creative freedom is subject to the non-negotiable
+‎identity rules below.
+‎
+‎---
+‎
+1. ‎CREATIVE FREEDOM IS INTENTIONAL
+‎
+‎Future agents should NOT interpret the original PNG references as
+‎a restriction preventing creativity.
+‎
+‎The purpose of the references is to establish the identity and
+‎intent of TwoHearts.
+‎
+‎They are not intended to prevent improvement.
+‎
+‎If an agent can create a significantly more beautiful and
+‎cohesive implementation while preserving TwoHearts identity,
+‎that is encouraged.
+‎
+‎The desired result is not:
+‎
+‎«"The implementation looks exactly like the old PNG."»
+‎
+‎The desired result is:
+‎
+‎«"The implementation clearly belongs to TwoHearts and feels
+‎better than the original reference."»
+‎
+‎---
+‎
+1. ‎NON-NEGOTIABLE BRAND IDENTITY
+‎
+‎The following rules MUST be preserved regardless of how creative
+‎the visual redesign becomes.
+‎
+‎Official TwoHearts Logo
+‎
+‎The official TwoHearts logo must remain the official logo.
+‎
+‎Repository source:
+‎
+‎"TwoHearts-Logo-BrandName/"
+‎
+‎Do NOT:
+‎
+· ‎redesign the logo
+· ‎replace the logo
+· ‎generate a different logo
+· ‎substitute plain text for the official logo
+· ‎create duplicate logo implementations
+‎
+‎The centralized "BrandLogo" architecture established previously
+‎should remain the authoritative mechanism for displaying the brand.
+‎
+‎---
+‎
+1. ‎BURGUNDY IS THE PRIMARY COLOR
+‎
+‎Burgundy should remain the dominant TwoHearts brand color.
+‎
+‎This does NOT mean every element should be burgundy.
+‎
+‎The agent may use complementary colors such as:
+‎
+· ‎warm cream
+· ‎ivory
+· ‎blush
+· ‎dusty rose
+· ‎muted pink
+· ‎warm beige
+· ‎plum
+· ‎champagne/gold accents
+· ‎deep burgundy
+· ‎soft neutral colors
+‎
+‎Gradients are explicitly allowed.
+‎
+‎The overall result should remain recognizable as a
+‎burgundy-first TwoHearts design.
+‎
+‎Avoid turning the application into an entirely different palette.
+‎
+‎---
+‎
+1. ‎ROSE AND LILY ARE CORE VISUAL ELEMENTS
+‎
+‎Rose and Lily are part of the emotional identity of TwoHearts.
+‎
+‎Repository source:
+‎
+‎"Rose Lily Vectors/"
+‎
+‎This directory contains the prepared Rose/Lily SVG assets.
+‎
+‎Future visual work should inspect and reuse these assets.
+‎
+‎The agent has creative freedom regarding:
+‎
+‎custom Generation of Rose Lily Svg assets or by getting them online on free sources if whats applicable and applying them on TwoHearts make sure the generated assets and etc are fit to be in TwoHearts
+‎
+· ‎size
+· ‎placement
+· ‎rotation
+· ‎cropping
+· ‎opacity
+· ‎layering
+· ‎pairing
+· ‎background usage
+· ‎foreground usage
+· ‎section placement
+· ‎animation
+· ‎composition
+‎
+‎There is NO requirement that flowers appear in a fixed location.
+‎
+‎There is also NO requirement that flowers appear on every screen.
+‎
+‎In fact, excessive repetition should be avoided.
+‎
+‎Flowers should be used where they strengthen:
+‎
+· ‎romance
+· ‎warmth
+· ‎visual storytelling
+· ‎hierarchy
+· ‎emotional moments
+· ‎onboarding
+· ‎relationship screens
+· ‎memories
+· ‎timeline
+· ‎milestones
+· ‎empty states
+· ‎celebrations
+‎
+‎The correct principle is:
+‎
+‎«Curated floral identity, not decorative clutter.»
+‎
+‎---
+‎
+1. ‎THE APPLICATION SHOULD FEEL LIKE A REAL BRAND
+‎
+‎The ultimate visual goal is NOT:
+‎
+‎«"A web application using burgundy CSS."»
+‎
+‎The goal is:
+‎
+‎«"A recognizable couples product called TwoHearts."»
+‎
+‎A person who sees the application for the first time should
+‎immediately perceive:
+‎
+· ‎romance
+· ‎intimacy
+· ‎warmth
+· ‎personalization
+· ‎relationship
+· ‎care
+· ‎visual identity
+‎
+‎The application should feel intentionally designed rather than
+‎assembled from generic components.
+‎
+‎---
+‎
+1. ‎MISSING UI ELEMENTS MUST BE TAKEN SERIOUSLY
+‎
+‎Future visual work should specifically audit for missing
+‎elements such as:
+‎
+‎Branding
+‎
+· ‎official logo
+· ‎brand lockup
+· ‎brand moments
+· ‎branded backgrounds
+· ‎branded buttons
+‎
+‎Profiles
+‎
+· ‎avatar creation
+· ‎avatar selection
+· ‎profile picture picker
+· ‎profile editing
+· ‎profile presentation
+· ‎partner avatar
+· ‎couple presentation
+‎
+‎Decorative identity
+‎
+· ‎Rose/Lily artwork
+· ‎background decoration
+· ‎visual accents
+· ‎atmospheric elements
+· ‎relationship-themed illustrations
+‎
+‎Interaction
+‎
+· ‎button feedback
+· ‎selection states
+· ‎confirmation states
+· ‎loading states
+· ‎success states
+· ‎error states
+· ‎dialogs
+· ‎empty states
+‎
+‎Emotional design
+‎
+· ‎milestones
+· ‎memories
+· ‎relationship moments
+· ‎celebrations
+· ‎onboarding moments
+· ‎personalized states
+‎
+‎A component being technically functional does NOT mean it is
+‎visually complete.
+‎
+‎---
+‎
+1. ‎PROFILE AND AVATAR EXPERIENCE
+‎
+‎Profiles should feel like part of the relationship experience,
+‎not generic account settings.
+‎
+‎Where appropriate, the visual experience may include:
+‎
+· ‎framed avatars
+· ‎decorative rings
+· ‎subtle floral accents
+· ‎warm gradients
+· ‎personalized backgrounds
+· ‎meaningful empty states
+· ‎couple-oriented layouts
+· ‎visual distinction between the two partners
+‎
+‎However, all existing storage and media architecture must be
+‎preserved.
+‎
+‎Do not introduce external image hosting.
+‎
+‎Do not introduce cloud storage.
+‎
+‎Do not introduce remote profile-image services.
+‎
+‎---
+‎
+1. ‎BUTTONS MUST FEEL DESIGNED
+‎
+‎Buttons are a major part of perceived product quality.
+‎
+‎Future visual work should audit:
+‎
+· ‎primary buttons
+· ‎secondary buttons
+· ‎icon buttons
+· ‎floating buttons
+· ‎destructive buttons
+· ‎navigation controls
+· ‎game actions
+· ‎dialog actions
+‎
+‎They should have coherent:
+‎
+· ‎shape
+· ‎spacing
+· ‎typography
+· ‎icon placement
+· ‎hierarchy
+· ‎pressed state
+· ‎disabled state
+· ‎loading state
+· ‎accessibility behavior
+‎
+‎Avoid generic browser-looking controls.
+‎
+‎---
+‎
+1. ‎CARDS MUST HAVE PERSONALITY
+‎
+‎Cards should not all feel like identical rectangles.
+‎
+‎Appropriate card types may have distinct personalities:
+‎
+· ‎relationship card
+· ‎memory card
+· ‎note card
+· ‎reminder card
+· ‎milestone card
+· ‎game card
+· ‎profile card
+· ‎vault card
+· ‎emotional empty-state card
+‎
+‎However, all cards must remain part of the same TwoHearts
+‎visual language.
+‎
+‎Variation is encouraged.
+‎
+‎Visual chaos is not.
+‎
+‎---
+‎
+1. ‎BACKGROUNDS AND DEPTH
+‎
+‎Future visual work may introduce:
+‎
+· ‎warm gradients
+· ‎radial lighting
+· ‎subtle floral silhouettes
+· ‎layered backgrounds
+· ‎soft textures
+· ‎atmospheric color
+· ‎decorative SVG composition
+· ‎subtle depth
+‎
+‎Avoid flatness where flatness makes the application feel like a
+‎template.
+‎
+‎At the same time, backgrounds must never compete with primary
+‎content.
+‎
+‎---
+‎
+1. ‎SCREEN PERSONALITY
+‎
+‎TwoHearts should feel like one application while allowing each
+‎feature to have its own emotional personality.
+‎
+‎Examples:
+‎
+‎Home
+‎
+‎Welcoming, calm, relationship-centered.
+‎
+‎Us
+‎
+‎Intimate, sentimental, story-oriented.
+‎
+‎Memories
+‎
+‎Nostalgic, visual, photo-centered.
+‎
+‎Timeline
+‎
+‎Storytelling and chronological.
+‎
+‎Notes
+‎
+‎Personal, intimate, reflective.
+‎
+‎Reminders
+‎
+‎Gentle and organized.
+‎
+‎Places
+‎
+‎Adventurous and memory-oriented.
+‎
+‎Mood
+‎
+‎Expressive and emotionally warm.
+‎
+‎Period Tracker
+‎
+‎Private, respectful, calm.
+‎
+‎Vault
+‎
+‎Secure, intimate, premium.
+‎
+‎Games
+‎
+‎Playful, energetic, interactive.
+‎
+‎Settings
+‎
+‎Calm, organized, trustworthy.
+‎
+‎Onboarding
+‎
+‎Memorable, welcoming, emotional.
+‎
+‎These are examples, not rigid templates.
+‎
+‎---
+‎
+1. ‎ANIMATION IDENTITY
+‎
+‎Animation is an important part of making the application feel
+‎alive.
+‎
+‎The existing centralized Phase 25 motion architecture must remain
+‎the foundation.
+‎
+‎Future animation may include:
+‎
+· ‎elegant screen transitions
+· ‎gentle floral movement
+· ‎card entrances
+· ‎subtle button feedback
+· ‎avatar reveal
+· ‎selection feedback
+· ‎save confirmation
+· ‎relationship milestone celebration
+· ‎game celebration
+· ‎level-up moments
+· ‎emotional empty-state entrances
+‎
+‎Animations should feel:
+‎
+· ‎smooth
+· ‎intentional
+· ‎warm
+· ‎modern
+· ‎responsive
+‎
+‎Avoid:
+‎
+· ‎excessive bouncing
+· ‎constant movement
+· ‎distracting effects
+· ‎animation on every element
+· ‎slow transitions
+· ‎visual noise
+‎
+‎Reduced-motion behavior must always remain supported.
+‎
+‎---
+‎
+1. ‎PRESERVE THE EXISTING DESIGN SYSTEM
+‎
+‎The existing Phase 23 design system is NOT obsolete.
+‎
+‎Future visual improvements should build upon:
+‎
+· ‎centralized color tokens
+· ‎typography tokens
+· ‎spacing tokens
+· ‎radius tokens
+· ‎elevation tokens
+· ‎motion tokens
+· ‎theme architecture
+· ‎text scaling
+· ‎icon system
+· ‎BrandLogo
+· ‎decorative asset architecture
+‎
+‎If a new visual value is needed repeatedly:
+‎
+‎add it to the centralized design system.
+‎
+‎Do not scatter hardcoded values throughout feature screens.
+‎
+‎Do not create duplicate animation systems.
+‎
+‎Do not create duplicate branding systems.
+‎
+‎Do not create duplicate floral systems.
+‎
+‎---
+‎
+1. ‎PRESERVE THE POST-V1 ENGINEERING FOUNDATION
+‎
+‎The following completed work remains authoritative:
+‎
+‎Phase 23
+‎
+‎Design System & Branding Overhaul
+‎
+‎Phase 24
+‎
+‎Home & Global Navigation Experience
+‎
+‎Phase 25
+‎
+‎System-Wide Motion & Micro-Interactions
+‎
+‎Phase 26
+‎
+‎Visual Experience Overhaul
+‎
+‎Phase 27
+‎
+‎Decorative & Emotional Design Pass
+‎
+‎Phase 28
+‎
+‎Games Engine & Gameplay Overhaul
+‎
+‎Phase 29
+‎
+‎Game Visual & UX Polish
+‎
+‎Phase 30
+‎
+‎Settings & Real-Time Customization
+‎
+‎Phase 31
+‎
+‎Full UX Consistency Pass
+‎
+‎Phase 32
+‎
+‎Performance & Accessibility Polish
+‎
+‎Phase 33
+‎
+‎Final Visual QA
+‎
+‎These systems should be improved where necessary, not casually
+‎discarded.
+‎
+‎---
+‎
+1. ‎ARCHITECTURE IS NOT THE PROBLEM
+‎
+‎Do not use this directive as justification for rewriting the
+‎application architecture.
+‎
+‎Do NOT replace:
+‎
+· ‎storage
+· ‎repositories
+· ‎game engine
+· ‎navigation architecture
+· ‎settings architecture
+· ‎security architecture
+· ‎notification architecture
+· ‎offline architecture
+· ‎local-first architecture
+· ‎existing feature logic
+‎
+‎unless a genuine technical defect is discovered independently.
+‎
+‎The current problem is primarily visual product quality.
+‎
+‎---
+‎
+1. ‎V1 BOUNDARIES REMAIN
+‎
+‎TwoHearts remains:
+‎
+‎PRIVATE
+‎
+‎OFFLINE-FIRST
+‎
+‎LOCAL-FIRST
+‎
+‎ANDROID-FIRST
+‎
+‎Do NOT introduce:
+‎
+· ‎V2 chat
+· ‎Firebase communication
+· ‎cloud storage
+· ‎online synchronization
+· ‎remote notifications
+· ‎online multiplayer
+· ‎analytics/tracking
+· ‎external account infrastructure
+‎
+‎This directive is visual/product direction, not permission to
+‎expand the product scope.
+‎
+‎---
+‎
+1. ‎NO REMOTE VISUAL DEPENDENCIES
+‎
+‎Visual assets should remain locally available.
+‎
+‎Do not use remote URLs for:
+‎
+· ‎logos
+· ‎flowers
+· ‎profile images
+· ‎decorative artwork
+· ‎fonts
+· ‎game assets
+· ‎icons
+‎
+‎The application must remain fully functional offline.
+‎
+‎---
+‎
+1. ‎REFERENCE VS IMPLEMENTATION
+‎
+‎Future agents must distinguish between:
+‎
+‎PRODUCT REQUIREMENT
+‎
+‎What TwoHearts must do.
+‎
+‎VISUAL REFERENCE
+‎
+‎How the original design intended it to look.
+‎
+‎CURRENT IMPLEMENTATION
+‎
+‎What actually exists in the repository.
+‎
+‎A reference image should not be treated as a reason to destroy
+‎working architecture.
+‎
+‎Likewise, existing code should not be treated as proof that the
+‎visual experience is finished.
+‎
+‎All three must be considered together.
+‎
+‎---
+‎
+1. ‎CREATIVE AUTHORITY RULE
+‎
+‎The agent is explicitly authorized to make significant visual
+‎changes when those changes improve the product.
+‎
+‎The agent may ask:
+‎
+‎«"What would make this screen feel beautiful?"»
+‎
+‎rather than only:
+‎
+‎«"How do I reproduce the current JSX?"»
+‎
+‎The agent may improve:
+‎
+· ‎composition
+· ‎hierarchy
+· ‎backgrounds
+· ‎colors
+· ‎gradients
+· ‎cards
+· ‎buttons
+· ‎avatars
+· ‎illustrations
+· ‎flowers
+· ‎animation
+· ‎empty states
+· ‎onboarding
+· ‎relationship presentation
+· ‎visual storytelling
+‎
+‎The agent should use professional design judgment.
+‎
+‎---
+‎
+1. ‎BUT BRAND IDENTITY MUST NEVER BE LOST
+‎
+‎Creative freedom ends at the identity boundary.
+‎
+‎The final application must still unmistakably be:
+‎
+‎TwoHearts
+‎
+‎It must retain:
+‎
+· ‎official logo
+· ‎burgundy-first identity
+· ‎Rose/Lily identity
+· ‎romantic/couple orientation
+· ‎warm emotional atmosphere
+‎
+‎The agent must not accidentally turn TwoHearts into:
+‎
+· ‎a generic productivity app
+· ‎a generic social app
+· ‎a generic journal app
+· ‎a generic game app
+· ‎an entirely pink children's application
+· ‎a generic SaaS dashboard
+· ‎an unrelated visual brand
+‎
+‎---
+‎
+1. ‎THE "REAL APP" TEST
+‎
+‎Whenever visual work is performed, evaluate the result with this
+‎question:
+‎
+‎«If someone who has never seen the source code opens TwoHearts,
+‎does it look like a real standalone application?»
+‎
+‎Then ask:
+‎
+‎«Does it look intentionally branded?»
+‎
+‎Then:
+‎
+‎«Does it feel like a couples application?»
+‎
+‎Then:
+‎
+‎«Does it feel emotionally warm?»
+‎
+‎Then:
+‎
+‎«Does it feel polished enough that someone would want to keep
+‎using it?»
+‎
+‎If the answer is no, the visual work is not finished.
+‎
+‎---
+‎
+1. ‎THE "NOT JUST HTML PANELS" RULE
+‎
+‎The application must move beyond the visual language of:
+‎
+‎header
+‎white card
+‎text
+‎button
+‎another card
+‎another button
+‎
+‎Repeated across every screen.
+‎
+‎TwoHearts should use:
+‎
+· ‎composition
+· ‎depth
+· ‎color
+· ‎imagery
+· ‎typography
+· ‎decorative elements
+· ‎emotional hierarchy
+· ‎interaction
+· ‎motion
+· ‎personalization
+‎
+‎to create a complete visual experience.
+‎
+‎---
+‎
+1. ‎DO NOT OVERDECORATE
+‎
+‎The solution is not simply to add flowers everywhere.
+‎
+‎It is not simply to add gradients everywhere.
+‎
+‎It is not simply to add animations everywhere.
+‎
+‎Every visual element must support the screen.
+‎
+‎The desired design language is:
+‎
+‎cozy + romantic + elegant + warm + modern
+‎
+‎rather than:
+‎
+‎cluttered + noisy + childish + overly pink + overanimated
+‎
+‎---
+‎
+1. ‎THE 77 REFERENCES ARE A FOUNDATION, NOT A CAGE
+‎
+‎The original references should be respected.
+‎
+‎But future visual work is allowed to improve upon them.
+‎
+‎If the reference contains a beautiful concept:
+‎
+‎preserve it.
+‎
+‎If the reference is incomplete:
+‎
+‎complete it.
+‎
+‎If the reference is visually dated:
+‎
+‎modernize it.
+‎
+‎If the reference is unavailable:
+‎
+‎reconstruct the intent.
+‎
+‎If the current implementation is generic:
+‎
+‎redesign it.
+‎
+‎If a better composition can clearly communicate the same
+‎TwoHearts experience:
+‎
+‎use the better composition.
+‎
+‎---
+‎
+1. ‎REQUIRED REPOSITORY CONTEXT
+‎
+‎Before performing substantial visual work, future agents should
+‎inspect:
+‎
+‎"AGENTS.md"
+‎
+‎"MasterPrompt.txt"
+‎
+‎"TwoHeartsRDMap.txt"
+‎
+‎"TwoHearts-Post-V1-UI-UX_Experience-Ovehaul-RoadMap.txt"
+‎
+‎"docs/design-system.md"
+‎
+‎"docs/phase26-screen-audit.md"
+‎
+‎"docs/phase31-ux-consistency-audit.md"
+‎
+‎"docs/phase32-performance-accessibility-audit.md"
+‎
+‎and the complete:
+‎
+‎"TwoHearts UI Reference Screens/"
+‎
+‎as well as:
+‎
+‎"Rose Lily Vectors/"
+‎
+‎and:
+‎
+‎"TwoHearts-Logo-BrandName/"
+‎
+‎Additional relevant ".md" and ".txt" files should also be
+‎considered.
+‎
+‎---
+‎
+1. ‎THIS DOCUMENT DOES NOT AUTHORIZE DEVELOPMENT
+‎
+‎This directive is a standing product/design instruction.
+‎
+‎It exists so that future agents do not need to rediscover the
+‎visual problem from conversation history.
+‎
+‎It does NOT itself authorize:
+‎
+· ‎beginning a new roadmap phase
+· ‎changing the repository
+· ‎creating commits
+· ‎redesigning screens immediately
+· ‎modifying architecture
+‎
+‎Development should only begin when explicitly authorized.
+‎
+‎---
+‎
+1. ‎WHEN VISUAL DEVELOPMENT IS EVENTUALLY AUTHORIZED
+‎
+‎When visual productization work is explicitly authorized, the
+‎agent should first perform reconnaissance.
+‎
+‎The agent should:
+‎
+1. ‎inspect the repository state
+2. ‎inspect current branch and HEAD
+3. ‎inspect AGENTS.md
+4. ‎inspect this directive
+5. ‎inspect MasterPrompt.txt
+6. ‎inspect TwoHeartsRDMap.txt
+7. ‎read the complete Post-V1 roadmap
+8. ‎inspect design-system documentation
+9. ‎inspect previous audit documents
+10. ‎inspect the complete 77-screen reference directory
+11. ‎investigate the missing "02-Welcome-FirstLaunch.png"
+12. ‎inspect the Rose/Lily assets
+13. ‎inspect the official logo assets
+14. ‎inspect the current BrandLogo implementation
+15. ‎inspect current decorative architecture
+16. ‎inspect current motion architecture
+17. ‎inspect current navigation
+18. ‎inspect profile/avatar functionality
+19. ‎inspect all affected screens
+20. ‎create a clear visual remediation plan before making broad
+‎    changes
+‎
+‎---
+‎
+1. ‎FUTURE FAILSAFE REQUIREMENT
+‎
+‎If an agent is interrupted, runs out of tokens, reaches a tool
+‎limit, or cannot complete the visual work:
+‎
+‎It must leave the repository understandable.
+‎
+‎Before stopping, it should:
+‎
+· ‎inspect git status
+· ‎inspect git diff
+· ‎run available tests
+· ‎run TypeScript validation
+· ‎run production build where possible
+· ‎document completed work
+· ‎document incomplete work
+· ‎document the exact next step
+· ‎avoid claiming completion when work remains
+‎
+‎No future agent should have to guess what the previous agent
+‎was doing.
+‎
+‎---
+‎
+1. ‎FINAL VISUAL STANDARD
+‎
+‎The ultimate standard for TwoHearts is not:
+‎
+‎«"All screens exist."»
+‎
+‎It is not:
+‎
+‎«"All tests pass."»
+‎
+‎It is not:
+‎
+‎«"The CSS has burgundy colors."»
+‎
+‎It is not:
+‎
+‎«"The application has animations."»
+‎
+‎The final standard is:
+‎
+‎«TwoHearts should look and feel like a deliberately designed,
+‎emotionally warm, beautiful couples application with its own
+‎recognizable identity.»
+‎
+‎The application should feel complete when someone opens it.
+‎
+‎The user should see:
+‎
+· ‎the TwoHearts identity
+· ‎the burgundy visual language
+· ‎tasteful Rose/Lily elements
+· ‎beautiful relationship presentation
+· ‎intentional buttons
+· ‎intentional cards
+· ‎meaningful typography
+· ‎strong visual hierarchy
+· ‎polished animations
+· ‎personal profiles
+· ‎thoughtful empty states
+· ‎cohesive screens
+· ‎a complete product experience
+‎
+‎rather than a collection of functional HTML/CSS panels.
+‎
+‎---
+‎
+1. ‎AUTHORITATIVE SUMMARY
+‎
+‎When future visual decisions are uncertain, use this priority:
+‎
+1. ‎Preserve the official TwoHearts identity.
+2. ‎Preserve working functionality and architecture.
+3. ‎Preserve PRIVATE / OFFLINE-FIRST / LOCAL-FIRST /
+‎   ANDROID-FIRST requirements.
+1. ‎Use the 77 reference screens to recover original visual
+‎   intent.
+1. ‎Use the existing design system as the implementation
+‎   foundation.
+1. ‎Use Rose/Lily as a meaningful recurring visual identity.
+2. ‎Keep burgundy as the primary brand color.
+3. ‎Use creative design judgment to improve weak or incomplete
+‎   screens.
+1. ‎Make the application feel emotionally warm and visually
+‎   intentional.
+1. ‎Do not settle for a generic template-like appearance.
+‎
+‎The agent is encouraged to make TwoHearts beautiful.
+‎
+‎The agent is NOT encouraged to destroy what already works.
+‎
+‎---
+‎
+‎FINAL DIRECTIVE
+‎
+‎TwoHearts is no longer being treated as merely a collection of
+‎implemented screens.
+‎
+‎It is a product.
+‎
+‎The next visual generation of TwoHearts should preserve everything
+‎that makes the application technically sound while giving it the
+‎visual soul that the current implementation is still missing.
+‎
+‎The goal is not simply to finish the UI.
+‎
+‎The goal is to make TwoHearts feel like TwoHearts.
+‎
