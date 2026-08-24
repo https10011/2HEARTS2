@@ -20,7 +20,9 @@ bottom nav, More).
 
 ## 3. Ending commit
 
-- See final commit hash in conversation summary (pushed to master).
+- `f0d2a83` — *Stage 4 visual productization: Us / Relationship
+  Experience* (pushed to origin/master and verified via `git
+  ls-remote`).
 
 ## 4. Files/components changed
 
