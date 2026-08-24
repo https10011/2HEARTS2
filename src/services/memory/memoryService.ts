@@ -264,6 +264,14 @@ export class MemoryService {
     return ref;
   }
 
+  /**
+   * Resolves a renderable `data:` URL for a media asset (photo-first UI).
+   * Delegates to MediaStorage so raw filesystem paths never reach UI code.
+   */
+  async resolveMediaUrl(mediaAssetId: string): Promise<string> {
+    return this.mediaStorage.resolveUrl(mediaAssetId);
+  }
+
   /** Removes media from a memory. Also deletes the media asset. */
   async removeMedia(memoryId: string, mediaAssetId: string): Promise<boolean> {
     const removed = await this.memories.removeMediaFromMemory(memoryId, mediaAssetId);

@@ -1,8 +1,11 @@
 /**
- * MemoryDetail (Phase 7).
+ * MemoryDetail (Stage 5).
  *
- * Displays a single memory's information, media, and provides
- * edit/delete actions. Handles missing records and media gracefully.
+ * A memory opens like a shared moment: hero media first, serif title with
+ * a heart accent, the date, then the story. Additional media renders as a
+ * thumb strip that swaps the hero. Edit routes to the shared add/edit
+ * form; delete confirms through the existing Modal + toast layer.
+ * Media resolves through MemoryService → MediaStorage `data:` URLs.
  */
 
 import { useEffect, useState, useCallback } from 'react';
@@ -10,8 +13,23 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import type { MemoryWithMedia } from '../../services/memory/memoryService.ts';
 import { useMemoryService } from './useMemoryService.ts';
-import { Button, IconButton, IconBack, IconCamera, IconVideo, LoadingState, useToast } from '../../components/index.ts';
-import { Modal } from '../../components/index.ts';
+import { formatDateKey } from './memoryFilters.ts';
+import {
+  Button,
+  Header,
+  IconBack,
+  IconButton,
+  IconCamera,
+  IconVideo,
+  IconHeart,
+  IconTrash,
+  IconEdit,
+  IconCalendar,
+  LoadingState,
+  RoseLilyDecoration,
+  Modal,
+  useToast,
+} from '../../components/index.ts';
 
 export function MemoryDetail() {
   const { memoryId } = useParams<{ memoryId: string }>();
@@ -19,6 +37,8 @@ export function MemoryDetail() {
   const memoryService = useMemoryService();
   const toast = useToast();
   const [memory, setMemory] = useState<MemoryWithMedia | null>(null);
+  const [mediaUrls, setMediaUrls] = useState<Record<string, string>>({});
+  const [heroIndex, setHeroIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -31,6 +51,17 @@ export function MemoryDetail() {
     try {
       const result = await memoryService.getMemory(memoryId);
       setMemory(result);
+      const urls: Record<string, string> = {};
+      await Promise.all(
+        result.mediaReferences.map(async (ref) => {
+          try {
+            urls[ref.id] = await memoryService.resolveMediaUrl(ref.id);
+          } catch {
+            // Missing bytes — tile falls back to a warm placeholder.
+          }
+        }),
+      );
+      setMediaUrls(urls);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Memory not found.';
       setError(message);
@@ -63,15 +94,14 @@ export function MemoryDetail() {
   if (loading || !memoryService) {
     return (
       <div className="th-screen">
-        <header className="th-app-header">
-          <div style={{ display: 'flex', alignItems: 'center', minWidth: 'var(--th-touch-target-min)' }}>
+        <Header
+          title="Memory"
+          left={
             <IconButton label="Go back" onClick={() => navigate(-1)}>
               <IconBack />
             </IconButton>
-          </div>
-          <h1 className="th-app-header__title">Memory</h1>
-          <div style={{ minWidth: 'var(--th-touch-target-min)' }} />
-        </header>
+          }
+        />
         <LoadingState label="Loading memory…" />
       </div>
     );
@@ -80,15 +110,14 @@ export function MemoryDetail() {
   if (error || !memory) {
     return (
       <div className="th-screen">
-        <header className="th-app-header">
-          <div style={{ display: 'flex', alignItems: 'center', minWidth: 'var(--th-touch-target-min)' }}>
+        <Header
+          title="Memory"
+          left={
             <IconButton label="Go back" onClick={() => navigate(-1)}>
               <IconBack />
             </IconButton>
-          </div>
-          <h1 className="th-app-header__title">Memory</h1>
-          <div style={{ minWidth: 'var(--th-touch-target-min)' }} />
-        </header>
+          }
+        />
         <div className="th-content-pad" style={{ textAlign: 'center', paddingTop: 'var(--th-space-12)' }}>
           <p style={{ color: 'var(--th-color-error)', marginBottom: 'var(--th-space-4)' }}>
             {error || 'Memory not found.'}
@@ -101,94 +130,125 @@ export function MemoryDetail() {
     );
   }
 
+  const media = memory.mediaReferences;
+  const heroRef = media[Math.min(heroIndex, media.length - 1)];
+  const heroUrl = heroRef ? mediaUrls[heroRef.id] : undefined;
+
   return (
-    <div className="th-screen">
-      {/* Header */}
-      <header className="th-app-header">
-        <div style={{ display: 'flex', alignItems: 'center', minWidth: 'var(--th-touch-target-min)' }}>
+    <div className="th-screen th-screen-warm">
+      <RoseLilyDecoration variant={11} size={110} position="top-right" opacity={0.1} />
+      <Header
+        title="Memory"
+        left={
           <IconButton label="Go back" onClick={() => navigate(-1)}>
             <IconBack />
           </IconButton>
-        </div>
-        <h1 className="th-app-header__title">Memory</h1>
-        <div style={{ minWidth: 'var(--th-touch-target-min)' }}>
-          <Button
-            variant="ghost"
+        }
+        right={
+          <IconButton
+            label="Delete memory"
             onClick={() => setShowDeleteConfirm(true)}
-            style={{ minWidth: 'auto', padding: 'var(--th-space-2)', color: 'var(--th-color-error)' }}
           >
-            Delete
-          </Button>
-        </div>
-      </header>
+            <IconTrash />
+          </IconButton>
+        }
+      />
 
       {/* Content */}
       <div className="th-scroll th-content-pad">
-        <h2 className="th-screen-title" style={{ marginBottom: 'var(--th-space-2)' }}>
-          {memory.title}
-        </h2>
+        {/* Hero media */}
+        {media.length > 0 && (
+          <div className="th-memory-hero">
+            {heroRef && heroUrl && heroRef.kind === 'photo' && (
+              <img src={heroUrl} alt={`${memory.title} photo`} className="th-memory-hero__image" />
+            )}
+            {heroRef && heroUrl && heroRef.kind === 'video' && (
+              <video
+                src={heroUrl}
+                controls
+                className="th-memory-hero__image"
+                aria-label={`${memory.title} video`}
+              />
+            )}
+            {heroRef && !heroUrl && (
+              <div className="th-memory-hero__placeholder" aria-hidden="true">
+                {heroRef.kind === 'photo' ? <IconCamera size={40} /> : <IconVideo size={40} />}
+              </div>
+            )}
+
+            {media.length > 1 && (
+              <div className="th-memory-strip">
+                {media.map((ref, index) => (
+                  <button
+                    key={ref.id}
+                    type="button"
+                    className={`th-memory-strip__item ${index === heroIndex ? 'th-memory-strip__item--active' : ''}`}
+                    onClick={() => setHeroIndex(index)}
+                    aria-label={`Show media ${index + 1} of ${media.length}`}
+                    aria-pressed={index === heroIndex}
+                  >
+                    {mediaUrls[ref.id] && ref.kind === 'photo' ? (
+                      <img src={mediaUrls[ref.id]} alt="" className="th-memory-strip__img" />
+                    ) : (
+                      <span className="th-memory-strip__fallback" aria-hidden="true">
+                        {ref.kind === 'photo' ? <IconCamera size={16} /> : <IconVideo size={16} />}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Title + heart accent */}
+        <div className="th-memory-title-row">
+          <h2 className="th-memory-title">{memory.title}</h2>
+          <span className="th-memory-heart" aria-hidden="true">
+            <IconHeart size={22} />
+          </span>
+        </div>
 
         {memory.memoryDate && (
-          <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)', marginBottom: 'var(--th-space-4)' }}>
-            {memory.memoryDate}
+          <p className="th-mem-date th-mem-date--large">
+            <IconCalendar size={16} />
+            {formatDateKey(memory.memoryDate)}
           </p>
         )}
 
         {memory.caption && (
-          <p style={{ color: 'var(--th-color-text-primary)', fontSize: 'var(--th-font-size-md)', lineHeight: 'var(--th-line-height-relaxed)', marginBottom: 'var(--th-space-6)' }}>
-            {memory.caption}
-          </p>
+          <p className="th-memory-story">{memory.caption}</p>
         )}
 
-        {/* Media section */}
-        {memory.mediaReferences.length > 0 && (
-          <div style={{ marginBottom: 'var(--th-space-6)' }}>
-            <p style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-2)' }}>
-              {memory.mediaReferences.length} {memory.mediaReferences.length === 1 ? 'item' : 'items'}
-            </p>
-            <div style={{ display: 'flex', gap: 'var(--th-space-2)', flexWrap: 'wrap' }}>
-              {memory.mediaReferences.map((media) => (
-                <div
-                  key={media.id}
-                  style={{
-                    width: '100px',
-                    height: '100px',
-                    borderRadius: 'var(--th-radius-md)',
-                    backgroundColor: 'var(--th-color-blush)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--th-color-rose-muted)',
-                  }}
-                >
-                  {media.kind === 'photo' ? <IconCamera size={40} /> : <IconVideo size={40} />}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Actions */}
+        <div className="th-memory-actions">
+          <Button
+            variant="primary"
+            full
+            onClick={() => navigate(`${RoutePath.appMemories}/${memory.id}/edit`)}
+          >
+            <IconEdit size={18} /> Edit Memory
+          </Button>
+        </div>
 
-        {/* Metadata */}
-        <div style={{ borderTop: '1px solid var(--th-color-divider)', paddingTop: 'var(--th-space-4)' }}>
-          <p style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
-            Created: {new Date(memory.createdAt).toLocaleDateString()}
+        {/* Metadata footer */}
+        <div className="th-memory-meta">
+          <p>
+            Added {new Date(memory.createdAt).toLocaleDateString()}
+            {memory.updatedAt !== memory.createdAt &&
+              ` · Updated ${new Date(memory.updatedAt).toLocaleDateString()}`}
           </p>
-          {memory.updatedAt !== memory.createdAt && (
-            <p style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
-              Updated: {new Date(memory.updatedAt).toLocaleDateString()}
-            </p>
-          )}
         </div>
       </div>
 
       {/* Delete confirmation modal */}
       <Modal open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} label="Delete memory">
         <div style={{ padding: 'var(--th-space-2) 0' }}>
-          <h3 style={{ fontFamily: 'var(--th-font-family-display)', fontSize: 'var(--th-font-size-lg)', marginBottom: 'var(--th-space-2)' }}>
+          <h3 className="th-memory-confirm-title">
             Delete this memory?
           </h3>
-          <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-6)' }}>
-            This action cannot be undone.
+          <p className="th-memory-confirm-copy">
+            “{memory.title}” will be removed permanently. This action cannot be undone.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
             <Button variant="primary" full onClick={handleDelete} disabled={deleting}>

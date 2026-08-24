@@ -43,6 +43,7 @@ export const RoutePath = {
   appMemories: '/app/memories',
   appMemoriesAdd: '/app/memories/add',
   appMemoriesDetail: '/app/memories/:memoryId',
+  appMemoriesEdit: '/app/memories/:memoryId/edit',
 
   /** Games hub (Phase 11 + Phase 12). */
   appGames: '/app/games',

@@ -157,6 +157,7 @@ const router = createBrowserRouter([
       { path: 'memories', element: <MemoriesHome /> },
       { path: 'memories/add', element: <AddMemory /> },
       { path: 'memories/:memoryId', element: <MemoryDetail /> },
+      { path: 'memories/:memoryId/edit', element: <AddMemory /> },
 
       // Period Tracker (Phase 16)
       { path: 'period', element: <PeriodHome /> },
