@@ -1,28 +1,38 @@
 /**
- * NotesHome (Phase 8).
+ * NotesHome (Phase 8, productized in Stage 6).
  *
- * Main notes screen — list of notes with search, category filter,
- * empty state, and navigation to NoteEditor/NoteDetail.
+ * Private notes home — branded serif header, warm search, category
+ * chips, and paper-inspired note cards with circular category icon
+ * badges. Love letters get a blush "keepsake" treatment. Local-first:
+ * all data flows through useNoteService → NoteService → SQLite.
  */
 
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconPlus, IconSearch, IconChevronRight, IconFileText, RoseLilyDecoration } from '../../components/index.ts';
+import {
+  IconPlus,
+  IconSearch,
+  IconFileText,
+  IconButton,
+  RoseLilyDecoration,
+} from '../../components/index.ts';
 import { useNoteService } from './useNoteService.ts';
 import type { NoteView } from '../../services/note/noteService.ts';
-import { NOTE_CATEGORY_LABELS, NOTE_CATEGORY_COLORS } from './categoryMeta.ts';
+import {
+  NOTE_CATEGORY_LABELS,
+} from './categoryMeta.ts';
+import { NOTE_CATEGORY_ICONS } from './categoryIcons.tsx';
+import { formatRelativeTime } from './noteTime.ts';
 
 const CATEGORY_LABELS: Record<string, string> = {
   all: 'All',
   ...NOTE_CATEGORY_LABELS,
 };
 
-const CATEGORY_COLORS = NOTE_CATEGORY_COLORS;
-
 export function NotesHome() {
   const navigate = useNavigate();
-  const { notes, loading, error, counts } = useNoteService();
+  const { notes, loading, error, counts, loadNotes } = useNoteService();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
 
@@ -46,40 +56,46 @@ export function NotesHome() {
 
   return (
     <div className="th-content-pad">
-      <div className="th-screen-header--enhanced">
-        <div>
-          <h1 className="th-screen-title">Notes</h1>
-          <p className="th-screen-subtitle" style={{ marginTop: 'var(--th-space-1)' }}>
-            Private notes and thoughts
-          </p>
+      {/* Branded header */}
+      <div className="th-notes-header">
+        <RoseLilyDecoration variant={14} size={120} position="top-right" opacity={0.14} />
+        <div className="th-notes-header__copy">
+          <h1 className="th-notes-title">Notes</h1>
+          <p className="th-notes-subtitle">Keep the little thoughts that matter.</p>
         </div>
+        <IconButton label="Add note" onClick={() => navigate(RoutePath.appNotesAdd)}>
+          <IconPlus />
+        </IconButton>
       </div>
 
       {/* Search bar */}
-      <div className="th-note-search">
+      <div className="th-notes-search">
         <IconSearch size={16} />
         <input
           type="text"
           placeholder="Search notes..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="th-note-search__input"
+          className="th-notes-search__input"
+          aria-label="Search notes"
         />
       </div>
 
       {/* Category chips */}
-      <div className="th-note-categories">
+      <div className="th-notes-chips" role="listbox" aria-label="Filter by category">
         {categories.map((cat) => {
           const count = counts[cat] ?? 0;
           if (cat !== 'all' && count === 0) return null;
           return (
             <button
               key={cat}
-              className={`th-chip ${activeCategory === cat ? 'th-chip--active' : ''}`}
+              role="option"
+              aria-selected={activeCategory === cat}
+              className={`th-notes-chip ${activeCategory === cat ? 'th-notes-chip--active' : ''}`}
               onClick={() => setActiveCategory(cat)}
             >
               {CATEGORY_LABELS[cat]}
-              {cat !== 'all' && <span className="th-chip__count">{count}</span>}
+              {cat !== 'all' && <span className="th-notes-chip__count">{count}</span>}
             </button>
           );
         })}
@@ -89,8 +105,8 @@ export function NotesHome() {
       {error && (
         <div className="th-error-message">
           <p>{error}</p>
-          <button className="th-btn th-btn--secondary" onClick={() => window.location.reload()}>
-            Retry
+          <button className="th-btn th-btn--secondary" onClick={() => void loadNotes()}>
+            Try again
           </button>
         </div>
       )}
@@ -116,7 +132,7 @@ export function NotesHome() {
           <p className="th-empty-emotional__message">
             {searchQuery
               ? 'Try a different search term.'
-              : 'A quiet place for your thoughts, plans, and everything in between.'}
+              : 'A private place for the thoughts you keep for each other.'}
           </p>
           <div className="th-empty-emotional__action">
             {!searchQuery && (
@@ -124,7 +140,7 @@ export function NotesHome() {
                 className="th-btn th-btn--primary"
                 onClick={() => navigate(RoutePath.appNotesAdd)}
               >
-                Create Note
+                Write your first note
               </button>
             )}
           </div>
@@ -133,11 +149,14 @@ export function NotesHome() {
 
       {/* Notes list */}
       {!loading && filteredNotes.length > 0 && (
-        <div className="th-note-list">
-          {filteredNotes.map((note) => (
-            <NoteCard key={note.id} note={note} />
-          ))}
-        </div>
+        <>
+          <h2 className="th-notes-section">All Notes</h2>
+          <div className="th-notes-list">
+            {filteredNotes.map((note) => (
+              <NoteCard key={note.id} note={note} />
+            ))}
+          </div>
+        </>
       )}
 
       {/* FAB */}
@@ -154,29 +173,16 @@ export function NotesHome() {
 
 function NoteCard({ note }: { note: NoteView }) {
   const navigate = useNavigate();
-
-  const formatTime = (iso: string): string => {
-    const d = new Date(iso);
-    const now = new Date();
-    const diffMs = now.getTime() - d.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return d.toLocaleDateString();
-  };
-
-  const color = CATEGORY_COLORS[note.category] || CATEGORY_COLORS.general;
+  const CategoryIcon = NOTE_CATEGORY_ICONS[note.category] ?? IconFileText;
+  const isLoveLetter = note.category === 'love-letter';
 
   return (
     <div
-      className="th-note-card th-note-card--enhanced th-stagger-item"
+      className={`th-note-card th-stagger-item ${isLoveLetter ? 'th-note-card--keepsake' : ''}`}
       onClick={() => navigate(`/app/notes/${note.id}`)}
       role="button"
       tabIndex={0}
+      aria-label={`Note: ${note.title}`}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -184,17 +190,18 @@ function NoteCard({ note }: { note: NoteView }) {
         }
       }}
     >
-      <div className="th-note-card__header">
-        <div className="th-note-card__category" style={{ color }}>
-          {note.category.replace('-', ' ')}
+      <span className="th-note-card__badge" aria-hidden="true">
+        <CategoryIcon size={20} />
+      </span>
+      <div className="th-note-card__body">
+        <div className="th-note-card__top">
+          <h3 className="th-note-card__title">{note.title}</h3>
+          <span className="th-note-card__time">{formatRelativeTime(note.updatedAt)}</span>
         </div>
-        <div className="th-note-card__time">{formatTime(note.updatedAt)}</div>
+        {note.excerpt && (
+          <p className="th-note-card__excerpt">{note.excerpt}</p>
+        )}
       </div>
-      <h3 className="th-note-card__title">{note.title}</h3>
-      {note.excerpt && (
-        <p className="th-note-card__excerpt">{note.excerpt}</p>
-      )}
-      <IconChevronRight size={16} className="th-note-card__chevron" />
     </div>
   );
 }

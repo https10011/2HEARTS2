@@ -3,6 +3,8 @@
  *
  * Single source for category labels and accent colors so all notes
  * screens stay consistent (previously duplicated per screen).
+ * Icon mapping lives in categoryIcons.tsx (TSX components are not
+ * loadable by the Node test runner).
  */
 
 export const NOTE_CATEGORY_LABELS: Record<string, string> = {

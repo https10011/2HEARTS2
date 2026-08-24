@@ -316,12 +316,17 @@ describe('Phase 28 — Memory Match', () => {
 
   it('resets unmatched cards', () => {
     const session = createMemoryMatchSession(4, FIXED_CLOCK);
-    let updated = flipCard(session, 0, FIXED_CLOCK)!;
-    updated = flipCard(updated.session, 1, FIXED_CLOCK)!;
+    const cards = session.board!.cards;
+    // Pick two cards from different pairs (shuffle is random — indices
+    // 0 and 1 can be a matching pair, which made this test flaky).
+    const first = 0;
+    const second = cards.findIndex((c, i) => i > 0 && c.pairId !== cards[first].pairId);
+    let updated = flipCard(session, first, FIXED_CLOCK)!;
+    updated = flipCard(updated.session, second, FIXED_CLOCK)!;
     // Cards should be revealed (but not matched if different pairs)
-    const reset = resetUnmatchedCards(updated.session, 0, 1, FIXED_CLOCK);
-    assert.equal(reset.board?.cards[0].revealed, false);
-    assert.equal(reset.board?.cards[1].revealed, false);
+    const reset = resetUnmatchedCards(updated.session, first, second, FIXED_CLOCK);
+    assert.equal(reset.board?.cards[first].revealed, false);
+    assert.equal(reset.board?.cards[second].revealed, false);
   });
 
   it('cannot flip already revealed card', () => {

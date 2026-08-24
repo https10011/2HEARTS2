@@ -1,7 +1,10 @@
 /**
- * NoteDetail (Phase 8).
+ * NoteDetail (Phase 8, productized in Stage 6).
  *
- * Individual note view with full content, edit, and delete actions.
+ * Individual note view — serif title with category icon accent,
+ * "last edited" line, comfortable reading typography, and a quiet
+ * action row (Edit / Delete). Delete confirms through the existing
+ * centralized Modal + toast layer.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -9,9 +12,24 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { useNoteService } from './useNoteService.ts';
 import type { NoteView } from '../../services/note/noteService.ts';
-import { IconTrash, IconEdit, IconFileText, useToast } from '../../components/index.ts';
-
-import { NOTE_CATEGORY_LABELS as CATEGORY_LABELS, NOTE_CATEGORY_COLORS as CATEGORY_COLORS } from './categoryMeta.ts';
+import {
+  Button,
+  Header,
+  IconButton,
+  IconBack,
+  IconTrash,
+  IconEdit,
+  IconFileText,
+  LoadingState,
+  Modal,
+  RoseLilyDecoration,
+  useToast,
+} from '../../components/index.ts';
+import {
+  NOTE_CATEGORY_LABELS as CATEGORY_LABELS,
+} from './categoryMeta.ts';
+import { NOTE_CATEGORY_ICONS } from './categoryIcons.tsx';
+import { formatLastEdited } from './noteTime.ts';
 
 export function NoteDetail() {
   const navigate = useNavigate();
@@ -61,128 +79,136 @@ export function NoteDetail() {
     }
   }, [noteId, deleteNote, navigate, toast]);
 
-  const formatDate = (iso: string): string => {
-    const d = new Date(iso);
-    return d.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   if (loading) {
     return (
-      <div className="th-content-pad">
-        <div className="th-loading-state">
-          <div className="th-spinner" />
-          <p>Loading note...</p>
-        </div>
+      <div className="th-screen">
+        <Header
+          title="Note"
+          left={
+            <IconButton label="Go back" onClick={() => navigate(-1)}>
+              <IconBack />
+            </IconButton>
+          }
+        />
+        <LoadingState label="Loading note…" />
       </div>
     );
   }
 
   if (error || !note) {
     return (
-      <div className="th-content-pad">
-        <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
-            <IconFileText size={36} />
+      <div className="th-screen">
+        <Header
+          title="Note"
+          left={
+            <IconButton label="Go back" onClick={() => navigate(-1)}>
+              <IconBack />
+            </IconButton>
+          }
+        />
+        <div className="th-content-pad" style={{ textAlign: 'center', paddingTop: 'var(--th-space-12)' }}>
+          <div className="th-empty-state th-empty-state--enhanced">
+            <div className="th-empty-state__visual">
+              <IconFileText size={36} />
+            </div>
+            <h3 className="th-empty-state__title">Note not found</h3>
+            <p className="th-empty-state__desc">{error ?? 'This note may have been deleted.'}</p>
+            <button
+              className="th-btn th-btn--primary"
+              onClick={() => navigate(RoutePath.appNotes)}
+            >
+              Back to Notes
+            </button>
           </div>
-          <h3 className="th-empty-state__title">Note not found</h3>
-          <p className="th-empty-state__desc">{error ?? 'This note may have been deleted.'}</p>
-          <button
-            className="th-btn th-btn--primary"
-            onClick={() => navigate(RoutePath.appNotes)}
-          >
-            Back to Notes
-          </button>
         </div>
       </div>
     );
   }
 
-  const color = CATEGORY_COLORS[note.category] || CATEGORY_COLORS.general;
+  const CategoryIcon = NOTE_CATEGORY_ICONS[note.category] ?? IconFileText;
 
   return (
-    <div className="th-content-pad">
-      {/* Header with actions */}
-      <div className="th-note-detail-header">
-        <button
-          className="th-btn th-btn--secondary th-btn--sm"
-          onClick={() => navigate(RoutePath.appNotes)}
-        >
-          ← Back
-        </button>
-        <div className="th-note-detail-actions">
-          <button
-            className="th-icon-btn"
-            onClick={() => navigate(`/app/notes/${note.id}/edit`)}
-            aria-label="Edit note"
-          >
-            <IconEdit size={18} />
-          </button>
-          <button
-            className="th-icon-btn th-icon-btn--danger"
+    <div className="th-screen th-screen-warm">
+      <RoseLilyDecoration variant={11} size={110} position="bottom-right" opacity={0.08} />
+      <Header
+        title="Note"
+        left={
+          <IconButton label="Go back" onClick={() => navigate(-1)}>
+            <IconBack />
+          </IconButton>
+        }
+        right={
+          <IconButton
+            label="Delete note"
             onClick={() => setShowDeleteConfirm(true)}
-            aria-label="Delete note"
           >
-            <IconTrash size={18} />
-          </button>
-        </div>
-      </div>
+            <IconTrash />
+          </IconButton>
+        }
+      />
 
-      {/* Note content */}
-      <div className="th-note-detail">
-        <div className="th-note-detail__category" style={{ color }}>
+      <div className="th-scroll th-content-pad">
+        {/* Category + title */}
+        <p className="th-note-detail__category">
+          <CategoryIcon size={14} />
           {CATEGORY_LABELS[note.category]}
-        </div>
+        </p>
         <h1 className="th-note-detail__title">{note.title}</h1>
-        <div className="th-note-detail__meta">
-          <span>Created: {formatDate(note.createdAt)}</span>
-          {note.updatedAt !== note.createdAt && (
-            <span>Updated: {formatDate(note.updatedAt)}</span>
-          )}
-        </div>
+        <p className="th-note-detail__edited">{formatLastEdited(note.updatedAt)}</p>
+
+        {/* Body */}
         <div className="th-note-detail__content">
           {note.content ? (
             note.content.split('\n').map((line, i) => (
-              <p key={i}>{line || '\u00A0'}</p>
+              <p key={i}>{line || ' '}</p>
             ))
           ) : (
             <p className="th-note-detail__empty">No content</p>
           )}
         </div>
+
+        {/* Actions */}
+        <div className="th-note-detail__actions">
+          <Button
+            variant="primary"
+            full
+            onClick={() => navigate(`/app/notes/${note.id}/edit`)}
+          >
+            <IconEdit size={18} /> Edit Note
+          </Button>
+          <button
+            className="th-note-detail__delete"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            <IconTrash size={16} /> Delete this note
+          </button>
+        </div>
+
+        {/* Quiet metadata */}
+        <p className="th-note-detail__meta">
+          Written {new Date(note.createdAt).toLocaleDateString()}
+          {note.updatedAt !== note.createdAt &&
+            ` · Updated ${new Date(note.updatedAt).toLocaleDateString()}`}
+        </p>
       </div>
 
       {/* Delete confirmation modal */}
-      {showDeleteConfirm && (
-        <div className="th-modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="th-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="th-modal__title">Delete Note</h2>
-            <p className="th-modal__text">
-              Are you sure you want to delete &ldquo;{note.title}&rdquo;? This cannot be undone.
-            </p>
-            <div className="th-modal__actions">
-              <button
-                className="th-btn th-btn--secondary"
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={deleting}
-              >
-                Cancel
-              </button>
-              <button
-                className="th-btn th-btn--danger"
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                {deleting ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
+      <Modal open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} label="Delete note">
+        <div style={{ padding: 'var(--th-space-2) 0' }}>
+          <h3 className="th-note-confirm-title">Delete this note?</h3>
+          <p className="th-note-confirm-copy">
+            “{note.title}” will be removed permanently. This action cannot be undone.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
+            <Button variant="primary" full onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Deleting…' : 'Delete'}
+            </Button>
+            <Button variant="ghost" full onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
+              Cancel
+            </Button>
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

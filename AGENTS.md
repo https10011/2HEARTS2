@@ -276,6 +276,20 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
 ## Stage notes (post-Phase 34)
 - Stage 2 (onboarding): branded DatePicker centralized; docs/STAGE-2-…
 - Stage 3 (Home + global shell): docs/STAGE-3-…, committed def00d8..8fd067f.
+- Stage 5 (Memories Experience): docs/STAGE-5-VISUAL-PRODUCTIZATION.md,
+  committed 365686a — photo-first Memories Home (hero + cards + year
+  filter), Add/Edit memory, Memory Detail; memoryFilters.ts helpers;
+  690 tests.
+- Stage 6 (Notes + Private Thoughts): docs/STAGE-6-VISUAL-PRODUCTIZATION.md
+  — branded Notes Home (paper cards + category icon badges +
+  love-letter keepsake variant), NoteEditor (header Save + paper
+  writing surface), NoteDetail (serif reading view + centralized
+  Modal delete); noteTime.ts relative-time helpers; categoryIcons.tsx
+  (Record<NoteCategory,…> enforced by TS; .tsx not loadable by Node
+  tests — keep icon maps out of categoryMeta.ts); obsolete Phase 8
+  notes CSS replaced by Stage 6 .th-notes-* vocabulary; fixed a
+  pre-existing flaky Memory Match test (random shuffle could pair
+  indices 0/1); 700 tests.
 - Stage 4 (Us / Relationship Experience): docs/STAGE-4-…, committed
   f0d2a83 + 08b2b78 — couple-first Us hub, new /app/us/counter route,
   shared <CouplePair>, ImportantDates branded DatePicker + badges,
