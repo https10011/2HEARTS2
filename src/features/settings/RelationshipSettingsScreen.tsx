@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Input, IconCalendar } from '../../components/index.ts';
+import { Button, Input, IconCalendar, DatePicker } from '../../components/index.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { safeUserMessage } from '../../services/errors/appError.ts';
 import { SettingsScreen, SettingRow, InfoCard } from './settingsUi.tsx';
@@ -89,11 +89,11 @@ export function RelationshipSettingsScreen() {
         <label className="th-form-label" htmlFor="partner-birthday">
           Birthday (optional)
         </label>
-        <Input
-          id="partner-birthday"
-          type="date"
+        <DatePicker
           value={birthday}
-          onChange={(e) => setBirthday(e.target.value)}
+          onChange={setBirthday}
+          label="Partner birthday"
+          placeholder="Tap to choose a date"
         />
       </div>
 
@@ -101,11 +101,11 @@ export function RelationshipSettingsScreen() {
         <label className="th-form-label" htmlFor="start-date">
           Relationship start date
         </label>
-        <Input
-          id="start-date"
-          type="date"
+        <DatePicker
           value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
+          onChange={setStartDate}
+          label="Relationship start date"
+          placeholder="Tap to choose a date"
         />
       </div>
 

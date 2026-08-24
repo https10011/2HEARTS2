@@ -37,6 +37,7 @@ export const RoutePath = {
   appUsMemories: '/app/us/memories',
   appUsTimeline: '/app/us/timeline',
   appUsReminders: '/app/us/reminders',
+  appUsCounter: '/app/us/counter',
 
   /** Memories feature (Phase 7). */
   appMemories: '/app/memories',

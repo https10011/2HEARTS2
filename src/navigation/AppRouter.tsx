@@ -21,6 +21,7 @@ import { GamesHubScreen } from '../features/app-shell/screens/GamesHubScreen.tsx
 import { NotesHome, NoteEditor, NoteDetail } from '../features/notes/index.ts';
 import { MoreScreen } from '../features/app-shell/screens/MoreScreen.tsx';
 import { ImportantDatesScreen } from '../features/app-shell/screens/ImportantDatesScreen.tsx';
+import { RelationshipCounterScreen } from '../features/app-shell/screens/RelationshipCounterScreen.tsx';
 import { MemoriesHome, AddMemory, MemoryDetail } from '../features/memories/index.ts';
 import { TimelineHome, AddEvent, EventDetail } from '../features/timeline/index.ts';
 import { GamePlayScreen, GameResultsScreen, MemoryMatchScreen, WordScrambleScreen, CasualGamePlayScreen } from '../features/games/index.ts';
@@ -116,6 +117,10 @@ const router = createBrowserRouter([
       {
         path: 'us/reminders',
         element: <ImportantDatesScreen />,
+      },
+      {
+        path: 'us/counter',
+        element: <RelationshipCounterScreen />,
       },
 
       // Games (Phase 11 + Phase 12)

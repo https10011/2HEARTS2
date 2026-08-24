@@ -1,4 +1,446 @@
 /* TwoHearts reusable UI primitives — component styles. */
+/* ================================================================
+   STAGE 4 — Us / Relationship experience
+   Couple pair, together hero, relationship counter, important dates
+   ================================================================ */
+
+/* Couple pair — two avatar circles joined by a heart connector */
+.th-couple-pair {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--th-space-5);
+  padding: var(--th-space-4) var(--th-space-3);
+}
+.th-couple-pair__face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-2);
+  text-decoration: none;
+  min-width: 96px;
+}
+.th-couple-pair__circle {
+  width: var(--th-avatar-lg, 72px);
+  height: var(--th-avatar-lg, 72px);
+  border-radius: var(--th-radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+  border: var(--th-border-width-thin) solid var(--th-color-border-default);
+}
+.th-couple-pair__initial {
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-semibold);
+}
+.th-couple-pair__name {
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-medium);
+  color: var(--th-color-text-secondary);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.th-couple-pair__heart {
+  color: var(--th-color-burgundy);
+  display: inline-flex;
+  align-items: center;
+}
+/* dotted connectors either side of the heart */
+.th-couple-pair__heart::before,
+.th-couple-pair__heart::after {
+  content: '';
+  width: 18px;
+  border-bottom: 2px dotted var(--th-color-burgundy-light);
+  opacity: 0.7;
+}
+.th-couple-pair__heart::before { margin-right: var(--th-space-1); }
+.th-couple-pair__heart::after { margin-left: var(--th-space-1); }
+
+/* Couple card — cream surface hosting the pair with a floral corner */
+.th-couple-card {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border-default);
+  border-radius: var(--th-radius-xl);
+  box-shadow: var(--th-shadow-sm);
+  margin-bottom: var(--th-space-4);
+}
+.th-couple-card .th-couple-pair {
+  position: relative;
+  z-index: 1;
+}
+
+/* Together hero — the relationship duration, links to the counter */
+.th-together-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-4);
+  border-radius: var(--th-radius-xl);
+  background: linear-gradient(135deg, var(--th-color-burgundy), var(--th-color-burgundy-dark));
+  color: var(--th-color-text-on-accent);
+  text-decoration: none;
+  box-shadow: var(--th-shadow-md);
+  margin-bottom: var(--th-space-5);
+}
+.th-together-hero__icon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: var(--th-radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.14);
+  color: var(--th-color-text-on-accent);
+}
+.th-together-hero__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.th-together-hero__label {
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-medium);
+  opacity: 0.85;
+}
+.th-together-hero__days {
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  line-height: 1.2;
+}
+.th-together-hero__since {
+  font-size: var(--th-font-size-xs);
+  opacity: 0.85;
+}
+.th-together-hero__anniv {
+  margin-top: var(--th-space-1);
+  align-self: flex-start;
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-medium);
+  padding: var(--th-space-1) var(--th-space-2);
+  border-radius: var(--th-radius-circle);
+  background-color: rgba(255, 255, 255, 0.16);
+}
+.th-together-hero__chevron {
+  color: var(--th-color-text-on-accent);
+  opacity: 0.8;
+}
+
+/* Hub section head — title + see-all link */
+.th-hub-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--th-space-2);
+}
+.th-hub-see-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-medium);
+  color: var(--th-color-burgundy);
+  text-decoration: none;
+  padding: var(--th-space-1) 0;
+}
+.th-hub-see-all:active {
+  opacity: 0.7;
+}
+
+/* Us dates invitation (empty) */
+.th-us-dates-invite {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-3) var(--th-space-4);
+  background-color: var(--th-color-blush);
+  border: var(--th-border-width-thin) solid var(--th-color-border-default);
+  border-radius: var(--th-radius-lg);
+  color: var(--th-color-text-primary);
+  text-decoration: none;
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-medium);
+}
+.th-us-dates-invite__icon {
+  display: inline-flex;
+  color: var(--th-color-burgundy);
+}
+.th-us-dates-invite__hint {
+  display: block;
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-regular);
+  color: var(--th-color-text-secondary);
+}
+
+/* Relationship Counter screen */
+.th-counter-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--th-space-6) var(--th-space-4);
+  background-color: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border-default);
+  border-radius: var(--th-radius-xl);
+  box-shadow: var(--th-shadow-sm);
+  margin-bottom: var(--th-space-4);
+}
+.th-counter-hero__label {
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-secondary);
+}
+.th-counter-hero__days {
+  font-size: var(--th-font-size-3xl, 2.25rem);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  line-height: 1.15;
+  margin-top: var(--th-space-1);
+}
+.th-counter-hero__decomp {
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-secondary);
+  margin-top: var(--th-space-1);
+}
+.th-counter-hero__divider {
+  width: 64%;
+  height: 1px;
+  background-color: var(--th-color-border-default);
+  margin: var(--th-space-3) 0 var(--th-space-2);
+}
+.th-counter-hero__since {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-burgundy);
+  font-weight: var(--th-font-weight-medium);
+}
+
+/* Counter stats strip — days / hours / minutes */
+.th-counter-stats {
+  display: flex;
+  background-color: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border-default);
+  border-radius: var(--th-radius-xl);
+  margin-bottom: var(--th-space-4);
+  overflow: hidden;
+}
+.th-counter-stats__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--th-space-4) var(--th-space-2);
+}
+.th-counter-stats__item + .th-counter-stats__item {
+  border-left: var(--th-border-width-thin) solid var(--th-color-border-default);
+}
+.th-counter-stats__value {
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-burgundy);
+}
+.th-counter-stats__label {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}
+
+/* Milestone card */
+.th-counter-milestone {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--th-space-3);
+  padding: var(--th-space-4);
+  background-color: var(--th-color-blush);
+  border: var(--th-border-width-thin) solid var(--th-color-border-default);
+  border-radius: var(--th-radius-xl);
+  margin-bottom: var(--th-space-4);
+}
+.th-counter-milestone__icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: var(--th-radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--th-color-surface-elevated);
+  color: var(--th-color-burgundy);
+}
+.th-counter-milestone__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.th-counter-milestone__title {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}
+.th-counter-milestone__days {
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-burgundy);
+}
+.th-counter-milestone__togo {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}
+.th-counter-milestone__track {
+  margin-top: var(--th-space-2);
+  height: 8px;
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-border-default);
+  overflow: hidden;
+}
+.th-counter-milestone__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-burgundy);
+}
+
+/* Counter link row */
+.th-counter-linkrow {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-4);
+  background-color: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border-default);
+  border-radius: var(--th-radius-xl);
+  text-decoration: none;
+  color: var(--th-color-text-primary);
+  margin-bottom: var(--th-space-4);
+}
+.th-counter-linkrow__icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: var(--th-radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+.th-counter-linkrow__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.th-counter-linkrow__title {
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+}
+.th-counter-linkrow__desc {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}
+.th-counter-linkrow__chevron {
+  color: var(--th-color-text-secondary);
+}
+
+/* Counter CTA + empty state */
+.th-counter-cta,
+.th-counter-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--th-space-2);
+  padding: var(--th-space-6) var(--th-space-5);
+  border-radius: var(--th-radius-xl);
+  margin-bottom: var(--th-space-5);
+}
+.th-counter-cta {
+  background-color: var(--th-color-blush);
+  border: var(--th-border-width-thin) solid var(--th-color-border-default);
+}
+.th-counter-cta__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--th-radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--th-color-surface-elevated);
+  color: var(--th-color-burgundy);
+}
+.th-counter-cta__title {
+  margin: 0;
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+}
+.th-counter-cta__desc {
+  margin: 0 0 var(--th-space-2);
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-secondary);
+}
+.th-counter-empty .th-btn {
+  margin-top: var(--th-space-2);
+}
+
+/* Important dates header + add button */
+.th-us-dates-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--th-space-3);
+}
+.th-us-dates-header .th-screen-title {
+  margin: 0;
+}
+.th-us-dates-add {
+  min-width: auto;
+  padding: var(--th-space-2) var(--th-space-3);
+}
+
+/* Date form title */
+.th-date-form__title {
+  margin: 0 0 var(--th-space-3);
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+}
+
+/* Date row decorations */
+.th-date-row__badge {
+  display: inline;
+  color: var(--th-color-burgundy);
+  font-weight: var(--th-font-weight-medium);
+  margin-left: var(--th-space-2);
+}
+.th-date-row__icon {
+  color: var(--th-color-burgundy);
+}
+.th-date-row__actions {
+  display: flex;
+  gap: var(--th-space-1);
+}
+.th-date-row--past {
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .th-counter-milestone__fill { transition: none; }
+}
+:root[data-th-motion='reduced'] .th-counter-milestone__fill {
+  transition: none;
+}
+
 
 /* ----- Button ----- */
 .th-button {

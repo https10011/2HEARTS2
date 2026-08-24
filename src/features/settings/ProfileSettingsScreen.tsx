@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Input } from '../../components/index.ts';
+import { Button, Input, DatePicker } from '../../components/index.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { safeUserMessage } from '../../services/errors/appError.ts';
 import type { Profile } from '../../data/relationship/relationshipTypes.ts';
@@ -83,11 +83,11 @@ export function ProfileSettingsScreen() {
         <label className="th-form-label" htmlFor="profile-birthday">
           Birthday (optional)
         </label>
-        <Input
-          id="profile-birthday"
-          type="date"
+        <DatePicker
           value={birthday}
-          onChange={(e) => setBirthday(e.target.value)}
+          onChange={setBirthday}
+          label="Your birthday"
+          placeholder="Tap to choose a date"
         />
       </div>
 
