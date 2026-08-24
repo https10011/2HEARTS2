@@ -10,6 +10,7 @@ import { useState, useCallback } from 'react';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { appSettingsStore, type OnboardingStage } from '../../core/appSettings.ts';
 import type { RelationshipService } from '../../services/relationship/relationshipService.ts';
+import { safeUserMessage } from '../../services/errors/appError.ts';
 
 export interface OnboardingState {
   stage: OnboardingStage;
@@ -62,7 +63,7 @@ export function useOnboarding() {
       advanceStage('relationship');
       return true;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to save profile.';
+      const message = safeUserMessage(err);
       setError(message);
       return false;
     } finally {
@@ -94,7 +95,7 @@ export function useOnboarding() {
       advanceStage('personalization');
       return true;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to save relationship.';
+      const message = safeUserMessage(err);
       setError(message);
       return false;
     } finally {
@@ -115,7 +116,7 @@ export function useOnboarding() {
       advanceStage('personalization');
       return true;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to save preferences.';
+      const message = safeUserMessage(err);
       setError(message);
       return false;
     } finally {
@@ -134,7 +135,7 @@ export function useOnboarding() {
         advanceStage('complete');
         return true;
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to complete setup.';
+        const message = safeUserMessage(err);
         setError(message);
         return false;
       } finally {
@@ -168,7 +169,7 @@ export function useOnboarding() {
       advanceStage('complete');
       return true;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to enable app lock.';
+      const message = safeUserMessage(err);
       setError(message);
       return false;
     } finally {

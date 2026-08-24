@@ -175,11 +175,13 @@
 
 /* Splash */
 .th-splash {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100dvh;
+  overflow: hidden;
   background: var(--th-color-bg);
   animation: th-fade-in var(--th-duration-slow) var(--th-ease-decelerate);
 }
@@ -204,23 +206,33 @@
   font-size: var(--th-font-size-sm);
   color: var(--th-color-text-secondary);
 }
+.th-splash__spinner {
+  margin-top: var(--th-space-4);
+}
 
 /* Onboarding layout */
 .th-onboarding {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 100%;
   min-height: 100dvh;
+  overflow: hidden;
+  background:
+    radial-gradient(130% 55% at 100% 0%, var(--th-color-blush) 0%, transparent 50%),
+    linear-gradient(180deg, var(--th-color-bg) 0%, var(--th-color-cream) 100%);
 }
 .th-onboarding-header {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--th-space-3);
   min-height: var(--th-header-height);
   padding: 0 var(--th-space-4);
-  background-color: var(--th-color-surface);
-  border-bottom: var(--th-border-width-thin) solid var(--th-color-divider);
+  background-color: transparent;
+  border-bottom: none;
 }
 .th-onboarding-content {
   flex: 1 1 auto;
@@ -229,39 +241,60 @@
   padding: var(--th-space-6) var(--th-space-4);
 }
 
-/* Step indicator dots */
-.th-onboarding-dots {
+/* Numbered step indicator (references 03–06) */
+.th-onboarding-steps {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--th-space-2);
-  padding: var(--th-space-4) 0 var(--th-space-2);
+  padding: var(--th-space-3) 0 var(--th-space-2);
 }
-.th-onboarding-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--th-radius-circle);
+.th-onboarding-steps__item {
+  display: flex;
+  align-items: center;
+}
+.th-onboarding-steps__line {
+  width: 2.25rem;
+  height: 2px;
+  border-radius: var(--th-radius-pill);
   background-color: var(--th-color-border);
-  transition: background-color var(--th-duration-normal) var(--th-ease-standard),
-    transform var(--th-duration-fast) var(--th-ease-standard);
+  margin: 0 var(--th-space-1);
+  transition: background-color var(--th-duration-normal) var(--th-ease-standard);
 }
-.th-onboarding-dot--active {
-  background-color: var(--th-color-burgundy);
-  transform: scale(1.25);
-}
-.th-onboarding-dot--done {
+.th-onboarding-steps__line--done {
   background-color: var(--th-color-rose-muted);
 }
-
-/* Welcome screen */
-.th-onboarding-welcome {
+.th-onboarding-steps__circle {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--th-space-6);
-  padding: var(--th-space-8) 0;
-  text-align: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--th-radius-circle);
+  border: 2px solid var(--th-color-border);
+  background-color: var(--th-color-surface);
+  color: var(--th-color-text-secondary);
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  transition: background-color var(--th-duration-normal) var(--th-ease-standard),
+    border-color var(--th-duration-normal) var(--th-ease-standard),
+    color var(--th-duration-normal) var(--th-ease-standard),
+    transform var(--th-duration-fast) var(--th-ease-standard);
 }
+.th-onboarding-steps__circle--active {
+  background-color: var(--th-color-burgundy);
+  border-color: var(--th-color-burgundy);
+  color: var(--th-color-text-on-accent);
+  transform: scale(1.12);
+  box-shadow: var(--th-shadow-md);
+}
+.th-onboarding-steps__circle--done {
+  background-color: var(--th-color-blush);
+  border-color: var(--th-color-rose-muted);
+  color: var(--th-color-burgundy);
+}
+
 .th-welcome-illustration {
   display: flex;
   align-items: center;
@@ -369,6 +402,179 @@
 .th-onboarding-complete {
   justify-content: center;
   min-height: 60dvh;
+}
+
+/* Setup complete (reference 07) */
+.th-setup-complete {
+  align-items: center;
+  text-align: center;
+}
+.th-setup-complete__subtitle {
+  margin: calc(-1 * var(--th-space-3)) 0 0;
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-burgundy);
+}
+:root[data-th-theme='dark'] .th-setup-complete__subtitle {
+  color: var(--th-color-burgundy-light);
+}
+.th-setup-complete__card {
+  width: 100%;
+  max-width: 360px;
+  padding: var(--th-space-5);
+  text-align: left;
+}
+.th-setup-complete__card-title {
+  margin: 0 0 var(--th-space-3);
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  text-align: center;
+}
+.th-setup-complete__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+.th-setup-complete__item {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-3) 0;
+  border-bottom: var(--th-border-width-thin) solid var(--th-color-divider);
+}
+.th-setup-complete__item:last-child {
+  border-bottom: none;
+}
+.th-setup-complete__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 auto;
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-burgundy);
+  color: var(--th-color-text-on-accent);
+}
+.th-setup-complete__label {
+  flex: 1 1 auto;
+  color: var(--th-color-text-primary);
+}
+.th-setup-complete__detail {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}
+.th-setup-complete__signoff {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-2);
+  color: var(--th-color-burgundy);
+}
+.th-setup-complete__signoff p {
+  margin: 0;
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-primary);
+}
+
+/* ===== First Launch / Welcome (reference 02) =====
+   Full-screen branded welcome — no header bar, no step dots. */
+.th-welcome {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 60% at 100% 0%, var(--th-color-blush) 0%, transparent 55%),
+    radial-gradient(120% 55% at 0% 100%, var(--th-color-blush) 0%, transparent 50%),
+    linear-gradient(180deg, var(--th-color-bg) 0%, var(--th-color-cream) 45%, var(--th-color-blush) 130%);
+}
+.th-welcome__inner {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-5);
+  padding: var(--th-space-8) var(--th-space-6);
+  text-align: center;
+}
+.th-welcome__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.th-welcome__hero {
+  display: block;
+  width: min(100%, 360px);
+  height: auto;
+  filter: drop-shadow(0 10px 24px rgba(74, 15, 29, 0.14));
+}
+.th-welcome__title {
+  margin: 0;
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-3xl);
+  font-weight: var(--th-font-weight-bold);
+  line-height: var(--th-line-height-tight);
+  color: var(--th-color-text-primary);
+}
+.th-welcome__title-brand {
+  color: var(--th-color-burgundy);
+}
+:root[data-th-theme='dark'] .th-welcome__title-brand {
+  color: var(--th-color-burgundy-light);
+}
+.th-welcome__divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--th-space-3);
+  color: var(--th-color-rose-muted);
+}
+.th-welcome__divider-line {
+  width: 2.5rem;
+  height: 1px;
+  background-color: var(--th-color-rose-muted);
+  opacity: 0.55;
+}
+.th-welcome__text {
+  margin: 0;
+  max-width: 34ch;
+  font-size: var(--th-font-size-md);
+  line-height: var(--th-line-height-relaxed);
+  color: var(--th-color-text-secondary);
+}
+.th-welcome__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-3);
+  width: 100%;
+  max-width: 340px;
+  margin-top: var(--th-space-2);
+}
+.th-welcome__actions .th-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--th-space-2);
+}
+.th-welcome__privacy {
+  margin: 0;
+  font-size: var(--th-font-size-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--th-color-text-secondary);
+  opacity: 0.85;
 }
 
 /* ===== App Shell (Phase 6) ===== */

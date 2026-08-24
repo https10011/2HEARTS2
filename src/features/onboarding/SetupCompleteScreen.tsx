@@ -1,45 +1,78 @@
 /**
- * SetupCompleteScreen (Phase 5).
+ * SetupCompleteScreen (Phase 5; visual restoration per reference 07).
  *
- * Final onboarding screen. Confirms setup completion and navigates
- * to the main app home.
+ * Final onboarding screen: paired-hearts celebration, a truthful summary
+ * card of what was set up (app-lock reflects the user's actual choice),
+ * and the entrance into the app.
  */
 
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, OnboardingArt, RoseLilyDecoration } from '../../components/index.ts';
+import {
+  Button,
+  IconCheck,
+  IconHeart,
+  OnboardingArt,
+} from '../../components/index.ts';
+import { appSettingsStore } from '../../core/appSettings.ts';
 import { OnboardingLayout } from './OnboardingLayout.tsx';
 
 export function SetupCompleteScreen() {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Apply settings immediately on reaching the complete screen
-    // (text size + theme may have changed during personalization)
-  }, []);
+  const appLockEnabled = appSettingsStore.getState().appLockEnabled;
 
   const handleEnter = () => {
     navigate(RoutePath.appHome);
   };
 
+  const summaryItems: { label: string; detail?: string }[] = [
+    { label: 'Your profile' },
+    { label: 'Your special someone' },
+    { label: 'Your connection' },
+    { label: 'Your preferences' },
+    { label: 'App lock', detail: appLockEnabled ? 'On' : 'Skipped' },
+  ];
+
   return (
     <OnboardingLayout currentPath={RoutePath.onboardingComplete} showBack={false}>
-      <div className="th-onboarding-form th-onboarding-complete th-welcome-glow">
-        <RoseLilyDecoration variant={6} size={80} position="top-left" opacity={0.15} animated />
-        <RoseLilyDecoration variant={15} size={75} position="bottom-right" opacity={0.12} animated />
+      <div className="th-onboarding-form th-onboarding-complete th-setup-complete">
         {/* Celebration illustration (centralized decorative art — Phase 23) */}
-        <div className="th-welcome-illustration">
-          <OnboardingArt variant="celebration-heart" size={120} />
+        <div className="th-welcome-illustration th-stagger-item">
+          <OnboardingArt variant="paired-hearts-check" size={170} />
         </div>
 
-        <h2 className="th-onboarding-heading">You're all set!</h2>
-        <p className="th-onboarding-description">
-          Everything is ready. Welcome to your private couple space.
-          Enjoy celebrating your relationship together.
+        <h2 className="th-onboarding-heading th-stagger-item">You're all set</h2>
+        <p className="th-setup-complete__subtitle th-stagger-item">
+          Your TwoHearts space is ready.
+        </p>
+        <p className="th-onboarding-description th-stagger-item">
+          Everything is set up. Start making memories, sharing notes, and
+          enjoying your space together.
         </p>
 
-        <div className="th-onboarding-actions">
+        <div className="th-card th-setup-complete__card th-stagger-item">
+          <h3 className="th-setup-complete__card-title">Your setup is complete</h3>
+          <ul className="th-setup-complete__list">
+            {summaryItems.map((item) => (
+              <li key={item.label} className="th-setup-complete__item">
+                <span className="th-setup-complete__check" aria-hidden="true">
+                  <IconCheck size={14} />
+                </span>
+                <span className="th-setup-complete__label">{item.label}</span>
+                {item.detail && (
+                  <span className="th-setup-complete__detail">{item.detail}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="th-setup-complete__signoff th-stagger-item">
+          <IconHeart size={16} />
+          <p>Welcome to your little space.</p>
+        </div>
+
+        <div className="th-onboarding-actions th-stagger-item">
           <Button variant="primary" full onClick={handleEnter}>
             Enter TwoHearts
           </Button>

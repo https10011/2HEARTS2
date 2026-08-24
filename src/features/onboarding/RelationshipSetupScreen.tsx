@@ -33,15 +33,17 @@ export function RelationshipSetupScreen() {
     } else if (name.length > 40) {
       newErrors.partnerName = 'Name must be 40 characters or fewer.';
     }
-    if (startDate) {
-      // Validate date format
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+    // The app-state machine gates setup completion on the couple start date
+    // (appStateService.deriveStage), so it is required here — the previous
+    // "(optional)" label dead-ended onboarding at the final step.
+    if (!startDate) {
+      newErrors.startDate = 'Please enter when your journey together began.';
+    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+      newErrors.startDate = 'Please enter a valid date.';
+    } else {
+      const d = new Date(`${startDate}T00:00:00Z`);
+      if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== startDate) {
         newErrors.startDate = 'Please enter a valid date.';
-      } else {
-        const d = new Date(`${startDate}T00:00:00Z`);
-        if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== startDate) {
-          newErrors.startDate = 'Please enter a valid date.';
-        }
       }
     }
     setErrors(newErrors);
@@ -109,7 +111,7 @@ export function RelationshipSetupScreen() {
 
         <div className="th-form-group">
           <label className="th-form-label" htmlFor="start-date">
-            Relationship start date <span className="th-form-optional">(optional)</span>
+            Relationship start date
           </label>
           <Input
             id="start-date"

@@ -7,7 +7,13 @@
 
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconButton, IconBack, Button } from '../../components/index.ts';
+import {
+  IconButton,
+  IconBack,
+  IconCheck,
+  Button,
+  RoseLilyDecoration,
+} from '../../components/index.ts';
 import { ONBOARDING_STEPS, RoutePath } from '../../navigation/routes.ts';
 
 interface OnboardingLayoutProps {
@@ -51,8 +57,15 @@ export function OnboardingLayout({
     }
   };
 
+  // Numbered steps shown after the First Launch screen (reference 03–06):
+  // step 0 is the welcome experience, which has no indicator of its own.
+  const numberedSteps = progressSteps.slice(1);
+
   return (
     <div className="th-screen th-onboarding">
+      {/* Signature florals, kept quiet so forms stay readable */}
+      <RoseLilyDecoration variant={11} size={120} position="top-right" opacity={0.12} />
+      <RoseLilyDecoration variant={1} size={130} position="bottom-left" opacity={0.1} />
       {/* Header bar */}
       <header className="th-onboarding-header">
         <div
@@ -95,15 +108,32 @@ export function OnboardingLayout({
         </div>
       </header>
 
-      {/* Step indicator dots */}
-      {currentIdx >= 0 && (
-        <div className="th-onboarding-dots" role="progressbar" aria-label={`Step ${currentIdx + 1} of ${progressSteps.length}`}>
-          {progressSteps.map((step, i) => (
-            <span
-              key={step}
-              className={`th-onboarding-dot ${i === currentIdx ? 'th-onboarding-dot--active' : ''} ${i < currentIdx ? 'th-onboarding-dot--done' : ''}`}
-            />
-          ))}
+      {/* Numbered step indicator (setup steps after First Launch) */}
+      {currentIdx > 0 && (
+        <div
+          className="th-onboarding-steps"
+          role="progressbar"
+          aria-label={`Step ${currentIdx} of ${numberedSteps.length}`}
+        >
+          {numberedSteps.map((step, i) => {
+            const stepNumber = i + 1;
+            const isDone = stepNumber < currentIdx;
+            const isActive = stepNumber === currentIdx;
+            return (
+              <span key={step} className="th-onboarding-steps__item">
+                {i > 0 && (
+                  <span
+                    className={`th-onboarding-steps__line ${isDone || isActive ? 'th-onboarding-steps__line--done' : ''}`}
+                  />
+                )}
+                <span
+                  className={`th-onboarding-steps__circle ${isActive ? 'th-onboarding-steps__circle--active' : ''} ${isDone ? 'th-onboarding-steps__circle--done' : ''}`}
+                >
+                  {isDone ? <IconCheck size={14} /> : stepNumber}
+                </span>
+              </span>
+            );
+          })}
         </div>
       )}
 

@@ -13,6 +13,7 @@ This guide explains how to customize TwoHearts **without editing feature logic**
 | I want to change… | Go here |
 |---|---|
 | App logo | `src/assets/branding/twohearts-logo.svg` |
+| Welcome photo (First Launch) | `src/assets/images/onboarding-welcome-photo.svg` |
 | App icon (launcher) | `src/assets/branding/twohearts-app-icon.svg` (reference vector; Android launchers live in `android/app/src/main/res/mipmap-*/`) |
 | Colors | `src/customization/theme/ownerTheme.ts` |
 | Font families | `src/customization/theme/ownerTheme.ts` (`fontFamilyBase`, `fontFamilyDisplay`) |
@@ -28,6 +29,15 @@ This guide explains how to customize TwoHearts **without editing feature logic**
 | Feature implementation code | `src/features/<feature>/` (added in later phases) |
 
 ---
+
+## CHANGE WELCOME PHOTO
+
+- **Path:** `src/assets/images/onboarding-welcome-photo.svg`
+- **Shown on:** the First Launch / Welcome screen (`WelcomeScreen`).
+- **How:** Replace this one file with your own artwork or an exported photo
+  (SVG preferred; keep the same filename). No code changes required.
+- Keep a wide-ish aspect (the default is 720×560) so the layout stays stable.
+- The asset is bundled locally — do not link to external URLs (offline-first).
 
 ## CHANGE APP LOGO
 

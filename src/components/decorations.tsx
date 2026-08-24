@@ -97,13 +97,48 @@ export function RoseLilyDecoration({
 }
 
 /** Onboarding vector art variants (centralized inline illustrations). */
-export type OnboardingArtVariant = 'couple-hearts' | 'celebration-heart';
+export type OnboardingArtVariant =
+  | 'couple-hearts'
+  | 'celebration-heart'
+  | 'paired-hearts-check';
 export interface OnboardingArtProps {
   variant: OnboardingArtVariant;
   size?: number;
 }
 
 export function OnboardingArt({ variant, size = 160 }: OnboardingArtProps) {
+  if (variant === 'paired-hearts-check') {
+    // Reference 07 — two overlapping hearts with a check medallion.
+    return (
+      <svg width={size} height={size * 0.82} viewBox="0 0 200 164" fill="none" aria-hidden="true">
+        <path
+          d="M84 128C84 128 28 92 28 56C28 36 44 24 62 24C72 24 80 28 84 34C88 28 96 24 106 24C124 24 140 36 140 56C140 92 84 128 84 128Z"
+          fill="var(--th-color-burgundy)"
+        />
+        <path
+          d="M132 136C132 136 88 108 88 80C88 64 100 54 114 54C122 54 128 57 132 62C136 57 142 54 150 54C164 54 176 64 176 80C176 108 132 136 132 136Z"
+          fill="var(--th-color-blush)"
+          stroke="var(--th-color-rose-muted)"
+          strokeWidth="2"
+        />
+        <circle
+          cx="112"
+          cy="116"
+          r="34"
+          fill="var(--th-color-surface)"
+          stroke="var(--th-color-beige)"
+          strokeWidth="3"
+        />
+        <path
+          d="M96 116l12 12 22-24"
+          stroke="var(--th-color-burgundy)"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
   if (variant === 'celebration-heart') {
     return (
       <svg width={size} height={size} viewBox="0 0 120 120" fill="none" aria-hidden="true">
