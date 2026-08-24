@@ -309,4 +309,14 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   Note: SqlJsAdapter (browser dev/tests) is in-memory; rendered QA must
   avoid full reloads between seeding and inspection (onboarding → SPA
   navigation only). Android uses the persistent native adapter.
+- Stage 8 (Reminders + Important Dates): docs/STAGE-8-…, committed
+  b87084b — Reminders Home (filter chips, blush "next up" hero,
+  today/upcoming/history .th-reminders-* vocabulary), branded composer
+  (centralized DatePicker + NEW centralized components/TimePicker.tsx
+  wheel replacing native time input, repeat bottom sheet, Notify-me
+  Switch), productized ReminderDetail (moment card + sheet delete),
+  pure reminderSchedule.ts helpers (buildReminderGroups; hero = first
+  moment isAhead of now), IconBell/IconRepeat/IconChevronRight added to
+  the Icon set; Important Dates (Stage 4) audited, not rebuilt; local
+  notification architecture untouched; 727 tests.
 
