@@ -253,6 +253,28 @@ export function IconBell(props: IconProps) {
   );
 }
 
+/** Clock (reminder times). */
+export function IconClock(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <polyline points="12 7 12 12 15.5 14" />
+    </svg>
+  );
+}
+
+/** Repeat / recurrence. */
+export function IconRepeat(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <polyline points="17 1 21 5 17 9" />
+      <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+      <polyline points="7 23 3 19 7 15" />
+      <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+    </svg>
+  );
+}
+
 export function IconSettings(props: IconProps) {
   return (
     <svg {...base(props)} aria-hidden="true">

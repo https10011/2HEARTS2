@@ -3189,27 +3189,599 @@ html[data-th-motion='reduced'] .th-decor--animated {
 
 
 
-/* --- Enhanced reminder card: date-forward layout --- */
-.th-reminder-card--enhanced {
-  padding: var(--th-space-4) var(--th-space-5);
-  border-radius: var(--th-radius-xl);
-  border: none;
-  box-shadow: var(--th-shadow-md);
+/* ===================================================================
+   Reminders (Stage 8) — "the little things we remember for each other"
+   Branded header, filter chips, "next up" hero, today/upcoming/history
+   sections, composer fields, detail page. All colors flow through
+   existing tokens so dark mode, text scaling, and reduced motion stay
+   inherited from the design system.
+   =================================================================== */
+
+/* ----- Branded header (mirrors the Timeline vocabulary) ----- */
+.th-rem-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--th-space-3);
+  margin: var(--th-space-2) 0 var(--th-space-5);
+  min-height: var(--th-header-height);
+}
+.th-rem-header__copy {
+  flex: 1;
+  min-width: 0;
+}
+.th-rem-title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-3xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  line-height: var(--th-line-height-tight);
+  margin: 0;
+}
+.th-rem-subtitle {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: var(--th-space-1) 0 0;
+}
+.th-rem-header > .th-button {
+  color: var(--th-color-burgundy);
+  margin-top: var(--th-space-1);
+}
+
+/* ----- Filter chips ----- */
+.th-rem-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--th-space-2);
+  margin-bottom: var(--th-space-5);
+}
+
+/* ----- "Next up" hero ----- */
+.th-rem-hero {
   display: flex;
   align-items: center;
   gap: var(--th-space-4);
+  padding: var(--th-space-5);
+  margin-bottom: var(--th-space-6);
+  background: linear-gradient(
+    135deg,
+    var(--th-color-blush) 0%,
+    var(--th-color-brand-wash) 100%
+  );
+  border: var(--th-border-width-thin) solid var(--th-color-rose-muted);
+  border-radius: var(--th-radius-xl);
+  box-shadow: var(--th-shadow-md);
+  cursor: pointer;
+  transition: transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard);
+  -webkit-tap-highlight-color: transparent;
 }
-.th-reminder-card--enhanced .th-reminder-card__date {
+.th-rem-hero:active {
+  transform: scale(0.98);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-rem-hero:focus-visible {
+  outline: none;
+  box-shadow: var(--th-shadow-focus);
+}
+.th-rem-hero__badge {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-surface-elevated);
+  color: var(--th-color-burgundy);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-rem-hero__body {
+  flex: 1;
+  min-width: 0;
+}
+.th-rem-hero__when {
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--th-space-1);
+}
+.th-rem-hero__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-2xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-text-primary);
+  margin: 0 0 var(--th-space-1);
+  line-height: var(--th-line-height-tight);
+  overflow-wrap: break-word;
+}
+.th-rem-hero__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-1);
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-burgundy);
+}
+.th-rem-hero__repeat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--th-space-1);
+  margin-left: var(--th-space-2);
+  font-weight: var(--th-font-weight-medium);
+  color: var(--th-color-text-secondary);
+}
+.th-rem-hero__chevron {
+  flex: 0 0 auto;
+  color: var(--th-color-burgundy);
+  opacity: 0.6;
+}
+
+/* ----- Sections ----- */
+.th-rem-section {
+  margin-bottom: var(--th-space-5);
+}
+.th-rem-section__title {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin: 0 0 var(--th-space-3);
+}
+.th-rem-section__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+.th-rem-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-3);
+}
+
+/* ----- Reminder row ----- */
+.th-rem-row {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-4);
+  background-color: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-xl);
+  box-shadow: var(--th-shadow-sm);
+  cursor: pointer;
+  transition: transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard),
+    background-color var(--th-motion-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-rem-row:active {
+  transform: scale(0.98);
+  box-shadow: none;
+  background-color: var(--th-color-neutral-soft);
+}
+.th-rem-row:focus-visible {
+  outline: none;
+  box-shadow: var(--th-shadow-focus);
+}
+.th-rem-row__badge {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+.th-rem-row__body {
+  flex: 1;
+  min-width: 0;
+}
+.th-rem-row__date {
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-burgundy);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.th-rem-row__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin: 0;
+  line-height: var(--th-line-height-tight);
+  overflow-wrap: break-word;
+}
+.th-rem-row__excerpt {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  line-height: var(--th-line-height-normal);
+  margin: var(--th-space-1) 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.th-rem-row__time {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--th-space-1);
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-burgundy);
+}
+
+/* History rows — quiet, still readable */
+.th-rem-row--history {
+  opacity: 0.65;
+  box-shadow: none;
+}
+.th-rem-row--history .th-rem-row__title {
+  text-decoration: line-through;
+  text-decoration-color: var(--th-color-rose-muted);
+}
+.th-rem-row__history-meta {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin-top: 2px;
+}
+
+/* ----- Footer / filter-empty line ----- */
+.th-rem-footer {
+  font-size: var(--th-font-size-sm);
+  font-style: italic;
+  color: var(--th-color-text-secondary);
+  text-align: center;
+  margin: var(--th-space-6) 0 0;
+  padding-bottom: var(--th-space-16);
+}
+.th-rem-none {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  text-align: center;
+  margin: var(--th-space-6) 0;
+}
+
+/* ----- Composer (create / edit) ----- */
+.th-rem-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-5);
+}
+.th-rem-field__label {
+  display: block;
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin-bottom: var(--th-space-2);
+}
+
+/* Repeat row — blush branded field that opens the sheet */
+.th-rem-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  width: 100%;
+  min-height: var(--th-touch-target-min);
+  padding: var(--th-space-3) var(--th-space-4);
+  font-family: inherit;
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-primary);
+  background-color: var(--th-color-blush);
+  border: var(--th-border-width-thin) solid var(--th-color-rose-muted);
+  border-radius: var(--th-radius-md);
+  cursor: pointer;
+  transition: transform var(--th-motion-press),
+    background-color var(--th-motion-fast);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.th-rem-choice:active {
+  transform: scale(0.99);
+}
+.th-rem-choice:focus-visible {
+  outline: none;
+  box-shadow: var(--th-shadow-focus);
+}
+.th-rem-choice__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  color: var(--th-color-burgundy);
+}
+.th-rem-choice__text {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+.th-rem-choice__chevron {
+  flex: 0 0 auto;
+  color: var(--th-color-text-secondary);
+  opacity: 0.6;
+}
+
+/* Notify-me row */
+.th-rem-notify {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-4);
+  background-color: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-xl);
+}
+.th-rem-notify__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+.th-rem-notify__copy {
+  flex: 1;
+  min-width: 0;
+}
+.th-rem-notify__title {
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+}
+.th-rem-notify__sub {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin-top: 2px;
+}
+
+.th-rem-editor-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-3);
+  margin-top: var(--th-space-2);
+  padding-bottom: var(--th-space-16);
+}
+
+/* Repeat options sheet (inside the centralized Modal) */
+.th-rem-repeat-sheet__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-1);
+}
+.th-rem-repeat-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--th-space-3);
+  width: 100%;
+  min-height: var(--th-touch-target-min);
+  padding: var(--th-space-3) var(--th-space-4);
+  font-family: inherit;
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-primary);
+  background: none;
+  border: none;
+  border-radius: var(--th-radius-md);
+  cursor: pointer;
+  transition: background-color var(--th-motion-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-rem-repeat-option:active {
+  background-color: var(--th-color-neutral-soft);
+}
+.th-rem-repeat-option:focus-visible {
+  outline: none;
+  box-shadow: var(--th-shadow-focus);
+}
+.th-rem-repeat-option--active {
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+  font-weight: var(--th-font-weight-semibold);
+}
+.th-rem-repeat-option__label {
+  flex: 1;
+  text-align: left;
+}
+
+/* ----- Reminder detail ----- */
+.th-rem-detail__identity {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 48px;
-  padding: var(--th-space-2);
-  border-radius: var(--th-radius-md);
+  text-align: center;
+  gap: var(--th-space-3);
+  margin-bottom: var(--th-space-5);
+}
+.th-rem-detail__bell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--th-radius-circle);
   background-color: var(--th-color-blush);
   color: var(--th-color-burgundy);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-rem-detail__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-2xl);
   font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-text-primary);
+  margin: 0;
+  line-height: var(--th-line-height-tight);
+  overflow-wrap: break-word;
+}
+
+/* Schedule card — date-forward */
+.th-rem-detail__schedule {
+  padding: var(--th-space-5);
+  margin-bottom: var(--th-space-4);
+  background-color: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-xl);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-rem-detail__day {
   font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  margin-bottom: var(--th-space-1);
+}
+.th-rem-detail__time {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-3xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-text-primary);
+  line-height: var(--th-line-height-tight);
+  margin-bottom: var(--th-space-2);
+}
+.th-rem-detail__date {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}
+
+/* Detail meta rows (repeat / notification) */
+.th-rem-detail__row {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-4);
+  margin-bottom: var(--th-space-4);
+  background-color: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-xl);
+}
+.th-rem-detail__row--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--th-space-2);
+}
+.th-rem-detail__row-top {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+}
+.th-rem-detail__row-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+.th-rem-detail__row-label {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+}
+.th-rem-detail__row-value {
+  flex: 0 0 auto;
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-secondary);
+}
+.th-rem-detail__row-sub {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: 0;
+  padding-left: calc(36px + var(--th-space-3));
+}
+
+/* Note card */
+.th-rem-detail__note {
+  padding: var(--th-space-4) var(--th-space-5);
+  margin-bottom: var(--th-space-4);
+  background-color: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-xl);
+}
+.th-rem-detail__note-label {
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--th-space-1);
+}
+.th-rem-detail__note-text {
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-primary);
+  line-height: var(--th-line-height-relaxed);
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* Status line + actions */
+.th-rem-detail__status {
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-burgundy);
+  text-align: center;
+  margin: var(--th-space-2) 0 var(--th-space-4);
+}
+.th-rem-detail__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-3);
+  padding-bottom: var(--th-space-16);
+}
+.th-rem-detail__delete {
+  color: var(--th-color-error);
+  transition: opacity var(--th-motion-fast);
+}
+
+/* Delete confirmation sheet (inside the centralized Modal) */
+.th-rem-delete-sheet__text {
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-secondary);
+  text-align: center;
+  margin: 0 0 var(--th-space-4);
+  overflow-wrap: break-word;
+}
+.th-rem-delete-sheet__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-3);
+}
+
+/* Reduced motion: static cards, no pressed transforms */
+:root[data-th-motion='reduced'] .th-rem-hero,
+:root[data-th-motion='reduced'] .th-rem-row,
+:root[data-th-motion='reduced'] .th-rem-choice,
+:root[data-th-motion='reduced'] .th-rem-repeat-option,
+:root[data-th-motion='reduced'] .th-rem-detail__delete {
+  transition: none;
+}
+:root[data-th-motion='reduced'] .th-rem-hero:active,
+:root[data-th-motion='reduced'] .th-rem-row:active,
+:root[data-th-motion='reduced'] .th-rem-choice:active {
+  transform: none;
 }
 
 /* --- Enhanced FAB: subtle pulse on hover --- */
