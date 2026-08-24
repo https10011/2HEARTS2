@@ -272,3 +272,15 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
 - user.name=openhands, user.email=openhands@all-hands.dev (local config).
 - Shallow clone; unshallow if full history needed.
 - `.gitignore` covers node_modules/, dist/, android/app/build/, .gradle/, local.properties.
+
+## Stage notes (post-Phase 34)
+- Stage 2 (onboarding): branded DatePicker centralized; docs/STAGE-2-…
+- Stage 3 (Home + global shell): docs/STAGE-3-…, committed def00d8..8fd067f.
+- Stage 4 (Us / Relationship Experience): docs/STAGE-4-…, committed
+  f0d2a83 + 08b2b78 — couple-first Us hub, new /app/us/counter route,
+  shared <CouplePair>, ImportantDates branded DatePicker + badges,
+  Profile/Relationship Settings pickers, 674 tests.
+  Note: SqlJsAdapter (browser dev/tests) is in-memory; rendered QA must
+  avoid full reloads between seeding and inspection (onboarding → SPA
+  navigation only). Android uses the persistent native adapter.
+
