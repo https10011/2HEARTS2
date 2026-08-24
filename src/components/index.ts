@@ -9,6 +9,8 @@ export { EmptyState } from './EmptyState';
 export { LoadingState } from './LoadingState';
 export { Modal } from './Modal';
 export { Switch } from './Switch';
+export { DatePicker } from './DatePicker';
+export type { DatePickerProps } from './DatePicker';
 export { ToastProvider, useToast, TOAST_DURATION_MS } from './toast';
 export type { ToastApi, ToastMessage, ToastVariant } from './toast';
 export { BrandLogo } from './BrandLogo';

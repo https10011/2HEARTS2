@@ -1,13 +1,20 @@
 /**
- * PersonalizationSetupScreen (Phase 5).
+ * PersonalizationSetupScreen (Phase 5; Stage 2 visual productization).
  *
  * Captures text-size and theme-mode preferences. Persists to appSettings.
+ *
+ * Stage 2: added visual polish — personal illustration, warm micro-copy,
+ * staggered entrance, improved option chip styling with preview context.
  */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button } from '../../components/index.ts';
+import {
+  Button,
+  OnboardingArt,
+  RoseLilyDecoration,
+} from '../../components/index.ts';
 import { OnboardingLayout } from './OnboardingLayout.tsx';
 import { useOnboarding } from './useOnboarding.ts';
 import { appSettingsStore, type ThemeMode } from '../../core/appSettings.ts';
@@ -37,14 +44,23 @@ export function PersonalizationSetupScreen() {
 
   return (
     <OnboardingLayout currentPath={RoutePath.onboardingPersonalization}>
+      {/* Subtle decorative accent */}
+      <RoseLilyDecoration variant={16} size={100} position="bottom-left" opacity={0.08} />
+
       <div className="th-onboarding-form">
-        <h2 className="th-onboarding-heading">Make it yours</h2>
-        <p className="th-onboarding-description">
-          Choose your preferred text size and appearance. You can change these anytime.
-        </p>
+        {/* Emotional header */}
+        <div className="th-stagger-item" style={{ textAlign: 'center' }}>
+          <div className="th-welcome-illustration" aria-hidden="true">
+            <OnboardingArt variant="personalization-card" size={64} />
+          </div>
+          <h2 className="th-onboarding-heading">Make it yours</h2>
+          <p className="th-onboarding-description">
+            Choose how TwoHearts looks and feels. You can always change these later.
+          </p>
+        </div>
 
         {/* Text size selection */}
-        <div className="th-form-group">
+        <div className="th-form-group th-stagger-item">
           <label className="th-form-label">Text size</label>
           <div className="th-option-group" role="radiogroup" aria-label="Text size">
             {TEXT_SIZE_OPTIONS.map((size) => (
@@ -64,20 +80,20 @@ export function PersonalizationSetupScreen() {
         </div>
 
         {/* Theme mode selection */}
-        <div className="th-form-group">
+        <div className="th-form-group th-stagger-item">
           <label className="th-form-label">Appearance</label>
-          <div className="th-option-group" role="radiogroup" aria-label="Appearance">
+          <div className="th-personal-themes" role="radiogroup" aria-label="Appearance">
             {THEME_MODE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
                 role="radio"
                 aria-checked={themeMode === opt.value}
-                className={`th-option-chip ${themeMode === opt.value ? 'th-option-chip--active' : ''}`}
+                className={`th-personal-theme ${themeMode === opt.value ? 'th-personal-theme--active' : ''}`}
                 onClick={() => setThemeMode(opt.value)}
                 disabled={isLoading}
               >
-                {opt.label}
+                <span className="th-personal-theme__label">{opt.label}</span>
               </button>
             ))}
           </div>
@@ -89,7 +105,7 @@ export function PersonalizationSetupScreen() {
           </p>
         )}
 
-        <div className="th-onboarding-actions">
+        <div className="th-onboarding-actions th-stagger-item">
           <Button
             variant="primary"
             full

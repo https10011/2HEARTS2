@@ -1,15 +1,26 @@
 /**
- * RelationshipSetupScreen (Phase 5).
+ * RelationshipSetupScreen (Phase 5; Stage 2 visual productization).
  *
  * Captures the partner's display name, optional birth date, and the
  * relationship start date. Validates required fields. Persists to the
  * couple relationship via RelationshipService.
+ *
+ * Stage 2: replaced native `<input type="date">` with branded DatePicker
+ * and added visual polish — decorative illustration, branded card layout,
+ * emotional micro-copy.
  */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Input } from '../../components/index.ts';
+import {
+  Button,
+  Input,
+  DatePicker,
+  IconHeart,
+  OnboardingArt,
+  RoseLilyDecoration,
+} from '../../components/index.ts';
 import { OnboardingLayout } from './OnboardingLayout.tsx';
 import { useOnboarding } from './useOnboarding.ts';
 
@@ -65,13 +76,22 @@ export function RelationshipSetupScreen() {
 
   return (
     <OnboardingLayout currentPath={RoutePath.onboardingRelationship}>
-      <div className="th-onboarding-form">
-        <h2 className="th-onboarding-heading">Your relationship</h2>
-        <p className="th-onboarding-description">
-          Tell us about your partner and when your journey together began.
-        </p>
+      {/* Subtle decorative accent */}
+      <RoseLilyDecoration variant={7} size={100} position="bottom-right" opacity={0.08} />
 
-        <div className="th-form-group">
+      <div className="th-onboarding-form">
+        {/* Emotional header with illustration */}
+        <div className="th-stagger-item" style={{ textAlign: 'center' }}>
+          <div className="th-welcome-illustration" aria-hidden="true">
+            <OnboardingArt variant="relationship-hearts" size={64} />
+          </div>
+          <h2 className="th-onboarding-heading">Your relationship</h2>
+          <p className="th-onboarding-description">
+            Tell us about the person who makes your heart feel at home.
+          </p>
+        </div>
+
+        <div className="th-form-group th-stagger-item">
           <label className="th-form-label" htmlFor="partner-name">
             Partner's name
           </label>
@@ -96,33 +116,36 @@ export function RelationshipSetupScreen() {
           )}
         </div>
 
-        <div className="th-form-group">
+        <div className="th-form-group th-stagger-item">
           <label className="th-form-label" htmlFor="partner-birthday">
             Partner's birthday <span className="th-form-optional">(optional)</span>
           </label>
-          <Input
-            id="partner-birthday"
-            type="date"
+          <DatePicker
             value={partnerBirthDate}
-            onChange={(e) => setPartnerBirthDate(e.target.value)}
+            onChange={setPartnerBirthDate}
+            label="Partner's birthday"
+            placeholder="Tap to choose a date"
             disabled={isLoading}
           />
         </div>
 
-        <div className="th-form-group">
+        <div className="th-form-group th-stagger-item">
           <label className="th-form-label" htmlFor="start-date">
             Relationship start date
           </label>
-          <Input
-            id="start-date"
-            type="date"
+          <p className="th-form-hint">
+            <IconHeart size={13} /> When your journey together began
+          </p>
+          <DatePicker
             value={startDate}
-            onChange={(e) => {
-              setStartDate(e.target.value);
+            onChange={(val) => {
+              setStartDate(val);
               if (errors.startDate) setErrors((prev) => ({ ...prev, startDate: undefined }));
             }}
+            label="Relationship start date"
+            placeholder="Tap to choose a date"
             disabled={isLoading}
-            aria-invalid={!!errors.startDate}
+            error={!!errors.startDate}
             aria-describedby={errors.startDate ? 'start-date-error' : undefined}
           />
           {errors.startDate && (
@@ -138,7 +161,7 @@ export function RelationshipSetupScreen() {
           </p>
         )}
 
-        <div className="th-onboarding-actions">
+        <div className="th-onboarding-actions th-stagger-item">
           <Button
             variant="primary"
             full

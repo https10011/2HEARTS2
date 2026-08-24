@@ -1,9 +1,13 @@
 /**
- * SetupCompleteScreen (Phase 5; visual restoration per reference 07).
+ * SetupCompleteScreen (Phase 5; Stage 2 visual productization; visual restoration per reference 07).
  *
  * Final onboarding screen: paired-hearts celebration, a truthful summary
  * card of what was set up (app-lock reflects the user's actual choice),
  * and the entrance into the app.
+ *
+ * Stage 2: enhanced with staggered celebration elements, warmer emotional
+ * design, branded summary card with visual hierarchy, and a heartfelt
+ * sign-off moment.
  */
 
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +17,7 @@ import {
   IconCheck,
   IconHeart,
   OnboardingArt,
+  RoseLilyDecoration,
 } from '../../components/index.ts';
 import { appSettingsStore } from '../../core/appSettings.ts';
 import { OnboardingLayout } from './OnboardingLayout.tsx';
@@ -35,6 +40,10 @@ export function SetupCompleteScreen() {
 
   return (
     <OnboardingLayout currentPath={RoutePath.onboardingComplete} showBack={false}>
+      {/* Celebration florals */}
+      <RoseLilyDecoration variant={11} size={130} position="top-right" opacity={0.2} animated />
+      <RoseLilyDecoration variant={1} size={120} position="bottom-left" opacity={0.15} animated />
+
       <div className="th-onboarding-form th-onboarding-complete th-setup-complete">
         {/* Celebration illustration (centralized decorative art — Phase 23) */}
         <div className="th-welcome-illustration th-stagger-item">
@@ -50,6 +59,7 @@ export function SetupCompleteScreen() {
           enjoying your space together.
         </p>
 
+        {/* Branded summary card */}
         <div className="th-card th-setup-complete__card th-stagger-item">
           <h3 className="th-setup-complete__card-title">Your setup is complete</h3>
           <ul className="th-setup-complete__list">
@@ -67,13 +77,16 @@ export function SetupCompleteScreen() {
           </ul>
         </div>
 
+        {/* Emotional sign-off */}
         <div className="th-setup-complete__signoff th-stagger-item">
           <IconHeart size={16} />
           <p>Welcome to your little space.</p>
         </div>
 
+        {/* Primary action */}
         <div className="th-onboarding-actions th-stagger-item">
           <Button variant="primary" full onClick={handleEnter}>
+            <IconHeart size={16} />
             Enter TwoHearts
           </Button>
         </div>

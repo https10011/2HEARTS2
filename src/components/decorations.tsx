@@ -100,7 +100,11 @@ export function RoseLilyDecoration({
 export type OnboardingArtVariant =
   | 'couple-hearts'
   | 'celebration-heart'
-  | 'paired-hearts-check';
+  | 'paired-hearts-check'
+  | 'relationship-hearts'
+  | 'personal-profile'
+  | 'personalization-card'
+  | 'security-lock';
 export interface OnboardingArtProps {
   variant: OnboardingArtVariant;
   size?: number;
@@ -159,6 +163,76 @@ export function OnboardingArt({ variant, size = 160 }: OnboardingArtProps) {
         <circle cx="85" cy="38" r="2.5" fill="var(--th-color-rose-muted)" />
         <circle cx="30" cy="65" r="1.5" fill="var(--th-color-burgundy-light)" />
         <circle cx="90" cy="62" r="2" fill="var(--th-color-burgundy-light)" />
+      </svg>
+    );
+  }
+  if (variant === 'relationship-hearts') {
+    return (
+      <svg width={size} height={size * 0.88} viewBox="0 0 160 140" fill="none" aria-hidden="true">
+        <path
+          d="M80 120C80 120 30 85 30 52C30 34 42 24 56 24C65 24 73 28 80 36C87 28 95 24 104 24C118 24 130 34 130 52C130 85 80 120 80 120Z"
+          fill="var(--th-color-blush)"
+          stroke="var(--th-color-burgundy)"
+          strokeWidth="2"
+        />
+        <path
+          d="M60 68C60 68 48 60 48 52C48 46 52 42 58 42C61 42 63 44 64 46C65 44 67 42 70 42C76 42 80 46 80 52C80 60 68 68 68 68"
+          fill="var(--th-color-rose-muted)"
+          opacity="0.5"
+        />
+        <path
+          d="M92 68C92 68 80 60 80 52C80 46 84 42 90 42C93 42 95 44 96 46C97 44 99 42 102 42C108 42 112 46 112 52C112 60 100 68 100 68"
+          fill="var(--th-color-rose-muted)"
+          opacity="0.3"
+        />
+      </svg>
+    );
+  }
+  if (variant === 'personal-profile') {
+    return (
+      <svg width={size} height={size * 0.93} viewBox="0 0 120 110" fill="none" aria-hidden="true">
+        <circle cx="60" cy="44" r="28" fill="var(--th-color-blush)" stroke="var(--th-color-burgundy)" strokeWidth="2" />
+        <circle cx="60" cy="36" r="12" fill="var(--th-color-surface)" stroke="var(--th-color-rose-muted)" strokeWidth="1.5" />
+        <path
+          d="M42 58C42 58 42 52 48 48C54 44 60 44 60 44C60 44 66 44 72 48C78 52 78 58 78 58C78 66 60 76 60 76C60 76 42 66 42 58Z"
+          fill="var(--th-color-burgundy)"
+          opacity="0.15"
+        />
+        <circle cx="60" cy="96" r="6" fill="var(--th-color-rose-muted)" opacity="0.3" />
+        <path
+          d="M52 96L56 92L60 96L64 92L68 96"
+          stroke="var(--th-color-burgundy)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          opacity="0.3"
+        />
+      </svg>
+    );
+  }
+  if (variant === 'personalization-card') {
+    return (
+      <svg width={size} height={size * 0.92} viewBox="0 0 120 110" fill="none" aria-hidden="true">
+        <rect x="20" y="16" width="80" height="70" rx="16" fill="var(--th-color-blush)" stroke="var(--th-color-burgundy)" strokeWidth="2" />
+        <rect x="32" y="28" width="56" height="8" rx="4" fill="var(--th-color-rose-muted)" opacity="0.3" />
+        <rect x="32" y="42" width="40" height="8" rx="4" fill="var(--th-color-rose-muted)" opacity="0.2" />
+        <rect x="32" y="56" width="48" height="8" rx="4" fill="var(--th-color-rose-muted)" opacity="0.15" />
+        <circle cx="60" cy="88" r="4" fill="var(--th-color-burgundy)" opacity="0.3" />
+      </svg>
+    );
+  }
+  if (variant === 'security-lock') {
+    return (
+      <svg width={size} height={size * 0.92} viewBox="0 0 120 110" fill="none" aria-hidden="true">
+        <rect x="28" y="48" width="64" height="50" rx="12" fill="var(--th-color-blush)" stroke="var(--th-color-burgundy)" strokeWidth="2" />
+        <path
+          d="M44 48V36C44 27.2 51.2 20 60 20C68.8 20 76 27.2 76 36V48"
+          stroke="var(--th-color-burgundy)"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <circle cx="60" cy="72" r="8" fill="var(--th-color-surface)" stroke="var(--th-color-burgundy)" strokeWidth="2" />
+        <circle cx="60" cy="72" r="3" fill="var(--th-color-burgundy)" />
+        <line x1="60" y1="75" x2="60" y2="86" stroke="var(--th-color-burgundy)" strokeWidth="2" strokeLinecap="round" />
       </svg>
     );
   }

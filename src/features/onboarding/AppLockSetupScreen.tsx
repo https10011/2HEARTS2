@@ -1,14 +1,24 @@
 /**
- * AppLockSetupScreen (Phase 5).
+ * AppLockSetupScreen (Phase 5; Stage 2 visual productization).
  *
  * Optional app-lock setup. Users can skip or set a 4-8 digit PIN.
  * Delegates to the existing AppLockService (Phase 3/4).
+ *
+ * Stage 2: added visual polish — security-themed illustration,
+ * warm emotional framing, improved PIN input presentation,
+ * staggered entrance, branded card feel.
  */
 
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Input } from '../../components/index.ts';
+import {
+  Button,
+  Input,
+  OnboardingArt,
+  RoseLilyDecoration,
+  IconLock,
+} from '../../components/index.ts';
 import { OnboardingLayout } from './OnboardingLayout.tsx';
 import { useOnboarding } from './useOnboarding.ts';
 
@@ -52,15 +62,24 @@ export function AppLockSetupScreen() {
       onSkip={handleSkip}
       skipLoading={isLoading}
     >
-      <div className="th-onboarding-form">
-        <h2 className="th-onboarding-heading">Lock your app</h2>
-        <p className="th-onboarding-description">
-          Protect your private space with a PIN. You can set this up later in Settings.
-        </p>
+      {/* Subtle decorative accent */}
+      <RoseLilyDecoration variant={12} size={100} position="bottom-right" opacity={0.07} />
 
-        <div className="th-form-group">
+      <div className="th-onboarding-form">
+        {/* Emotional header with security illustration */}
+        <div className="th-stagger-item" style={{ textAlign: 'center' }}>
+          <div className="th-welcome-illustration" aria-hidden="true">
+            <OnboardingArt variant="security-lock" size={64} />
+          </div>
+          <h2 className="th-onboarding-heading">Lock your app</h2>
+          <p className="th-onboarding-description">
+            Protect your private space with a PIN. Only you can unlock TwoHearts.
+          </p>
+        </div>
+
+        <div className="th-form-group th-stagger-item">
           <label className="th-form-label" htmlFor="lock-pin">
-            Create a PIN
+            <IconLock size={14} /> Create a PIN
           </label>
           <Input
             id="lock-pin"
@@ -80,7 +99,7 @@ export function AppLockSetupScreen() {
           />
         </div>
 
-        <div className="th-form-group">
+        <div className="th-form-group th-stagger-item">
           <label className="th-form-label" htmlFor="lock-pin-confirm">
             Confirm PIN
           </label>
@@ -113,13 +132,14 @@ export function AppLockSetupScreen() {
           </p>
         )}
 
-        <div className="th-onboarding-actions">
+        <div className="th-onboarding-actions th-stagger-item">
           <Button
             variant="primary"
             full
             onClick={handleEnable}
             disabled={isLoading || !pin || !confirmPin}
           >
+            <IconLock size={16} />
             {isLoading ? 'Setting up…' : 'Enable app lock'}
           </Button>
           <Button
