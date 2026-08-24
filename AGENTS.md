@@ -290,6 +290,18 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   notes CSS replaced by Stage 6 .th-notes-* vocabulary; fixed a
   pre-existing flaky Memory Match test (random shuffle could pair
   indices 0/1); 700 tests.
+- Stage 7 (Timeline + Story): docs/STAGE-7-VISUAL-PRODUCTIZATION.md
+  — TimelineHome rewritten as "Our story" narrative (branded header
+  with back, blush story banner, ring-marker spine, year anchors only
+  for multi-year stories, "Latest" emphasis card + pill, footer line);
+  AddEvent composer (native <input type="date"> replaced by the
+  centralized DatePicker; toasts); EventDetail story page (date chip,
+  "The story" section, "Your story · Chapter N" band via pure
+  chapterOf, centralized Modal delete); timelineStory.ts pure helpers
+  (formatEventDate UTC-safe, buildStoryRows, chapterOf);
+  Phase 9 timeline CSS replaced by Stage 7 .th-tl-* vocabulary
+  (.th-timeline-editor-actions kept — shared with Stage 4
+  ImportantDatesScreen); entity/service/repository untouched; 709 tests.
 - Stage 4 (Us / Relationship Experience): docs/STAGE-4-…, committed
   f0d2a83 + 08b2b78 — couple-first Us hub, new /app/us/counter route,
   shared <CouplePair>, ImportantDates branded DatePicker + badges,

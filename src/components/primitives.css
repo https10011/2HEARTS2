@@ -2104,24 +2104,95 @@ html[data-th-motion='reduced'] .th-decor--animated {
 }
 
 /* ========================================================================
-   Timeline (Phase 9)
-   ======================================================================== */
+   Timeline (Stage 7) — "Our story" chronological narrative
+   ========================================================================
+   One centralized vocabulary for Timeline Home / Add Event / Event
+   Detail. All colors flow through existing tokens so dark mode, text
+   scaling, and reduced motion stay inherited from the design system. */
 
-/* Timeline list */
+/* ----- Branded header ----- */
+.th-tl-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--th-space-3);
+  margin: var(--th-space-2) 0 var(--th-space-5);
+  min-height: var(--th-header-height);
+}
+.th-tl-header__copy {
+  flex: 1;
+  min-width: 0;
+}
+.th-tl-title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-3xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  line-height: var(--th-line-height-tight);
+  margin: 0;
+}
+.th-tl-subtitle {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: var(--th-space-1) 0 0;
+}
+.th-tl-header > .th-button {
+  color: var(--th-color-burgundy);
+  margin-top: var(--th-space-1);
+}
+
+/* ----- "Our story" banner ----- */
+.th-tl-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--th-space-4);
+  padding: var(--th-space-5);
+  margin-bottom: var(--th-space-6);
+  background-color: var(--th-color-blush);
+  border: var(--th-border-width-thin) solid var(--th-color-rose-muted);
+  border-radius: var(--th-radius-xl);
+}
+.th-tl-banner__copy {
+  min-width: 0;
+}
+.th-tl-banner__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-2xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  margin: 0 0 var(--th-space-1);
+}
+.th-tl-banner__text {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-primary);
+  line-height: var(--th-line-height-normal);
+  margin: 0;
+  opacity: 0.85;
+}
+.th-tl-banner__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-surface-elevated);
+  color: var(--th-color-burgundy);
+  box-shadow: var(--th-shadow-sm);
+}
+
+/* ----- Chronological spine ----- */
 .th-timeline-list {
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--th-space-16);
 }
-
-/* Timeline event row */
 .th-timeline-event {
   display: flex;
   gap: var(--th-space-3);
   min-height: 80px;
 }
-
-/* Connector: dot + vertical line */
 .th-timeline-event__connector {
   display: flex;
   flex-direction: column;
@@ -2130,41 +2201,108 @@ html[data-th-motion='reduced'] .th-decor--animated {
   flex-shrink: 0;
   padding-top: var(--th-space-4);
 }
+.th-timeline-event__connector--bare {
+  padding-top: 0;
+}
+/* Ring marker: warm halo so the spine reads as a journey, not a list. */
 .th-timeline-event__dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: var(--th-color-burgundy);
-  border: 2px solid var(--th-color-surface);
-  box-shadow: 0 0 0 2px var(--th-color-burgundy);
+  width: 16px;
+  height: 16px;
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-surface);
+  border: 2px solid var(--th-color-burgundy);
+  box-shadow: 0 0 0 3px var(--th-color-blush);
   flex-shrink: 0;
   z-index: 1;
+}
+.th-timeline-event--latest .th-timeline-event__dot {
+  background-color: var(--th-color-burgundy);
 }
 .th-timeline-event__line {
   width: 2px;
   flex: 1;
-  background-color: var(--th-color-border-default);
+  background-color: var(--th-color-rose-muted);
+  opacity: 0.55;
   min-height: 16px;
 }
 
-/* Event card */
+/* ----- Year anchor ----- */
+.th-timeline-year {
+  display: flex;
+  gap: var(--th-space-3);
+  align-items: stretch;
+}
+.th-timeline-year__label {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-rose-muted);
+  padding: var(--th-space-1) 0;
+}
+
+/* ----- Moment card ----- */
 .th-timeline-event__card {
   flex: 1;
-  position: relative;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--th-space-3);
   padding: var(--th-space-4);
   background-color: var(--th-color-surface-elevated);
-  border-radius: var(--th-radius-lg);
   border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-xl);
   box-shadow: var(--th-shadow-sm);
   cursor: pointer;
-  transition: background-color var(--th-duration-fast) var(--th-ease-standard),
-    transform var(--th-duration-fast) var(--th-ease-standard);
-  -webkit-tap-highlight-color: transparent;
   margin-bottom: var(--th-space-3);
+  transition: transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard),
+    background-color var(--th-motion-fast);
+  -webkit-tap-highlight-color: transparent;
 }
 .th-timeline-event__card:active {
   transform: scale(0.98);
+  box-shadow: none;
   background-color: var(--th-color-neutral-soft);
+}
+.th-timeline-event__card:focus-visible {
+  outline: none;
+  box-shadow: var(--th-shadow-focus);
+}
+.th-timeline-event--latest .th-timeline-event__card {
+  border-color: var(--th-color-burgundy);
+  background-color: var(--th-color-blush);
+}
+.th-timeline-event--latest .th-timeline-event__card:active {
+  background-color: var(--th-color-blush);
+}
+.th-timeline-event__badge {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--th-radius-circle);
+  background-color: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+.th-timeline-event--latest .th-timeline-event__badge {
+  background-color: var(--th-color-burgundy);
+  color: var(--th-color-text-on-accent);
+}
+.th-timeline-event__body {
+  flex: 1;
+  min-width: 0;
+}
+.th-tl-pill {
+  display: inline-block;
+  padding: var(--th-space-1) var(--th-space-3);
+  margin-bottom: var(--th-space-1);
+  border-radius: var(--th-radius-pill);
+  background-color: var(--th-color-burgundy);
+  color: var(--th-color-text-on-accent);
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
 }
 .th-timeline-event__date {
   font-size: var(--th-font-size-xs);
@@ -2174,32 +2312,68 @@ html[data-th-motion='reduced'] .th-decor--animated {
   letter-spacing: 0.5px;
   margin-bottom: var(--th-space-1);
 }
+.th-timeline-event--latest .th-timeline-event__date {
+  color: var(--th-color-burgundy-dark);
+}
 .th-timeline-event__title {
-  font-size: var(--th-font-size-md);
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
   font-weight: var(--th-font-weight-semibold);
   color: var(--th-color-text-primary);
-  margin-bottom: var(--th-space-1);
+  margin: 0 0 var(--th-space-1);
   line-height: var(--th-line-height-tight);
+  overflow-wrap: break-word;
 }
 .th-timeline-event__excerpt {
   font-size: var(--th-font-size-sm);
   color: var(--th-color-text-secondary);
   line-height: var(--th-line-height-normal);
+  margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .th-timeline-event__chevron {
-  position: absolute;
-  right: var(--th-space-4);
-  top: 50%;
-  transform: translateY(-50%);
+  flex: 0 0 auto;
+  align-self: center;
   color: var(--th-color-text-secondary);
   opacity: 0.5;
 }
 
-/* Timeline editor actions */
+/* ----- Footer line ----- */
+.th-tl-footer {
+  font-size: var(--th-font-size-sm);
+  font-style: italic;
+  color: var(--th-color-text-secondary);
+  text-align: center;
+  margin: var(--th-space-6) 0 0;
+  padding-bottom: var(--th-space-16);
+}
+
+/* ----- Add/Edit moment ----- */
+.th-tl-intro {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-2xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  line-height: var(--th-line-height-tight);
+  margin: 0 0 var(--th-space-2);
+}
+.th-tl-intro__sub {
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-secondary);
+  margin: 0 0 var(--th-space-5);
+}
+.th-tl-editor-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-3);
+  margin-top: var(--th-space-6);
+  padding-bottom: var(--th-space-16);
+}
+
+/* Shared with ImportantDatesScreen (Stage 4) — do not remove. */
 .th-timeline-editor-actions {
   display: flex;
   gap: var(--th-space-3);
@@ -2207,58 +2381,103 @@ html[data-th-motion='reduced'] .th-decor--animated {
   padding-bottom: var(--th-space-16);
 }
 
-/* Timeline detail */
-.th-timeline-detail-header {
-  display: flex;
-  justify-content: space-between;
+/* ----- Event detail (one page of the story) ----- */
+.th-tl-detail__date {
+  display: inline-flex;
   align-items: center;
-  margin-bottom: var(--th-space-5);
-}
-.th-timeline-detail-actions {
-  display: flex;
-  gap: var(--th-space-2);
-}
-.th-timeline-detail {
-  padding-bottom: var(--th-space-16);
-}
-.th-timeline-detail__date {
-  font-size: var(--th-font-size-sm);
+  gap: var(--th-space-1);
+  font-size: var(--th-font-size-xs);
   font-weight: var(--th-font-weight-semibold);
-  color: var(--th-color-burgundy);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: var(--th-space-2);
+  color: var(--th-color-rose-muted);
+  margin: 0 0 var(--th-space-2);
 }
-.th-timeline-detail__title {
+.th-tl-detail__title {
   font-family: var(--th-font-family-display);
   font-size: var(--th-font-size-2xl);
   font-weight: var(--th-font-weight-bold);
   color: var(--th-color-text-primary);
-  margin-bottom: var(--th-space-3);
+  margin: 0 0 var(--th-space-5);
   line-height: var(--th-line-height-tight);
+  overflow-wrap: break-word;
 }
-.th-timeline-detail__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--th-space-4);
-  font-size: var(--th-font-size-sm);
-  color: var(--th-color-text-secondary);
-  margin-bottom: var(--th-space-5);
-  padding-bottom: var(--th-space-4);
-  border-bottom: var(--th-border-width-thin) solid var(--th-color-divider);
+.th-tl-detail__story-label {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-burgundy);
+  margin: 0 0 var(--th-space-2);
+  padding-top: var(--th-space-4);
+  border-top: var(--th-border-width-thin) solid var(--th-color-divider);
 }
-.th-timeline-detail__content {
+.th-tl-detail__content {
   font-size: var(--th-font-size-md);
   color: var(--th-color-text-primary);
   line-height: var(--th-line-height-relaxed);
   white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
-.th-timeline-detail__content p {
-  margin-bottom: var(--th-space-2);
+.th-tl-detail__content p {
+  margin: 0 0 var(--th-space-2);
 }
-.th-timeline-detail__empty {
+.th-tl-detail__empty {
   font-style: italic;
   color: var(--th-color-text-secondary);
+}
+.th-tl-detail__chapter {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-burgundy);
+  background-color: var(--th-color-blush);
+  border-radius: var(--th-radius-lg);
+  padding: var(--th-space-3) var(--th-space-4);
+  margin: var(--th-space-5) 0 0;
+}
+.th-tl-detail__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-3);
+  margin-top: var(--th-space-6);
+}
+.th-tl-detail__delete {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--th-space-1);
+  min-height: var(--th-touch-target-min);
+  padding: var(--th-space-2) var(--th-space-4);
+  border: none;
+  background: none;
+  color: var(--th-color-error);
+  font-family: inherit;
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-medium);
+  cursor: pointer;
+  border-radius: var(--th-radius-pill);
+  transition: transform var(--th-motion-press),
+    background-color var(--th-motion-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-tl-detail__delete:active {
+  transform: scale(0.96);
+  background-color: var(--th-color-error-bg);
+}
+.th-tl-detail__delete:focus-visible {
+  outline: none;
+  box-shadow: var(--th-shadow-focus);
+}
+.th-tl-detail__meta {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  text-align: center;
+  margin: var(--th-space-5) 0 0;
+  padding-bottom: var(--th-space-16);
+}
+
+/* ----- Reduced motion ----- */
+:root[data-th-motion='reduced'] .th-timeline-event__card,
+:root[data-th-motion='reduced'] .th-tl-detail__delete {
+  transition: none;
 }
 
 /* ===== Progress bar ===== */
@@ -2968,20 +3187,7 @@ html[data-th-motion='reduced'] .th-decor--animated {
   box-shadow: var(--th-shadow-sm);
 }
 
-/* --- Enhanced timeline card: better vertical rhythm --- */
-.th-timeline-event__card--enhanced {
-  padding: var(--th-space-5);
-  border-radius: var(--th-radius-xl);
-  border: none;
-  box-shadow: var(--th-shadow-md);
-  transition:
-    transform var(--th-motion-press),
-    box-shadow var(--th-motion-standard);
-}
-.th-timeline-event__card--enhanced:active {
-  transform: scale(0.98);
-  box-shadow: var(--th-shadow-sm);
-}
+
 
 /* --- Enhanced reminder card: date-forward layout --- */
 .th-reminder-card--enhanced {

@@ -1,20 +1,37 @@
 /**
- * EventDetail (Phase 9).
+ * EventDetail (Stage 7).
  *
- * Individual timeline event view with full details, edit, and delete actions.
+ * One page from the couple's story: date-forward header, serif title,
+ * "The story" reading section, a quiet "Your story · Chapter N" band,
+ * and deliberate Edit/Delete actions. Delete confirmation uses the
+ * centralized Modal bottom-sheet (no second modal framework).
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { useTimelineService } from './useTimelineService.ts';
+import { chapterOf, formatEventDate } from './timelineStory.ts';
 import type { TimelineEventView } from '../../services/timeline/timelineService.ts';
-import { IconTrash, IconEdit, IconCalendar } from '../../components/index.ts';
+import {
+  Button,
+  Header,
+  IconBack,
+  IconButton,
+  IconCalendar,
+  IconEdit,
+  IconTrash,
+  LoadingState,
+  Modal,
+  RoseLilyDecoration,
+  useToast,
+} from '../../components/index.ts';
 
 export function EventDetail() {
   const navigate = useNavigate();
   const { eventId } = useParams<{ eventId: string }>();
-  const { getEvent, deleteEvent } = useTimelineService();
+  const { events, getEvent, deleteEvent } = useTimelineService();
+  const toast = useToast();
 
   const [event, setEvent] = useState<TimelineEventView | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,142 +65,149 @@ export function EventDetail() {
     setDeleting(true);
     try {
       await deleteEvent(eventId);
+      toast.success('Moment deleted');
       navigate(RoutePath.appTimelineRoot, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete event.');
       setDeleting(false);
       setShowDeleteConfirm(false);
+      toast.error('Could not delete moment');
     }
-  }, [eventId, deleteEvent, navigate]);
+  }, [eventId, deleteEvent, navigate, toast]);
 
-  const formatDate = (dateStr: string): string => {
-    const [year, month, day] = dateStr.split('-').map(Number);
-    const date = new Date(Date.UTC(year, month - 1, day));
-    return date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  const chapter = useMemo(
+    () => (eventId ? chapterOf(events, eventId) : null),
+    [events, eventId],
+  );
 
-  const formatTimestamp = (iso: string): string => {
-    const d = new Date(iso);
-    return d.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  const backButton = (
+    <IconButton label="Go back" onClick={() => navigate(-1)}>
+      <IconBack />
+    </IconButton>
+  );
 
   if (loading) {
     return (
-      <div className="th-content-pad">
-        <div className="th-loading-state">
-          <div className="th-spinner" />
-          <p>Loading event...</p>
-        </div>
+      <div className="th-screen">
+        <Header title="Moment" left={backButton} />
+        <LoadingState label="Opening this moment…" />
       </div>
     );
   }
 
   if (error || !event) {
     return (
-      <div className="th-content-pad">
-        <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
-            <IconCalendar size={36} />
+      <div className="th-screen">
+        <Header title="Moment" left={backButton} />
+        <div className="th-scroll th-content-pad">
+          <div className="th-empty-state th-empty-state--enhanced">
+            <div className="th-empty-state__visual">
+              <IconCalendar size={36} />
+            </div>
+            <h3 className="th-empty-state__title">Moment not found</h3>
+            <p className="th-empty-state__desc">{error ?? 'This moment may have been deleted.'}</p>
+            <button
+              className="th-btn th-btn--primary"
+              onClick={() => navigate(RoutePath.appTimelineRoot)}
+            >
+              Back to Timeline
+            </button>
           </div>
-          <h3 className="th-empty-state__title">Event not found</h3>
-          <p className="th-empty-state__desc">{error ?? 'This event may have been deleted.'}</p>
-          <button
-            className="th-btn th-btn--primary"
-            onClick={() => navigate(RoutePath.appTimelineRoot)}
-          >
-            Back to Timeline
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="th-content-pad">
-      {/* Header with actions */}
-      <div className="th-timeline-detail-header">
-        <button
-          className="th-btn th-btn--secondary th-btn--sm"
-          onClick={() => navigate(RoutePath.appTimelineRoot)}
-        >
-          ← Back
-        </button>
-        <div className="th-timeline-detail-actions">
-          <button
-            className="th-icon-btn"
-            onClick={() => navigate(`${RoutePath.appTimelineRoot}/${event.id}/edit`)}
-            aria-label="Edit event"
-          >
-            <IconEdit size={18} />
-          </button>
-          <button
-            className="th-icon-btn th-icon-btn--danger"
+    <div className="th-screen th-screen-warm">
+      <RoseLilyDecoration variant={11} size={110} position="bottom-right" opacity={0.08} />
+      <Header
+        title="Moment"
+        left={backButton}
+        right={
+          <IconButton
+            label="Delete event"
             onClick={() => setShowDeleteConfirm(true)}
-            aria-label="Delete event"
           >
-            <IconTrash size={18} />
-          </button>
-        </div>
-      </div>
+            <IconTrash />
+          </IconButton>
+        }
+      />
 
-      {/* Event content */}
-      <div className="th-timeline-detail">
-        <div className="th-timeline-detail__date">{formatDate(event.eventDate)}</div>
-        <h1 className="th-timeline-detail__title">{event.title}</h1>
-        <div className="th-timeline-detail__meta">
-          <span>Created: {formatTimestamp(event.createdAt)}</span>
-          {event.updatedAt !== event.createdAt && (
-            <span>Updated: {formatTimestamp(event.updatedAt)}</span>
-          )}
-        </div>
-        <div className="th-timeline-detail__content">
+      <div className="th-scroll th-content-pad">
+        {/* Date-forward identity */}
+        <p className="th-tl-detail__date">
+          <IconCalendar size={14} />
+          {formatEventDate(event.eventDate)}
+        </p>
+        <h1 className="th-tl-detail__title">{event.title}</h1>
+
+        {/* The story */}
+        <h2 className="th-tl-detail__story-label">The story</h2>
+        <div className="th-tl-detail__content">
           {event.description ? (
             event.description.split('\n').map((line, i) => (
-              <p key={i}>{line || '\u00A0'}</p>
+              <p key={i}>{line || ' '}</p>
             ))
           ) : (
-            <p className="th-timeline-detail__empty">No description</p>
+            <p className="th-tl-detail__empty">
+              No story written yet — edit this moment to add one.
+            </p>
           )}
         </div>
+
+        {/* Chapter band */}
+        {chapter !== null && (
+          <p className="th-tl-detail__chapter">Your story · Chapter {chapter}</p>
+        )}
+
+        {/* Actions */}
+        <div className="th-tl-detail__actions">
+          <Button
+            variant="primary"
+            full
+            onClick={() => navigate(`${RoutePath.appTimelineRoot}/${event.id}/edit`)}
+          >
+            <IconEdit size={18} /> Edit event
+          </Button>
+          <button
+            className="th-tl-detail__delete"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            <IconTrash size={16} /> Delete this moment
+          </button>
+        </div>
+
+        {/* Quiet metadata */}
+        <p className="th-tl-detail__meta">
+          Added {new Date(event.createdAt).toLocaleDateString()}
+          {event.updatedAt !== event.createdAt &&
+            ` · Updated ${new Date(event.updatedAt).toLocaleDateString()}`}
+        </p>
       </div>
 
-      {/* Delete confirmation modal */}
-      {showDeleteConfirm && (
-        <div className="th-modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="th-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="th-modal__title">Delete Event</h2>
-            <p className="th-modal__text">
-              Are you sure you want to delete &ldquo;{event.title}&rdquo;? This cannot be undone.
-            </p>
-            <div className="th-modal__actions">
-              <button
-                className="th-btn th-btn--secondary"
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={deleting}
-              >
-                Cancel
-              </button>
-              <button
-                className="th-btn th-btn--danger"
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                {deleting ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
+      {/* Delete confirmation (centralized bottom-sheet) */}
+      <Modal
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        label="Delete event"
+      >
+        <div style={{ padding: 'var(--th-space-2) 0' }}>
+          <h3 className="th-note-confirm-title">Delete this moment?</h3>
+          <p className="th-note-confirm-copy">
+            “{event.title}” will be removed from your story permanently.
+            This action cannot be undone.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
+            <Button variant="primary" full onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Deleting…' : 'Delete moment'}
+            </Button>
+            <Button variant="ghost" full onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
+              Cancel
+            </Button>
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }
