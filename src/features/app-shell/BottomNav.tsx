@@ -27,7 +27,9 @@ function SideNavItem({ item }: { item: NavDestination }) {
         `th-bottom-nav-item${isActive ? ' th-bottom-nav-item--active' : ''}`
       }
     >
-      <NavIcon icon={item.icon} size={22} />
+      <span className="th-bottom-nav-icon" aria-hidden="true">
+        <NavIcon icon={item.icon} size={22} />
+      </span>
       <span className="th-bottom-nav-label">{item.label}</span>
       <span className="th-bottom-nav-dot" aria-hidden="true" />
     </NavLink>

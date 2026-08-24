@@ -127,7 +127,7 @@
   --th-bottom-nav-height: 64px;
   --th-screen-max-width: 480px; /* phone-first content column */
   --th-nav-center-size: 58px;  /* elevated center TwoHearts nav button */
-  --th-avatar-lg: 60px;        /* home-header relationship avatars */
+  --th-avatar-lg: 72px;        /* home-header relationship avatars */
 
   /* ----- Safe areas (Capacitor sets these via env insets) ----- */
   --th-safe-area-top: env(safe-area-inset-top, 0px);
