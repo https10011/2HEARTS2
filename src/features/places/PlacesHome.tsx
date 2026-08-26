@@ -1,168 +1,298 @@
 /**
- * PlacesHome (Phase 14).
+ * PlacesHome (Stage 9).
  *
- * Displays the couple's saved places as cards. Supports search
- * and category filtering. Uses real persisted data via PlaceService.
+ * "Places we've shared" — the couple's saved spots presented as part of
+ * their story, not a location database. The most recently saved place
+ * leads as a featured card; the rest fill a photo grid. Category chips
+ * and search filter in memory (no schema change). Photos resolve through
+ * PlaceService → MediaStorage `data:` URLs; places without a photo (or
+ * with missing bytes) render a warm pin fallback.
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { getDatabase } from '../../data/database/connection.ts';
-import { PlaceRepository } from '../../repositories/placeRepository.ts';
-import { PlaceService } from '../../services/place/placeService.ts';
-import { IconPlus, IconChevronRight, IconMapPin, RoseLilyDecoration } from '../../components/index.ts';
 import type { Place } from '../../data/place/placeTypes.ts';
-
-const CATEGORY_OPTIONS = ['All', 'Restaurant', 'Vacation', 'Home', 'Adventure', 'Special', 'Other'] as const;
-
-let _placeService: PlaceService | null = null;
-async function getPlaceService(): Promise<PlaceService> {
-  if (!_placeService) {
-    const repo = new PlaceRepository(await getDatabase());
-    _placeService = new PlaceService(repo);
-  }
-  return _placeService;
-}
+import { usePlaceService } from './usePlaceService.ts';
+import {
+  byNewestFirst,
+  collectCategories,
+  filterPlaces,
+  formatAddedAgo,
+  formatLocationLine,
+} from './placePresentation.ts';
+import {
+  Button,
+  IconBack,
+  IconButton,
+  IconCalendar,
+  IconMapPin,
+  IconPlus,
+  IconSearch,
+  LoadingState,
+  RoseLilyDecoration,
+} from '../../components/index.ts';
 
 export function PlacesHome() {
   const navigate = useNavigate();
+  const service = usePlaceService();
   const [places, setPlaces] = useState<Place[]>([]);
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState<string | null>(null);
 
   const loadPlaces = useCallback(async () => {
+    if (!service) return;
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      const service = await getPlaceService();
-      const data = searchQuery.trim()
-        ? await service.search(searchQuery)
-        : activeCategory === 'All'
-          ? await service.list()
-          : await service.listByCategory(activeCategory);
-      setPlaces(data);
-    } catch {
-      setPlaces([]);
+      const result = await service.list();
+      setPlaces(result);
+      // Resolve card photos through the existing local media architecture —
+      // failures degrade to the warm pin fallback.
+      const resolved: Record<string, string> = {};
+      await Promise.all(
+        result.map(async (place) => {
+          if (!place.photoRef) return;
+          const url = await service.resolvePhotoUrl(place.id);
+          if (url) resolved[place.id] = url;
+        }),
+      );
+      setPhotoUrls(resolved);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load places.');
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, activeCategory]);
+  }, [service]);
 
   useEffect(() => {
     loadPlaces();
   }, [loadPlaces]);
 
-  return (
-    <div className="th-content-pad">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--th-space-4)' }}>
-        <h1 className="th-screen-title">Our Places</h1>
-        <button
-          className="th-btn th-btn--primary th-btn--sm"
-          onClick={() => navigate(RoutePath.appPlacesAdd)}
-          style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)' }}
-        >
-          <IconPlus size={16} />
-          Add
-        </button>
+  const categories = useMemo(() => collectCategories(places), [places]);
+  const visible = useMemo(
+    () => byNewestFirst(filterPlaces(places, { category, query })),
+    [places, category, query],
+  );
+
+  if (loading || !service) {
+    return <LoadingState label="Gathering your places…" />;
+  }
+
+  const header = (
+    <header className="th-places-header">
+      <IconButton label="Go back" onClick={() => navigate(-1)}>
+        <IconBack />
+      </IconButton>
+      <div className="th-places-header__copy">
+        <h1 className="th-places-title">Our Places</h1>
+        <p className="th-places-subtitle">Places that mean something to us.</p>
       </div>
+      <IconButton label="Add place" onClick={() => navigate(RoutePath.appPlacesAdd)}>
+        <IconPlus />
+      </IconButton>
+    </header>
+  );
 
-      {/* Search */}
-      <input
-        type="text"
-        className="th-input"
-        placeholder="Search places..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        style={{ marginBottom: 'var(--th-space-3)' }}
-      />
-
-      {/* Category filter */}
-      <div style={{ display: 'flex', gap: 'var(--th-space-2)', marginBottom: 'var(--th-space-4)', overflowX: 'auto', flexWrap: 'nowrap' }}>
-        {CATEGORY_OPTIONS.map((cat) => (
-          <button
-            key={cat}
-            className={`th-btn th-btn--sm ${activeCategory === cat ? 'th-btn--primary' : 'th-btn--outline'}`}
-            onClick={() => setActiveCategory(cat)}
-            style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Loading */}
-      {loading && (
-        <div className="th-loading">
-          <div className="th-loading__spinner" />
-          <p>Loading places...</p>
+  if (error) {
+    return (
+      <div className="th-content-pad th-screen-warm">
+        {header}
+        <div className="th-places-error" role="alert">
+          <p>We couldn&apos;t gather your places just now.</p>
+          <Button variant="secondary" onClick={loadPlaces}>Try again</Button>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Empty state */}
-      {!loading && places.length === 0 && (
-        <div className="th-empty-emotional" style={{ marginTop: 'var(--th-space-4)' }}>
-          {!searchQuery && <RoseLilyDecoration variant={9} size={100} position="bottom-left" opacity={0.12} animated />}
+  // Empty state — an invitation, not an error.
+  if (places.length === 0) {
+    return (
+      <div className="th-content-pad th-screen-warm">
+        <RoseLilyDecoration variant={9} size={110} position="bottom-left" opacity={0.12} />
+        {header}
+        <div className="th-empty-emotional">
           <div className="th-empty-emotional__visual th-scale-in">
             <IconMapPin size={42} />
           </div>
-          <h3 className="th-empty-emotional__title">
-            {searchQuery ? 'No matching places' : 'No places yet'}
-          </h3>
+          <h3 className="th-empty-emotional__title">No places yet</h3>
           <p className="th-empty-emotional__message">
-            {searchQuery
-              ? 'Try a different search term.'
-              : 'Add the spots that matter to you both — the restaurants, the hideaways, the memories in between.'}
+            Save the little places that became part of your story — the café
+            from your first date, the beach you always go back to.
           </p>
           <div className="th-empty-emotional__action">
-            {!searchQuery && (
-              <button
-                className="th-btn th-btn--primary"
-                onClick={() => navigate(RoutePath.appPlacesAdd)}
-              >
-                Add Your First Place
-              </button>
-            )}
+            <Button variant="primary" onClick={() => navigate(RoutePath.appPlacesAdd)}>
+              <IconPlus size={18} /> Add your first place
+            </Button>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Place list */}
-      {!loading && places.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
-          {places.map((place) => (
+  const hero = visible[0] ?? null;
+  const rest = visible.slice(1);
+
+  return (
+    <div className="th-content-pad th-screen-warm">
+      <RoseLilyDecoration variant={14} size={120} position="top-right" opacity={0.12} />
+      {header}
+
+      {/* Story banner */}
+      <section className="th-places-banner th-stagger-item">
+        <div className="th-places-banner__copy">
+          <h2 className="th-places-banner__title">Places we&apos;ve shared</h2>
+          <p className="th-places-banner__text">
+            Keep the little places that became part of your story.
+          </p>
+        </div>
+        <span className="th-places-banner__medallion" aria-hidden="true">
+          <IconMapPin size={26} />
+        </span>
+      </section>
+
+      {/* Search */}
+      <div className="th-notes-search th-stagger-item">
+        <IconSearch size={16} />
+        <input
+          type="text"
+          placeholder="Search places..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="th-notes-search__input"
+          aria-label="Search places"
+        />
+      </div>
+
+      {/* Category chips — built from the couple's actual categories */}
+      {categories.length > 0 && (
+        <div className="th-places-chips" role="group" aria-label="Filter by category">
+          <button
+            type="button"
+            className={`th-option-chip ${category === null ? 'th-option-chip--active' : ''}`}
+            aria-pressed={category === null}
+            onClick={() => setCategory(null)}
+          >
+            All
+          </button>
+          {categories.map((cat) => (
             <button
-              key={place.id}
-              className="th-card th-card--clickable"
-              onClick={() => navigate(RoutePath.appPlacesDetail.replace(':placeId', place.id))}
-              style={{ textAlign: 'left', width: '100%', display: 'flex', alignItems: 'center', gap: 'var(--th-space-3)', padding: 'var(--th-space-4)' }}
+              key={cat}
+              type="button"
+              className={`th-option-chip ${category === cat ? 'th-option-chip--active' : ''}`}
+              aria-pressed={category === cat}
+              onClick={() => setCategory(category === cat ? null : cat)}
             >
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)', marginBottom: 'var(--th-space-1)' }}>
-                  <span style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex' }}>
-                    <IconMapPin size={18} />
-                  </span>
-                  <h3 style={{ fontWeight: 'var(--th-font-weight-semibold)', fontSize: 'var(--th-font-size-md)' }}>{place.name}</h3>
-                </div>
-                {(place.city || place.state || place.country) && (
-                  <p style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', margin: 0 }}>
-                    {[place.city, place.state, place.country].filter(Boolean).join(', ')}
-                  </p>
-                )}
-                {place.category && (
-                  <span
-                    className="th-badge"
-                    style={{ marginTop: 'var(--th-space-1)', display: 'inline-block' }}
-                  >
-                    {place.category}
-                  </span>
-                )}
-              </div>
-              <IconChevronRight size={18} className="th-more-item__chevron" />
+              {cat}
             </button>
           ))}
         </div>
       )}
+
+      {visible.length === 0 ? (
+        <p className="th-places-filter-empty">No places match that right now.</p>
+      ) : (
+        <>
+          {/* Featured place — the most recently saved */}
+          {hero && (
+            <Link
+              to={`${RoutePath.appPlaces}/${hero.id}`}
+              className="th-places-hero th-stagger-item"
+            >
+              <span className="th-places-hero__frame">
+                {photoUrls[hero.id] ? (
+                  <img
+                    src={photoUrls[hero.id]}
+                    alt={`${hero.name} photo`}
+                    className="th-places-hero__image"
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className="th-places-hero__placeholder" aria-hidden="true">
+                    <IconMapPin size={30} />
+                  </span>
+                )}
+              </span>
+              <span className="th-places-hero__info">
+                <span className="th-places-hero__name">{hero.name}</span>
+                {formatLocationLine(hero) && (
+                  <span className="th-places-location">
+                    <IconMapPin size={13} />
+                    {formatLocationLine(hero)}
+                  </span>
+                )}
+                {hero.category && (
+                  <span className="th-places-pill">{hero.category}</span>
+                )}
+                <span className="th-places-hero__added">
+                  <IconCalendar size={13} />
+                  {formatAddedAgo(hero.createdAt)}
+                </span>
+              </span>
+            </Link>
+          )}
+
+          {rest.length > 0 && <h2 className="th-places-section">Our places</h2>}
+          <div className="th-places-grid">
+            {rest.map((place) => (
+              <Link
+                key={place.id}
+                to={`${RoutePath.appPlaces}/${place.id}`}
+                className="th-places-card th-stagger-item"
+              >
+                <span className="th-places-card__frame">
+                  {photoUrls[place.id] ? (
+                    <img
+                      src={photoUrls[place.id]}
+                      alt={`${place.name} photo`}
+                      className="th-places-card__image"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="th-places-card__placeholder" aria-hidden="true">
+                      <IconMapPin size={26} />
+                    </span>
+                  )}
+                </span>
+                <span className="th-places-card__meta">
+                  <span className="th-places-card__name">{place.name}</span>
+                  {formatLocationLine(place) && (
+                    <span className="th-places-location">
+                      <IconMapPin size={12} />
+                      {formatLocationLine(place)}
+                    </span>
+                  )}
+                  <span className="th-places-card__footer">
+                    {place.category && (
+                      <span className="th-places-pill">{place.category}</span>
+                    )}
+                    <span className="th-places-card__added">
+                      {formatAddedAgo(place.createdAt)}
+                    </span>
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Closing invitation */}
+      <section className="th-places-cta th-stagger-item">
+        <div className="th-places-cta__copy">
+          <h2 className="th-places-cta__title">Have a special place in mind?</h2>
+          <p className="th-places-cta__text">Save it here, just for the two of you.</p>
+        </div>
+        <Button variant="primary" onClick={() => navigate(RoutePath.appPlacesAdd)}>
+          Add Place
+        </Button>
+      </section>
+
+      <p className="th-places-footer">Every place holds a piece of your story.</p>
     </div>
   );
 }

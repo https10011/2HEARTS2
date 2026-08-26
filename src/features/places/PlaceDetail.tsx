@@ -1,193 +1,280 @@
 /**
- * PlaceDetail (Phase 14).
+ * PlaceDetail (Stage 9).
  *
- * Displays full place information with edit and delete actions.
- * Uses real persisted data via PlaceService.
+ * One chapter from the couple's adventures: a photo hero (or warm pin
+ * fallback), serif title, location hierarchy, the "why this place is
+ * special" story card, saved-location details, quiet metadata, and
+ * deliberate Edit/Delete actions. Delete confirmation uses the
+ * centralized Modal bottom-sheet (no second modal framework). When the
+ * place is linked to a memory, a connected-memory card deep-links to it.
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { getDatabase } from '../../data/database/connection.ts';
-import { PlaceRepository } from '../../repositories/placeRepository.ts';
-import { PlaceService } from '../../services/place/placeService.ts';
-import { IconMapPin, useToast } from '../../components/index.ts';
 import type { Place } from '../../data/place/placeTypes.ts';
-
-let _placeService: PlaceService | null = null;
-async function getPlaceService(): Promise<PlaceService> {
-  if (!_placeService) {
-    const repo = new PlaceRepository(await getDatabase());
-    _placeService = new PlaceService(repo);
-  }
-  return _placeService;
-}
+import { usePlaceService } from './usePlaceService.ts';
+import { useMemoryService } from '../memories/useMemoryService.ts';
+import { formatLocationLine, formatPlaceDate } from './placePresentation.ts';
+import {
+  Button,
+  Header,
+  IconBack,
+  IconButton,
+  IconCalendar,
+  IconChevronRight,
+  IconEdit,
+  IconHeart,
+  IconMapPin,
+  IconTrash,
+  LoadingState,
+  Modal,
+  RoseLilyDecoration,
+  useToast,
+} from '../../components/index.ts';
 
 export function PlaceDetail() {
   const navigate = useNavigate();
   const { placeId } = useParams<{ placeId: string }>();
+  const service = usePlaceService();
+  const memoryService = useMemoryService();
   const toast = useToast();
+
   const [place, setPlace] = useState<Place | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [memoryTitle, setMemoryTitle] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    if (!placeId) return;
-    const load = async () => {
+    if (!service || !placeId) return;
+    let cancelled = false;
+    (async () => {
       try {
-        const service = await getPlaceService();
         const data = await service.getById(placeId);
+        if (cancelled) return;
         setPlace(data);
+        if (data?.photoRef) {
+          const url = await service.resolvePhotoUrl(data.id);
+          if (!cancelled) setPhotoUrl(url);
+        }
       } catch {
-        setPlace(null);
+        if (!cancelled) setPlace(null);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    };
-    load();
-  }, [placeId]);
+    })();
+    return () => { cancelled = true; };
+  }, [service, placeId]);
+
+  /* Resolve the linked memory title (model-supported connection). */
+  useEffect(() => {
+    if (!memoryService || !place?.memoryId) return;
+    let cancelled = false;
+    memoryService.getMemory(place.memoryId)
+      .then((memory) => { if (!cancelled) setMemoryTitle(memory.title); })
+      .catch(() => { /* Linked memory unavailable — card stays hidden. */ });
+    return () => { cancelled = true; };
+  }, [memoryService, place?.memoryId]);
 
   const handleDelete = useCallback(async () => {
-    if (!placeId) return;
+    if (!service || !placeId) return;
+    setDeleting(true);
     try {
-      const service = await getPlaceService();
       await service.delete(placeId);
       toast.success('Place deleted');
-      navigate(RoutePath.appPlaces);
+      navigate(RoutePath.appPlaces, { replace: true });
     } catch {
+      setDeleting(false);
       setShowDeleteConfirm(false);
+      toast.error('Could not delete place');
     }
-  }, [placeId, navigate, toast]);
+  }, [service, placeId, navigate, toast]);
 
-  if (loading) {
+  const backButton = (
+    <IconButton label="Go back" onClick={() => navigate(-1)}>
+      <IconBack />
+    </IconButton>
+  );
+
+  if (loading || !service) {
     return (
-      <div className="th-content-pad">
-        <div className="th-loading">
-          <div className="th-loading__spinner" />
-          <p>Loading place...</p>
-        </div>
+      <div className="th-screen">
+        <Header title="Place Details" left={backButton} />
+        <LoadingState label="Opening this place…" />
       </div>
     );
   }
 
   if (!place) {
     return (
-      <div className="th-content-pad">
-        <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual">
-            <IconMapPin size={36} />
+      <div className="th-screen">
+        <Header title="Place Details" left={backButton} />
+        <div className="th-scroll th-content-pad">
+          <div className="th-empty-state th-empty-state--enhanced">
+            <div className="th-empty-state__visual">
+              <IconMapPin size={36} />
+            </div>
+            <h3 className="th-empty-state__title">Place not found</h3>
+            <p className="th-empty-state__desc">This place may have been deleted.</p>
+            <Button variant="primary" onClick={() => navigate(RoutePath.appPlaces)}>
+              Back to Places
+            </Button>
           </div>
-          <h3 className="th-empty-state__title">Place not found</h3>
-          <p className="th-empty-state__desc">This place may have been deleted.</p>
-          <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appPlaces)}>
-            Back to Places
-          </button>
         </div>
       </div>
     );
   }
 
-  const locationParts = [place.city, place.state, place.country].filter(Boolean);
+  const locationLine = formatLocationLine(place);
   const hasCoordinates = place.latitude != null && place.longitude != null;
 
   return (
-    <div className="th-content-pad">
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--th-space-4)' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)', marginBottom: 'var(--th-space-1)' }}>
-            <span style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex' }}>
-              <IconMapPin size={24} />
+    <div className="th-screen th-screen-warm">
+      <RoseLilyDecoration variant={11} size={110} position="bottom-right" opacity={0.08} />
+      <Header
+        title="Place Details"
+        left={backButton}
+        right={
+          <IconButton label="Delete place" onClick={() => setShowDeleteConfirm(true)}>
+            <IconTrash />
+          </IconButton>
+        }
+      />
+
+      <div className="th-scroll th-content-pad">
+        {/* Photo hero — or a warm pin fallback when there is no photo */}
+        <div className={`th-places-detail-hero ${photoUrl ? '' : 'th-places-detail-hero--fallback'}`}>
+          {photoUrl ? (
+            <img src={photoUrl} alt={`${place.name} photo`} className="th-places-detail-hero__image" />
+          ) : (
+            <span className="th-places-detail-hero__placeholder" aria-hidden="true">
+              <IconMapPin size={44} />
             </span>
-            <h1 className="th-screen-title" style={{ margin: 0 }}>{place.name}</h1>
-          </div>
+          )}
+        </div>
+
+        {/* Identity */}
+        <h1 className="th-places-detail__title">{place.name}</h1>
+        <div className="th-places-detail__identity">
+          {locationLine && (
+            <span className="th-places-location th-places-detail__location">
+              <IconMapPin size={15} />
+              {locationLine}
+            </span>
+          )}
           {place.category && (
-            <span className="th-badge">{place.category}</span>
+            <span className="th-places-pill">{place.category}</span>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 'var(--th-space-2)' }}>
-          <button
-            className="th-btn th-btn--outline th-btn--sm"
-            onClick={() => navigate(RoutePath.appPlacesEdit.replace(':placeId', place.id))}
-          >
-            Edit
-          </button>
-        </div>
-      </div>
 
-      {/* Details card */}
-      <div className="th-card" style={{ padding: 'var(--th-space-4)' }}>
-        {/* Address */}
-        {place.address && (
-          <div style={{ marginBottom: 'var(--th-space-3)' }}>
-            <p className="th-label" style={{ marginBottom: 'var(--th-space-1)' }}>Address</p>
-            <p style={{ margin: 0 }}>{place.address}</p>
-          </div>
-        )}
-
-        {/* Location */}
-        {locationParts.length > 0 && (
-          <div style={{ marginBottom: 'var(--th-space-3)' }}>
-            <p className="th-label" style={{ marginBottom: 'var(--th-space-1)' }}>Location</p>
-            <p style={{ margin: 0 }}>{locationParts.join(', ')}</p>
-          </div>
-        )}
-
-        {/* Coordinates */}
-        {hasCoordinates && (
-          <div style={{ marginBottom: 'var(--th-space-3)' }}>
-            <p className="th-label" style={{ marginBottom: 'var(--th-space-1)' }}>Coordinates</p>
-            <p style={{ margin: 0, fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
-              {place.latitude?.toFixed(6)}, {place.longitude?.toFixed(6)}
-            </p>
-          </div>
-        )}
-
-        {/* Notes */}
-        {place.notes && (
-          <div style={{ marginBottom: 'var(--th-space-3)' }}>
-            <p className="th-label" style={{ marginBottom: 'var(--th-space-1)' }}>Notes</p>
-            <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{place.notes}</p>
-          </div>
-        )}
-
-        {/* Metadata */}
-        <div style={{ borderTop: '1px solid var(--th-color-border)', paddingTop: 'var(--th-space-3)', marginTop: 'var(--th-space-2)' }}>
-          <p style={{ margin: 0, fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
-            Added {new Date(place.createdAt).toLocaleDateString()}
-          </p>
-          {place.updatedAt !== place.createdAt && (
-            <p style={{ margin: 0, fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
-              Updated {new Date(place.updatedAt).toLocaleDateString()}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Delete */}
-      <div style={{ marginTop: 'var(--th-space-6)' }}>
-        {showDeleteConfirm ? (
-          <div className="th-card" style={{ padding: 'var(--th-space-4)', textAlign: 'center' }}>
-            <p style={{ marginBottom: 'var(--th-space-3)' }}>Delete this place? This cannot be undone.</p>
-            <div style={{ display: 'flex', gap: 'var(--th-space-3)', justifyContent: 'center' }}>
-              <button className="th-btn th-btn--outline th-btn--sm" onClick={() => setShowDeleteConfirm(false)}>
-                Cancel
-              </button>
-              <button className="th-btn th-btn--danger th-btn--sm" onClick={handleDelete}>
-                Delete Place
-              </button>
+        {/* Saved location */}
+        {(place.address || locationLine || hasCoordinates) && (
+          <section className="th-places-info-card">
+            <span className="th-places-info-card__medallion" aria-hidden="true">
+              <IconMapPin size={20} />
+            </span>
+            <div className="th-places-info-card__body">
+              <h2 className="th-places-info-card__label">Saved location</h2>
+              {place.address && <p className="th-places-info-card__text">{place.address}</p>}
+              {locationLine && <p className="th-places-info-card__text">{locationLine}</p>}
+              {hasCoordinates && (
+                <p className="th-places-info-card__quiet">
+                  {place.latitude?.toFixed(4)}, {place.longitude?.toFixed(4)} — kept on this device
+                </p>
+              )}
             </div>
-          </div>
-        ) : (
-          <button
-            className="th-btn th-btn--danger th-btn--outline"
-            onClick={() => setShowDeleteConfirm(true)}
-            style={{ width: '100%' }}
-          >
-            Delete Place
-          </button>
+          </section>
         )}
+
+        {/* Why this place is special */}
+        <section className="th-places-info-card">
+          <span className="th-places-info-card__medallion" aria-hidden="true">
+            <IconHeart size={20} />
+          </span>
+          <div className="th-places-info-card__body">
+            <h2 className="th-places-info-card__label">Why this place is special</h2>
+            {place.notes ? (
+              <p className="th-places-info-card__text th-places-info-card__text--story">
+                {place.notes}
+              </p>
+            ) : (
+              <p className="th-places-info-card__empty">
+                No story written yet — edit this place to add one.
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* Connected memory (when the place is linked to one) */}
+        {place.memoryId && memoryTitle && (
+          <>
+            <h2 className="th-places-detail__section">Connected memory</h2>
+            <Link
+              to={`${RoutePath.appMemories}/${place.memoryId}`}
+              className="th-places-memory-card"
+            >
+              <span className="th-places-memory-card__medallion" aria-hidden="true">
+                <IconHeart size={18} />
+              </span>
+              <span className="th-places-memory-card__body">
+                <span className="th-places-memory-card__title">{memoryTitle}</span>
+                <span className="th-places-memory-card__hint">From your memories</span>
+              </span>
+              <IconChevronRight size={18} className="th-places-memory-card__chevron" />
+            </Link>
+          </>
+        )}
+
+        {/* Actions */}
+        <div className="th-places-detail__actions">
+          <Button
+            variant="primary"
+            full
+            onClick={() => navigate(`${RoutePath.appPlaces}/${place.id}/edit`)}
+          >
+            <IconEdit size={18} /> Edit Place
+          </Button>
+          <button
+            className="th-places-detail__delete"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            <IconTrash size={16} /> Delete this place
+          </button>
+        </div>
+
+        {/* Quiet metadata */}
+        <p className="th-places-detail__meta">
+          <IconCalendar size={13} />
+          Added {formatPlaceDate(place.createdAt)}
+          {place.updatedAt !== place.createdAt &&
+            ` · Updated ${formatPlaceDate(place.updatedAt)}`}
+        </p>
       </div>
+
+      {/* Delete confirmation (centralized bottom-sheet) */}
+      <Modal
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        label="Delete place"
+      >
+        <div style={{ padding: 'var(--th-space-2) 0' }}>
+          <h3 className="th-note-confirm-title">Delete this place?</h3>
+          <p className="th-note-confirm-copy">
+            “{place.name}” will be removed from your places for good.
+            This action cannot be undone.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
+            <Button variant="primary" full onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Deleting…' : 'Delete place'}
+            </Button>
+            <Button variant="ghost" full onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
+              Keep it
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

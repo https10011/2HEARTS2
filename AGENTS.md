@@ -319,4 +319,18 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   moment isAhead of now), IconBell/IconRepeat/IconChevronRight added to
   the Icon set; Important Dates (Stage 4) audited, not rebuilt; local
   notification architecture untouched; 727 tests.
+- Stage 9 (Places + Shared Adventures): docs/STAGE-9-… — Places Home
+  rewritten (.th-places-* vocabulary: hero band + featured hero card +
+  "Our places" grid + category chips + in-memory search + branded empty
+  state), Create/Edit composer (photo dropzone via the existing Phase 2
+  media pipeline with data: preview), PlaceDetail (photo hero/fallback,
+  "Saved location" + "Why this place is special" story cards, Modal
+  bottom-sheet delete). PlaceService gained optional MediaStorage
+  boundary for photoRef coordination (mirrors MemoryService); shared
+  src/data/media/resolveMediaFileSystem.ts resolver replaces the
+  duplicated per-feature resolution (memories refactored to it); pure
+  placePresentation.ts helpers; tests/stage9-places.test.ts (24 tests,
+  sql.js + in-memory FS, no mocks); 751 tests. No schema change
+  (photo_ref column pre-existing); no map/location SDK (V1 prohibition
+  honored — "Pinpoint it" keeps optional on-device coordinates).
 

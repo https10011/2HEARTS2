@@ -7,29 +7,15 @@
 
 import { useState, useEffect } from 'react';
 import { getDatabase } from '../../data/database/connection.ts';
+import { resolveMediaFileSystem } from '../../data/media/resolveMediaFileSystem.ts';
 import { MemoryService } from '../../services/memory/memoryService.ts';
-
-/**
- * Resolves the appropriate MediaFileSystem adapter.
- * Production: CapacitorFileSystem (Android)
- * Dev/test: MemoryFileSystem
- */
-async function resolveFsAdapter() {
-  const { Capacitor } = await import('@capacitor/core');
-  if (Capacitor.isNativePlatform()) {
-    const { CapacitorFileSystem } = await import('../../data/media/capacitorFileSystem.ts');
-    return new CapacitorFileSystem();
-  }
-  const { MemoryFileSystem } = await import('../../data/media/memoryFileSystem.ts');
-  return new MemoryFileSystem();
-}
 
 let cachedService: MemoryService | null = null;
 
 async function getMemoryService(): Promise<MemoryService> {
   if (cachedService) return cachedService;
   const db = await getDatabase();
-  const fs = await resolveFsAdapter();
+  const fs = await resolveMediaFileSystem();
   cachedService = new MemoryService(db, fs);
   return cachedService;
 }
