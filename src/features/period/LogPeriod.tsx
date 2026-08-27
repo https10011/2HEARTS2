@@ -1,45 +1,42 @@
 /**
- * LogPeriod (Phase 16).
+ * Log Period / Edit Period (Phase 16, productized in Stage 11).
  *
- * Form for logging a period entry: start date, end date, flow level, notes.
- * Uses real persisted data via PeriodService.
+ * Calm, private composer for a period entry: start date, optional end
+ * date, flow level, and a personal note. Uses the centralized branded
+ * DatePicker (no duplicate picker), flows through the existing
+ * PeriodService, and maps 1:1 onto the same create/update calls — the
+ * underlying save behavior is unchanged.
  */
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { getDatabase } from '../../data/database/connection.ts';
-import { PeriodRepository } from '../../repositories/periodRepository.ts';
-import { PeriodService } from '../../services/period/periodService.ts';
+import { usePeriodService } from './usePeriodService.ts';
+import { OWNER_PROFILE_ID, flowLabel, flowOptions, localDateKey } from './periodPresentation.ts';
 import { AppError } from '../../services/errors/appError.ts';
 import type { FlowLevel } from '../../data/period/periodTypes.ts';
-import { FLOW_META, FLOW_ORDER, flowDotStyle } from './flowMeta.ts';
+import {
+  Button,
+  DatePicker,
+  IconBack,
+  IconButton,
+  IconInfo,
+  LoadingState,
+  useToast,
+} from '../../components/index.ts';
 
-const FLOW_OPTIONS = FLOW_ORDER.map((value) => ({ value, label: FLOW_META[value].label }));
-
-let _periodService: PeriodService | null = null;
-async function getPeriodService(): Promise<PeriodService> {
-  if (!_periodService) {
-    const repo = new PeriodRepository(await getDatabase());
-    _periodService = new PeriodService(repo);
-  }
-  return _periodService;
-}
-
-function todayKey(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
+const NOTE_MAX = 500;
+/** Allow logging back several years; start date remains a real calendar day. */
+const MIN_YEAR = new Date().getFullYear() - 5;
 
 export function LogPeriod() {
   const navigate = useNavigate();
+  const service = usePeriodService();
+  const toast = useToast();
   const { entryId } = useParams<{ entryId: string }>();
   const isEditing = Boolean(entryId);
 
-  const [startDate, setStartDate] = useState(todayKey());
+  const [startDate, setStartDate] = useState(localDateKey());
   const [endDate, setEndDate] = useState('');
   const [flowLevel, setFlowLevel] = useState<FlowLevel>('medium');
   const [note, setNote] = useState('');
@@ -48,35 +45,34 @@ export function LogPeriod() {
   const [loadingEntry, setLoadingEntry] = useState(isEditing);
 
   useEffect(() => {
-    if (!entryId) return;
+    if (!entryId || !service) return;
+    let cancelled = false;
     const load = async () => {
       try {
-        const service = await getPeriodService();
         const entry = await service.getEntryById(entryId);
-        if (entry) {
+        if (entry && !cancelled) {
           setStartDate(entry.startDate);
           setEndDate(entry.endDate ?? '');
           setFlowLevel(entry.flowLevel);
           setNote(entry.note ?? '');
         }
       } catch {
-        setError('Could not load period entry.');
+        if (!cancelled) setError('Could not load this entry.');
       } finally {
-        setLoadingEntry(false);
+        if (!cancelled) setLoadingEntry(false);
       }
     };
     load();
-  }, [entryId]);
+    return () => { cancelled = true; };
+  }, [entryId, service]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!service) return;
     setError('');
     setSaving(true);
 
     try {
-      const service = await getPeriodService();
-      const profileId = 'owner';
-
       if (isEditing && entryId) {
         await service.updateEntry(entryId, {
           startDate,
@@ -84,131 +80,148 @@ export function LogPeriod() {
           flowLevel,
           note: note || null,
         });
+        toast.success('Period updated');
       } else {
         await service.logPeriod({
           startDate,
           endDate: endDate || null,
           flowLevel,
           note: note || null,
-          profileId,
+          profileId: OWNER_PROFILE_ID,
         });
+        toast.success('Period logged');
       }
       navigate(RoutePath.appPeriod);
     } catch (err) {
       if (err instanceof AppError) {
         setError(err.userMessage);
       } else {
-        setError('An unexpected error occurred.');
+        setError('An unexpected error occurred. Please try again.');
       }
+      toast.error('Could not save period');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loadingEntry) {
-    return (
-      <div className="th-content-pad">
-        <div className="th-loading">
-          <div className="th-loading__spinner" />
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
+  if (loadingEntry || !service) {
+    return <LoadingState label="Loading entry…" />;
   }
 
+  const options = flowOptions();
+
   return (
-    <div className="th-content-pad">
-      <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-4)' }}>
-        {isEditing ? 'Edit Period' : 'Log Period'}
-      </h1>
+    <div className="th-content-pad th-screen-warm">
+      {/* Header */}
+      <div className="th-period-header">
+        <IconButton label="Go back" onClick={() => navigate(-1)}>
+          <IconBack />
+        </IconButton>
+        <div className="th-period-header__copy">
+          <h1 className="th-period-title">{isEditing ? 'Edit Period' : 'Log Period'}</h1>
+          <p className="th-period-subtitle">A few details, kept private.</p>
+        </div>
+      </div>
 
       {error && (
-        <div className="th-error-banner" style={{ marginBottom: 'var(--th-space-4)' }}>
+        <div
+          className="th-form-error"
+          style={{ marginBottom: 'var(--th-space-4)' }}
+          role="alert"
+        >
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-4)' }}>
-        {/* Start date */}
-        <div>
-          <label className="th-label">Start Date *</label>
-          <input
-            type="date"
-            className="th-input"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            required
-          />
-        </div>
-
-        {/* End date */}
-        <div>
-          <label className="th-label">End Date (if period ended)</label>
-          <input
-            type="date"
-            className="th-input"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            min={startDate}
-          />
-          {!endDate && (
-            <p style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', marginTop: 'var(--th-space-1)' }}>
-              Leave empty if still ongoing
-            </p>
-          )}
-        </div>
-
-        {/* Flow level */}
-        <div>
-          <label className="th-label">Flow Level *</label>
-          <div style={{ display: 'flex', gap: 'var(--th-space-3)' }}>
-            {FLOW_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                className={`th-btn th-btn--sm ${flowLevel === opt.value ? 'th-btn--primary' : 'th-btn--outline'}`}
-                onClick={() => setFlowLevel(opt.value)}
-                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--th-space-1)' }}
-              >
-                <span aria-hidden="true" style={flowDotStyle(opt.value)} />
-                <span>{opt.label}</span>
-              </button>
-            ))}
+      <form onSubmit={handleSubmit}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-5)' }}>
+          {/* Start date */}
+          <div className="th-period-field">
+            <label className="th-period-field__label" id="period-start-label">Start date</label>
+            <DatePicker
+              value={startDate}
+              onChange={(val) => setStartDate(val || localDateKey())}
+              label="Start date"
+              placeholder="Tap to choose a date"
+              minYear={MIN_YEAR}
+            />
           </div>
-        </div>
 
-        {/* Note */}
-        <div>
-          <label className="th-label">Notes (optional)</label>
-          <textarea
-            className="th-input"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="How are you feeling?"
-            rows={3}
-            maxLength={500}
-            style={{ resize: 'vertical' }}
-          />
-        </div>
+          {/* End date */}
+          <div className="th-period-field">
+            <label className="th-period-field__label" id="period-end-label">End date (optional)</label>
+            <DatePicker
+              value={endDate || null}
+              onChange={(val) => setEndDate(val)}
+              label="End date"
+              placeholder="Tap to choose a date"
+              minYear={MIN_YEAR}
+            />
+            {!endDate && (
+              <p className="th-period-field__hint">
+                Leave empty if your period is still ongoing.
+              </p>
+            )}
+          </div>
 
-        {/* Actions */}
-        <div style={{ display: 'flex', gap: 'var(--th-space-3)', marginTop: 'var(--th-space-2)' }}>
-          <button
-            type="button"
-            className="th-btn th-btn--outline"
-            onClick={() => navigate(-1)}
-            style={{ flex: 1 }}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="th-btn th-btn--primary"
-            disabled={saving}
-            style={{ flex: 1 }}
-          >
-            {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Log Period'}
-          </button>
+          {/* Flow level */}
+          <div className="th-period-field">
+            <label className="th-period-field__label" id="period-flow-label">Flow level</label>
+            <div className="th-period-chips" role="group" aria-labelledby="period-flow-label">
+              {options.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={`th-period-chip ${flowLevel === opt.value ? 'th-period-chip--selected' : ''}`}
+                  onClick={() => setFlowLevel(opt.value)}
+                  aria-pressed={flowLevel === opt.value}
+                >
+                  <span
+                    className="th-period-chip__dot"
+                    aria-hidden="true"
+                    style={{
+                      background: opt.value === 'light'
+                        ? 'var(--th-color-blush)'
+                        : opt.value === 'medium'
+                          ? 'var(--th-color-rose-muted)'
+                          : 'var(--th-color-burgundy)',
+                    }}
+                  />
+                  <span className="th-period-chip__label">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+            <p className="th-period-field__hint">The selected flow is {flowLabel(flowLevel).toLowerCase()}.</p>
+          </div>
+
+          {/* Note */}
+          <div className="th-period-field">
+            <label className="th-period-field__label" htmlFor="period-note">A note (optional)</label>
+            <textarea
+              id="period-note"
+              className="th-input"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Anything to note for yourself…"
+              rows={3}
+              maxLength={NOTE_MAX}
+            />
+            <p className="th-period-note-count">{note.length}/{NOTE_MAX}</p>
+          </div>
+
+          {/* Actions */}
+          <div className="th-period-actions-row">
+            <Button type="button" variant="ghost" onClick={() => navigate(-1)} disabled={saving}>
+              Cancel
+            </Button>
+            <Button variant="primary" type="submit" disabled={saving}>
+              {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Log Period'}
+            </Button>
+          </div>
+
+          <p className="th-period-composer-note">
+            <IconInfo size={15} /> Stored on this device only
+          </p>
         </div>
       </form>
     </div>

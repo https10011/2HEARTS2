@@ -6736,3 +6736,795 @@ html[data-th-motion='reduced'] .th-decor-ambient--sway {
   padding: var(--th-space-2) 0 var(--th-space-8);
   margin: 0;
 }
+/* ==========================================================================
+   Stage 11 — Period Tracker (private · respectful · calm)
+   A quiet, private, health-focused surface. Deliberately restrained versus
+   the romantic/floral features: one neutral status band, clear calendar
+   cells, dignified cards, and clear action language. Restraint on purpose —
+   this is "a private, thoughtfully designed part of our shared space."
+   All colors flow through tokens, so dark mode, text scaling, reduced
+   motion and the warm theme are inherited from the design system.
+   ========================================================================== */
+
+/* ----- Branded header (mirrors the Mood/Timeline vocabulary) ----- */
+.th-period-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--th-space-3);
+  margin: var(--th-space-2) 0 var(--th-space-5);
+  min-height: var(--th-header-height);
+}
+.th-period-header__copy {
+  flex: 1;
+  min-width: 0;
+}
+.th-period-title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-3xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  line-height: var(--th-line-height-tight);
+  margin: 0;
+}
+.th-period-subtitle {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: var(--th-space-1) 0 0;
+}
+
+/* ----- Status band (cycle / current state) ----- */
+.th-period-status {
+  position: relative;
+  padding: var(--th-space-5);
+  margin-bottom: var(--th-space-5);
+  background: linear-gradient(
+    135deg,
+    var(--th-color-surface-elevated) 0%,
+    var(--th-color-brand-wash) 100%
+  );
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-xl);
+  box-shadow: var(--th-shadow-md);
+}
+.th-period-status__eyebrow {
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--th-color-text-secondary);
+  margin: 0;
+}
+.th-period-status__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-4);
+  margin-top: var(--th-space-3);
+}
+.th-period-status__medallion {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--th-radius-circle);
+  background: var(--th-color-surface-elevated);
+  color: var(--th-color-burgundy);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-period-status__copy {
+  flex: 1;
+  min-width: 0;
+}
+.th-period-status__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy-dark);
+  line-height: var(--th-line-height-tight);
+  margin: 0;
+}
+.th-period-status__desc {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: var(--th-space-1) 0 0;
+}
+.th-period-status__meta {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  margin-top: var(--th-space-2);
+}
+
+/* ----- Cycle progress band ----- */
+.th-period-progress {
+  margin-top: var(--th-space-4);
+}
+.th-period-progress__track {
+  height: 8px;
+  border-radius: var(--th-radius-pill);
+  background: var(--th-color-blush);
+  overflow: hidden;
+}
+.th-period-progress__bar {
+  display: block;
+  height: 100%;
+  border-radius: var(--th-radius-pill);
+  background: var(--th-color-burgundy);
+  transition: width var(--th-motion-standard);
+}
+.th-period-progress__labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--th-space-1);
+}
+.th-period-progress__labels span {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+
+/* ----- Quick action tiles ----- */
+.th-period-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--th-space-3);
+  margin-bottom: var(--th-space-5);
+}
+.th-period-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--th-space-2);
+  min-height: var(--th-touch-target-min);
+  padding: var(--th-space-3) var(--th-space-2);
+  background: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-lg);
+  color: var(--th-color-burgundy);
+  cursor: pointer;
+  transition: border-color var(--th-motion-fast),
+    background var(--th-motion-fast),
+    box-shadow var(--th-motion-fast),
+    transform var(--th-motion-press);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-period-action:active {
+  transform: scale(0.97);
+}
+.th-period-action__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--th-radius-circle);
+  background: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+.th-period-action__label {
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-medium);
+  color: var(--th-color-text-primary);
+  line-height: var(--th-line-height-tight);
+  text-align: center;
+}
+
+/* ----- Stats row (averages) ----- */
+.th-period-stats {
+  display: flex;
+  gap: var(--th-space-3);
+  margin-bottom: var(--th-space-5);
+}
+.th-period-stat {
+  flex: 1;
+  padding: var(--th-space-3);
+  text-align: center;
+  background: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-lg);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-period-stat__label {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+.th-period-stat__value {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  margin-top: var(--th-space-1);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- Section heading + recent list ----- */
+.th-period-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--th-space-3);
+  margin: var(--th-space-5) 0 var(--th-space-3);
+}
+.th-period-section {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-burgundy);
+  margin: 0;
+}
+.th-period-see-all {
+  background: none;
+  border: none;
+  padding: var(--th-space-1) var(--th-space-2);
+  min-height: var(--th-touch-target-min);
+  color: var(--th-color-burgundy);
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  cursor: pointer;
+  border-radius: var(--th-radius-md);
+}
+.th-period-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-2);
+}
+.th-period-row {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  width: 100%;
+  padding: var(--th-space-3) var(--th-space-4);
+  background: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-lg);
+  box-shadow: var(--th-shadow-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-period-row:active {
+  transform: scale(0.98);
+  box-shadow: none;
+}
+.th-period-row__body {
+  flex: 1;
+  min-width: 0;
+}
+.th-period-row__date {
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+}
+.th-period-row__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  margin-top: var(--th-space-1);
+}
+.th-period-row__meta > span {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+.th-period-flow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--th-space-1);
+}
+.th-period-row__chevron {
+  flex-shrink: 0;
+  color: var(--th-color-rose-muted);
+}
+
+/* ----- Empty / error states ----- */
+.th-period-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-3);
+  text-align: center;
+  padding: var(--th-space-8) var(--th-space-6);
+}
+.th-period-empty__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--th-radius-circle);
+  background: var(--th-color-blush);
+  color: var(--th-color-rose-muted);
+  animation: th-scale-in var(--th-motion-emphasized);
+}
+.th-period-empty__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  margin: 0;
+}
+.th-period-empty__text {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: 0;
+  max-width: 30em;
+}
+.th-period-empty__privacy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--th-space-1);
+  margin-top: var(--th-space-1);
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+.th-period-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-4);
+  text-align: center;
+  padding: var(--th-space-10) var(--th-space-6);
+  color: var(--th-color-error);
+}
+.th-period-footer {
+  text-align: center;
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  padding: var(--th-space-2) 0 var(--th-space-8);
+  margin: 0;
+}
+
+/* ----- Calendar ----- */
+.th-period-cal {
+  padding: var(--th-space-4);
+  background: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-xl);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-period-cal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--th-space-3);
+}
+.th-period-cal__month {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  text-align: center;
+}
+.th-period-cal__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--th-radius-circle);
+  color: var(--th-color-burgundy);
+  cursor: pointer;
+  transition: background var(--th-motion-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-period-cal__nav:active {
+  background: var(--th-color-blush);
+}
+.th-period-cal__dow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--th-space-1);
+  margin-bottom: var(--th-space-1);
+}
+.th-period-cal__dow span {
+  text-align: center;
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-secondary);
+  padding: var(--th-space-1) 0;
+}
+.th-period-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--th-space-1);
+}
+.th-period-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0;
+  background: none;
+  border: none;
+  position: relative;
+}
+.th-period-cell__day {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--th-radius-circle);
+  font-size: var(--th-font-size-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--th-color-text-primary);
+  transition: background var(--th-motion-fast),
+    color var(--th-motion-fast),
+    box-shadow var(--th-motion-fast);
+}
+.th-period-cell--today .th-period-cell__day {
+  box-shadow: inset 0 0 0 2px var(--th-color-burgundy);
+  font-weight: var(--th-font-weight-bold);
+}
+.th-period-cell--selected .th-period-cell__day {
+  box-shadow: inset 0 0 0 2px var(--th-color-burgundy-dark);
+}
+.th-period-cell--period .th-period-cell__day {
+  background: var(--th-color-burgundy);
+  color: var(--th-color-text-on-accent);
+}
+.th-period-cell--period.th-period-cell--today .th-period-cell__day {
+  box-shadow: inset 0 0 0 3px var(--th-color-surface-elevated);
+}
+.th-period-cell--predicted .th-period-cell__day {
+  background: var(--th-color-pink);
+  color: var(--th-color-text-on-accent);
+  opacity: 0.85;
+}
+.th-period-cell__dot {
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: var(--th-radius-circle);
+  background: transparent;
+}
+.th-period-cell--period .th-period-cell__dot {
+  background: var(--th-color-surface-elevated);
+}
+.th-period-cell--predicted .th-period-cell__dot {
+  background: var(--th-color-surface-elevated);
+}
+.th-period-cell--today:not(.th-period-cell--period):not(.th-period-cell--predicted)
+  .th-period-cell__day {
+  color: var(--th-color-burgundy);
+  font-weight: var(--th-font-weight-bold);
+}
+.th-period-cell--disabled {
+  opacity: 0;
+}
+
+/* ----- Calendar legend ----- */
+.th-period-legend {
+  margin-top: var(--th-space-4);
+  padding: var(--th-space-4);
+  background: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-xl);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-period-legend__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-2);
+  font-size: var(--th-font-size-sm);
+}
+.th-period-legend__item {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  color: var(--th-color-text-primary);
+  min-height: var(--th-touch-target-min);
+}
+.th-period-legend__swatch {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--th-radius-circle);
+}
+.th-period-legend__swatch--period {
+  background: var(--th-color-burgundy);
+}
+.th-period-legend__swatch--predicted {
+  background: var(--th-color-pink);
+  opacity: 0.85;
+}
+.th-period-legend__swatch--today {
+  box-shadow: inset 0 0 0 2px var(--th-color-burgundy);
+}
+
+/* ----- Log Period composer ----- */
+.th-period-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-2);
+}
+.th-period-field__label {
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+}
+.th-period-field__hint {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+.th-period-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--th-space-3);
+}
+.th-period-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-2);
+  flex: 1 1 96px;
+  min-height: var(--th-touch-target-min);
+  padding: var(--th-space-3) var(--th-space-2);
+  background: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-lg);
+  color: var(--th-color-text-secondary);
+  cursor: pointer;
+  transition: border-color var(--th-motion-fast),
+    background var(--th-motion-fast),
+    color var(--th-motion-fast),
+    transform var(--th-motion-press);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-period-chip:active {
+  transform: scale(0.96);
+}
+.th-period-chip__dot {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--th-radius-circle);
+}
+.th-period-chip__label {
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-medium);
+}
+.th-period-chip--selected {
+  border-color: var(--th-color-burgundy);
+  background: var(--th-color-blush);
+  color: var(--th-color-burgundy-dark);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-period-chip--selected .th-period-chip__label {
+  font-weight: var(--th-font-weight-semibold);
+}
+.th-period-note-count {
+  text-align: right;
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+.th-period-actions-row {
+  display: flex;
+  gap: var(--th-space-3);
+  margin-top: var(--th-space-2);
+}
+.th-period-actions-row > * {
+  flex: 1;
+}
+.th-period-composer-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--th-space-1);
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  margin: var(--th-space-4) 0 0;
+}
+
+/* ----- History ----- */
+.th-period-month {
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--th-color-text-secondary);
+  margin: var(--th-space-5) 0 var(--th-space-3);
+}
+.th-period-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-2);
+}
+.th-period-history-row {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  width: 100%;
+  padding: var(--th-space-4);
+  background: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-lg);
+  box-shadow: var(--th-shadow-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--th-motion-press),
+    box-shadow var(--th-motion-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-period-history-row:active {
+  transform: scale(0.98);
+  box-shadow: none;
+}
+.th-period-history-row__body {
+  flex: 1;
+  min-width: 0;
+}
+.th-period-history-row__dates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--th-space-1);
+}
+.th-period-history-row__range {
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+}
+.th-period-history-row__end {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+.th-period-history-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--th-space-3);
+  margin-top: var(--th-space-1);
+}
+.th-period-history-row__meta > span {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+.th-period-history-row__note {
+  font-size: var(--th-font-size-sm);
+  font-style: italic;
+  color: var(--th-color-text-secondary);
+  margin: var(--th-space-2) 0 0;
+  line-height: var(--th-line-height-normal);
+}
+.th-period-cycle-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: var(--th-space-0) var(--th-space-3);
+  border-radius: var(--th-radius-pill);
+  background: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
+  flex-shrink: 0;
+}
+.th-period-history-row__chevron {
+  flex-shrink: 0;
+  color: var(--th-color-rose-muted);
+}
+
+/* ----- Period settings ----- */
+.th-period-settings-section {
+  margin-bottom: var(--th-space-5);
+}
+.th-period-settings-title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-burgundy);
+  margin: 0 0 var(--th-space-3);
+}
+.th-period-settings-desc {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: 0 0 var(--th-space-3);
+}
+.th-period-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--th-space-3);
+  padding: var(--th-space-4);
+  margin-bottom: var(--th-space-3);
+  background: var(--th-color-surface-elevated);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-lg);
+  box-shadow: var(--th-shadow-sm);
+}
+.th-period-stepper__copy {
+  flex: 1;
+  min-width: 0;
+}
+.th-period-stepper__label {
+  font-weight: var(--th-font-weight-semibold);
+  font-size: var(--th-font-size-md);
+  color: var(--th-color-text-primary);
+}
+.th-period-stepper__hint {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  margin-top: var(--th-space-1);
+}
+.th-period-stepper__value {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  min-width: 2.5em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.th-period-stepper__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+}
+.th-period-stepper-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--th-touch-target-min);
+  height: var(--th-touch-target-min);
+  padding: 0;
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-md);
+  background: var(--th-color-surface);
+  color: var(--th-color-burgundy);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--th-motion-fast),
+    color var(--th-motion-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-period-stepper-btn:active {
+  background: var(--th-color-blush);
+}
+.th-period-stepper-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.th-period-settings-save {
+  margin: var(--th-space-2) 0 0;
+}
+
+/* ----- Privacy card (settings) ----- */
+.th-period-privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--th-space-3);
+  padding: var(--th-space-4);
+  margin-bottom: var(--th-space-4);
+  background: var(--th-color-blush);
+  border: var(--th-border-width-thin) solid var(--th-color-rose-muted);
+  border-radius: var(--th-radius-lg);
+}
+.th-period-privacy__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--th-radius-circle);
+  background: var(--th-color-surface-elevated);
+  color: var(--th-color-burgundy);
+}
+.th-period-privacy__title {
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-burgundy-dark);
+  margin: 0 0 var(--th-space-1);
+}
+.th-period-privacy__text {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  margin: 0;
+}

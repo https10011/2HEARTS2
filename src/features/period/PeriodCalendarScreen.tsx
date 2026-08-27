@@ -1,36 +1,23 @@
 /**
- * PeriodCalendarScreen (Phase 22).
+ * Period Calendar (Phase 22, productized in Stage 11).
  *
- * Offline monthly calendar: logged period days, current day, previous
- * periods, estimated upcoming period, month navigation. All data comes
- * from PeriodService over the local database — no network, no server.
+ * Offline monthly calendar: logged period days, today, and an estimated
+ * upcoming window. Month navigation, clear cells, and a legend explain
+ * every marker. All data comes from PeriodService over the local
+ * database — no network, no server. Markers are kept understandable at a
+ * glance without fabricating state.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { getDatabase } from '../../data/database/connection.ts';
-import { IconBack } from '../../components/index.ts';
-import { PeriodRepository } from '../../repositories/periodRepository.ts';
-import { PeriodService } from '../../services/period/periodService.ts';
+import { usePeriodService } from './usePeriodService.ts';
+import { cellStatus, localDateKey, type PeriodCellFill } from './periodPresentation.ts';
+import { IconBack, LoadingState } from '../../components/index.ts';
 import type { PeriodEntry } from '../../data/period/periodTypes.ts';
-
-let _periodService: PeriodService | null = null;
-async function getPeriodService(): Promise<PeriodService> {
-  if (!_periodService) {
-    const repo = new PeriodRepository(await getDatabase());
-    _periodService = new PeriodService(repo);
-  }
-  return _periodService;
-}
 
 function dateKey(y: number, m: number, d: number): string {
   return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-}
-
-function todayKey(): string {
-  const d = new Date();
-  return dateKey(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
 /** All covered days of an entry (start → end inclusive, or just start). */
@@ -48,6 +35,7 @@ const WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 export function PeriodCalendarScreen() {
   const navigate = useNavigate();
+  const service = usePeriodService();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
@@ -57,8 +45,8 @@ export function PeriodCalendarScreen() {
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
+    if (!service) return;
     try {
-      const service = await getPeriodService();
       const entries = await service.listEntries('owner');
       const days = new Set<string>();
       for (const entry of entries) {
@@ -76,7 +64,7 @@ export function PeriodCalendarScreen() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [service]);
 
   useEffect(() => {
     loadData();
@@ -105,7 +93,7 @@ export function PeriodCalendarScreen() {
     }
   }
 
-  const today = todayKey();
+  const today = localDateKey();
   const firstOfMonth = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const leadingBlanks = firstOfMonth.getDay();
@@ -115,72 +103,68 @@ export function PeriodCalendarScreen() {
   for (let i = 0; i < leadingBlanks; i += 1) cells.push(null);
   for (let d = 1; d <= daysInMonth; d += 1) cells.push({ key: dateKey(year, month, d), day: d });
 
+  // Determine the non-marked "today" outline class only when today is in this month.
+  const todayInMonth = today && today.slice(0, 4) === String(year) && today.slice(5, 7) === String(month + 1).padStart(2, '0');
+
+  const cellClass = (fill: PeriodCellFill, isToday: boolean): string => {
+    const base = 'th-period-cell';
+    const fillClass = fill === 'period' ? 'th-period-cell--period' : fill === 'predicted' ? 'th-period-cell--predicted' : '';
+    const todayClass = isToday && todayInMonth ? 'th-period-cell--today' : '';
+    return [base, fillClass, todayClass].filter(Boolean).join(' ');
+  };
+
   return (
-    <div className="th-content-pad">
+    <div className="th-content-pad th-screen-warm">
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'var(--th-space-4)' }}>
         <button
           className="th-btn th-btn--ghost"
           onClick={() => navigate(RoutePath.appPeriod)}
           style={{ minWidth: 'auto', padding: 'var(--th-space-2)' }}
+          aria-label="Back to period home"
         >
           <IconBack size={20} />
         </button>
         <h1 className="th-screen-title" style={{ flex: 1 }}>Calendar</h1>
       </div>
 
-      {loading ? (
-        <div className="th-loading">
-          <div className="th-loading__spinner" />
-          <p>Loading calendar...</p>
-        </div>
+      {loading || !service ? (
+        <LoadingState label="Loading calendar…" />
       ) : (
         <>
-          {/* Month navigation */}
-          <div className="th-card" style={{ padding: 'var(--th-space-4)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--th-space-3)' }}>
-              <button className="th-btn th-btn--ghost" onClick={prevMonth} style={{ minWidth: '44px' }} aria-label="Previous month">‹</button>
-              <div style={{ fontWeight: 'var(--th-font-weight-semibold)', fontSize: 'var(--th-font-size-md)' }}>{monthLabel}</div>
-              <button className="th-btn th-btn--ghost" onClick={nextMonth} style={{ minWidth: '44px' }} aria-label="Next month">›</button>
+          {/* Month navigation + grid */}
+          <div className="th-period-cal">
+            <div className="th-period-cal__head">
+              <button className="th-period-cal__nav" onClick={prevMonth} aria-label="Previous month">
+                <span aria-hidden="true" style={{ fontSize: 'var(--th-font-size-xl)', lineHeight: 1 }}>‹</span>
+              </button>
+              <div className="th-period-cal__month">{monthLabel}</div>
+              <button className="th-period-cal__nav" onClick={nextMonth} aria-label="Next month">
+                <span aria-hidden="true" style={{ fontSize: 'var(--th-font-size-xl)', lineHeight: 1 }}>›</span>
+              </button>
             </div>
 
-            {/* Weekday header */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginBottom: 'var(--th-space-1)' }}>
+            <div className="th-period-cal__dow">
               {WEEKDAY_LABELS.map((w) => (
-                <div key={w} style={{ textAlign: 'center', fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', padding: 'var(--th-space-1)' }}>
-                  {w}
-                </div>
+                <span key={w} aria-hidden="true">{w}</span>
               ))}
             </div>
 
-            {/* Day cells */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+            <div className="th-period-cal__grid" role="grid" aria-label={monthLabel}>
               {cells.map((cell, i) => {
-                if (!cell) return <div key={`blank-${i}`} />;
-                const isPeriod = periodDays.has(cell.key);
-                const isPredicted = !isPeriod && predictedDays.has(cell.key);
-                const isToday = cell.key === today;
+                if (!cell) {
+                  return <div key={`blank-${i}`} className="th-period-cell th-period-cell--disabled" />;
+                }
+                const { fill, isToday } = cellStatus(cell.key, today, periodDays, predictedDays);
                 return (
                   <div
                     key={cell.key}
-                    style={{
-                      textAlign: 'center',
-                      padding: 'var(--th-space-2) 0',
-                      borderRadius: 'var(--th-radius-circle)',
-                      fontSize: 'var(--th-font-size-sm)',
-                      fontWeight: isToday ? 700 : 400,
-                      background: isPeriod
-                        ? 'var(--th-color-burgundy)'
-                        : isPredicted
-                          ? 'var(--th-color-pink)'
-                          : 'transparent',
-                      color: isPeriod || isPredicted ? 'var(--th-color-text-on-accent)' : 'var(--th-color-text-primary)',
-                      outline: isToday ? '2px solid var(--th-color-burgundy)' : 'none',
-                      outlineOffset: '-2px',
-                      opacity: isPredicted ? 0.7 : 1,
-                    }}
+                    className={cellClass(fill, isToday)}
+                    role="gridcell"
+                    aria-label={`${cell.day} ${monthLabel}${fill === 'period' ? ', logged period' : fill === 'predicted' ? ', estimated period' : ''}`}
                   >
-                    {cell.day}
+                    <span className="th-period-cell__day">{cell.day}</span>
+                    <span className="th-period-cell__dot" aria-hidden="true" />
                   </div>
                 );
               })}
@@ -188,18 +172,18 @@ export function PeriodCalendarScreen() {
           </div>
 
           {/* Legend */}
-          <div className="th-card" style={{ marginTop: 'var(--th-space-4)', padding: 'var(--th-space-4)' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-2)', fontSize: 'var(--th-font-size-sm)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)' }}>
-                <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--th-color-burgundy)', display: 'inline-block' }} />
+          <div className="th-period-legend">
+            <div className="th-period-legend__list">
+              <div className="th-period-legend__item">
+                <span className="th-period-legend__swatch th-period-legend__swatch--period" aria-hidden="true" />
                 Logged period day
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)' }}>
-                <span style={{ width: 16, height: 16, borderRadius: '50%', background: 'var(--th-color-pink)', opacity: 0.7, display: 'inline-block' }} />
+              <div className="th-period-legend__item">
+                <span className="th-period-legend__swatch th-period-legend__swatch--predicted" aria-hidden="true" />
                 Estimated upcoming period
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)' }}>
-                <span style={{ width: 16, height: 16, borderRadius: '50%', outline: '2px solid var(--th-color-burgundy)', outlineOffset: '-2px', display: 'inline-block' }} />
+              <div className="th-period-legend__item">
+                <span className="th-period-legend__swatch th-period-legend__swatch--today" aria-hidden="true" />
                 Today
               </div>
             </div>
