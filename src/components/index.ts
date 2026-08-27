@@ -53,5 +53,13 @@ export {
   IconCamera,
   IconVideo,
   IconLock,
+  IconLotus,
+  IconSparkle,
+  IconSun,
+  IconMeh,
+  IconMoon,
+  IconFrown,
+  IconSwirl,
+  IconPulse,
 } from './Icon';
 export type { IconProps } from './Icon';

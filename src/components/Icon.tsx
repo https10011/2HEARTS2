@@ -275,6 +275,96 @@ export function IconRepeat(props: IconProps) {
   );
 }
 
+/** Lotus flower (calm mood). */
+export function IconLotus(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <path d="M12 19c-1.8-1.4-3-3.8-3-6.2C9 10 10.2 7.4 12 5.5c1.8 1.9 3 4.5 3 7.3 0 2.4-1.2 4.8-3 6.2z" />
+      <path d="M12 19c-2.9.3-5.8-.7-7.8-2.7 1-2.6 3-4.7 5.5-5.8" />
+      <path d="M12 19c2.9.3 5.8-.7 7.8-2.7-1-2.6-3-4.7-5.5-5.8" />
+    </svg>
+  );
+}
+
+/** Sparkles (excited mood). */
+export function IconSparkle(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <path d="M10 4l1.5 4.5L16 10l-4.5 1.5L10 16l-1.5-4.5L4 10l4.5-1.5L10 4z" />
+      <path d="M18 14l.9 2.6L21.5 17.5l-2.6.9L18 21l-.9-2.6-2.6-.9 2.6-.9L18 14z" />
+    </svg>
+  );
+}
+
+/** Sun (grateful mood). */
+export function IconSun(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <circle cx="12" cy="12" r="4" />
+      <line x1="12" y1="2.5" x2="12" y2="5" />
+      <line x1="12" y1="19" x2="12" y2="21.5" />
+      <line x1="2.5" y1="12" x2="5" y2="12" />
+      <line x1="19" y1="12" x2="21.5" y2="12" />
+      <line x1="5.3" y1="5.3" x2="7" y2="7" />
+      <line x1="17" y1="17" x2="18.7" y2="18.7" />
+      <line x1="5.3" y1="18.7" x2="7" y2="17" />
+      <line x1="17" y1="7" x2="18.7" y2="5.3" />
+    </svg>
+  );
+}
+
+/** Even face (neutral mood). */
+export function IconMeh(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="8.5" y1="14.5" x2="15.5" y2="14.5" />
+      <line x1="9" y1="9" x2="9.01" y2="9" />
+      <line x1="15" y1="9" x2="15.01" y2="9" />
+    </svg>
+  );
+}
+
+/** Crescent moon (tired mood). */
+export function IconMoon(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a7 7 0 0 0 11 11z" />
+    </svg>
+  );
+}
+
+/** Downturned face (sad mood). */
+export function IconFrown(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M16 16.5s-1.5-2-4-2-4 2-4 2" />
+      <line x1="9" y1="9" x2="9.01" y2="9" />
+      <line x1="15" y1="9" x2="15.01" y2="9" />
+    </svg>
+  );
+}
+
+/** Soft spiral (anxious mood). */
+export function IconSwirl(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <path d="M12 12a2 2 0 0 0 2 2 3.5 3.5 0 0 0 3.5-3.5A5.5 5.5 0 0 0 12 5a7.5 7.5 0 0 0-7.5 7.5A9.5 9.5 0 0 0 14 22" />
+    </svg>
+  );
+}
+
+/** Tension line (stressed mood). */
+export function IconPulse(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="6 13.5 9 13.5 10.5 9.5 13.5 15.5 15 11.5 18 11.5" />
+    </svg>
+  );
+}
+
 export function IconSettings(props: IconProps) {
   return (
     <svg {...base(props)} aria-hidden="true">

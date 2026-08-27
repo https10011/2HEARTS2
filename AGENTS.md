@@ -334,3 +334,18 @@ online sync/chat. `google-services` plugin is on AGP classpath but NOT applied.
   (photo_ref column pre-existing); no map/location SDK (V1 prohibition
   honored — "Pinpoint it" keeps optional on-device coordinates).
 
+- Stage 10 (Mood Experience): docs/STAGE-10-… — Mood Home rewritten
+  (.th-mood-* vocabulary: branded header, "Today you're feeling" card
+  with per-mood copy, icon-based one-tap quick selector replacing the
+  emoji wall, recent check-ins, 2+-day streak line computed from real
+  entries), Check in / Edit check-in composer (icon mood grid with
+  aria-pressed, optional note kept, Modal bottom-sheet remove +
+  "Mood saved/updated/removed" toasts), Mood History (This week/This
+  month/All time chips, real distribution summary, month-grouped
+  timeline rows, emotional empty state). Eight Mood icons added to the
+  central Icon set (IconLotus/Sparkle/Sun/Meh/Moon/Frown/Swirl/Pulse);
+  pure moodPresentation.ts helpers (localDateKey, formatMoodDay,
+  buildMoodMonths, filterByRange, summarizeMoods, computeCheckInStreak);
+  shared useMoodService.ts hook; tests/stage10-mood.test.ts (25 tests);
+  776 tests. No schema change; MoodService/repository untouched; no
+  mood strength or fabricated partner stats (not in the data model).

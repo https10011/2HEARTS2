@@ -1,209 +1,255 @@
 /**
- * MoodHome (Phase 15).
+ * MoodHome (Phase 15, productized in Stage 10).
  *
- * Displays the mood tracking dashboard. Shows today's mood status,
- * quick mood selection, and recent mood history.
- * Uses real persisted data via MoodService.
+ * "How are you feeling?" — the couple's daily check-in space. Today's
+ * mood leads with the app's own icon language (no emoji wall); a quick
+ * one-tap check-in row appears when today is still unlogged. Recent
+ * check-ins, a real consecutive-day streak, and warm empty/error states
+ * follow. All numbers come from persisted entries — nothing fabricated.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { getDatabase } from '../../data/database/connection.ts';
-import { MoodRepository } from '../../repositories/moodRepository.ts';
-import { MoodService } from '../../services/mood/moodService.ts';
-import { IconSmile, LoadingState, RoseLilyDecoration } from '../../components/index.ts';
-
+import { useMoodService } from './useMoodService.ts';
+import { MoodIcon } from './moodMeta.tsx';
+import {
+  MOOD_DESCRIPTIONS,
+  OWNER_PROFILE_ID,
+  computeCheckInStreak,
+  formatMoodDay,
+  localDateKey,
+} from './moodPresentation.ts';
 import {
   type MoodEntry,
   type MoodValue,
-  MOOD_EMOJI,
   MOOD_LABELS,
   MOOD_VALUES,
 } from '../../data/mood/moodTypes.ts';
-
-let _moodService: MoodService | null = null;
-async function getMoodService(): Promise<MoodService> {
-  if (!_moodService) {
-    const repo = new MoodRepository(await getDatabase());
-    _moodService = new MoodService(repo);
-  }
-  return _moodService;
-}
-
-/** Returns today's date in yyyy-mm-dd format. */
-function todayKey(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
+import {
+  Button,
+  IconBack,
+  IconButton,
+  IconChevronRight,
+  IconEdit,
+  IconHeart,
+  IconPlus,
+  LoadingState,
+  RoseLilyDecoration,
+  useToast,
+} from '../../components/index.ts';
 
 export function MoodHome() {
   const navigate = useNavigate();
-  const [todayMood, setTodayMood] = useState<MoodEntry | null>(null);
-  const [recentMoods, setRecentMoods] = useState<MoodEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const service = useMoodService();
+  const toast = useToast();
 
+  const [todayMood, setTodayMood] = useState<MoodEntry | null>(null);
+  const [entries, setEntries] = useState<MoodEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const today = localDateKey();
+
   const loadData = useCallback(async () => {
+    if (!service) return;
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      const service = await getMoodService();
-      // Use a placeholder profileId — in real app would come from context
-      const profileId = 'owner';
-      const today = todayKey();
-      const existing = await service.getByProfileAndDate(profileId, today);
+      const existing = await service.getByProfileAndDate(OWNER_PROFILE_ID, today);
       setTodayMood(existing);
-      const recent = await service.listRecent(7);
-      setRecentMoods(recent);
-    } catch {
-      // Silently handle
+      const all = await service.list();
+      setEntries(all);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load moods.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [service, today]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   const handleQuickMood = async (mood: MoodValue) => {
+    if (!service) return;
     setSaving(true);
     try {
-      const service = await getMoodService();
-      const profileId = 'owner';
-      const today = todayKey();
       const entry = await service.record({
         moodValue: mood,
-        profileId,
+        profileId: OWNER_PROFILE_ID,
         entryDate: today,
       });
       setTodayMood(entry);
-      // Refresh recent
-      const recent = await service.listRecent(7);
-      setRecentMoods(recent);
+      const all = await service.list();
+      setEntries(all);
+      toast.success('Mood saved');
     } catch {
-      // Silently handle
+      toast.error('Could not save mood');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
+  if (loading || !service) {
+    return <LoadingState label="Loading your check-ins…" />;
+  }
+
+  const header = (
+    <header className="th-mood-header">
+      <IconButton label="Go back" onClick={() => navigate(-1)}>
+        <IconBack />
+      </IconButton>
+      <div className="th-mood-header__copy">
+        <h1 className="th-mood-title">Mood</h1>
+        <p className="th-mood-subtitle">A little check-in, every day.</p>
+      </div>
+      <IconButton label="Check in" onClick={() => navigate(RoutePath.appMoodAdd)}>
+        <IconPlus />
+      </IconButton>
+    </header>
+  );
+
+  if (error) {
     return (
-      <div className="th-content-pad">
-        <LoadingState label="Loading mood data…" />
+      <div className="th-content-pad th-screen-warm">
+        {header}
+        <div className="th-mood-error" role="alert">
+          <p>We couldn&apos;t load your check-ins just now.</p>
+          <Button variant="secondary" onClick={loadData}>Try again</Button>
+        </div>
       </div>
     );
   }
 
+  const streak = computeCheckInStreak(entries, today);
+  const recent = entries.slice(0, 5);
+
   return (
-    <div className="th-content-pad">
-      <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-4)' }}>
-        How Are You?
-      </h1>
+    <div className="th-content-pad th-screen-warm">
+      <RoseLilyDecoration variant={11} size={120} position="top-right" opacity={0.12} />
+      {header}
 
-      {/* Today's mood */}
-      <div className="th-card" style={{ padding: 'var(--th-space-4)', marginBottom: 'var(--th-space-4)' }}>
-        <h3 style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-3)' }}>
-          {todayMood ? "Today's mood" : "How are you feeling today?"}
-        </h3>
-
+      {/* Today's check-in */}
+      <section className="th-mood-today th-stagger-item" aria-label="Today's check-in">
         {todayMood ? (
-          <div style={{ textAlign: 'center', padding: 'var(--th-space-4) 0' }}>
-            <div style={{ fontSize: '3rem', marginBottom: 'var(--th-space-2)' }}>
-              {todayMood.moodEmoji}
-            </div>
-            <div style={{ fontWeight: 'var(--th-font-weight-semibold)', fontSize: 'var(--th-font-size-lg)' }}>
-              {MOOD_LABELS[todayMood.moodValue]}
+          <>
+            <p className="th-mood-today__eyebrow">Today you&apos;re feeling</p>
+            <div className="th-mood-today__identity">
+              <span className="th-mood-medallion th-mood-medallion--lg" aria-hidden="true">
+                <MoodIcon mood={todayMood.moodValue} size={30} />
+              </span>
+              <div className="th-mood-today__copy">
+                <h2 className="th-mood-today__mood">{MOOD_LABELS[todayMood.moodValue]}</h2>
+                <p className="th-mood-today__desc">{MOOD_DESCRIPTIONS[todayMood.moodValue]}</p>
+              </div>
             </div>
             {todayMood.note && (
-              <p style={{ color: 'var(--th-color-text-secondary)', marginTop: 'var(--th-space-2)', fontStyle: 'italic' }}>
-                "{todayMood.note}"
-              </p>
+              <p className="th-mood-today__note">&ldquo;{todayMood.note}&rdquo;</p>
             )}
-            <button
-              className="th-btn th-btn--outline th-btn--sm"
-              onClick={() => navigate(RoutePath.appMoodAdd)}
-              style={{ marginTop: 'var(--th-space-3)' }}
-            >
-              Change Mood
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--th-space-2)' }}>
-            {MOOD_VALUES.map((mood) => (
-              <button
-                key={mood}
-                className="th-btn th-btn--outline"
-                onClick={() => handleQuickMood(mood)}
-                disabled={saving}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 'var(--th-space-1)',
-                  padding: 'var(--th-space-2)',
-                  fontSize: 'var(--th-font-size-sm)',
-                }}
+            <div className="th-mood-today__actions">
+              <Button
+                variant="secondary"
+                onClick={() => navigate(RoutePath.appMoodEdit.replace(':entryId', todayMood.id))}
               >
-                <span style={{ fontSize: '1.5rem' }}>{MOOD_EMOJI[mood]}</span>
-                <span style={{ fontSize: 'var(--th-font-size-xs)' }}>{MOOD_LABELS[mood]}</span>
-              </button>
-            ))}
-          </div>
+                <IconEdit size={16} /> Update today&apos;s check-in
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h2 className="th-mood-today__prompt">How are you feeling today?</h2>
+            <p className="th-mood-today__prompt-sub">
+              One tap is enough — add a note anytime.
+            </p>
+            <div className="th-mood-select" role="group" aria-label="Choose today's mood">
+              {MOOD_VALUES.map((mood) => (
+                <button
+                  key={mood}
+                  type="button"
+                  className="th-mood-option"
+                  onClick={() => handleQuickMood(mood)}
+                  disabled={saving}
+                >
+                  <span className="th-mood-option__icon" aria-hidden="true">
+                    <MoodIcon mood={mood} size={20} />
+                  </span>
+                  <span className="th-mood-option__label">{MOOD_LABELS[mood]}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* Real consecutive-day streak */}
+      {streak >= 2 && (
+        <div className="th-mood-streak th-stagger-item">
+          <IconHeart size={16} />
+          {streak} days checked in a row
+        </div>
+      )}
+
+      {/* Recent check-ins */}
+      <div className="th-mood-section-head th-stagger-item">
+        <h2 className="th-mood-section">Recent check-ins</h2>
+        {entries.length > 0 && (
+          <button
+            type="button"
+            className="th-mood-see-all"
+            onClick={() => navigate(RoutePath.appMoodHistory)}
+          >
+            View history
+          </button>
         )}
       </div>
 
-      {/* Mood history */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--th-space-3)' }}>
-        <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 'var(--th-font-weight-semibold)' }}>Recent Moods</h2>
-        <button
-          className="th-btn th-btn--outline th-btn--sm"
-          onClick={() => navigate(RoutePath.appMoodHistory)}
-        >
-          View All
-        </button>
-      </div>
-
-      {recentMoods.length === 0 ? (
-        <div className="th-empty-emotional" style={{ marginTop: 'var(--th-space-4)' }}>
-          <RoseLilyDecoration variant={18} size={80} position="bottom-right" opacity={0.1} animated />
+      {recent.length === 0 ? (
+        <div className="th-empty-emotional">
+          <RoseLilyDecoration variant={18} size={90} position="bottom-right" opacity={0.1} />
           <div className="th-empty-emotional__visual th-scale-in">
-            <IconSmile size={36} />
+            <IconHeart size={38} />
           </div>
-          <h3 className="th-empty-emotional__title">No moods yet</h3>
+          <h3 className="th-empty-emotional__title">No check-ins yet</h3>
           <p className="th-empty-emotional__message">
-            Start tracking how you feel — it's a beautiful way to understand each other
+            Start with today — a small daily note about how you feel becomes
+            a beautiful way to understand each other.
           </p>
+          <div className="th-empty-emotional__action">
+            <Button variant="primary" onClick={() => navigate(RoutePath.appMoodAdd)}>
+              <IconPlus size={18} /> Check in now
+            </Button>
+          </div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-2)' }}>
-          {recentMoods.slice(0, 5).map((entry) => (
-            <div
+        <div className="th-mood-list">
+          {recent.map((entry) => (
+            <button
               key={entry.id}
-              className="th-card"
-              style={{ padding: 'var(--th-space-3)', display: 'flex', alignItems: 'center', gap: 'var(--th-space-3)' }}
+              type="button"
+              className="th-mood-row th-stagger-item"
+              onClick={() => navigate(RoutePath.appMoodEdit.replace(':entryId', entry.id))}
             >
-              <span style={{ fontSize: '1.5rem' }}>{entry.moodEmoji}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 'var(--th-font-weight-medium)' }}>{MOOD_LABELS[entry.moodValue]}</div>
-                <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
-                  {new Date(entry.entryDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                </div>
-              </div>
-              {entry.note && (
-                <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {entry.note}
-                </div>
-              )}
-            </div>
+              <span className="th-mood-medallion" aria-hidden="true">
+                <MoodIcon mood={entry.moodValue} size={20} />
+              </span>
+              <span className="th-mood-row__body">
+                <span className="th-mood-row__top">
+                  <span className="th-mood-row__label">{MOOD_LABELS[entry.moodValue]}</span>
+                  <span className="th-mood-row__date">{formatMoodDay(entry.entryDate, today)}</span>
+                </span>
+                {entry.note && <span className="th-mood-row__note">&ldquo;{entry.note}&rdquo;</span>}
+              </span>
+              <span className="th-mood-row__chevron" aria-hidden="true">
+                <IconChevronRight size={18} />
+              </span>
+            </button>
           ))}
         </div>
       )}
+
+      <p className="th-mood-footer">Small feelings, shared daily, add up to a lot.</p>
     </div>
   );
 }

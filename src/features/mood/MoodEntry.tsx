@@ -1,45 +1,49 @@
 /**
- * MoodEntry (Phase 15).
+ * MoodEntryScreen (Phase 15, productized in Stage 10).
  *
- * Mood selection screen with emoji grid and optional note.
- * Uses real persisted data via MoodService.
+ * The daily check-in composer — expressive mood cards drawn from the
+ * centralized icon system (no emoji wall), a clear selected state, an
+ * optional note, and a quiet privacy line. Editing an existing check-in
+ * reuses the same screen and adds removal through the centralized
+ * Modal + toast layer.
  */
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { getDatabase } from '../../data/database/connection.ts';
-import { MoodRepository } from '../../repositories/moodRepository.ts';
-import { MoodService } from '../../services/mood/moodService.ts';
 import { AppError } from '../../services/errors/appError.ts';
-import { useToast } from '../../components/index.ts';
+import { useMoodService } from './useMoodService.ts';
+import { MoodIcon } from './moodMeta.tsx';
+import {
+  OWNER_PROFILE_ID,
+  formatCheckInDate,
+  formatMoodDay,
+  localDateKey,
+} from './moodPresentation.ts';
 import {
   type MoodValue,
-  MOOD_EMOJI,
   MOOD_LABELS,
   MOOD_VALUES,
 } from '../../data/mood/moodTypes.ts';
+import {
+  Button,
+  IconBack,
+  IconButton,
+  IconCalendar,
+  IconLock,
+  IconTrash,
+  LoadingState,
+  Modal,
+  RoseLilyDecoration,
+  useToast,
+} from '../../components/index.ts';
 
-let _moodService: MoodService | null = null;
-async function getMoodService(): Promise<MoodService> {
-  if (!_moodService) {
-    const repo = new MoodRepository(await getDatabase());
-    _moodService = new MoodService(repo);
-  }
-  return _moodService;
-}
-
-function todayKey(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
+const NOTE_MAX_LENGTH = 500;
 
 export function MoodEntryScreen() {
   const navigate = useNavigate();
   const { entryId } = useParams<{ entryId: string }>();
+  const service = useMoodService();
   const toast = useToast();
   const isEditing = Boolean(entryId);
 
@@ -48,50 +52,55 @@ export function MoodEntryScreen() {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [loadingEntry, setLoadingEntry] = useState(isEditing);
+  const [entryDate, setEntryDate] = useState<string | null>(null);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const [removing, setRemoving] = useState(false);
+
+  const today = localDateKey();
 
   useEffect(() => {
-    if (!entryId) return;
-    const load = async () => {
+    if (!entryId || !service) return;
+    let cancelled = false;
+    (async () => {
       try {
-        const service = await getMoodService();
         const entry = await service.getById(entryId);
+        if (cancelled) return;
         if (entry) {
           setSelectedMood(entry.moodValue);
           setNote(entry.note ?? '');
+          setEntryDate(entry.entryDate);
+        } else {
+          setError('This check-in could not be found.');
         }
       } catch {
-        setError('Could not load mood entry.');
+        if (!cancelled) setError('Could not load this check-in.');
       } finally {
-        setLoadingEntry(false);
+        if (!cancelled) setLoadingEntry(false);
       }
-    };
-    load();
-  }, [entryId]);
+    })();
+    return () => { cancelled = true; };
+  }, [entryId, service]);
 
   const handleSubmit = async () => {
+    if (!service) return;
     if (!selectedMood) {
-      setError('Please select a mood.');
+      setError('Please choose how you feel.');
       return;
     }
     setError('');
     setSaving(true);
-
     try {
-      const service = await getMoodService();
-      const profileId = 'owner'; // Placeholder — real app uses profile context
-      const today = todayKey();
-
       if (isEditing && entryId) {
         await service.update(entryId, {
           moodValue: selectedMood,
-          note: note || null,
+          note: note.trim() || null,
         });
         toast.success('Mood updated');
       } else {
         await service.record({
           moodValue: selectedMood,
-          note: note || null,
-          profileId,
+          note: note.trim() || null,
+          profileId: OWNER_PROFILE_ID,
           entryDate: today,
         });
         toast.success('Mood saved');
@@ -109,95 +118,143 @@ export function MoodEntryScreen() {
     }
   };
 
-  if (loadingEntry) {
-    return (
-      <div className="th-content-pad">
-        <div className="th-loading">
-          <div className="th-loading__spinner" />
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
+  const handleRemove = async () => {
+    if (!service || !entryId) return;
+    setRemoving(true);
+    try {
+      await service.delete(entryId);
+      toast.success('Mood removed');
+      navigate(RoutePath.appMood, { replace: true });
+    } catch {
+      setRemoving(false);
+      setShowRemoveConfirm(false);
+      toast.error('Could not remove mood');
+    }
+  };
+
+  if (loadingEntry || !service) {
+    return <LoadingState label="Loading your check-in…" />;
   }
 
   return (
-    <div className="th-content-pad">
-      <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-4)' }}>
-        {isEditing ? 'Change Mood' : 'How Are You Feeling?'}
-      </h1>
+    <div className="th-content-pad th-screen-warm">
+      <RoseLilyDecoration variant={7} size={110} position="top-right" opacity={0.1} />
+
+      <header className="th-mood-header">
+        <IconButton label="Go back" onClick={() => navigate(-1)}>
+          <IconBack />
+        </IconButton>
+        <div className="th-mood-header__copy">
+          <h1 className="th-mood-title">{isEditing ? 'Edit check-in' : 'Check in'}</h1>
+          <p className="th-mood-subtitle">
+            {isEditing ? 'Update how you were feeling.' : 'How are you feeling right now?'}
+          </p>
+        </div>
+      </header>
+
+      <span className="th-mood-date-chip">
+        <IconCalendar size={15} />
+        {isEditing && entryDate ? formatMoodDay(entryDate, today) : formatCheckInDate(today)}
+      </span>
 
       {error && (
-        <div className="th-error-banner" style={{ marginBottom: 'var(--th-space-4)' }}>
+        <div className="th-form-error th-form-error--global" role="alert">
           {error}
         </div>
       )}
 
-      {/* Mood selection grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--th-space-3)', marginBottom: 'var(--th-space-6)' }}>
+      {/* Mood selection */}
+      <div
+        className="th-mood-select th-stagger-item"
+        role="group"
+        aria-label="Choose your mood"
+        style={{ marginBottom: 'var(--th-space-5)' }}
+      >
         {MOOD_VALUES.map((mood) => {
           const isSelected = selectedMood === mood;
           return (
             <button
               key={mood}
+              type="button"
+              className={`th-mood-option ${isSelected ? 'th-mood-option--selected' : ''}`}
+              aria-pressed={isSelected}
               onClick={() => setSelectedMood(mood)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 'var(--th-space-1)',
-                padding: 'var(--th-space-3)',
-                borderRadius: 'var(--th-radius-md)',
-                border: isSelected ? '2px solid var(--th-color-burgundy)' : '2px solid var(--th-color-border)',
-                background: isSelected ? 'var(--th-color-burgundy-light, rgba(106, 27, 43, 0.08))' : 'var(--th-color-surface)',
-                cursor: 'pointer',
-                transition: 'all var(--th-motion-fast)',
-                transform: isSelected ? 'scale(1.05)' : 'scale(1)',
-              }}
             >
-              <span style={{ fontSize: '2rem' }}>{MOOD_EMOJI[mood]}</span>
-              <span style={{ fontSize: 'var(--th-font-size-xs)', fontWeight: isSelected ? 600 : 400 }}>
-                {MOOD_LABELS[mood]}
+              <span className="th-mood-option__icon" aria-hidden="true">
+                <MoodIcon mood={mood} size={20} />
               </span>
+              <span className="th-mood-option__label">{MOOD_LABELS[mood]}</span>
             </button>
           );
         })}
       </div>
 
       {/* Note */}
-      <div style={{ marginBottom: 'var(--th-space-4)' }}>
-        <label className="th-label">Add a note (optional)</label>
+      <div className="th-form-group th-stagger-item">
+        <label className="th-form-label" htmlFor="mood-note">
+          Add a note <span className="th-form-optional">(optional)</span>
+        </label>
         <textarea
+          id="mood-note"
           className="th-input"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="What's on your mind?"
+          placeholder="What's behind this feeling?"
           rows={3}
-          maxLength={500}
+          maxLength={NOTE_MAX_LENGTH}
           style={{ resize: 'vertical' }}
         />
-        <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', textAlign: 'right', marginTop: 'var(--th-space-1)' }}>
-          {note.length}/500
-        </div>
+        <p className="th-mood-char-count">{note.length}/{NOTE_MAX_LENGTH}</p>
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: 'var(--th-space-3)' }}>
-        <button
-          className="th-btn th-btn--outline"
-          onClick={() => navigate(-1)}
-          style={{ flex: 1 }}
-        >
+      <div className="th-mood-actions">
+        <Button variant="secondary" onClick={() => navigate(-1)}>
           Cancel
-        </button>
-        <button
-          className="th-btn th-btn--primary"
+        </Button>
+        <Button
+          variant="primary"
           onClick={handleSubmit}
           disabled={saving || !selectedMood}
-          style={{ flex: 1 }}
         >
-          {saving ? 'Saving...' : isEditing ? 'Update Mood' : 'Save Mood'}
-        </button>
+          {saving ? 'Saving…' : isEditing ? 'Update check-in' : 'Save check-in'}
+        </Button>
       </div>
+
+      {isEditing && entryId && (
+        <button
+          type="button"
+          className="th-mood-remove"
+          onClick={() => setShowRemoveConfirm(true)}
+        >
+          <IconTrash size={16} /> Remove this check-in
+        </button>
+      )}
+
+      <p className="th-mood-privacy">
+        <IconLock size={13} /> Stays on this device — just for the two of you.
+      </p>
+
+      <Modal
+        open={showRemoveConfirm}
+        onClose={() => setShowRemoveConfirm(false)}
+        label="Remove check-in"
+      >
+        <div style={{ padding: 'var(--th-space-2) 0' }}>
+          <h3 className="th-note-confirm-title">Remove this check-in?</h3>
+          <p className="th-note-confirm-copy">
+            This day&apos;s mood will be removed for good. This action cannot be undone.
+          </p>
+          <div className="th-mood-actions">
+            <Button variant="secondary" onClick={() => setShowRemoveConfirm(false)}>
+              Keep it
+            </Button>
+            <Button variant="primary" onClick={handleRemove} disabled={removing}>
+              {removing ? 'Removing…' : 'Remove'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
