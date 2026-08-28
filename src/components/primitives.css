@@ -848,13 +848,28 @@
 /* Complete screen */
 .th-onboarding-complete {
   justify-content: center;
-  min-height: 60dvh;
+  /* Responsive: no fixed min-height — content flows naturally */
 }
 
-/* Setup complete (reference 07) */
+/* Setup complete (reference 07) — fully responsive composition */
 .th-setup-complete {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   text-align: center;
+  /* Comfortable vertical breathing room, responsive to viewport */
+  padding: clamp(var(--th-space-4), 4dvh, var(--th-space-8)) var(--th-space-4);
+  gap: clamp(var(--th-space-3), 2.5dvh, var(--th-space-5));
+  /* Fill available space so centering works on short and tall screens */
+  flex: 1 1 auto;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+.th-setup-complete__illustration {
+  /* Fluid sizing: scales down on short viewports, caps on large */
+  flex-shrink: 0;
+  max-width: min(170px, 30vw);
 }
 .th-setup-complete__subtitle {
   margin: calc(-1 * var(--th-space-3)) 0 0;
@@ -868,9 +883,10 @@
 }
 .th-setup-complete__card {
   width: 100%;
-  max-width: 360px;
-  padding: var(--th-space-5);
+  max-width: min(360px, 90%);
+  padding: var(--th-space-4) var(--th-space-5);
   text-align: left;
+  flex-shrink: 0;
 }
 .th-setup-complete__card-title {
   margin: 0 0 var(--th-space-3);
@@ -922,6 +938,7 @@
   align-items: center;
   gap: var(--th-space-2);
   color: var(--th-color-burgundy);
+  flex-shrink: 0;
 }
 .th-setup-complete__signoff p {
   margin: 0;

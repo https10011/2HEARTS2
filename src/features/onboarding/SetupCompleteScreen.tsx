@@ -5,9 +5,11 @@
  * card of what was set up (app-lock reflects the user's actual choice),
  * and the entrance into the app.
  *
- * Stage 2: enhanced with staggered celebration elements, warmer emotional
- * design, branded summary card with visual hierarchy, and a heartfelt
- * sign-off moment.
+ * Stage 2: Fully responsive composition — content flows naturally on any
+ * viewport size, aspect ratio, text scale, or safe-area condition. No fixed
+ * viewport heights or absolute positions. The layout uses flex centering
+ * with comfortable padding so the celebration feels intentional on both
+ * short (600px) and tall (2400px) devices.
  */
 
 import { useNavigate } from 'react-router-dom';
@@ -40,13 +42,13 @@ export function SetupCompleteScreen() {
 
   return (
     <OnboardingLayout currentPath={RoutePath.onboardingComplete} showBack={false}>
-      {/* Celebration florals */}
+      {/* Celebration florals — positioned absolutely to not affect flow */}
       <RoseLilyDecoration variant={11} size={130} position="top-right" opacity={0.2} animated />
       <RoseLilyDecoration variant={1} size={120} position="bottom-left" opacity={0.15} animated />
 
-      <div className="th-onboarding-form th-onboarding-complete th-setup-complete">
-        {/* Celebration illustration (centralized decorative art — Phase 23) */}
-        <div className="th-welcome-illustration th-stagger-item">
+      <div className="th-setup-complete">
+        {/* Celebration illustration — fluid sizing via CSS */}
+        <div className="th-setup-complete__illustration th-stagger-item">
           <OnboardingArt variant="paired-hearts-check" size={170} />
         </div>
 
