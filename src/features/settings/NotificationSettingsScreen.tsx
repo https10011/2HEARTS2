@@ -1,11 +1,7 @@
 /**
- * Notification Settings (Phase 19 — roadmap screen 84).
+ * Notification Settings (Stage 15 — Settings + App Customization).
  *
- * LOCAL notifications only — V1 has no push/FCM. The master switch and the
- * reminders category switch persist in appSettings and gate the existing
- * NotificationService/ReminderService scheduling path; turning a switch
- * off also cancels already-scheduled notifications so nothing stale fires.
- * Device permission status is reported honestly (never claimed delivered).
+ * LOCAL notifications only — V1 has no push/FCM. Architecture unchanged.
  */
 
 import { useEffect, useState } from 'react';
@@ -15,15 +11,9 @@ import { appSettingsStore, useAppSettings } from '../../core/appSettings.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { PermissionService, type PermissionState } from '../../services/permissions/permissionService.ts';
 import { SettingsScreen, SettingSwitchRow, InfoCard } from './settingsUi.tsx';
+import { permissionStatusLabel, permissionStatusDescription } from './settingsPresentation.ts';
 
 const permissions = new PermissionService();
-
-const PERMISSION_LABEL: Record<PermissionState, string> = {
-  granted: 'Allowed',
-  denied: 'Denied',
-  prompt: 'Not requested',
-  unavailable: 'Not available',
-};
 
 export function NotificationSettingsScreen() {
   const settings = useAppSettings();
@@ -47,13 +37,11 @@ export function NotificationSettingsScreen() {
     setDeviceState(state);
   };
 
-  /** Cancel every pending local notification (master switch off). */
   const cancelAllScheduled = async () => {
     const notifications = coreServices.notifications;
     if (notifications) await notifications.cancelAll().catch(() => undefined);
   };
 
-  /** Cancel pending reminder notifications (category switch off). */
   const cancelReminderScheduled = async () => {
     const notifications = coreServices.notifications;
     if (!notifications) return;
@@ -65,7 +53,7 @@ export function NotificationSettingsScreen() {
         }
       }
     } catch {
-      // Cancellation is best-effort; scheduling is gated regardless.
+      // Best-effort
     }
   };
 
@@ -81,58 +69,64 @@ export function NotificationSettingsScreen() {
 
   return (
     <SettingsScreen title="Notifications" backTo={RoutePath.appMoreSettings}>
-      <div className="th-settings-group">
+      {/* Master toggle */}
+      <div className="th-settings-group--enhanced">
         <SettingSwitchRow
           icon={<IconBell size={18} />}
           label="Notifications"
-          description="Allow TwoHearts to send reminders on this device."
+          description="Allow TwoHearts to send local reminders"
           checked={settings.notificationsEnabled}
           onChange={toggleMaster}
         />
       </div>
 
-      <p className="th-settings-section">Reminders</p>
-      <div className="th-settings-group">
+      {/* Reminders */}
+      <div className="th-settings-section--enhanced">
+        <span className="th-settings-section--enhanced__dot" />
+        Reminders
+      </div>
+      <div className="th-settings-group--enhanced">
         <SettingSwitchRow
           icon={<IconBell size={18} />}
           label="Reminder Notifications"
-          description="Get reminded about reminders you've scheduled."
+          description="Get reminded about reminders you've scheduled"
           checked={settings.remindersEnabled}
           onChange={toggleReminders}
           disabled={!settings.notificationsEnabled}
         />
       </div>
 
+      {/* Privacy note */}
       <div style={{ marginTop: 'var(--th-space-4)' }}>
         <InfoCard
-          title="Keep private moments private"
-          text="Private Vault content never appears in notifications. All reminders are scheduled locally on this device — nothing is sent to a server."
+          title="Private by design"
+          text="Private Vault content never appears in notifications. All reminders are scheduled locally — nothing is sent to a server."
+          icon={<IconBell size={16} />}
         />
       </div>
 
-      <p className="th-settings-section">Device</p>
-      <div className="th-settings-group">
-        <div className="th-settings-row th-settings-row--static">
+      {/* Device status */}
+      <div className="th-settings-section--enhanced">
+        <span className="th-settings-section--enhanced__dot" />
+        Device
+      </div>
+      <div className="th-settings-group--enhanced">
+        <div className="th-settings-row--stage15 th-settings-row--stage15--static">
+          <span className="th-settings-row--stage15__icon">
+            <IconBell size={18} />
+          </span>
           <span className="th-settings-row__body">
             <span className="th-settings-row__label">Device Notifications</span>
             <span className="th-settings-row__description">
-              {deviceState === 'granted'
-                ? 'TwoHearts can send notifications on this device.'
-                : deviceState === 'denied'
-                  ? 'Notifications are blocked in your device settings. Reminders will not appear until allowed.'
-                  : deviceState === 'prompt'
-                    ? 'TwoHearts has not asked for notification permission yet.'
-                    : 'Notifications are not available on this device.'}
+              {permissionStatusDescription(deviceState)}
             </span>
           </span>
-          <span
-            className="th-settings-row__trailing"
-            style={{ color: deviceState === 'granted' ? 'var(--th-color-success)' : 'inherit' }}
-          >
-            {PERMISSION_LABEL[deviceState]}
+          <span className={`th-settings-status th-settings-status--${deviceState}`}>
+            {permissionStatusLabel(deviceState)}
           </span>
         </div>
       </div>
+
       {deviceState === 'prompt' ? (
         <div style={{ marginTop: 'var(--th-space-3)' }}>
           <Button variant="secondary" full onClick={() => void requestPermission()}>

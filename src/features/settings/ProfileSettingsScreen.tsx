@@ -1,5 +1,5 @@
 /**
- * Profile Settings (Phase 19 — roadmap screen 81).
+ * Profile Settings (Stage 15 — Settings + App Customization).
  *
  * Edit the owner profile through RelationshipService (the same boundary
  * onboarding uses): display name + optional birthday. Saves persist into
@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Input, DatePicker } from '../../components/index.ts';
+import { Button, Input, DatePicker, IconFileText } from '../../components/index.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { safeUserMessage } from '../../services/errors/appError.ts';
 import type { Profile } from '../../data/relationship/relationshipTypes.ts';
@@ -66,38 +66,48 @@ export function ProfileSettingsScreen() {
 
   return (
     <SettingsScreen title="Profile Settings" backTo={RoutePath.appMoreSettings}>
-      <div className="th-form-group">
-        <label className="th-form-label" htmlFor="profile-name">
-          Name
-        </label>
-        <Input
-          id="profile-name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
-          maxLength={40}
-        />
-      </div>
+      <p style={{ marginTop: 0, fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
+        Make TwoHearts feel more personal.
+      </p>
 
-      <div className="th-form-group">
-        <label className="th-form-label" htmlFor="profile-birthday">
-          Birthday (optional)
-        </label>
-        <DatePicker
-          value={birthday}
-          onChange={setBirthday}
-          label="Your birthday"
-          placeholder="Tap to choose a date"
-        />
+      <div className="th-settings-section--enhanced">
+        <span className="th-settings-section--enhanced__dot" />
+        Your Details
+      </div>
+      <div className="th-settings-group--enhanced">
+        <div className="th-form-group" style={{ padding: 'var(--th-space-4)' }}>
+          <label className="th-form-label" htmlFor="profile-name">
+            Name
+          </label>
+          <Input
+            id="profile-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name"
+            maxLength={40}
+          />
+        </div>
+
+        <div className="th-form-group" style={{ padding: '0 var(--th-space-4) var(--th-space-4)' }}>
+          <label className="th-form-label" htmlFor="profile-birthday">
+            Birthday (optional)
+          </label>
+          <DatePicker
+            value={birthday}
+            onChange={setBirthday}
+            label="Your birthday"
+            placeholder="Tap to choose a date"
+          />
+        </div>
       </div>
 
       {error ? (
-        <p role="alert" style={{ color: 'var(--th-color-error)', fontSize: 'var(--th-font-size-sm)' }}>
+        <p role="alert" style={{ color: 'var(--th-color-error)', fontSize: 'var(--th-font-size-sm)', marginTop: 'var(--th-space-3)' }}>
           {error}
         </p>
       ) : null}
       {saved ? (
-        <p role="status" style={{ color: 'var(--th-color-success)', fontSize: 'var(--th-font-size-sm)' }}>
+        <p role="status" style={{ color: 'var(--th-color-success)', fontSize: 'var(--th-font-size-sm)', marginTop: 'var(--th-space-3)' }}>
           Saved.
         </p>
       ) : null}
@@ -110,6 +120,7 @@ export function ProfileSettingsScreen() {
         <InfoCard
           title="Your profile is private"
           text="Your profile information is stored locally on this device."
+          icon={<IconFileText size={16} />}
         />
       </div>
 
@@ -118,6 +129,7 @@ export function ProfileSettingsScreen() {
           <InfoCard
             title="Complete your profile"
             text="Add a few details to make TwoHearts feel more personal."
+            icon={<IconFileText size={16} />}
           />
         </div>
       )}

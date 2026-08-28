@@ -1,9 +1,9 @@
 /**
- * Shared building blocks for the Settings screens (Phase 19).
+ * Shared building blocks for the Settings screens (Stage 15 enhanced).
  *
- * Feature-local helpers only — primitives (Header, IconButton, Switch…)
- * stay in src/components; these compose them into the repeating settings
- * row/group patterns so each screen stays declarative.
+ * Composes primitives (Header, IconButton, Switch, etc.) into the
+ * repeating settings patterns. Stage 15 adds enhanced visual treatment
+ * while preserving the same API surface.
  */
 
 import type { ReactNode } from 'react';
@@ -51,7 +51,7 @@ interface SettingRowProps {
   static?: boolean;
 }
 
-/** One grouped settings row. */
+/** One grouped settings row — Stage 15 enhanced version. */
 export function SettingRow({
   icon,
   label,
@@ -62,10 +62,14 @@ export function SettingRow({
   danger = false,
   static: isStatic = false,
 }: SettingRowProps) {
-  const className = `th-settings-row${danger ? ' th-settings-row--danger' : ''}${isStatic ? ' th-settings-row--static' : ''}`;
+  const className = [
+    'th-settings-row--stage15',
+    danger ? 'th-settings-row--danger' : '',
+    isStatic ? 'th-settings-row--stage15--static' : '',
+  ].filter(Boolean).join(' ');
   const inner = (
     <>
-      {icon ? <span className="th-settings-row__icon">{icon}</span> : null}
+      {icon ? <span className="th-settings-row--stage15__icon">{icon}</span> : null}
       <span className="th-settings-row__body">
         <span className="th-settings-row__label">{label}</span>
         {description ? <span className="th-settings-row__description">{description}</span> : null}
@@ -94,7 +98,7 @@ export function SettingRow({
   );
 }
 
-/** Settings row whose trailing control is a Switch. */
+/** Settings row whose trailing control is a Switch — Stage 15 enhanced. */
 export function SettingSwitchRow({
   icon,
   label,
@@ -111,8 +115,8 @@ export function SettingSwitchRow({
   disabled?: boolean;
 }) {
   return (
-    <div className="th-settings-row th-settings-row--static">
-      {icon ? <span className="th-settings-row__icon">{icon}</span> : null}
+    <div className="th-settings-row--stage15 th-settings-row--stage15--static">
+      {icon ? <span className="th-settings-row--stage15__icon">{icon}</span> : null}
       <span className="th-settings-row__body">
         <span className="th-settings-row__label">{label}</span>
         {description ? <span className="th-settings-row__description">{description}</span> : null}
@@ -124,13 +128,14 @@ export function SettingSwitchRow({
   );
 }
 
-/** Soft informational card used for privacy/storage notes. */
-export function InfoCard({ title, text }: { title: string; text: string }) {
+/** Soft informational card — Stage 15 enhanced version. */
+export function InfoCard({ title, text, icon }: { title: string; text: string; icon?: ReactNode }) {
   return (
-    <div className="th-settings-info">
-      <div>
-        <p className="th-settings-info__title">{title}</p>
-        <p className="th-settings-info__text">{text}</p>
+    <div className="th-settings-info--enhanced">
+      {icon && <div className="th-settings-info--enhanced__icon">{icon}</div>}
+      <div className="th-settings-info--enhanced__body">
+        <p className="th-settings-info--enhanced__title">{title}</p>
+        <p className="th-settings-info--enhanced__text">{text}</p>
       </div>
     </div>
   );

@@ -1,30 +1,20 @@
 /**
- * Appearance Settings (Phase 19 — roadmap screen 83).
+ * Appearance Settings (Stage 15 — Settings + App Customization).
  *
- * Connects the EXISTING personalization preferences (appSettings schema,
- * established in Phase 4/5): theme mode (light/dark/system — dark tokens
- * landed in Phase 19), text size, and reduce motion. Changes apply
- * immediately via AppRootProvider and persist across restarts.
+ * Theme selector with visual preview cards, text size selector, motion
+ * preference, and appearance reset. All changes apply immediately.
+ * Architecture unchanged — uses existing appSettingsStore + useSyncExternalStore.
  */
 
 import { useState } from 'react';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Modal, IconCheck } from '../../components/index.ts';
+import { Button, Modal, IconCheck, IconSettings } from '../../components/index.ts';
 import {
   appSettingsStore,
   useAppSettings,
-  type ThemeMode,
 } from '../../core/appSettings.ts';
-import { TEXT_SIZE_LABELS, type TextSizeKey } from '../../theme/tokens.ts';
-import { SettingsScreen, SettingSwitchRow, SettingRow } from './settingsUi.tsx';
-
-const THEME_OPTIONS: { value: ThemeMode; label: string; description: string }[] = [
-  { value: 'light', label: 'Light', description: 'Warm and bright' },
-  { value: 'dark', label: 'Dark', description: 'Soft and low-light' },
-  { value: 'system', label: 'System', description: 'Follow your device' },
-];
-
-const TEXT_SIZE_OPTIONS: TextSizeKey[] = ['small', 'default', 'large', 'extra-large'];
+import { SettingsScreen, SettingRow, SettingSwitchRow } from './settingsUi.tsx';
+import { THEME_OPTIONS, TEXT_SIZE_OPTIONS } from './settingsPresentation.ts';
 
 export function AppearanceSettingsScreen() {
   const settings = useAppSettings();
@@ -32,87 +22,87 @@ export function AppearanceSettingsScreen() {
 
   return (
     <SettingsScreen title="Appearance" backTo={RoutePath.appMoreSettings}>
-      <p style={{ marginTop: 0, fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
+      <p style={{ marginTop: 0, fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
         Choose the look that feels right for you.
       </p>
 
-      <p className="th-settings-section">Theme</p>
-      <div className="th-settings-group" role="radiogroup" aria-label="Theme">
+      {/* Theme selector — visual preview cards */}
+      <div className="th-settings-section--enhanced">
+        <span className="th-settings-section--enhanced__dot" />
+        Theme
+      </div>
+      <div className="th-settings-theme-options" role="radiogroup" aria-label="Theme">
         {THEME_OPTIONS.map((option) => (
-          <SettingRow
+          <button
             key={option.value}
-            label={option.label}
-            description={option.description}
+            className={`th-settings-theme-card ${settings.themeMode === option.value ? 'th-settings-theme-card--selected' : ''}`}
             onClick={() => appSettingsStore.setThemeMode(option.value)}
-            trailing={
-              <span
-                role="radio"
-                aria-checked={settings.themeMode === option.value}
-                aria-label={option.label}
-                style={{
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: 'var(--th-radius-circle)',
-                  border: `var(--th-border-width-medium) solid ${
-                    settings.themeMode === option.value
-                      ? 'var(--th-color-burgundy)'
-                      : 'var(--th-color-border)'
-                  }`,
-                  background:
-                    settings.themeMode === option.value ? 'var(--th-color-burgundy)' : 'transparent',
-                  boxShadow:
-                    settings.themeMode === option.value
-                      ? 'inset 0 0 0 3px var(--th-color-surface)'
-                      : 'none',
-                }}
-              />
-            }
-          />
+            role="radio"
+            aria-checked={settings.themeMode === option.value}
+            aria-label={option.label}
+          >
+            <div className={`th-settings-theme-card__preview th-settings-theme-card__preview--${option.value}`} />
+            <span className="th-settings-theme-card__label">{option.label}</span>
+            {settings.themeMode === option.value && (
+              <span className="th-settings-theme-card__check th-settings-theme-card__check--active">
+                <IconCheck size={12} />
+              </span>
+            )}
+          </button>
         ))}
       </div>
       {settings.themeMode === 'system' ? (
-        <p style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)' }}>
+        <p style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)', marginTop: 'var(--th-space-2)' }}>
           Using your device&apos;s appearance setting.
         </p>
       ) : null}
 
-      <p className="th-settings-section">Text Size</p>
-      <div className="th-settings-group" role="radiogroup" aria-label="Text size">
-        {TEXT_SIZE_OPTIONS.map((size) => (
-          <SettingRow
-            key={size}
-            label={TEXT_SIZE_LABELS[size]}
-            onClick={() => appSettingsStore.setTextSize(size)}
-            trailing={
-              settings.textSize === size ? (
-                <span
-                  role="radio"
-                  aria-checked="true"
-                  aria-label={`${TEXT_SIZE_LABELS[size]} selected`}
-                  style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex' }}
-                >
-                  <IconCheck size={16} />
-                </span>
-              ) : null
-            }
-          />
+      {/* Text size selector */}
+      <div className="th-settings-section--enhanced">
+        <span className="th-settings-section--enhanced__dot" />
+        Text Size
+      </div>
+      <div className="th-settings-textsize-options" role="radiogroup" aria-label="Text size">
+        {TEXT_SIZE_OPTIONS.map((option) => (
+          <button
+            key={option.value}
+            className={`th-settings-textsize-card ${settings.textSize === option.value ? 'th-settings-textsize-card--selected' : ''}`}
+            onClick={() => appSettingsStore.setTextSize(option.value)}
+            role="radio"
+            aria-checked={settings.textSize === option.value}
+            aria-label={`${option.label} text size`}
+          >
+            <span className="th-settings-textsize-card__label">{option.label}</span>
+            <span className="th-settings-textsize-card__desc">{option.description}</span>
+            {settings.textSize === option.value && (
+              <span style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex', flexShrink: 0 }}>
+                <IconCheck size={16} />
+              </span>
+            )}
+          </button>
         ))}
       </div>
 
-      <p className="th-settings-section">Motion</p>
-      <div className="th-settings-group">
+      {/* Motion */}
+      <div className="th-settings-section--enhanced">
+        <span className="th-settings-section--enhanced__dot" />
+        Motion
+      </div>
+      <div className="th-settings-group--enhanced">
         <SettingSwitchRow
+          icon={<IconSettings size={18} />}
           label="Reduce Motion"
-          description="Use simpler animations throughout TwoHearts."
+          description="Use simpler animations throughout TwoHearts"
           checked={settings.reduceMotion}
           onChange={(next) => appSettingsStore.setReduceMotion(next)}
         />
       </div>
 
-      <div style={{ marginTop: 'var(--th-space-6)' }} className="th-settings-group">
+      {/* Reset */}
+      <div style={{ marginTop: 'var(--th-space-6)' }} className="th-settings-group--enhanced">
         <SettingRow
           label="Reset to Default"
-          description="Restore the original TwoHearts appearance."
+          description="Restore the original TwoHearts appearance"
           onClick={() => setConfirmReset(true)}
         />
       </div>

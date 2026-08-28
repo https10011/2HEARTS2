@@ -1,5 +1,5 @@
 /**
- * Storage Settings (Phase 19 — roadmap screen 86).
+ * Storage Settings (Stage 15 — Settings + App Customization).
  *
  * Honest local-storage picture + management, through the Phase 19
  * DataManagementService: per-feature row counts, stored media bytes,
@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Modal } from '../../components/index.ts';
+import { Button, Modal, IconFile, IconFileText } from '../../components/index.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { safeUserMessage } from '../../services/errors/appError.ts';
 import type { StorageReport } from '../../services/maintenance/dataManagementService.ts';
@@ -122,10 +122,14 @@ export function StorageSettingsScreen() {
 
   return (
     <SettingsScreen title="Storage" backTo={RoutePath.appMoreSettings}>
-      <div className="th-settings-info" style={{ marginBottom: 'var(--th-space-4)' }}>
-        <div>
-          <p className="th-settings-info__title">TwoHearts Storage</p>
-          <p className="th-settings-info__text">
+      {/* Storage summary */}
+      <div className="th-settings-info--enhanced" style={{ marginBottom: 'var(--th-space-4)' }}>
+        <div className="th-settings-info--enhanced__icon">
+          <IconFile size={16} />
+        </div>
+        <div className="th-settings-info--enhanced__body">
+          <p className="th-settings-info--enhanced__title">TwoHearts Storage</p>
+          <p className="th-settings-info--enhanced__text">
             {report
               ? `${formatBytes(report.mediaBytes)} of media · ${report.domainRows} saved item${report.domainRows === 1 ? '' : 's'} · ${report.pendingNotifications} scheduled reminder${report.pendingNotifications === 1 ? '' : 's'}`
               : 'Calculating space used on this device…'}
@@ -134,20 +138,23 @@ export function StorageSettingsScreen() {
       </div>
 
       {error ? (
-        <p role="alert" style={{ color: 'var(--th-color-error)', fontSize: 'var(--th-font-size-sm)' }}>
+        <p role="alert" style={{ color: 'var(--th-color-error)', fontSize: 'var(--th-font-size-sm)', marginTop: 'var(--th-space-3)' }}>
           {error}
         </p>
       ) : null}
       {message ? (
-        <p role="status" style={{ color: 'var(--th-color-success)', fontSize: 'var(--th-font-size-sm)' }}>
+        <p role="status" style={{ color: 'var(--th-color-success)', fontSize: 'var(--th-font-size-sm)', marginTop: 'var(--th-space-3)' }}>
           {message}
         </p>
       ) : null}
 
       {breakdown.length > 0 ? (
         <>
-          <p className="th-settings-section">Storage Breakdown</p>
-          <div className="th-settings-group">
+          <div className="th-settings-section--enhanced">
+            <span className="th-settings-section--enhanced__dot" />
+            Storage Breakdown
+          </div>
+          <div className="th-settings-group--enhanced">
             {breakdown.map(([label, rows]) => (
               <SettingRow
                 key={label}
@@ -164,25 +171,33 @@ export function StorageSettingsScreen() {
         </>
       ) : null}
 
-      <p className="th-settings-section">Local Data</p>
-      <div className="th-settings-group">
+      <div className="th-settings-section--enhanced">
+        <span className="th-settings-section--enhanced__dot" />
+        Local Data
+      </div>
+      <div className="th-settings-group--enhanced">
         <SettingRow
+          icon={<IconFile size={18} />}
           label="App Data"
-          description="Your TwoHearts information is stored on this device."
+          description="Your TwoHearts information is stored on this device"
           static
         />
         <SettingRow
+          icon={<IconFileText size={18} />}
           label="Clear Cache"
-          description="Remove temporary files without deleting your saved data."
+          description="Remove temporary files without deleting your saved data"
           onClick={() => setConfirmCache(true)}
         />
       </div>
 
-      <p className="th-settings-section">Danger Zone</p>
-      <div className="th-settings-group">
+      <div className="th-settings-section--enhanced">
+        <span className="th-settings-section--enhanced__dot" />
+        Danger Zone
+      </div>
+      <div className="th-settings-group--enhanced">
         <SettingRow
           label="Clear Local Data"
-          description="Delete TwoHearts data stored on this device."
+          description="Delete TwoHearts data stored on this device"
           danger
           onClick={() => setConfirmReset(true)}
         />
@@ -192,6 +207,7 @@ export function StorageSettingsScreen() {
         <InfoCard
           title="Your data stays on your device"
           text="TwoHearts V1 is designed to keep your saved app data local."
+          icon={<IconFile size={16} />}
         />
       </div>
 
@@ -203,9 +219,7 @@ export function StorageSettingsScreen() {
           other saved data are not affected.
         </p>
         <div style={{ display: 'flex', gap: 'var(--th-space-3)' }}>
-          <Button variant="ghost" full onClick={() => setConfirmCache(false)} disabled={busy}>
-            Cancel
-          </Button>
+          <Button variant="ghost" full onClick={() => setConfirmCache(false)} disabled={busy}>Cancel</Button>
           <Button variant="primary" full onClick={() => void clearCache()} disabled={busy}>
             {busy ? 'Clearing…' : 'Clear Cache'}
           </Button>
@@ -222,9 +236,7 @@ export function StorageSettingsScreen() {
           all preferences. This cannot be undone.
         </p>
         <div style={{ display: 'flex', gap: 'var(--th-space-3)' }}>
-          <Button variant="ghost" full onClick={() => setConfirmReset(false)} disabled={busy}>
-            Cancel
-          </Button>
+          <Button variant="ghost" full onClick={() => setConfirmReset(false)} disabled={busy}>Cancel</Button>
           <Button variant="primary" full onClick={() => void resetAll()} disabled={busy}>
             {busy ? 'Deleting…' : 'Delete Everything'}
           </Button>

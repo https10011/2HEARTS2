@@ -9079,3 +9079,412 @@ html[data-th-motion='reduced'] .th-decor-ambient--sway {
   padding: var(--th-space-10) var(--th-space-4);
   color: var(--th-color-text-secondary);
 }
+
+
+/* ==========================================================================
+   Stage 15 — Settings + App Customization Visual Productization
+   ==========================================================================
+
+   Enhanced settings vocabulary: branded hero, improved sections, theme
+   previews, text size selector, polished rows, info cards, and dialogs.
+   All token-driven, dark-mode safe, reduced-motion aware.
+   ========================================================================== */
+
+/* --- Settings hero band --- */
+.th-settings-hero {
+  position: relative;
+  padding: var(--th-space-6) var(--th-space-4);
+  margin-bottom: var(--th-space-6);
+  background: linear-gradient(135deg, var(--th-color-burgundy), var(--th-color-burgundy-dark));
+  border-radius: var(--th-radius-xl);
+  color: var(--th-color-text-on-accent);
+  overflow: hidden;
+}
+.th-settings-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 25%, rgba(255,255,255,0.1) 0%, transparent 55%);
+  pointer-events: none;
+}
+:root[data-th-theme='dark'] .th-settings-hero {
+  background: linear-gradient(135deg, rgba(106,27,43,0.45), rgba(74,15,29,0.6));
+  border: 1px solid rgba(201,128,139,0.12);
+}
+.th-settings-hero__label {
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  opacity: 0.8;
+  margin-bottom: var(--th-space-1);
+}
+.th-settings-hero__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-2xl);
+  font-weight: var(--th-font-weight-bold);
+  line-height: var(--th-line-height-tight);
+  margin-bottom: var(--th-space-1);
+}
+.th-settings-hero__desc {
+  font-size: var(--th-font-size-sm);
+  opacity: 0.85;
+  line-height: var(--th-line-height-relaxed);
+}
+
+/* --- Settings profile card — enhanced --- */
+.th-settings-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-4);
+  padding: var(--th-space-4) var(--th-space-4);
+  background: var(--th-color-surface);
+  border: 1px solid var(--th-color-border);
+  border-radius: var(--th-radius-lg);
+  margin-bottom: var(--th-space-5);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--th-duration-fast) var(--th-ease-standard),
+              box-shadow var(--th-duration-fast) var(--th-ease-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-settings-profile:hover {
+  border-color: var(--th-color-burgundy-light);
+  box-shadow: var(--th-shadow-md);
+}
+.th-settings-profile:active {
+  transform: scale(0.98);
+}
+:root[data-th-theme='dark'] .th-settings-profile {
+  background: var(--th-color-surface-elevated);
+}
+.th-settings-profile__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--th-radius-circle);
+  background: linear-gradient(135deg, var(--th-color-burgundy), var(--th-color-burgundy-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-bold);
+  font-family: var(--th-font-family-display);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(106,27,43,0.2);
+}
+.th-settings-profile__body {
+  flex: 1;
+  min-width: 0;
+}
+.th-settings-profile__name {
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  display: block;
+  margin-bottom: 2px;
+}
+.th-settings-profile__subtitle {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+.th-settings-profile__chevron {
+  flex-shrink: 0;
+  color: var(--th-color-text-secondary);
+  opacity: 0.5;
+}
+
+/* --- Settings section header — enhanced --- */
+.th-settings-section--enhanced {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--th-color-rose-muted);
+  margin: var(--th-space-6) 0 var(--th-space-2);
+}
+.th-settings-section--enhanced__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--th-color-burgundy);
+  opacity: 0.5;
+}
+
+/* --- Settings group — enhanced --- */
+.th-settings-group--enhanced {
+  background: var(--th-color-surface);
+  border-radius: var(--th-radius-lg);
+  box-shadow: var(--th-shadow-sm);
+  overflow: hidden;
+  border: 1px solid var(--th-color-border);
+}
+:root[data-th-theme='dark'] .th-settings-group--enhanced {
+  background: var(--th-color-surface-elevated);
+}
+
+/* --- Settings row — enhanced --- */
+.th-settings-row--stage15 {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  width: 100%;
+  min-height: var(--th-touch-target-min);
+  padding: var(--th-space-4) var(--th-space-4);
+  border: none;
+  border-bottom: 1px solid var(--th-color-divider);
+  background: transparent;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--th-duration-fast) var(--th-ease-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+.th-settings-row--stage15:last-child {
+  border-bottom: none;
+}
+.th-settings-row--stage15:hover {
+  background: var(--th-color-neutral-soft);
+}
+.th-settings-row--stage15:active {
+  background: var(--th-color-blush);
+}
+.th-settings-row--stage15--static {
+  cursor: default;
+}
+.th-settings-row--stage15--static:hover {
+  background: transparent;
+}
+:root[data-th-theme='dark'] .th-settings-row--stage15:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+/* --- Settings row icon — enhanced --- */
+.th-settings-row--stage15__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--th-radius-md);
+  background: linear-gradient(135deg, var(--th-color-blush), var(--th-color-neutral-soft));
+  color: var(--th-color-burgundy);
+}
+:root[data-th-theme='dark'] .th-settings-row--stage15__icon {
+  background: linear-gradient(135deg, rgba(106,27,43,0.15), rgba(232,184,194,0.08));
+}
+
+/* --- Theme preview cards --- */
+.th-settings-theme-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--th-space-3);
+}
+.th-settings-theme-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-2);
+  padding: var(--th-space-4) var(--th-space-2);
+  background: var(--th-color-surface);
+  border: 2px solid var(--th-color-border);
+  border-radius: var(--th-radius-lg);
+  cursor: pointer;
+  transition: border-color var(--th-duration-fast) var(--th-ease-standard),
+              box-shadow var(--th-duration-fast) var(--th-ease-standard);
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+  color: inherit;
+  text-align: center;
+}
+.th-settings-theme-card:active {
+  transform: scale(0.97);
+}
+.th-settings-theme-card--selected {
+  border-color: var(--th-color-burgundy);
+  box-shadow: 0 0 0 1px var(--th-color-burgundy), var(--th-shadow-md);
+}
+.th-settings-theme-card__preview {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--th-radius-md);
+  border: 1px solid var(--th-color-border);
+  position: relative;
+  overflow: hidden;
+}
+.th-settings-theme-card__preview--light {
+  background: linear-gradient(135deg, #FDF6F0, #FFFFFF);
+}
+.th-settings-theme-card__preview--dark {
+  background: linear-gradient(135deg, #1C1512, #2A211C);
+}
+.th-settings-theme-card__preview--system {
+  background: linear-gradient(135deg, #FDF6F0 50%, #1C1512 50%);
+}
+.th-settings-theme-card__label {
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-medium);
+  color: var(--th-color-text-primary);
+}
+.th-settings-theme-card--selected .th-settings-theme-card__label {
+  color: var(--th-color-burgundy);
+  font-weight: var(--th-font-weight-semibold);
+}
+.th-settings-theme-card__check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.th-settings-theme-card__check--active {
+  background: var(--th-color-burgundy);
+  color: white;
+}
+
+/* --- Text size selector --- */
+.th-settings-textsize-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-2);
+}
+.th-settings-textsize-card {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-3) var(--th-space-4);
+  background: var(--th-color-surface);
+  border: 2px solid var(--th-color-border);
+  border-radius: var(--th-radius-lg);
+  cursor: pointer;
+  transition: border-color var(--th-duration-fast) var(--th-ease-standard);
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+}
+.th-settings-textsize-card:active {
+  transform: scale(0.98);
+}
+.th-settings-textsize-card--selected {
+  border-color: var(--th-color-burgundy);
+}
+.th-settings-textsize-card__label {
+  flex: 1;
+  font-weight: var(--th-font-weight-medium);
+  color: var(--th-color-text-primary);
+}
+.th-settings-textsize-card--selected .th-settings-textsize-card__label {
+  color: var(--th-color-burgundy);
+  font-weight: var(--th-font-weight-semibold);
+}
+.th-settings-textsize-card__desc {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+
+/* --- Settings info card — enhanced --- */
+.th-settings-info--enhanced {
+  background: linear-gradient(135deg, var(--th-color-blush), var(--th-color-neutral-soft));
+  border-radius: var(--th-radius-lg);
+  padding: var(--th-space-4) var(--th-space-5);
+  display: flex;
+  gap: var(--th-space-3);
+  align-items: flex-start;
+  border: 1px solid rgba(106,27,43,0.06);
+}
+:root[data-th-theme='dark'] .th-settings-info--enhanced {
+  background: linear-gradient(135deg, rgba(106,27,43,0.08), rgba(232,184,194,0.04));
+  border-color: rgba(106,27,43,0.1);
+}
+.th-settings-info--enhanced__icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--th-radius-sm);
+  background: rgba(106,27,43,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--th-color-burgundy);
+}
+.th-settings-info--enhanced__body {
+  flex: 1;
+  min-width: 0;
+}
+.th-settings-info--enhanced__title {
+  font-weight: var(--th-font-weight-semibold);
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-primary);
+  margin: 0 0 var(--th-space-1);
+}
+.th-settings-info--enhanced__text {
+  margin: 0;
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  line-height: var(--th-line-height-relaxed);
+}
+
+/* --- Status badge --- */
+.th-settings-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--th-radius-sm);
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
+}
+.th-settings-status--granted {
+  background: var(--th-color-success-bg);
+  color: var(--th-color-success);
+}
+.th-settings-status--denied {
+  background: var(--th-color-error-bg);
+  color: var(--th-color-error);
+}
+.th-settings-status--prompt {
+  background: var(--th-color-neutral-soft);
+  color: var(--th-color-text-secondary);
+}
+.th-settings-status--unavailable {
+  background: var(--th-color-neutral-soft);
+  color: var(--th-color-text-secondary);
+}
+
+/* --- Settings footer --- */
+.th-settings-footer {
+  text-align: center;
+  padding: var(--th-space-8) 0 var(--th-space-6);
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  opacity: 0.7;
+}
+
+/* --- Switch row enhanced --- */
+.th-settings-switch-row {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  width: 100%;
+  min-height: var(--th-touch-target-min);
+  padding: var(--th-space-4) var(--th-space-4);
+  border: none;
+  border-bottom: 1px solid var(--th-color-divider);
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+.th-settings-switch-row:last-child {
+  border-bottom: none;
+}

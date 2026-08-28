@@ -1,5 +1,5 @@
 /**
- * About TwoHearts (Phase 19 — roadmap screen 87 area).
+ * About TwoHearts (Stage 15 — Settings + App Customization).
  *
  * Shows real application/version information (mirrored from
  * capacitor.config.ts + package.json via src/config/appInfo.ts), a short
@@ -40,11 +40,14 @@ export function AboutScreen() {
         moments together.
       </p>
 
-      <p className="th-settings-section">What&apos;s Inside</p>
-      <div className="th-settings-group">
+      <div className="th-settings-section--enhanced">
+        <span className="th-settings-section--enhanced__dot" />
+        What&apos;s Inside
+      </div>
+      <div className="th-settings-group--enhanced">
         {FEATURES.map((feature) => (
-          <div key={feature} className="th-settings-row th-settings-row--static">
-            <span className="th-settings-row__icon">
+          <div key={feature} className="th-settings-row--stage15 th-settings-row--stage15--static">
+            <span className="th-settings-row--stage15__icon">
               <IconHeart size={16} />
             </span>
             <span className="th-settings-row__body">
@@ -58,16 +61,12 @@ export function AboutScreen() {
         <InfoCard
           title="Private by design"
           text="TwoHearts keeps your data on this device — no accounts, no cloud sync, no tracking."
+          icon={<IconHeart size={16} />}
         />
       </div>
 
       <p
-        style={{
-          marginTop: 'var(--th-space-6)',
-          textAlign: 'center',
-          fontSize: 'var(--th-font-size-xs)',
-          color: 'var(--th-color-text-secondary)',
-        }}
+        className="th-settings-footer"
       >
         {APP_INFO.appId} · Made for the two of you
       </p>

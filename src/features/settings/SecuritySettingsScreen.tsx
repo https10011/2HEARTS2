@@ -1,17 +1,15 @@
 /**
- * Security & App Lock Settings (Phase 19 — roadmap screen 85).
+ * Security & App Lock Settings (Stage 15 — Settings + App Customization).
  *
- * Integrates the EXISTING AppLockService + SecureStore architecture (Phase
- * 3/17): PIN material never touches settings, UI state, or logs — only the
- * non-sensitive flags (appLockEnabled, lockTimeoutSeconds) persist in
- * appSettings. Lock state stays memory-only, so a cold start is always
- * locked when the lock is enabled; the Vault reacts to the same lock bus.
+ * Calm, trustworthy App Lock experience. PIN material never touches
+ * settings UI or logs. Architecture unchanged — preserves existing
+ * AppLockService + SecureStore.
  */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Input, Modal, IconHeart , IconCheck } from '../../components/index.ts';
+import { Button, Input, Modal, IconLock, IconCheck, IconHeart } from '../../components/index.ts';
 import { appSettingsStore, useAppSettings } from '../../core/appSettings.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { safeUserMessage } from '../../services/errors/appError.ts';
@@ -66,7 +64,7 @@ export function SecuritySettingsScreen() {
     setBusy(true);
     setPinError(null);
     try {
-      await appLock.enable(pin); // writes salt+verifier to SecureStore only
+      await appLock.enable(pin);
       appSettingsStore.set({ appLockEnabled: true });
       setMessage(pinDialog === 'change' ? 'App Lock updated.' : 'App Lock enabled.');
       resetPinDialog();
@@ -81,7 +79,7 @@ export function SecuritySettingsScreen() {
     if (!appLock) return;
     setBusy(true);
     try {
-      await appLock.disable(); // removes PIN material from SecureStore
+      await appLock.disable();
       appSettingsStore.set({ appLockEnabled: false });
       setMessage('App Lock turned off.');
       setConfirmDisable(false);
@@ -99,10 +97,12 @@ export function SecuritySettingsScreen() {
 
   return (
     <SettingsScreen title="Security &amp; App Lock" backTo={RoutePath.appMoreSettings}>
+      {/* Security hero info */}
       <div style={{ marginBottom: 'var(--th-space-4)' }}>
         <InfoCard
           title="Your privacy matters"
           text="Protect your TwoHearts memories and private spaces on this device."
+          icon={<IconLock size={16} />}
         />
       </div>
 
@@ -110,14 +110,16 @@ export function SecuritySettingsScreen() {
         <InfoCard
           title="App Lock unavailable"
           text="The security service did not start on this device. Your data remains local."
+          icon={<IconHeart size={16} />}
         />
       ) : (
         <>
-          <div className="th-settings-group">
+          {/* Lock toggle */}
+          <div className="th-settings-group--enhanced">
             <SettingSwitchRow
-              icon={<IconHeart size={18} />}
+              icon={<IconLock size={18} />}
               label="App Lock"
-              description="Require a lock before opening TwoHearts."
+              description="Require a lock before opening TwoHearts"
               checked={lockEnabled}
               onChange={(next) => {
                 setMessage(null);
@@ -127,14 +129,18 @@ export function SecuritySettingsScreen() {
             />
             <SettingRow
               label="Lock Method"
-              description="Choose how TwoHearts is unlocked."
+              description="How TwoHearts is unlocked"
               static
-              trailing={<span>PIN</span>}
+              trailing={
+                <span className="th-settings-status th-settings-status--granted">
+                  {lockEnabled ? 'Active' : 'PIN'}
+                </span>
+              }
             />
             {lockEnabled ? (
               <SettingRow
                 label="Change Lock"
-                description="Update your current App Lock PIN."
+                description="Update your current App Lock PIN"
                 onClick={() => {
                   setMessage(null);
                   setPinDialog('change');
@@ -143,19 +149,23 @@ export function SecuritySettingsScreen() {
             ) : null}
           </div>
 
+          {/* Auto-lock */}
           {lockEnabled ? (
             <>
-              <p className="th-settings-section">Auto-Lock</p>
-              <div className="th-settings-group">
+              <div className="th-settings-section--enhanced">
+                <span className="th-settings-section--enhanced__dot" />
+                Auto-Lock
+              </div>
+              <div className="th-settings-group--enhanced">
                 <SettingRow
                   label="Lock automatically"
-                  description="Choose when TwoHearts should require your lock again."
+                  description="When TwoHearts should require your lock again"
                   onClick={() => setTimeoutPicker(true)}
                   trailing={<span>{timeoutLabel}</span>}
                 />
                 <SettingRow
-                  label="Lock TwoHearts Now"
-                  description="Immediately lock the app."
+                  label="Lock Now"
+                  description="Immediately lock the app"
                   danger
                   onClick={lockNow}
                 />
@@ -164,34 +174,36 @@ export function SecuritySettingsScreen() {
               <div style={{ marginTop: 'var(--th-space-4)' }}>
                 <InfoCard
                   title="Protected areas"
-                  text="Private Vault, personal information, and relationship information."
+                  text="Private Vault, personal information, and relationship details are protected."
+                  icon={<IconLock size={16} />}
                 />
               </div>
             </>
           ) : null}
 
+          {/* Status message */}
           {message ? (
-            <p role="status" style={{ color: 'var(--th-color-success)', fontSize: 'var(--th-font-size-sm)' }}>
+            <p role="status" style={{ color: 'var(--th-color-success)', fontSize: 'var(--th-font-size-sm)', marginTop: 'var(--th-space-3)' }}>
               {message}
             </p>
           ) : null}
 
+          {/* Privacy note */}
           <div style={{ marginTop: 'var(--th-space-4)' }}>
             <InfoCard
               title="Private by design"
               text="Your App Lock settings stay on this device. TwoHearts locks again after a fresh start."
+              icon={<IconLock size={16} />}
             />
           </div>
         </>
       )}
 
-      {/* PIN entry (enable / change) */}
+      {/* PIN entry dialog */}
       <Modal open={pinDialog !== null} onClose={resetPinDialog} label="Set App Lock PIN">
         <h2 style={{ marginTop: 0 }}>{pinDialog === 'change' ? 'Change your PIN' : 'Choose a PIN'}</h2>
         <div className="th-form-group">
-          <label className="th-form-label" htmlFor="lock-pin">
-            PIN (4–8 digits)
-          </label>
+          <label className="th-form-label" htmlFor="lock-pin">PIN (4–8 digits)</label>
           <Input
             id="lock-pin"
             type="password"
@@ -202,9 +214,7 @@ export function SecuritySettingsScreen() {
           />
         </div>
         <div className="th-form-group">
-          <label className="th-form-label" htmlFor="lock-pin-confirm">
-            Confirm PIN
-          </label>
+          <label className="th-form-label" htmlFor="lock-pin-confirm">Confirm PIN</label>
           <Input
             id="lock-pin-confirm"
             type="password"
@@ -215,14 +225,10 @@ export function SecuritySettingsScreen() {
           />
         </div>
         {pinError ? (
-          <p role="alert" style={{ color: 'var(--th-color-error)', fontSize: 'var(--th-font-size-sm)' }}>
-            {pinError}
-          </p>
+          <p role="alert" style={{ color: 'var(--th-color-error)', fontSize: 'var(--th-font-size-sm)' }}>{pinError}</p>
         ) : null}
         <div style={{ display: 'flex', gap: 'var(--th-space-3)' }}>
-          <Button variant="ghost" full onClick={resetPinDialog} disabled={busy}>
-            Cancel
-          </Button>
+          <Button variant="ghost" full onClick={resetPinDialog} disabled={busy}>Cancel</Button>
           <Button variant="primary" full onClick={() => void submitPin()} disabled={busy}>
             {busy ? 'Saving…' : 'Save PIN'}
           </Button>
@@ -233,13 +239,10 @@ export function SecuritySettingsScreen() {
       <Modal open={confirmDisable} onClose={() => setConfirmDisable(false)} label="Turn off App Lock">
         <h2 style={{ marginTop: 0 }}>Turn Off App Lock?</h2>
         <p style={{ color: 'var(--th-color-text-secondary)' }}>
-          TwoHearts will no longer require a lock when opening the app. Your PIN is removed from
-          this device.
+          TwoHearts will no longer require a lock when opening the app. Your PIN is removed from this device.
         </p>
         <div style={{ display: 'flex', gap: 'var(--th-space-3)' }}>
-          <Button variant="ghost" full onClick={() => setConfirmDisable(false)} disabled={busy}>
-            Cancel
-          </Button>
+          <Button variant="ghost" full onClick={() => setConfirmDisable(false)} disabled={busy}>Cancel</Button>
           <Button variant="primary" full onClick={() => void disableLock()} disabled={busy}>
             {busy ? 'Turning off…' : 'Turn Off'}
           </Button>
@@ -249,7 +252,7 @@ export function SecuritySettingsScreen() {
       {/* Auto-lock timeout picker */}
       <Modal open={timeoutPicker} onClose={() => setTimeoutPicker(false)} label="Auto-lock timing">
         <h2 style={{ marginTop: 0 }}>Lock automatically</h2>
-        <div className="th-settings-group" role="radiogroup" aria-label="Auto-lock timing">
+        <div className="th-settings-group--enhanced" role="radiogroup" aria-label="Auto-lock timing">
           {TIMEOUT_OPTIONS.map((option) => (
             <SettingRow
               key={option.seconds}
