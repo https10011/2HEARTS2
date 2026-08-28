@@ -1,31 +1,27 @@
 /**
- * AddVaultContent (Phase 17).
+ * AddVaultContent — premium vault item creation form (Stage 12).
  *
- * Form for adding content to the private vault.
- * Supports text notes, with placeholders for photo/video/file upload.
- * Uses real persisted data via VaultService.
+ * Branded content type picker, clean form layout, validation,
+ * success/error feedback via toast, cancel behavior preserved.
  */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import { AppError } from '../../services/errors/appError.ts';
+import { useToast } from '../../components/index.ts';
 import type { VaultContentType } from '../../data/vault/vaultTypes.ts';
 import { CONTENT_TYPE_META, CONTENT_TYPE_ORDER } from './contentTypeMeta.tsx';
 
 interface AddVaultContentProps {
   service?: {
-    create: (input: { title: string; contentType: VaultContentType; content?: string | null; description?: string | null; profileId: string }) => Promise<any>;
+    create: (input: { title: string; contentType: VaultContentType; content?: string | null; description?: string | null; profileId: string }) => Promise<unknown>;
   };
 }
 
-const CONTENT_TYPE_OPTIONS = CONTENT_TYPE_ORDER.map((value) => ({
-  value,
-  ...CONTENT_TYPE_META[value],
-}));
-
 export function AddVaultContent({ service }: AddVaultContentProps) {
   const navigate = useNavigate();
+  const toast = useToast();
   const [title, setTitle] = useState('');
   const [contentType, setContentType] = useState<VaultContentType>('note');
   const [content, setContent] = useState('');
@@ -51,12 +47,15 @@ export function AddVaultContent({ service }: AddVaultContentProps) {
         description: description || null,
         profileId,
       });
+      toast.success('Added to vault');
       navigate(RoutePath.appVault);
     } catch (err) {
       if (err instanceof AppError) {
         setError(err.userMessage);
+        toast.error(err.userMessage);
       } else {
         setError('An unexpected error occurred.');
+        toast.error('Could not add vault content');
       }
     } finally {
       setSaving(false);
@@ -65,45 +64,56 @@ export function AddVaultContent({ service }: AddVaultContentProps) {
 
   return (
     <div className="th-content-pad">
-      <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-4)' }}>
+      {/* Header */}
+      <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-2)' }}>
         Add to Vault
       </h1>
+      <p className="th-screen-subtitle" style={{ marginBottom: 'var(--th-space-5)' }}>
+        Store something private — only you can see it.
+      </p>
 
       {error && (
-        <div className="th-error-banner" style={{ marginBottom: 'var(--th-space-4)' }}>
+        <div className="th-form-error th-form-error--global" style={{ marginBottom: 'var(--th-space-4)' }} role="alert">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-4)' }}>
+      <form onSubmit={handleSubmit} className="th-vault-form">
         {/* Content type selection */}
-        <div>
-          <label className="th-label">Content Type *</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--th-space-2)' }}>
-            {CONTENT_TYPE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                className={`th-btn th-btn--sm ${contentType === opt.value ? 'th-btn--primary' : 'th-btn--outline'}`}
-                onClick={() => setContentType(opt.value)}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--th-space-1)', padding: 'var(--th-space-3)' }}
-              >
-                <opt.Icon size={22} />
-                <span style={{ fontSize: 'var(--th-font-size-xs)' }}>{opt.label}</span>
-              </button>
-            ))}
+        <div className="th-form-group">
+          <label className="th-label">Content Type</label>
+          <div className="th-vault-type-grid" role="radiogroup" aria-label="Content type">
+            {CONTENT_TYPE_ORDER.map((value) => {
+              const meta = CONTENT_TYPE_META[value];
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={contentType === value}
+                  className={`th-vault-type-btn${contentType === value ? ' th-vault-type-btn--active' : ''}`}
+                  onClick={() => setContentType(value)}
+                >
+                  <span className="th-vault-type-btn__icon" aria-hidden="true">
+                    <meta.Icon size={20} />
+                  </span>
+                  <span>{meta.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Title */}
-        <div>
-          <label className="th-label">Title *</label>
+        <div className="th-form-group">
+          <label className="th-label" htmlFor="vault-title">Title</label>
           <input
+            id="vault-title"
             type="text"
             className="th-input"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter a title"
+            placeholder="Give it a name"
             required
             maxLength={200}
           />
@@ -111,13 +121,14 @@ export function AddVaultContent({ service }: AddVaultContentProps) {
 
         {/* Note content (only for note type) */}
         {contentType === 'note' && (
-          <div>
-            <label className="th-label">Content</label>
+          <div className="th-form-group">
+            <label className="th-label" htmlFor="vault-content">Content</label>
             <textarea
+              id="vault-content"
               className="th-input"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your private note..."
+              placeholder="Write your private note…"
               rows={6}
               style={{ resize: 'vertical' }}
             />
@@ -126,16 +137,14 @@ export function AddVaultContent({ service }: AddVaultContentProps) {
 
         {/* Non-note types show placeholder */}
         {contentType !== 'note' && (
-          <div className="th-card" style={{ padding: 'var(--th-space-4)', textAlign: 'center' }}>
-            {(() => {
-              const Selected = CONTENT_TYPE_OPTIONS.find((o) => o.value === contentType);
-              return (
-                <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-burgundy)' }}>
-                  {Selected ? <Selected.Icon size={32} /> : null}
-                </div>
-              );
-            })()}
-            <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)' }}>
+          <div className="th-vault-placeholder">
+            <div className="th-vault-placeholder__icon" aria-hidden="true">
+              {(() => {
+                const meta = CONTENT_TYPE_META[contentType];
+                return <meta.Icon size={36} />;
+              })()}
+            </div>
+            <p style={{ fontSize: 'var(--th-font-size-sm)', margin: 0 }}>
               {contentType === 'photo' && 'Photo upload will be available in a future update.'}
               {contentType === 'video' && 'Video upload will be available in a future update.'}
               {contentType === 'file' && 'File upload will be available in a future update.'}
@@ -144,9 +153,12 @@ export function AddVaultContent({ service }: AddVaultContentProps) {
         )}
 
         {/* Description */}
-        <div>
-          <label className="th-label">Description (optional)</label>
+        <div className="th-form-group">
+          <label className="th-label" htmlFor="vault-desc">
+            Description <span className="th-form-optional">(optional)</span>
+          </label>
           <input
+            id="vault-desc"
             type="text"
             className="th-input"
             value={description}
@@ -157,12 +169,11 @@ export function AddVaultContent({ service }: AddVaultContentProps) {
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: 'var(--th-space-3)', marginTop: 'var(--th-space-2)' }}>
+        <div className="th-vault-actions">
           <button
             type="button"
             className="th-btn th-btn--outline"
             onClick={() => navigate(-1)}
-            style={{ flex: 1 }}
           >
             Cancel
           </button>
@@ -170,12 +181,16 @@ export function AddVaultContent({ service }: AddVaultContentProps) {
             type="submit"
             className="th-btn th-btn--primary"
             disabled={saving || !title.trim()}
-            style={{ flex: 1 }}
           >
-            {saving ? 'Adding...' : 'Add to Vault'}
+            {saving ? 'Adding…' : 'Add to Vault'}
           </button>
         </div>
       </form>
+
+      {/* Privacy footer */}
+      <div className="th-vault-footer" style={{ marginTop: 'var(--th-space-6)' }}>
+        <span>Stored locally on this device only</span>
+      </div>
     </div>
   );
 }

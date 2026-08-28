@@ -1,16 +1,18 @@
 /**
- * VaultContentViewer (Phase 17).
+ * VaultContentViewer — premium vault item detail view (Stage 12).
  *
- * Displays a single vault item with full content, edit/delete actions.
- * Uses real persisted data via VaultService.
+ * Content-aware display with type icon, metadata, edit/delete actions,
+ * confirmation dialog, toast feedback, and privacy footer.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconLock } from '../../components/index.ts';
-import type { VaultItem, VaultContentType } from '../../data/vault/vaultTypes.ts';
+import { IconLock, IconBack, IconEdit, IconTrash } from '../../components/index.ts';
+import { Modal, useToast } from '../../components/index.ts';
+import type { VaultItem } from '../../data/vault/vaultTypes.ts';
 import { CONTENT_TYPE_META } from './contentTypeMeta.tsx';
+import { formatVaultDate, securityLabel } from './vaultPresentation.ts';
 
 interface VaultContentViewerProps {
   service?: {
@@ -20,17 +22,14 @@ interface VaultContentViewerProps {
   };
 }
 
-function TypeIcon({ contentType, size }: { contentType: VaultContentType; size: number }) {
-  const Meta = CONTENT_TYPE_META[contentType] ?? CONTENT_TYPE_META.file;
-  return <Meta.Icon size={size} />;
-}
-
 export function VaultContentViewer({ service }: VaultContentViewerProps) {
   const navigate = useNavigate();
   const { itemId } = useParams<{ itemId: string }>();
+  const toast = useToast();
   const [item, setItem] = useState<VaultItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
@@ -57,13 +56,18 @@ export function VaultContentViewer({ service }: VaultContentViewerProps) {
 
   const handleDelete = useCallback(async () => {
     if (!itemId || !service) return;
+    setDeleting(true);
     try {
       await service.delete(itemId);
+      toast.success('Vault item deleted');
       navigate(RoutePath.appVault);
     } catch {
+      toast.error('Could not delete item');
       setShowDeleteConfirm(false);
+    } finally {
+      setDeleting(false);
     }
-  }, [itemId, service, navigate]);
+  }, [itemId, service, navigate, toast]);
 
   const handleSaveEdit = async () => {
     if (!itemId || !service) return;
@@ -75,8 +79,9 @@ export function VaultContentViewer({ service }: VaultContentViewerProps) {
       });
       setItem(updated);
       setEditing(false);
+      toast.success('Vault item updated');
     } catch {
-      // Silently handle
+      toast.error('Could not update item');
     } finally {
       setSaving(false);
     }
@@ -87,7 +92,7 @@ export function VaultContentViewer({ service }: VaultContentViewerProps) {
       <div className="th-content-pad">
         <div className="th-loading">
           <div className="th-loading__spinner" />
-          <p>Loading...</p>
+          <p>Loading…</p>
         </div>
       </div>
     );
@@ -96,50 +101,61 @@ export function VaultContentViewer({ service }: VaultContentViewerProps) {
   if (!item) {
     return (
       <div className="th-content-pad">
-        <div className="th-card" style={{ padding: 'var(--th-space-6)', textAlign: 'center' }}>
-          <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-rose-muted)' }}>
-            <IconLock size={48} />
+        <div className="th-empty-emotional">
+          <div className="th-empty-emotional__visual th-scale-in">
+            <IconLock size={42} />
           </div>
-          <h3 style={{ marginBottom: 'var(--th-space-2)' }}>Item not found</h3>
-          <p style={{ color: 'var(--th-color-text-secondary)', marginBottom: 'var(--th-space-4)' }}>
+          <h3 className="th-empty-emotional__title">Item not found</h3>
+          <p className="th-empty-emotional__message">
             This vault item may have been deleted.
           </p>
-          <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appVault)}>
-            Back to Vault
-          </button>
+          <div className="th-empty-emotional__action">
+            <button
+              className="th-btn th-btn--primary"
+              onClick={() => navigate(RoutePath.appVault)}
+            >
+              Back to Vault
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
+  const Meta = CONTENT_TYPE_META[item.contentType] ?? CONTENT_TYPE_META.file;
+
   return (
     <div className="th-content-pad">
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--th-space-4)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)' }}>
-          <TypeIcon contentType={item.contentType} size={24} />
-          <h1 className="th-screen-title" style={{ margin: 0 }}>
-            {editing ? 'Edit Item' : item.title}
-          </h1>
-        </div>
-        <div style={{ display: 'flex', gap: 'var(--th-space-2)' }}>
-          {!editing && (
-            <button
-              className="th-btn th-btn--outline th-btn--sm"
-              onClick={() => setEditing(true)}
-            >
-              Edit
-            </button>
-          )}
-        </div>
+      {/* Back + edit header */}
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'var(--th-space-4)' }}>
+        <button
+          type="button"
+          className="th-icon-button"
+          onClick={() => editing ? setEditing(false) : navigate(-1)}
+          aria-label={editing ? 'Cancel editing' : 'Go back'}
+        >
+          <IconBack size={20} />
+        </button>
+        <div style={{ flex: 1 }} />
+        {!editing && (
+          <button
+            type="button"
+            className="th-icon-button"
+            onClick={() => setEditing(true)}
+            aria-label="Edit item"
+          >
+            <IconEdit size={20} />
+          </button>
+        )}
       </div>
 
       {editing ? (
-        /* Edit mode */
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-4)' }}>
-          <div>
-            <label className="th-label">Title</label>
+        /* --- Edit mode --- */
+        <div className="th-vault-form">
+          <div className="th-form-group">
+            <label className="th-label" htmlFor="edit-title">Title</label>
             <input
+              id="edit-title"
               type="text"
               className="th-input"
               value={editTitle}
@@ -148,102 +164,136 @@ export function VaultContentViewer({ service }: VaultContentViewerProps) {
             />
           </div>
           {item.contentType === 'note' && (
-            <div>
-              <label className="th-label">Content</label>
+            <div className="th-form-group">
+              <label className="th-label" htmlFor="edit-content">Content</label>
               <textarea
+                id="edit-content"
                 className="th-input"
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                rows={6}
+                rows={8}
                 style={{ resize: 'vertical' }}
               />
             </div>
           )}
-          <div style={{ display: 'flex', gap: 'var(--th-space-3)' }}>
-            <button className="th-btn th-btn--outline" onClick={() => setEditing(false)} style={{ flex: 1 }}>
+          <div className="th-vault-actions">
+            <button
+              type="button"
+              className="th-btn th-btn--outline"
+              onClick={() => setEditing(false)}
+            >
               Cancel
             </button>
             <button
+              type="button"
               className="th-btn th-btn--primary"
               onClick={handleSaveEdit}
               disabled={saving || !editTitle.trim()}
-              style={{ flex: 1 }}
             >
-              {saving ? 'Saving...' : 'Save'}
+              {saving ? 'Saving…' : 'Save Changes'}
             </button>
           </div>
         </div>
       ) : (
-        /* View mode */
-        <div>
+        /* --- View mode --- */
+        <>
+          {/* Header */}
+          <div className="th-vault-detail-header">
+            <div className="th-vault-detail-header__icon" aria-hidden="true">
+              <Meta.Icon size={24} />
+            </div>
+            <div className="th-vault-detail-header__body">
+              <h1 className="th-vault-detail-header__title">{item.title}</h1>
+              <span className="th-vault-detail-header__type">
+                {securityLabel(item.contentType)}
+              </span>
+            </div>
+          </div>
+
           {/* Content card */}
-          <div className="th-card" style={{ padding: 'var(--th-space-4)', marginBottom: 'var(--th-space-4)' }}>
-            {item.contentType === 'note' && item.content && (
-              <div style={{ marginBottom: 'var(--th-space-3)' }}>
-                <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{item.content}</p>
-              </div>
-            )}
-
-            {item.contentType !== 'note' && (
-              <div style={{ textAlign: 'center', padding: 'var(--th-space-4)' }}>
-                <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-burgundy)' }}>
-                  <TypeIcon contentType={item.contentType} size={48} />
+          <div className="th-vault-content-card">
+            {item.contentType === 'note' && item.content ? (
+              <div className="th-vault-content-card__body">{item.content}</div>
+            ) : (
+              <div className="th-vault-content-card__placeholder">
+                <div className="th-vault-content-card__placeholder-icon" aria-hidden="true">
+                  <Meta.Icon size={48} />
                 </div>
-                <p style={{ color: 'var(--th-color-text-secondary)' }}>
-                  {item.contentType === 'photo' && 'Photo content'}
-                  {item.contentType === 'video' && 'Video content'}
-                  {item.contentType === 'file' && 'File content'}
+                <p style={{ fontSize: 'var(--th-font-size-sm)', margin: 0 }}>
+                  {item.contentType === 'photo' && 'Protected photo content'}
+                  {item.contentType === 'video' && 'Protected video content'}
+                  {item.contentType === 'file' && 'Secured file content'}
                 </p>
               </div>
             )}
 
+            {/* Description */}
             {item.description && (
-              <div style={{ borderTop: '1px solid var(--th-color-border)', paddingTop: 'var(--th-space-3)', marginTop: 'var(--th-space-3)' }}>
-                <p style={{ fontSize: 'var(--th-font-size-sm)', color: 'var(--th-color-text-secondary)', margin: 0, fontStyle: 'italic' }}>
-                  {item.description}
-                </p>
+              <div className="th-vault-content-card__description">
+                {item.description}
               </div>
             )}
 
             {/* Metadata */}
-            <div style={{ borderTop: '1px solid var(--th-color-border)', paddingTop: 'var(--th-space-3)', marginTop: 'var(--th-space-3)' }}>
-              <p style={{ margin: 0, fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
-                Added {new Date(item.createdAt).toLocaleDateString()}
+            <div className="th-vault-content-card__meta">
+              <p style={{ margin: 0 }}>
+                Added {formatVaultDate(item.createdAt)}
               </p>
               {item.updatedAt !== item.createdAt && (
-                <p style={{ margin: 0, fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
-                  Updated {new Date(item.updatedAt).toLocaleDateString()}
+                <p style={{ margin: '2px 0 0' }}>
+                  Updated {formatVaultDate(item.updatedAt)}
                 </p>
               )}
             </div>
           </div>
 
-          {/* Delete */}
-          <div style={{ marginTop: 'var(--th-space-6)' }}>
-            {showDeleteConfirm ? (
-              <div className="th-card" style={{ padding: 'var(--th-space-4)', textAlign: 'center' }}>
-                <p style={{ marginBottom: 'var(--th-space-3)' }}>Delete this item permanently? This cannot be undone.</p>
-                <div style={{ display: 'flex', gap: 'var(--th-space-3)', justifyContent: 'center' }}>
-                  <button className="th-btn th-btn--outline th-btn--sm" onClick={() => setShowDeleteConfirm(false)}>
-                    Cancel
-                  </button>
-                  <button className="th-btn th-btn--danger th-btn--sm" onClick={handleDelete}>
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                className="th-btn th-btn--danger th-btn--outline"
-                onClick={() => setShowDeleteConfirm(true)}
-                style={{ width: '100%' }}
-              >
-                Delete from Vault
-              </button>
-            )}
+          {/* Delete zone */}
+          <div className="th-vault-danger-zone">
+            <button
+              type="button"
+              className="th-btn th-btn--danger th-btn--outline th-btn--full"
+              onClick={() => setShowDeleteConfirm(true)}
+            >
+              <IconTrash size={16} />
+              Delete from Vault
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Delete confirmation modal */}
+      <Modal
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        label="Delete vault item"
+      >
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ color: 'var(--th-color-error)', marginBottom: 'var(--th-space-3)' }}>
+            <IconTrash size={32} />
+          </div>
+          <p className="th-vault-delete-confirm__text">
+            Delete <strong>{item.title}</strong> permanently? This cannot be undone.
+          </p>
+          <div className="th-vault-delete-confirm__actions">
+            <button
+              type="button"
+              className="th-btn th-btn--outline"
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={deleting}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="th-btn th-btn--danger"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? 'Deleting…' : 'Delete'}
+            </button>
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

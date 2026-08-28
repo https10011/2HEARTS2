@@ -1,26 +1,28 @@
 /**
- * VaultLocked (Phase 17).
+ * VaultLocked — premium locked-state presentation (Stage 12).
  *
- * Displayed when the vault is locked and the user needs to enter their PIN
- * to access vault content. Uses the existing AppLockService for authentication.
+ * Communicates privacy, security, calm, trust.
+ * Uses the existing AppLockService for PIN verification.
+ * Deep burgundy shield icon, gradient background, restrained motion.
  */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IconLock } from '../../components/index.ts';
+import { IconLock, IconBack } from '../../components/index.ts';
 
 interface VaultLockedProps {
   onUnlock: () => void;
+  /** Optional PIN verification callback — returns true on success. */
+  verifyPin?: (pin: string) => Promise<boolean>;
 }
 
-export function VaultLocked({ onUnlock }: VaultLockedProps) {
+export function VaultLocked({ onUnlock, verifyPin }: VaultLockedProps) {
   const navigate = useNavigate();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [attempting, setAttempting] = useState(false);
 
   const handlePinChange = (value: string) => {
-    // Only allow digits
     const digits = value.replace(/\D/g, '').slice(0, 8);
     setPin(digits);
     setError('');
@@ -29,17 +31,25 @@ export function VaultLocked({ onUnlock }: VaultLockedProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pin.length < 4) {
-      setError('PIN must be 4-8 digits.');
+      setError('PIN must be 4–8 digits.');
       return;
     }
 
     setAttempting(true);
     try {
-      // The VaultService.unlock will be called by the parent
-      // Here we just trigger the unlock callback
-      onUnlock();
+      if (verifyPin) {
+        const ok = await verifyPin(pin);
+        if (ok) {
+          onUnlock();
+          return;
+        }
+        setError('Incorrect PIN. Please try again.');
+        setPin('');
+      } else {
+        onUnlock();
+      }
     } catch {
-      setError('Invalid PIN. Please try again.');
+      setError('Something went wrong. Please try again.');
       setPin('');
     } finally {
       setAttempting(false);
@@ -47,27 +57,30 @@ export function VaultLocked({ onUnlock }: VaultLockedProps) {
   };
 
   return (
-    <div className="th-content-pad" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ textAlign: 'center', marginBottom: 'var(--th-space-8)' }}>
-        <div style={{ marginBottom: 'var(--th-space-3)', color: 'var(--th-color-burgundy)' }}>
-          <IconLock size={56} />
-        </div>
-        <h1 className="th-screen-title" style={{ marginBottom: 'var(--th-space-2)' }}>Vault Locked</h1>
-        <p style={{ color: 'var(--th-color-text-secondary)' }}>
-          Enter your PIN to access private content.
-        </p>
+    <div className="th-vault-locked" role="main" aria-label="Vault locked">
+      {/* Shield icon */}
+      <div className="th-vault-locked__shield th-scale-in" aria-hidden="true">
+        <IconLock size={40} />
       </div>
 
+      {/* Title + subtitle */}
+      <h1 className="th-vault-locked__title">Vault Locked</h1>
+      <p className="th-vault-locked__subtitle">
+        Enter your PIN to access your private space.
+      </p>
+
+      {/* Error */}
       {error && (
-        <div className="th-error-banner" style={{ marginBottom: 'var(--th-space-4)', width: '100%', maxWidth: '320px' }}>
+        <div className="th-vault-locked__error" role="alert">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: '320px' }}>
+      {/* PIN form */}
+      <form onSubmit={handleSubmit} className="th-vault-locked__pin-area">
         <input
           type="password"
-          className="th-input"
+          className="th-vault-locked__pin-input"
           value={pin}
           onChange={(e) => handlePinChange(e.target.value)}
           placeholder="Enter PIN"
@@ -75,26 +88,33 @@ export function VaultLocked({ onUnlock }: VaultLockedProps) {
           inputMode="numeric"
           pattern="[0-9]*"
           maxLength={8}
-          style={{ textAlign: 'center', fontSize: 'var(--th-font-size-lg)', letterSpacing: '0.3em', marginBottom: 'var(--th-space-4)' }}
+          aria-label="PIN code"
+          disabled={attempting}
         />
 
         <button
           type="submit"
-          className="th-btn th-btn--primary"
+          className="th-btn th-btn--primary th-btn--full"
           disabled={attempting || pin.length < 4}
-          style={{ width: '100%' }}
+          style={{ marginTop: 'var(--th-space-4)' }}
         >
-          {attempting ? 'Unlocking...' : 'Unlock'}
+          {attempting ? 'Unlocking…' : 'Unlock Vault'}
         </button>
       </form>
 
+      {/* Back */}
       <button
-        className="th-btn th-btn--ghost"
+        type="button"
+        className="th-btn th-btn--ghost th-vault-locked__back"
         onClick={() => navigate(-1)}
-        style={{ marginTop: 'var(--th-space-4)' }}
+        disabled={attempting}
       >
+        <IconBack size={16} />
         Go Back
       </button>
+
+      {/* Footer */}
+      <p className="th-vault-locked__footer">Your private space</p>
     </div>
   );
 }

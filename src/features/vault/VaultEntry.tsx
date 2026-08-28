@@ -1,9 +1,9 @@
 /**
- * VaultEntry (Phase 17).
+ * VaultEntry — lock/unlock lifecycle controller (Stage 12).
  *
- * Main vault component that manages the lock/unlock lifecycle.
- * When locked, shows VaultLocked. When unlocked, shows VaultHome.
- * Integrates with AppLockService for PIN-based access control.
+ * Manages the vault access flow: locked state → PIN entry → unlocked state.
+ * Subscribes to AppLockService for reactive lock state changes.
+ * Uses VaultService.unlock for PIN verification.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -29,12 +29,15 @@ export function VaultEntry({ appLockService, vaultService }: VaultEntryProps) {
   }, [appLockService]);
 
   const handleUnlock = useCallback(async () => {
-    // The VaultLocked component handles PIN entry and calls AppLockService.unlock()
-    // This callback is invoked on successful unlock
+    // Mark the vault as accessible in the current session
     if (appLockService.currentState() === 'unlocked') {
       setLockState('unlocked');
     }
   }, [appLockService]);
+
+  const handleVerifyPin = useCallback(async (pin: string): Promise<boolean> => {
+    return vaultService?.unlock(pin) ?? false;
+  }, [vaultService]);
 
   // If lock is disabled or unlocked, show vault content
   if (lockState === 'disabled' || lockState === 'unlocked') {
@@ -42,5 +45,5 @@ export function VaultEntry({ appLockService, vaultService }: VaultEntryProps) {
   }
 
   // Show locked screen
-  return <VaultLocked onUnlock={handleUnlock} />;
+  return <VaultLocked onUnlock={handleUnlock} verifyPin={handleVerifyPin} />;
 }

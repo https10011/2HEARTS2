@@ -1,18 +1,19 @@
 /**
- * VaultHome (Phase 17).
+ * VaultHome — premium vault content display (Stage 12).
  *
- * Displays vault content in a grid/list. Shows empty state when vault is empty.
- * All content is protected — must only show when vault is unlocked.
- * Uses real persisted data via VaultService.
+ * Hero band with lock icon + item count, filter chips, two-column card grid,
+ * branded empty state, and privacy footer. Uses the centralized th-vault-*
+ * CSS vocabulary. All data through VaultService.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import type { VaultService } from '../../services/vault/vaultService.ts';
-import { IconPlus, IconLock, RoseLilyDecoration } from '../../components/index.ts';
+import { IconPlus, IconLock } from '../../components/index.ts';
 import type { VaultItem, VaultContentType } from '../../data/vault/vaultTypes.ts';
-import { CONTENT_TYPE_META, CONTENT_TYPE_ORDER } from './contentTypeMeta.tsx';
+import { CONTENT_TYPE_META } from './contentTypeMeta.tsx';
+import { itemCountText, relativeVaultDate, VAULT_FILTER_OPTIONS } from './vaultPresentation.ts';
 
 export function VaultHome({ service }: { service?: VaultService }) {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ export function VaultHome({ service }: { service?: VaultService }) {
       <div className="th-content-pad">
         <div className="th-loading">
           <div className="th-loading__spinner" />
-          <p>Loading vault...</p>
+          <p>Loading vault…</p>
         </div>
       </div>
     );
@@ -56,28 +57,31 @@ export function VaultHome({ service }: { service?: VaultService }) {
 
   return (
     <div className="th-content-pad">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--th-space-4)' }}>
-        <h1 className="th-screen-title">Private Vault</h1>
-        <button
-          className="th-btn th-btn--primary th-btn--sm"
-          onClick={() => navigate(RoutePath.appVaultAdd)}
-          style={{ display: 'flex', alignItems: 'center', gap: 'var(--th-space-2)' }}
-        >
-          <IconPlus size={16} />
-          Add
-        </button>
+      {/* Hero band */}
+      <div className="th-vault-hero" role="banner" aria-label="Private Vault">
+        <div className="th-vault-hero__icon th-scale-in" aria-hidden="true">
+          <IconLock size={32} />
+        </div>
+        <h1 className="th-vault-hero__title">Private Vault</h1>
+        <p className="th-vault-hero__subtitle">
+          Your most private moments, protected locally
+        </p>
+        <span className="th-vault-hero__count" aria-label={`${items.length} items`}>
+          {itemCountText(items.length)}
+        </span>
       </div>
 
-      {/* Filter tabs */}
-      <div style={{ display: 'flex', gap: 'var(--th-space-2)', marginBottom: 'var(--th-space-4)', overflowX: 'auto' }}>
-        {(['all', ...CONTENT_TYPE_ORDER] as const).map((type) => (
+      {/* Filter chips */}
+      <div className="th-vault-filters" role="tablist" aria-label="Filter vault items">
+        {VAULT_FILTER_OPTIONS.map((opt) => (
           <button
-            key={type}
-            className={`th-btn th-btn--sm ${filter === type ? 'th-btn--primary' : 'th-btn--outline'}`}
-            onClick={() => setFilter(type)}
-            style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+            key={opt.value}
+            role="tab"
+            aria-selected={filter === opt.value}
+            className={`th-option-chip${filter === opt.value ? ' th-option-chip--active' : ''}`}
+            onClick={() => setFilter(opt.value)}
           >
-            {type === 'all' ? 'All' : CONTENT_TYPE_META[type].label}
+            {opt.label}
           </button>
         ))}
       </div>
@@ -85,12 +89,11 @@ export function VaultHome({ service }: { service?: VaultService }) {
       {/* Empty state */}
       {items.length === 0 && (
         <div className="th-empty-emotional" style={{ marginTop: 'var(--th-space-4)' }}>
-          <RoseLilyDecoration variant={16} size={90} position="bottom-right" opacity={0.12} animated />
           <div className="th-empty-emotional__visual th-scale-in">
             <IconLock size={42} />
           </div>
           <h3 className="th-empty-emotional__title">
-            {filter === 'all' ? 'Your private vault' : `No ${CONTENT_TYPE_META[filter].label} items`}
+            {filter === 'all' ? 'Your vault is empty' : `No ${filter} items yet`}
           </h3>
           <p className="th-empty-emotional__message">
             A secure place for your most private moments together
@@ -100,7 +103,8 @@ export function VaultHome({ service }: { service?: VaultService }) {
               className="th-btn th-btn--primary"
               onClick={() => navigate(RoutePath.appVaultAdd)}
             >
-              Add Content
+              <IconPlus size={16} />
+              Add First Item
             </button>
           </div>
         </div>
@@ -108,32 +112,51 @@ export function VaultHome({ service }: { service?: VaultService }) {
 
       {/* Vault items grid */}
       {items.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--th-space-3)' }}>
+        <div className="th-vault-grid" role="list">
           {items.map((item) => (
             <button
               key={item.id}
-              className="th-card th-card--clickable"
+              className="th-vault-card"
+              role="listitem"
               onClick={() => navigate(RoutePath.appVaultDetail.replace(':itemId', item.id))}
-              style={{ padding: 'var(--th-space-3)', textAlign: 'left' }}
+              aria-label={`${item.title} — ${CONTENT_TYPE_META[item.contentType].label}`}
             >
-              {(() => {
-                const Meta = CONTENT_TYPE_META[item.contentType];
-                return (
-                  <div style={{ marginBottom: 'var(--th-space-2)', color: 'var(--th-color-burgundy)' }}>
-                    <Meta.Icon size={28} />
-                  </div>
-                );
-              })()}
-              <div style={{ fontWeight: 'var(--th-font-weight-medium)', fontSize: 'var(--th-font-size-sm)', marginBottom: 'var(--th-space-1)' }}>
-                {item.title}
+              <div className="th-vault-card__icon" aria-hidden="true">
+                {(() => {
+                  const Meta = CONTENT_TYPE_META[item.contentType];
+                  return <Meta.Icon size={22} />;
+                })()}
               </div>
-              <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
-                {new Date(item.createdAt).toLocaleDateString()}
+              <div className="th-vault-card__title">{item.title}</div>
+              <div className="th-vault-card__meta">
+                <span className="th-vault-card__type-badge">
+                  {CONTENT_TYPE_META[item.contentType].label}
+                </span>
+                <span>{relativeVaultDate(item.createdAt)}</span>
               </div>
             </button>
           ))}
         </div>
       )}
+
+      {/* Floating add button when items exist */}
+      {items.length > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--th-space-5)' }}>
+          <button
+            className="th-btn th-btn--primary"
+            onClick={() => navigate(RoutePath.appVaultAdd)}
+          >
+            <IconPlus size={16} />
+            Add Content
+          </button>
+        </div>
+      )}
+
+      {/* Security footer */}
+      <div className="th-vault-footer">
+        <IconLock size={12} className="th-vault-footer__icon" />
+        <span>Stored locally on this device only</span>
+      </div>
     </div>
   );
 }
