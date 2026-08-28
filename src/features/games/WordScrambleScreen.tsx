@@ -1,9 +1,8 @@
 /**
- * WordScrambleScreen (Phase 12, Phase 29 visual polish).
+ * WordScrambleScreen (Stage 13 — Games Visual Productization).
  *
  * Word Scramble — unscramble love-themed words one at a time.
- * Uses createWordScrambleSession + scrambleWord + validateScrambleGuess
- * from the shared game engine.
+ * Enhanced: improved scramble display, intro, and results. Engine unchanged.
  */
 
 import { useState, useCallback, useMemo } from 'react';
@@ -19,7 +18,14 @@ import {
 import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 import type { GameSession } from '../../data/game/gameTypes.ts';
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
-import { IconBack } from '../../components/index.ts';
+import { IconBack, IconCheck, IconClose, IconSparkle } from '../../components/index.ts';
+import {
+  getGamePersonality,
+  accuracyPercent,
+  accuracyLabel,
+  scoreDisplay,
+  roundProgress,
+} from './gamesPresentation.ts';
 
 type GamePhase = 'intro' | 'playing' | 'results';
 
@@ -33,6 +39,7 @@ export function WordScrambleScreen() {
   const wordCount = resolveWordScrambleCount(currentLevel);
 
   const definition = getGameDefinition('word-scramble');
+  const personality = getGamePersonality('word-scramble');
   const allQuestions = definition?.questions ?? [];
   const questions = useMemo(
     () => selectQuestionsForLevel(allQuestions, currentLevel, wordCount),
@@ -110,17 +117,20 @@ export function WordScrambleScreen() {
   // --- Intro phase ---
   if (phase === 'intro') {
     return (
-      <div className="th-content-pad th-game-intro th-game-enter">
-        <div className="th-game-intro__icon">
-          <span style={{ fontSize: '1.8rem' }}>Aa</span>
+      <div className="th-content-pad th-game-intro th-game-intro--enhanced th-game-enter th-game-screen--warm">
+        <div className="th-game-intro__circle">
+          <span style={{ fontSize: '1.6rem', fontWeight: 'var(--th-font-weight-bold)', fontFamily: 'var(--th-font-family-display)' }}>Aa</span>
         </div>
         <h1 className="th-game-intro__title">Word Scramble</h1>
-        <div className="th-game-badge-group" style={{ marginBottom: 'var(--th-space-3)' }}>
+        <div className="th-game-intro__vibe">{personality.vibe}</div>
+        <div className="th-game-badge-group" style={{ margin: 'var(--th-space-4) 0' }}>
           <span className="th-game-level-badge th-badge-enter">Level {currentLevel}</span>
           <span className="th-game-difficulty-badge">{levelConfig.difficulty}</span>
         </div>
         <p className="th-game-intro__desc">Unscramble love-themed words!</p>
-        <p className="th-game-intro__meta">{wordCount} words to unscramble</p>
+        <p className="th-game-intro__meta" style={{ marginTop: 'var(--th-space-2)' }}>
+          {wordCount} words to unscramble
+        </p>
         <div style={{ marginTop: 'var(--th-space-6)' }}>
           <button className="th-btn th-btn--primary th-pressable" onClick={startGame}>Start Game</button>
         </div>
@@ -134,23 +144,17 @@ export function WordScrambleScreen() {
   // --- Results phase ---
   if (phase === 'results') {
     const score = session?.casualScore ?? 0;
-    const accuracy = wordCount > 0 ? Math.round((score / wordCount) * 100) : 0;
-
-    let message: string;
-    if (accuracy >= 90) message = 'Word wizard!';
-    else if (accuracy >= 70) message = 'Great vocabulary!';
-    else if (accuracy >= 50) message = 'Nice effort!';
-    else message = 'Words are tricky!';
+    const accuracy = accuracyPercent(score, wordCount);
 
     return (
-      <div className="th-content-pad th-game-screen">
+      <div className="th-content-pad th-game-screen th-game-screen--warm">
         {/* Level-up celebration */}
-        <div className="th-game-level-up th-result-enter">
-          <div className="th-game-level-up__icon th-badge-enter">
-            <span style={{ fontSize: '1.4rem' }}>Aa</span>
+        <div className="th-game-result-hero th-result-enter">
+          <div className="th-game-result-hero__ring th-badge-enter">
+            <IconSparkle size={32} />
           </div>
-          <div className="th-game-level-up__text">Level Complete!</div>
-          <div className="th-game-level-up__sub">Word Scramble</div>
+          <div className="th-game-result-hero__title">Level Complete!</div>
+          <div className="th-game-result-hero__subtitle">Word Scramble</div>
         </div>
 
         <div className="th-game-badge-group th-result-enter-delayed" style={{ marginBottom: 'var(--th-space-4)' }}>
@@ -159,14 +163,20 @@ export function WordScrambleScreen() {
         </div>
 
         {/* Score card */}
-        <div className="th-game-result-card th-result-enter-delayed">
-          <div className="th-game-result-card__score">{score} / {wordCount}</div>
-          <div className="th-game-result-card__label">words unscrambled ({accuracy}% accuracy)</div>
-          <div className="th-game-result-card__message">{message}</div>
+        <div className="th-game-score-card--enhanced th-result-enter-delayed">
+          <div className="th-game-score-card__value">
+            {scoreDisplay(score, wordCount)}
+          </div>
+          <div className="th-game-score-card__label">
+            words unscrambled ({accuracy}% accuracy)
+          </div>
+          <div className="th-game-score-card__message">
+            {accuracyLabel(accuracy)}
+          </div>
         </div>
 
         {/* Actions */}
-        <div className="th-game-actions th-result-enter-delayed-2">
+        <div className="th-game-actions--enhanced th-result-enter-delayed-2">
           <button className="th-btn th-btn--primary th-btn--full th-pressable" onClick={goToNextLevel}>
             Next Level
           </button>
@@ -182,10 +192,10 @@ export function WordScrambleScreen() {
   }
 
   // --- Playing phase ---
-  const progress = (currentWordIndex / wordCount) * 100;
+  const progress = roundProgress(currentWordIndex, wordCount);
 
   return (
-    <div className="th-content-pad th-game-screen">
+    <div className="th-content-pad th-game-screen th-game-screen--warm">
       {/* Header */}
       <div className="th-game-header">
         <button className="th-btn th-btn--ghost th-game-header__back" onClick={() => navigate(RoutePath.appGames)}>
@@ -198,16 +208,15 @@ export function WordScrambleScreen() {
       </div>
 
       {/* Progress bar */}
-      <div className="th-progress-bar" style={{ marginBottom: 'var(--th-space-6)' }}>
-        <div className="th-progress-bar__fill" style={{ width: `${progress}%` }} />
+      <div className="th-game-progress--enhanced">
+        <div className="th-game-progress--enhanced__fill" style={{ width: `${progress}%` }} />
       </div>
 
       {/* Scrambled word card */}
-      <div className={`th-game-question th-game-enter ${feedback === 'correct' ? 'th-game-correct' : ''} ${feedback === 'incorrect' ? 'th-game-incorrect' : ''}`} key={currentWordIndex}>
-        <p style={{ color: 'var(--th-color-text-secondary)', fontSize: 'var(--th-font-size-sm)', marginBottom: 'var(--th-space-3)' }}>
-          Unscramble this word:
-        </p>
-        <div className="th-scramble-display--enhanced">
+      <div className={`th-game-question th-game-question--enhanced th-game-enter ${feedback === 'correct' ? 'th-game-correct' : ''} ${feedback === 'incorrect' ? 'th-game-incorrect' : ''}`} key={currentWordIndex}>
+        <span className="th-game-question__number">Word {currentWordIndex + 1}</span>
+        <p className="th-scramble__hint">Unscramble this word:</p>
+        <div className="th-scramble--enhanced">
           {scrambled.toUpperCase()}
         </div>
         {currentQuestion?.category && (
@@ -217,8 +226,12 @@ export function WordScrambleScreen() {
 
       {/* Feedback */}
       {feedback && (
-        <div className={`th-game-feedback th-game-${feedback}`}>
-          {feedback === 'correct' ? 'Correct!' : `The answer was: ${correctAnswer}`}
+        <div className={`th-game-feedback--enhanced ${feedback === 'correct' ? 'th-game-feedback--correct-enhanced' : 'th-game-feedback--incorrect-enhanced'} th-game-enter`}>
+          {feedback === 'correct' ? (
+            <><IconCheck size={16} /> Correct!</>
+          ) : (
+            <><IconClose size={16} /> The answer was: {correctAnswer}</>
+          )}
         </div>
       )}
 
@@ -256,8 +269,8 @@ export function WordScrambleScreen() {
       )}
 
       {/* Score */}
-      <div className="th-game-score">
-        Score: <span className="th-game-score__number">{session?.casualScore ?? 0}</span> / {currentWordIndex + (feedback === 'correct' ? 1 : 0)}
+      <div className="th-game-score-footer">
+        Score: <span className="th-game-score-footer__number">{session?.casualScore ?? 0}</span> / {currentWordIndex + (feedback === 'correct' ? 1 : 0)}
       </div>
     </div>
   );

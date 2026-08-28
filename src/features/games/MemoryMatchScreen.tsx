@@ -1,8 +1,8 @@
 /**
- * MemoryMatchScreen (Phase 12, Phase 29 visual polish).
+ * MemoryMatchScreen (Stage 13 — Games Visual Productization).
  *
  * Memory Match card game — flip cards to find matching pairs.
- * Uses createMemoryMatchSession + flipCard from the shared game engine.
+ * Enhanced: improved card grid, intro, and results. Engine unchanged.
  */
 
 import { useState, useCallback, useEffect } from 'react';
@@ -17,6 +17,11 @@ import {
 import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 import type { GameSession, MemoryCard } from '../../data/game/gameTypes.ts';
 import { IconBack, IconHeart } from '../../components/index.ts';
+import {
+  getGamePersonality,
+  efficiencyLabel,
+  scoreDisplay,
+} from './gamesPresentation.ts';
 
 type GamePhase = 'intro' | 'playing' | 'results';
 
@@ -33,6 +38,7 @@ export function MemoryMatchScreen() {
 
   const levelConfig = resolveLevelConfig(currentLevel);
   const pairCount = resolveMemoryMatchPairs(currentLevel);
+  const personality = getGamePersonality('memory-match');
 
   const startGame = useCallback(() => {
     const s = createMemoryMatchSession(pairCount);
@@ -99,17 +105,20 @@ export function MemoryMatchScreen() {
   // --- Intro phase ---
   if (phase === 'intro') {
     return (
-      <div className="th-content-pad th-game-intro th-game-enter">
-        <div className="th-game-intro__icon">
-          <IconHeart size={28} />
+      <div className="th-content-pad th-game-intro th-game-intro--enhanced th-game-enter th-game-screen--warm">
+        <div className="th-game-intro__circle">
+          <IconHeart size={32} />
         </div>
         <h1 className="th-game-intro__title">Memory Match</h1>
-        <div className="th-game-badge-group" style={{ marginBottom: 'var(--th-space-3)' }}>
+        <div className="th-game-intro__vibe">{personality.vibe}</div>
+        <div className="th-game-badge-group" style={{ margin: 'var(--th-space-4) 0' }}>
           <span className="th-game-level-badge th-badge-enter">Level {currentLevel}</span>
           <span className="th-game-difficulty-badge">{levelConfig.difficulty}</span>
         </div>
         <p className="th-game-intro__desc">Flip cards and find all matching pairs!</p>
-        <p className="th-game-intro__meta">{pairCount} pairs to find</p>
+        <p className="th-game-intro__meta" style={{ marginTop: 'var(--th-space-2)' }}>
+          {pairCount} pairs to find
+        </p>
         <div style={{ marginTop: 'var(--th-space-6)' }}>
           <button className="th-btn th-btn--primary th-pressable" onClick={startGame}>Start Game</button>
         </div>
@@ -124,21 +133,16 @@ export function MemoryMatchScreen() {
   if (phase === 'results') {
     const moves = session?.board?.moves ?? 0;
     const pairs = session?.board?.totalPairs ?? pairCount;
-    const efficiency = pairs > 0 ? Math.round((pairs / Math.max(moves, pairs)) * 100) : 0;
-
-    let message: string;
-    if (efficiency >= 80) message = 'Incredible memory!';
-    else if (efficiency >= 60) message = 'Great job!';
-    else if (efficiency >= 40) message = 'Not bad at all!';
-    else message = 'Practice makes perfect!';
 
     return (
-      <div className="th-content-pad th-game-screen">
+      <div className="th-content-pad th-game-screen th-game-screen--warm">
         {/* Level-up celebration */}
-        <div className="th-game-level-up th-result-enter">
-          <div className="th-game-level-up__icon th-badge-enter"><IconHeart size={28} /></div>
-          <div className="th-game-level-up__text">Level Complete!</div>
-          <div className="th-game-level-up__sub">Memory Match</div>
+        <div className="th-game-result-hero th-result-enter">
+          <div className="th-game-result-hero__ring th-badge-enter">
+            <IconHeart size={32} />
+          </div>
+          <div className="th-game-result-hero__title">Level Complete!</div>
+          <div className="th-game-result-hero__subtitle">Memory Match</div>
         </div>
 
         <div className="th-game-badge-group th-result-enter-delayed" style={{ marginBottom: 'var(--th-space-4)' }}>
@@ -147,14 +151,20 @@ export function MemoryMatchScreen() {
         </div>
 
         {/* Score card */}
-        <div className="th-game-result-card th-result-enter-delayed">
-          <div className="th-game-result-card__score">{pairs} / {pairs}</div>
-          <div className="th-game-result-card__label">pairs found in {moves} moves</div>
-          <div className="th-game-result-card__message">{message}</div>
+        <div className="th-game-score-card--enhanced th-result-enter-delayed">
+          <div className="th-game-score-card__value">
+            {scoreDisplay(pairs, pairs)}
+          </div>
+          <div className="th-game-score-card__label">
+            pairs found in {moves} moves
+          </div>
+          <div className="th-game-score-card__message">
+            {efficiencyLabel(pairs, moves)}
+          </div>
         </div>
 
         {/* Actions */}
-        <div className="th-game-actions th-result-enter-delayed-2">
+        <div className="th-game-actions--enhanced th-result-enter-delayed-2">
           <button className="th-btn th-btn--primary th-btn--full th-pressable" onClick={goToNextLevel}>
             Next Level
           </button>
@@ -174,7 +184,7 @@ export function MemoryMatchScreen() {
   if (!board) return null;
 
   return (
-    <div className="th-content-pad th-game-screen">
+    <div className="th-content-pad th-game-screen th-game-screen--warm">
       {/* Header */}
       <div className="th-game-header">
         <button className="th-btn th-btn--ghost th-game-header__back" onClick={() => navigate(RoutePath.appGames)}>
@@ -187,20 +197,27 @@ export function MemoryMatchScreen() {
       </div>
 
       {/* Progress bar */}
-      <div className="th-progress-bar" style={{ marginBottom: 'var(--th-space-3)' }}>
+      <div className="th-game-progress--enhanced">
         <div
-          className="th-progress-bar__fill"
+          className="th-game-progress--enhanced__fill"
           style={{ width: `${(board.matchedPairs / board.totalPairs) * 100}%` }}
         />
       </div>
 
-      {/* Moves counter */}
-      <div className="th-game-score">
-        Moves: <span className="th-game-score__number">{board.moves}</span>
+      {/* Stats */}
+      <div className="th-game-stats">
+        <div className="th-game-stat">
+          <div className="th-game-stat__value">{board.matchedPairs}</div>
+          <div className="th-game-stat__label">matched</div>
+        </div>
+        <div className="th-game-stat">
+          <div className="th-game-stat__value">{board.moves}</div>
+          <div className="th-game-stat__label">moves</div>
+        </div>
       </div>
 
       {/* Card grid */}
-      <div className="th-memory-grid th-memory-grid--enhanced" style={{ marginTop: 'var(--th-space-4)' }}>
+      <div className="th-memory-grid--stage13">
         {board.cards.map((card, index) => (
           <MemoryCardView
             key={card.id}
@@ -216,14 +233,23 @@ export function MemoryMatchScreen() {
 function MemoryCardView({ card, onClick }: { card: MemoryCard; onClick: () => void }) {
   const isVisible = card.revealed || card.matched;
 
+  let className = 'th-memory-card--stage13';
+  if (card.matched) {
+    className += ' th-memory-card--stage13--matched';
+  } else if (isVisible) {
+    className += ' th-memory-card--stage13--revealed';
+  } else {
+    className += ' th-memory-card--stage13--hidden';
+  }
+
   return (
     <button
-      className={`th-memory-card ${isVisible ? 'th-memory-card--revealed' : ''} ${card.matched ? 'th-memory-card--matched' : ''}`}
+      className={className}
       onClick={onClick}
       disabled={card.revealed || card.matched}
       aria-label={isVisible ? `Card: ${card.symbol}` : 'Hidden card'}
     >
-      <span className="th-memory-card__face">
+      <span className="th-memory-card--stage13__face">
         {isVisible ? card.symbol : '?'}
       </span>
     </button>

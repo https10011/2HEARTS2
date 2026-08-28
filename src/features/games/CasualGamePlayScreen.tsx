@@ -1,22 +1,27 @@
 /**
- * CasualGamePlayScreen (Phase 12, Phase 29 visual polish).
+ * CasualGamePlayScreen (Stage 13 — Games Visual Productization).
  *
  * Shared play screen for casual single-player games (trivia, riddle room).
- * Uses the same question/answer model as couple games but with single-player
- * mechanics — no turn transitions, just sequential questions.
- *
- * Reuses: recordCasualAnswer, completeCasualGame from the game engine.
+ * Enhanced: improved intro, question cards, answer options, feedback,
+ * and results with casual personality. Engine unchanged.
  */
 
 import { useState, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconCheck, IconClose, IconBack, IconSmile } from '../../components/index.ts';
+import { IconCheck, IconClose, IconBack, IconSmile, IconSparkle } from '../../components/index.ts';
 import { createSession, recordCasualAnswer, completeCasualGame } from '../../services/game/gameEngine.ts';
 import type { GameSession, GameType } from '../../data/game/gameTypes.ts';
 import { resolveLevelConfig } from '../../data/game/gameTypes.ts';
 import { getGameDefinition } from '../../customization/games/gameContent.ts';
 import { recordLevelCompletion } from '../../services/game/gameProgression.ts';
+import {
+  getGamePersonality,
+  accuracyPercent,
+  accuracyLabel,
+  scoreDisplay,
+  roundProgress,
+} from './gamesPresentation.ts';
 
 type GamePhase = 'intro' | 'playing' | 'results';
 
@@ -26,6 +31,7 @@ export function CasualGamePlayScreen() {
   const location = useLocation();
   const gt = gameType as GameType | undefined;
   const definition = gt ? getGameDefinition(gt) : undefined;
+  const personality = gt ? getGamePersonality(gt) : undefined;
   const passedLevel = (location.state as { level?: number })?.level ?? 1;
   const levelConfig = resolveLevelConfig(passedLevel);
 
@@ -104,7 +110,7 @@ export function CasualGamePlayScreen() {
   // --- Not found state ---
   if (!definition || !gt) {
     return (
-      <div className="th-content-pad th-game-screen">
+      <div className="th-content-pad th-game-screen th-game-screen--warm">
         <div className="th-empty-state th-empty-state--enhanced">
           <div className="th-empty-state__visual"><span style={{ fontSize: '2rem' }}>?</span></div>
           <h3 className="th-empty-state__title">Game not found</h3>
@@ -117,19 +123,24 @@ export function CasualGamePlayScreen() {
   // --- Intro phase ---
   if (phase === 'intro') {
     return (
-      <div className="th-content-pad th-game-intro th-game-enter">
-        <div className="th-game-intro__icon">
-          <IconSmile size={28} />
+      <div className="th-content-pad th-game-intro th-game-intro--enhanced th-game-enter th-game-screen--warm">
+        <div className="th-game-intro__circle">
+          <IconSmile size={32} />
         </div>
         <h1 className="th-game-intro__title">{definition.title}</h1>
-        <div className="th-game-badge-group" style={{ marginBottom: 'var(--th-space-3)' }}>
+        {personality && (
+          <div className="th-game-intro__vibe">{personality.vibe}</div>
+        )}
+        <div className="th-game-badge-group" style={{ margin: 'var(--th-space-4) 0' }}>
           <span className="th-game-level-badge th-badge-enter">Level {passedLevel}</span>
           <span className="th-game-difficulty-badge">{levelConfig.difficulty}</span>
         </div>
         <p className="th-game-intro__desc">{definition.description}</p>
-        <p className="th-game-intro__meta">{definition.questionsPerRound} questions</p>
+        <p className="th-game-intro__meta" style={{ marginTop: 'var(--th-space-2)' }}>
+          {definition.questionsPerRound} questions
+        </p>
         <div style={{ marginTop: 'var(--th-space-6)' }}>
-          <button className="th-btn th-btn--primary" onClick={startGame}>Start Game</button>
+          <button className="th-btn th-btn--primary th-pressable" onClick={startGame}>Start Game</button>
         </div>
         <button className="th-btn th-btn--secondary" onClick={() => navigate(RoutePath.appGames)} style={{ marginTop: 'var(--th-space-3)' }}>
           Back to Games
@@ -142,21 +153,17 @@ export function CasualGamePlayScreen() {
   if (phase === 'results') {
     const score = session?.casualScore ?? 0;
     const total = definition.questionsPerRound;
-    const accuracy = total > 0 ? Math.round((score / total) * 100) : 0;
-
-    let message: string;
-    if (accuracy >= 90) message = 'Outstanding!';
-    else if (accuracy >= 70) message = 'Well done!';
-    else if (accuracy >= 50) message = 'Good effort!';
-    else message = 'Keep trying!';
+    const accuracy = accuracyPercent(score, total);
 
     return (
-      <div className="th-content-pad th-game-screen">
+      <div className="th-content-pad th-game-screen th-game-screen--warm">
         {/* Level-up celebration header */}
-        <div className="th-game-level-up th-result-enter">
-          <div className="th-game-level-up__icon th-badge-enter">1</div>
-          <div className="th-game-level-up__text">Level Complete!</div>
-          <div className="th-game-level-up__sub">{definition.title}</div>
+        <div className="th-game-result-hero th-result-enter">
+          <div className="th-game-result-hero__ring th-badge-enter">
+            <IconSparkle size={32} />
+          </div>
+          <div className="th-game-result-hero__title">Level Complete!</div>
+          <div className="th-game-result-hero__subtitle">{definition.title}</div>
         </div>
 
         <div className="th-game-badge-group th-result-enter-delayed" style={{ marginBottom: 'var(--th-space-4)' }}>
@@ -165,17 +172,23 @@ export function CasualGamePlayScreen() {
         </div>
 
         {/* Score card */}
-        <div className="th-game-result-card th-result-enter-delayed">
-          <div className="th-game-result-card__score">{score} / {total}</div>
-          <div className="th-game-result-card__label">correct ({accuracy}% accuracy)</div>
-          <div className="th-game-result-card__message">{message}</div>
+        <div className="th-game-score-card--enhanced th-result-enter-delayed">
+          <div className="th-game-score-card__value">
+            {scoreDisplay(score, total)}
+          </div>
+          <div className="th-game-score-card__label">
+            correct ({accuracy}% accuracy)
+          </div>
+          <div className="th-game-score-card__message">
+            {accuracyLabel(accuracy)}
+          </div>
         </div>
 
         {/* Round breakdown */}
-        <h2 style={{ fontSize: 'var(--th-font-size-md)', fontWeight: 'var(--th-font-weight-semibold)', marginBottom: 'var(--th-space-3)' }} className="th-result-enter-delayed-2">
+        <h2 className="th-game-breakdown-title th-result-enter-delayed-2">
           Round Breakdown
         </h2>
-        <div className="th-hub-grid th-result-enter-delayed-2" style={{ marginBottom: 'var(--th-space-6)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-2)', marginBottom: 'var(--th-space-6)' }}>
           {session?.rounds
             .filter((r) => r.complete)
             .map((r, i) => {
@@ -184,21 +197,23 @@ export function CasualGamePlayScreen() {
               return (
                 <div
                   key={i}
-                  className={`th-feature-card th-feature-card--enhanced th-stagger-item th-game-round ${isCorrect ? 'th-game-round--correct' : 'th-game-round--incorrect'}`}
-                  style={{ cursor: 'default' }}
+                  className={`th-game-round--enhanced ${isCorrect ? 'th-game-round--correct-enhanced' : 'th-game-round--incorrect-enhanced'} th-game-stagger`}
+                  style={{ animationDelay: `${i * 30}ms`, background: 'var(--th-color-surface)', borderRadius: 'var(--th-radius-md)' }}
                 >
-                  <div className="th-feature-card__body">
-                    <div className="th-feature-card__title" style={{ fontSize: 'var(--th-font-size-sm)' }}>
-                      <span style={{ color: isCorrect ? 'var(--th-color-burgundy)' : 'var(--th-color-text-secondary)', display: 'inline-flex', verticalAlign: '-2px', marginRight: 'var(--th-space-1)' }}>
-                        {isCorrect ? <IconCheck size={14} /> : <IconClose size={14} />}
-                      </span>
-                      Q{i + 1}: {r.question.text.length > 50 ? r.question.text.slice(0, 50) + '...' : r.question.text}
-                    </div>
-                    <div className="th-feature-card__desc">
-                      Your answer: {a?.answer || '(none)'}
-                      {!isCorrect && (
-                        <span> · Correct: {r.question.correctAnswer ?? r.question.options?.[0]}</span>
-                      )}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--th-space-2)' }}>
+                    <span style={{ color: isCorrect ? 'var(--th-color-success)' : 'var(--th-color-error)', flexShrink: 0, marginTop: '2px' }}>
+                      {isCorrect ? <IconCheck size={14} /> : <IconClose size={14} />}
+                    </span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 'var(--th-font-size-sm)', fontWeight: 'var(--th-font-weight-semibold)', color: 'var(--th-color-text-primary)', marginBottom: '2px' }}>
+                        Q{i + 1}: {r.question.text.length > 50 ? r.question.text.slice(0, 50) + '...' : r.question.text}
+                      </div>
+                      <div style={{ fontSize: 'var(--th-font-size-xs)', color: 'var(--th-color-text-secondary)' }}>
+                        Your answer: {a?.answer || '(none)'}
+                        {!isCorrect && (
+                          <span> · Correct: {r.question.correctAnswer ?? r.question.options?.[0]}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -207,7 +222,7 @@ export function CasualGamePlayScreen() {
         </div>
 
         {/* Actions */}
-        <div className="th-game-actions">
+        <div className="th-game-actions--enhanced">
           <button className="th-btn th-btn--primary th-btn--full th-pressable" onClick={() => navigate(`${RoutePath.appGames}/${gt}`, { replace: true, state: { level: passedLevel + 1 } })}>
             Next Level
           </button>
@@ -225,7 +240,7 @@ export function CasualGamePlayScreen() {
   // --- Playing phase ---
   const questionIndex = session?.currentRound ?? 0;
   const currentQuestion = definition.questions[questionIndex];
-  const progress = (questionIndex / definition.questionsPerRound) * 100;
+  const progress = roundProgress(questionIndex, definition.questionsPerRound);
 
   if (!currentQuestion) {
     const { result } = completeCasualGame(session!);
@@ -240,7 +255,7 @@ export function CasualGamePlayScreen() {
   }
 
   return (
-    <div className="th-content-pad th-game-screen">
+    <div className="th-content-pad th-game-screen th-game-screen--warm">
       {/* Header */}
       <div className="th-game-header">
         <button className="th-btn th-btn--ghost th-game-header__back" onClick={() => navigate(RoutePath.appGames)}>
@@ -253,19 +268,24 @@ export function CasualGamePlayScreen() {
       </div>
 
       {/* Progress bar */}
-      <div className="th-progress-bar" style={{ marginBottom: 'var(--th-space-4)' }}>
-        <div className="th-progress-bar__fill" style={{ width: `${progress}%` }} />
+      <div className="th-game-progress--enhanced">
+        <div className="th-game-progress--enhanced__fill" style={{ width: `${progress}%` }} />
       </div>
 
       {/* Feedback */}
       {feedback && (
-        <div className={`th-game-feedback th-game-${feedback} ${feedback === 'correct' ? 'th-game-correct' : 'th-game-incorrect'}`}>
-          {feedback === 'correct' ? 'Correct!' : `Wrong! The answer was: ${currentQuestion.correctAnswer ?? currentQuestion.options?.[0]}`}
+        <div className={`th-game-feedback--enhanced ${feedback === 'correct' ? 'th-game-feedback--correct-enhanced' : 'th-game-feedback--incorrect-enhanced'} th-game-enter`}>
+          {feedback === 'correct' ? (
+            <><IconCheck size={16} /> Correct!</>
+          ) : (
+            <><IconClose size={16} /> Wrong! The answer was: {currentQuestion.correctAnswer ?? currentQuestion.options?.[0]}</>
+          )}
         </div>
       )}
 
       {/* Question card */}
-      <div className={`th-game-question ${!feedback ? 'th-game-enter' : ''}`} key={questionIndex}>
+      <div className={`th-game-question th-game-question--enhanced ${!feedback ? 'th-game-enter' : ''}`} key={questionIndex}>
+        <span className="th-game-question__number">Question {questionIndex + 1}</span>
         <h2 className="th-game-question__text">{currentQuestion.text}</h2>
         {currentQuestion.category && (
           <span className="th-game-question__category">{currentQuestion.category}</span>
@@ -276,13 +296,12 @@ export function CasualGamePlayScreen() {
       {!feedback && (
         <>
           {definition.scoringType === 'choice' && currentQuestion.options ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)', marginBottom: 'var(--th-space-6)' }}>
+            <div className="th-game-options">
               {currentQuestion.options.map((opt, i) => (
                 <button
                   key={i}
-                  className={`th-option-chip ${selectedOption === i ? 'th-option-chip--active' : ''}`}
+                  className={`th-game-option ${selectedOption === i ? 'th-game-option--selected' : ''}`}
                   onClick={() => { setSelectedOption(i); setErrors([]); }}
-                  style={{ width: '100%', textAlign: 'center', padding: 'var(--th-space-4)' }}
                 >
                   {opt}
                 </button>
@@ -317,8 +336,8 @@ export function CasualGamePlayScreen() {
       )}
 
       {/* Score */}
-      <div className="th-game-score">
-        Score: <span className="th-game-score__number">{session?.casualScore ?? 0}</span> / {questionIndex + (feedback === 'correct' ? 1 : 0)}
+      <div className="th-game-score-footer">
+        Score: <span className="th-game-score-footer__number">{session?.casualScore ?? 0}</span> / {questionIndex + (feedback === 'correct' ? 1 : 0)}
       </div>
     </div>
   );

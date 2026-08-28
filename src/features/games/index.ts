@@ -1,5 +1,5 @@
 /**
- * Games feature barrel exports (Phase 11 + Phase 12).
+ * Games feature barrel exports (Stage 13 — Games Visual Productization).
  */
 
 export { GamePlayScreen } from './GamePlayScreen.tsx';
