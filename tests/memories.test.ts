@@ -57,7 +57,7 @@ describe('Memory migration', () => {
   });
 
   it('schema version is 12 after migration', () => {
-    assert.equal(PERSISTENCE_CONFIG.schemaVersion, 12);
+    assert.equal(PERSISTENCE_CONFIG.schemaVersion, 13);
   });
 
   it('creates memories table', async () => {

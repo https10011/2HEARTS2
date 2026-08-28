@@ -51,7 +51,7 @@ describe('Phase 18 — Migration 012 notification center', () => {
   });
 
   it('schema version is 12', () => {
-    assert.equal(PERSISTENCE_CONFIG.schemaVersion, 12);
+    assert.equal(PERSISTENCE_CONFIG.schemaVersion, 13);
   });
 });
 

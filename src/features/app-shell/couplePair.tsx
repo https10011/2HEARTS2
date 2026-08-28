@@ -6,26 +6,26 @@
 
 import { Link } from 'react-router-dom';
 import type { Profile } from '../../data/relationship/relationshipTypes.ts';
-import { IconHeart, IconSmile } from '../../components/index.ts';
+import { IconHeart, ProfileAvatar } from '../../components/index.ts';
+import { useProfilePhotos } from './useProfilePhotos.ts';
 
 interface CoupleFaceProps {
   profile: Profile | null;
   fallbackRole: string; // e.g. "You" / "Partner"
   to: string;
   label: string;
+  photoUrl: string | null;
 }
 
-function CoupleFace({ profile, fallbackRole, to, label }: CoupleFaceProps) {
+function CoupleFace({ profile, fallbackRole, to, label, photoUrl }: CoupleFaceProps) {
   const name = profile?.displayName?.trim() ?? '';
   return (
     <Link to={to} className="th-couple-pair__face" aria-label={label}>
-      <span className="th-couple-pair__circle">
-        {name ? (
-          <span className="th-couple-pair__initial">{name.charAt(0).toUpperCase()}</span>
-        ) : (
-          <IconSmile size={26} />
-        )}
-      </span>
+      <ProfileAvatar
+        name={name || fallbackRole}
+        photoUrl={photoUrl}
+        size={56}
+      />
       <span className="th-couple-pair__name">{name || fallbackRole}</span>
     </Link>
   );
@@ -39,13 +39,15 @@ interface CouplePairProps {
 }
 
 export function CouplePair({ owner, partner, ownerTo, partnerTo }: CouplePairProps) {
+  const { ownerUrl, partnerUrl } = useProfilePhotos();
+
   return (
     <div className="th-couple-pair">
-      <CoupleFace profile={owner} fallbackRole="You" to={ownerTo} label="Your profile" />
+      <CoupleFace profile={owner} fallbackRole="You" to={ownerTo} label="Your profile" photoUrl={ownerUrl} />
       <span className="th-couple-pair__heart" aria-hidden="true">
         <IconHeart size={16} />
       </span>
-      <CoupleFace profile={partner} fallbackRole="Partner" to={partnerTo} label="Partner profile" />
+      <CoupleFace profile={partner} fallbackRole="Partner" to={partnerTo} label="Partner profile" photoUrl={partnerUrl} />
     </div>
   );
 }

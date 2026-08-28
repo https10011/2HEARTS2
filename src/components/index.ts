@@ -21,6 +21,8 @@ export { ToastProvider, useToast, TOAST_DURATION_MS } from './toast';
 export type { ToastApi, ToastMessage, ToastVariant } from './toast';
 export { BrandLogo } from './BrandLogo';
 export type { BrandLogoProps, BrandLogoVariant } from './BrandLogo';
+export { ProfileAvatar } from './ProfileAvatar';
+export type { ProfileAvatarProps } from './ProfileAvatar';
 export { RoseLilyDecoration, OnboardingArt } from './decorations';
 export type {
   RoseLilyDecorationProps,

@@ -63,6 +63,8 @@ export interface CoreServices {
   appState?: AppStateService;
   /** undefined when the (non-critical) application-state stage degraded. */
   relationship?: RelationshipService;
+  /** MediaStorage instance — shared across features that need local media. */
+  mediaStorage?: MediaStorage;
   /**
    * Phase 19 — data/storage management behind the Storage settings screen.
    * undefined when the (non-critical) application-state stage degraded.
@@ -160,9 +162,11 @@ function buildStages(): Stage[] {
         // Phase 19: storage/data management for the Settings screens. Media
         // bytes live in private app files on device, memory fs in web/dev.
         const fs = Capacitor.isNativePlatform() ? new CapacitorFileSystem() : new MemoryFileSystem();
+        const mediaStorage = new MediaStorage(adapter, fs);
+        coreServices.mediaStorage = mediaStorage;
         coreServices.dataManagement = new DataManagementService(
           adapter,
-          new MediaStorage(adapter, fs),
+          mediaStorage,
           coreServices.notifications ?? null,
           coreServices.appLock ?? null,
         );

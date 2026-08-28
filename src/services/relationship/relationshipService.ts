@@ -42,6 +42,7 @@ const MAX_TITLE_LENGTH = 80;
 export interface ProfileInput {
   displayName: string;
   birthDate?: string | null;
+  photoRef?: string | null;
 }
 
 export interface RelationshipSummary {
@@ -110,6 +111,18 @@ export class RelationshipService {
     return this.saveProfile('partner', input);
   }
 
+  /** Updates only the photo reference for a profile (owner or partner). */
+  async setProfilePhoto(role: 'owner' | 'partner', photoRef: string | null): Promise<Profile> {
+    const existing = role === 'owner' ? await this.profiles.getOwner() : await this.profiles.getPartner();
+    if (!existing) {
+      throw new AppError('validation', 'not-found', {
+        recoverable: false,
+        userMessage: 'Profile not found. Complete setup first.',
+      });
+    }
+    return this.profiles.update(existing.id, { photoRef });
+  }
+
   private async saveProfile(role: 'owner' | 'partner', input: ProfileInput): Promise<Profile> {
     const displayName = normalizeInput(input.displayName);
     const birthDate = input.birthDate ?? null;
@@ -127,9 +140,19 @@ export class RelationshipService {
         role === 'owner' ? await this.profiles.getOwner() : await this.profiles.getPartner();
       let saved: Profile;
       if (existing) {
-        saved = await this.profiles.update(existing.id, { displayName, birthDate });
+        saved = await this.profiles.update(existing.id, {
+          displayName,
+          birthDate,
+          ...(input.photoRef !== undefined ? { photoRef: input.photoRef } : {}),
+        });
       } else {
-        saved = await this.profiles.create({ role, displayName, birthDate, deletedAt: null });
+        saved = await this.profiles.create({
+          role,
+          displayName,
+          birthDate,
+          photoRef: input.photoRef ?? null,
+          deletedAt: null,
+        });
       }
       assertProfile(saved);
 

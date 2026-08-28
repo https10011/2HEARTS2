@@ -54,7 +54,7 @@ describe('Notes migration', () => {
   });
 
   it('schema version is 12 after migration', () => {
-    assert.equal(PERSISTENCE_CONFIG.schemaVersion, 12);
+    assert.equal(PERSISTENCE_CONFIG.schemaVersion, 13);
   });
 
   it('creates notes table', async () => {

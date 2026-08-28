@@ -1688,6 +1688,37 @@
   width: 100%;
   height: auto;
 }
+
+/* ProfileAvatar — shared photo-or-initials avatar component (Stage 4) */
+.th-profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--th-radius-circle);
+  background: linear-gradient(
+    135deg,
+    var(--th-color-blush) 0%,
+    var(--th-color-neutral-soft) 100%
+  );
+  color: var(--th-color-burgundy);
+  border: var(--th-border-width-medium) solid var(--th-color-surface-elevated);
+  box-shadow: var(--th-shadow-md);
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+}
+.th-profile-avatar__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+.th-profile-avatar__initial {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-2xl);
+  font-weight: var(--th-font-weight-bold);
+  line-height: 1;
+}
 .th-home-pill {
   position: relative;
   z-index: 1;

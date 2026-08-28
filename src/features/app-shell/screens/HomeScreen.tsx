@@ -30,7 +30,7 @@ import {
   IconBell,
   IconChevronRight,
   IconHeart,
-  IconSmile,
+  ProfileAvatar,
   LoadingState,
   RoseLilyDecoration,
 } from '../../../components/index.ts';
@@ -38,11 +38,13 @@ import { HOME_PRIMARY_ITEMS } from '../navConfig.ts';
 import { NavIcon } from '../navIcons.tsx';
 import { greetingForHour } from '../homeHighlights.ts';
 import { useHomeHighlights } from '../useHomeHighlights.ts';
+import { useProfilePhotos } from '../useProfilePhotos.ts';
 
 export function HomeScreen() {
   const [summary, setSummary] = useState<RelationshipSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const { highlights, unreadNotifications } = useHomeHighlights();
+  const { ownerUrl, partnerUrl } = useProfilePhotos();
 
   useEffect(() => {
     let cancelled = false;
@@ -136,15 +138,11 @@ export function HomeScreen() {
             className="th-home-couple__avatar"
             aria-label="Your profile"
           >
-            <span className="th-home-couple__circle">
-              {summary?.owner?.displayName?.trim() ? (
-                <span className="th-home-couple__initial">
-                  {summary.owner.displayName.trim().charAt(0).toUpperCase()}
-                </span>
-              ) : (
-                <IconSmile size={28} />
-              )}
-            </span>
+            <ProfileAvatar
+              name={summary?.owner?.displayName?.trim() || 'You'}
+              photoUrl={ownerUrl}
+              size={80}
+            />
             <span className="th-home-couple__name">
               {summary?.owner?.displayName?.trim() || 'You'}
             </span>
@@ -159,15 +157,11 @@ export function HomeScreen() {
             className="th-home-couple__avatar"
             aria-label="Partner profile"
           >
-            <span className="th-home-couple__circle">
-              {summary?.partner?.displayName?.trim() ? (
-                <span className="th-home-couple__initial">
-                  {summary.partner.displayName.trim().charAt(0).toUpperCase()}
-                </span>
-              ) : (
-                <IconSmile size={28} />
-              )}
-            </span>
+            <ProfileAvatar
+              name={summary?.partner?.displayName?.trim() || 'Partner'}
+              photoUrl={partnerUrl}
+              size={80}
+            />
             <span className="th-home-couple__name">
               {summary?.partner?.displayName?.trim() || 'Partner'}
             </span>

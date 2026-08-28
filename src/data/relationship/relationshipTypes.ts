@@ -47,6 +47,8 @@ export interface Profile extends TombstonedEntity {
   displayName: string;
   /** Local calendar day `yyyy-mm-dd`, or null when not provided. */
   birthDate: string | null;
+  /** MediaAsset.id for the profile photo, or null when no photo is set. */
+  photoRef: string | null;
 }
 
 export function assertProfile(profile: Profile): void {
@@ -64,6 +66,7 @@ export const PROFILE_COLUMNS = [
   'role',
   'display_name',
   'birth_date',
+  'photo_ref',
   'created_at',
   'updated_at',
   'deleted_at',
@@ -77,9 +80,10 @@ export const profileSerializer: EntitySerializer<Profile> = {
       profile.role,
       profile.displayName,
       profile.birthDate,
+      profile.photoRef ?? null,
       profile.createdAt,
       profile.updatedAt,
-      profile.deletedAt,
+      profile.deletedAt ?? null,
     ];
   },
   fromRow(row: Row): Profile {
@@ -88,6 +92,7 @@ export const profileSerializer: EntitySerializer<Profile> = {
       role: requireEnum(row, 'role', PROFILE_ROLES),
       displayName: requireString(row, 'display_name'),
       birthDate: optionalString(row, 'birth_date'),
+      photoRef: optionalString(row, 'photo_ref'),
       createdAt: requireString(row, 'created_at'),
       updatedAt: requireString(row, 'updated_at'),
       deletedAt: optionalString(row, 'deleted_at'),
