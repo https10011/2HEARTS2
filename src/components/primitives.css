@@ -1534,10 +1534,15 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   padding: var(--th-space-8) var(--th-space-4) var(--th-space-6);
-  /* No overflow: hidden — the scroll container (.th-app-content) handles
-     scrolling. Removing overflow:hidden fixes content clipping on short
-     viewports and with large text (Stage 3). */
+  /* flex: 1 1 auto ensures .th-home fills the available space in
+     .th-route-transition (a flex column), so the scroll container
+     (.th-app-content) properly handles overflow on short viewports
+     and with large text. Without this, .th-home only takes its
+     natural content height, which disrupts the flex chain and can
+     cause content at the bottom (grid cards, highlights) to clip.
+     (Stage 5 — root cause fix for US button clipping.) */
 }
 
 /* Greeting row — personal, time-aware welcome + notification access */
