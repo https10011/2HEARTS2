@@ -146,14 +146,14 @@ test('formatLocalDateKey renders a friendly month-day', () => {
 test('Home keeps the official branding, couple binding, and curated config', () => {
   const home = read('src/features/app-shell/screens/HomeScreen.tsx');
   assert.ok(home.includes('BrandLogo'), 'Home must carry the official logo');
-  assert.ok(home.includes('variant="brand"'), 'Home uses the full brand lockup');
+  assert.ok(home.includes('variant="mark"'), 'Home uses the brand mark as connector');
   assert.ok(home.includes('summary?.owner'), 'owner avatar bound to owner profile');
   assert.ok(home.includes('summary?.partner'), 'partner avatar bound to partner profile');
   assert.ok(home.includes('HOME_PRIMARY_ITEMS'), 'Home consumes the curated config');
   assert.ok(home.includes('RoseLilyDecoration'), 'Home carries a subtle floral');
   assert.ok(home.includes('useHomeHighlights'), 'Home renders the story previews');
   assert.ok(home.includes('th-home-greeting__bell'), 'Home restores the notification bell');
-  assert.ok(home.includes('th-home-couple-avatars__heart'), 'Home joins the two avatars');
+  assert.ok(home.includes('th-home-couple__mark'), 'Home joins avatars with brand mark');
 });
 
 test('Home never links relationship archive roots directly', () => {
@@ -196,8 +196,8 @@ test('design system exposes the Stage 3 classes', () => {
     '.th-home-greeting',
     '.th-home-greeting__bell',
     '.th-home-greeting__bell-badge',
-    '.th-home-couple-avatars',
-    '.th-home-couple-avatars__heart',
+    '.th-home-couple',
+    '.th-home-couple__mark',
     '.th-home-pill',
     '.th-home-card__body',
     '.th-home-card__chevron',

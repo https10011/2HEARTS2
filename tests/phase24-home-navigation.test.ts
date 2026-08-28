@@ -259,7 +259,7 @@ test('route transitions are wired through the keyed wrapper', () => {
 test('Home header renders both avatars around the official branding', () => {
   const home = read('src/features/app-shell/screens/HomeScreen.tsx');
   assert.ok(home.includes('BrandLogo'), 'Home header must carry the official logo');
-  assert.ok(home.includes('variant="brand"'), 'Home header uses the full brand lockup');
+  assert.ok(home.includes('variant="mark"'), 'Home header uses the brand mark as connector');
   assert.ok(home.includes('summary?.owner'), 'owner avatar bound to owner profile');
   assert.ok(home.includes('summary?.partner'), 'partner avatar bound to partner profile');
   assert.ok(home.includes('HOME_PRIMARY_ITEMS'), 'Home consumes the curated config');

@@ -1535,7 +1535,9 @@
   display: flex;
   flex-direction: column;
   padding: var(--th-space-8) var(--th-space-4) var(--th-space-6);
-  overflow: hidden;
+  /* No overflow: hidden — the scroll container (.th-app-content) handles
+     scrolling. Removing overflow:hidden fixes content clipping on short
+     viewports and with large text (Stage 3). */
 }
 
 /* Greeting row — personal, time-aware welcome + notification access */
@@ -1596,8 +1598,8 @@
   border: var(--th-border-width-medium) solid var(--th-color-surface-elevated);
 }
 
-/* Couple centerpiece: official lockup above the two partners, joined by a
-   small burgundy heart — the relationship stays the emotional center. */
+/* Couple centerpiece: two prominent avatars flanking the official brand mark.
+   The avatars feel like PEOPLE; the mark connects them visually. */
 .th-home-header {
   position: relative;
   display: flex;
@@ -1606,31 +1608,85 @@
   gap: var(--th-space-4);
   margin-bottom: var(--th-space-8);
 }
-.th-home-couple-avatars {
+.th-home-couple {
   position: relative;
   z-index: 1;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  gap: var(--th-space-4);
+  gap: clamp(var(--th-space-3), 4vw, var(--th-space-6));
   width: 100%;
 }
-.th-home-couple-avatars__heart {
+.th-home-couple__avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-1);
+  width: clamp(72px, 22vw, 96px);
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--th-motion-press);
+}
+.th-home-couple__avatar:active {
+  transform: scale(0.93);
+}
+.th-home-couple__circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(64px, 18vw, 84px);
+  height: clamp(64px, 18vw, 84px);
+  border-radius: var(--th-radius-circle);
+  background: linear-gradient(
+    135deg,
+    var(--th-color-blush) 0%,
+    var(--th-color-neutral-soft) 100%
+  );
+  color: var(--th-color-burgundy);
+  border: var(--th-border-width-medium) solid var(--th-color-surface-elevated);
+  box-shadow: var(--th-shadow-lg);
+  transition: box-shadow var(--th-motion-standard);
+}
+.th-home-couple__avatar:active .th-home-couple__circle {
+  box-shadow: var(--th-shadow-sm);
+}
+.th-home-couple__initial {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-2xl);
+  font-weight: var(--th-font-weight-bold);
+}
+.th-home-couple__name {
+  max-width: clamp(64px, 18vw, 84px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-medium);
+  color: var(--th-color-text-secondary);
+  text-align: center;
+}
+.th-home-couple__mark {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  margin-top: calc((var(--th-avatar-lg) - 34px) / 2);
+  width: 48px;
+  height: 48px;
   border-radius: var(--th-radius-circle);
   background: linear-gradient(
     135deg,
     var(--th-color-burgundy) 0%,
     var(--th-color-burgundy-light) 100%
   );
-  color: var(--th-color-text-on-accent);
   box-shadow: var(--th-shadow-md);
+  padding: 6px;
+}
+.th-home-couple__mark .th-brand-logo {
+  filter: brightness(0) invert(1);
+  width: 100%;
+  height: auto;
 }
 .th-home-pill {
   position: relative;
@@ -1847,18 +1903,23 @@
 
 /* Narrow screens: keep the relationship header proportionate */
 @media (max-width: 360px) {
-  .th-home-avatar {
-    width: 68px;
+  /* Narrow screens: scale down the couple header proportionally */
+  .th-home-couple__avatar {
+    width: 64px;
   }
-  .th-home-avatar__circle {
+  .th-home-couple__circle {
     width: 56px;
     height: 56px;
   }
-  .th-home-avatar__name {
-    max-width: 68px;
+  .th-home-couple__name {
+    max-width: 64px;
   }
-  .th-home-couple-avatars {
+  .th-home-couple {
     gap: var(--th-space-2);
+  }
+  .th-home-couple__mark {
+    width: 40px;
+    height: 40px;
   }
   .th-home-card__caption {
     display: none;

@@ -6,22 +6,24 @@
  * Composition (reference 09-Home.png, adapted to the Phase 24 architecture):
  *   1. Greeting row — time-aware "Good morning, {name}" + date, with a
  *      notification bell (unread badge) at the top right.
- *   2. Couple centerpiece — the official TwoHearts lockup above the two
- *      partners' avatars, joined by a small burgundy heart; the relationship
- *      counter lives in a warm pill beneath (the emotional center of the app
- *      stays the two people).
+ *   2. Couple centerpiece — two prominent avatar circles flanking the official
+ *      TwoHearts brand mark, with names beneath and the relationship counter
+ *      in a warm pill. The avatars feel like PEOPLE; the mark connects them.
  *   3. Everyday actions — the curated set (navConfig.HOME_PRIMARY_ITEMS) as
  *      horizontal cards: icon tile, title + caption, chevron.
  *   4. "From your story" — live previews (latest note, upcoming reminder,
  *      recent memory) deep-linking to their existing detail screens, or a
  *      warm invitation when the story is still empty. Vault is never shown.
+ *
+ * Stage 3 redesign: couple header now uses the BrandLogo mark as the visual
+ * connector between two large avatars. The composition communicates
+ * "TWO PEOPLE + THEIR RELATIONSHIP + THEIR SHARED SPACE".
  */
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { coreServices } from '../../../services/bootstrap/appBootstrap.ts';
 import type { RelationshipService, RelationshipSummary } from '../../../services/relationship/relationshipService.ts';
-import type { Profile } from '../../../data/relationship/relationshipTypes.ts';
 import { RoutePath } from '../../../navigation/routes.ts';
 import {
   BrandLogo,
@@ -36,30 +38,6 @@ import { HOME_PRIMARY_ITEMS } from '../navConfig.ts';
 import { NavIcon } from '../navIcons.tsx';
 import { greetingForHour } from '../homeHighlights.ts';
 import { useHomeHighlights } from '../useHomeHighlights.ts';
-
-interface AvatarChipProps {
-  profile: Profile | null;
-  fallbackName: string;
-  to: string;
-  label: string;
-}
-
-/** Relationship avatar: first letter of the name, or a soft face fallback. */
-function AvatarChip({ profile, fallbackName, to, label }: AvatarChipProps) {
-  const name = profile?.displayName?.trim() || fallbackName;
-  return (
-    <Link to={to} className="th-home-avatar" aria-label={label}>
-      <span className="th-home-avatar__circle">
-        {profile ? (
-          <span className="th-home-avatar__initial">{name.charAt(0).toUpperCase()}</span>
-        ) : (
-          <IconSmile size={28} />
-        )}
-      </span>
-      <span className="th-home-avatar__name">{name}</span>
-    </Link>
-  );
-}
 
 export function HomeScreen() {
   const [summary, setSummary] = useState<RelationshipSummary | null>(null);
@@ -150,26 +128,52 @@ export function HomeScreen() {
         </Link>
       </div>
 
-      {/* Couple centerpiece — the two people joined around the brand */}
+      {/* Couple centerpiece — two people flanking the brand mark */}
       <header className="th-home-header th-couple-header-backdrop">
-        <BrandLogo variant="brand" size={92} title="TwoHearts" />
-        <div className="th-home-couple-avatars">
-          <AvatarChip
-            profile={summary?.owner ?? null}
-            fallbackName="You"
+        <div className="th-home-couple">
+          <Link
             to={RoutePath.appMoreSettingsProfile}
-            label="Your profile"
-          />
-          <span className="th-home-couple-avatars__heart" aria-hidden="true">
-            <IconHeart size={16} />
-          </span>
-          <AvatarChip
-            profile={summary?.partner ?? null}
-            fallbackName="Partner"
+            className="th-home-couple__avatar"
+            aria-label="Your profile"
+          >
+            <span className="th-home-couple__circle">
+              {summary?.owner?.displayName?.trim() ? (
+                <span className="th-home-couple__initial">
+                  {summary.owner.displayName.trim().charAt(0).toUpperCase()}
+                </span>
+              ) : (
+                <IconSmile size={28} />
+              )}
+            </span>
+            <span className="th-home-couple__name">
+              {summary?.owner?.displayName?.trim() || 'You'}
+            </span>
+          </Link>
+
+          <div className="th-home-couple__mark" aria-hidden="true">
+            <BrandLogo variant="mark" size={44} />
+          </div>
+
+          <Link
             to={RoutePath.appMoreSettingsRelationship}
-            label="Partner profile"
-          />
+            className="th-home-couple__avatar"
+            aria-label="Partner profile"
+          >
+            <span className="th-home-couple__circle">
+              {summary?.partner?.displayName?.trim() ? (
+                <span className="th-home-couple__initial">
+                  {summary.partner.displayName.trim().charAt(0).toUpperCase()}
+                </span>
+              ) : (
+                <IconSmile size={28} />
+              )}
+            </span>
+            <span className="th-home-couple__name">
+              {summary?.partner?.displayName?.trim() || 'Partner'}
+            </span>
+          </Link>
         </div>
+
         <p className="th-home-pill" aria-live="polite">
           {ageParts.length > 0
             ? `${ageParts.join(', ')} together${anniversaryNote ? ` · ${anniversaryNote}` : ''}`
