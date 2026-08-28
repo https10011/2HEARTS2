@@ -1,8 +1,8 @@
 /**
- * NotificationCenter screen (Phase 18).
+ * NotificationCenter (Stage 14 — Search + Notification Center Visual Productization).
  *
- * Displays local notification history with read/unread state
- * and navigation to originating content.
+ * Displays local notification history with polished unread/read states,
+ * timestamps, kind badges, and warm empty state. Architecture unchanged.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -10,9 +10,17 @@ import { useNavigate } from 'react-router-dom';
 import { Screen } from '../../components/Screen.tsx';
 import { Header } from '../../components/Header.tsx';
 import { IconButton } from '../../components/IconButton.tsx';
-import { IconCheck, useToast } from '../../components/index.ts';
-import { EmptyState } from '../../components/EmptyState.tsx';
+import { IconCheck, IconBell, IconHeart, IconInfo, useToast } from '../../components/index.ts';
 import type { NotificationCenterEntry } from '../../data/notification/notificationCenterTypes.ts';
+import {
+  unreadCountText,
+  notificationKindLabel,
+  notificationEmptyTitle,
+  notificationEmptyDescription,
+  formatRelativeTime,
+  markAllReadToast,
+  clearAllToast,
+} from './searchNotificationPresentation.ts';
 
 interface NotificationCenterRepo {
   list(): Promise<NotificationCenterEntry[]>;
@@ -25,13 +33,7 @@ interface NotificationCenterProps {
   repo?: NotificationCenterRepo | null;
 }
 
-const KIND_LABELS: Record<string, string> = {
-  reminder: 'Reminder',
-  anniversary: 'Anniversary',
-  system: 'System',
-};
-
-/** Simple feature-to-route mapping for navigation targets. */
+/** Feature-to-route mapping for navigation targets. */
 function resolveRoute(entry: NotificationCenterEntry): string | null {
   if (!entry.originId) return null;
   switch (entry.originFeature) {
@@ -46,6 +48,25 @@ function resolveRoute(entry: NotificationCenterEntry): string | null {
     default:
       return null;
   }
+}
+
+/** Notification kind → icon component. */
+function NotifKindIcon({ kind }: { kind: string }) {
+  switch (kind) {
+    case 'reminder':
+      return <IconBell size={18} />;
+    case 'anniversary':
+      return <IconHeart size={18} />;
+    default:
+      return <IconInfo size={18} />;
+  }
+}
+
+/** Notification kind → CSS class suffix. */
+function notifIconClass(kind: string): string {
+  if (kind === 'reminder') return 'th-notif-icon--reminder';
+  if (kind === 'anniversary') return 'th-notif-icon--anniversary';
+  return 'th-notif-icon--system';
 }
 
 export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
@@ -89,14 +110,16 @@ export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
   const handleMarkAllRead = useCallback(async () => {
     if (repo) await repo.markAllAsRead();
     setEntries((prev) => prev.map((e) => ({ ...e, read: true })));
-    toast.info('All marked as read');
+    toast.info(markAllReadToast());
   }, [repo, toast]);
 
   const handleClearAll = useCallback(async () => {
     if (repo) await repo.clearAll();
     setEntries([]);
-    toast.success('Notifications cleared');
+    toast.success(clearAllToast());
   }, [repo, toast]);
+
+  const unreadCount = entries.filter((e) => !e.read).length;
 
   return (
     <Screen>
@@ -107,112 +130,85 @@ export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
             ←
           </IconButton>
         }
-        right={
-          entries.some((e) => !e.read) ? (
-            <IconButton label="Mark all as read" onClick={() => void handleMarkAllRead()}>
-              <IconCheck size={18} />
-            </IconButton>
-          ) : undefined
-        }
       />
 
-      <div style={{ padding: '16px' }}>
+      <div className="th-content-pad">
+        {/* Loading */}
         {loading && (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--th-color-text-secondary)' }}>
-            Loading notifications...
+          <div className="th-notif-loading">
+            <div className="th-search-loading__spinner" />
+            <span>Loading notifications...</span>
           </div>
         )}
 
+        {/* Empty state */}
         {!loading && entries.length === 0 && (
-          <EmptyState
-            title="No notifications"
-            description="You're all caught up!"
-          />
+          <div className="th-notif-empty th-game-enter">
+            <div className="th-notif-empty__icon">
+              <IconBell size={28} />
+            </div>
+            <h3 className="th-notif-empty__title">{notificationEmptyTitle()}</h3>
+            <p className="th-notif-empty__desc">{notificationEmptyDescription()}</p>
+          </div>
         )}
 
+        {/* Notification list */}
         {!loading && entries.length > 0 && (
           <>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '16px',
-            }}>
-              <span style={{
-                fontSize: '13px',
-                color: 'var(--th-color-text-secondary)',
-              }}>
-                {entries.filter((e) => !e.read).length} unread
+            {/* Header bar */}
+            <div className="th-notif-header">
+              <span className={`th-notif-header__count ${unreadCount > 0 ? 'th-notif-header__count--unread' : ''}`}>
+                {unreadCountText(unreadCount)}
               </span>
-              <button
-                onClick={() => void handleClearAll()}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--th-color-error)',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                }}
-              >
-                Clear all
-              </button>
+              <div className="th-notif-header__actions">
+                {unreadCount > 0 && (
+                  <button
+                    className="th-notif-header__btn th-notif-header__btn--read"
+                    onClick={() => void handleMarkAllRead()}
+                  >
+                    <IconCheck size={14} />
+                    Mark all read
+                  </button>
+                )}
+                <button
+                  className="th-notif-header__btn th-notif-header__btn--clear"
+                  onClick={() => void handleClearAll()}
+                >
+                  Clear all
+                </button>
+              </div>
             </div>
 
-            <div className="th-hub-grid--enhanced">
-              {entries.map((entry) => (
+            {/* Cards */}
+            <div className="th-notif-list">
+              {entries.map((entry, i) => (
                 <button
                   key={entry.id}
                   onClick={() => void handleEntryPress(entry)}
-                  className="th-feature-card th-feature-card--enhanced th-stagger-item"
-                  style={{
-                    alignItems: 'flex-start',
-                    textAlign: 'left',
-                    background: entry.read ? undefined : 'var(--th-color-blush)',
-                  }}
+                  className={`th-notif-card ${!entry.read ? 'th-notif-card--unread' : ''} th-game-stagger`}
+                  style={{ animationDelay: `${i * 30}ms` }}
                 >
-                  <span style={{ fontSize: '20px', marginTop: '2px' }}>
-                    {!entry.read ? '●' : '○'}
-                  </span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '4px',
-                    }}>
-                      <span style={{
-                        fontSize: '11px',
-                        color: 'var(--th-color-burgundy)',
-                        fontWeight: 500,
-                      }}>
-                        {KIND_LABELS[entry.kind] ?? entry.kind}
+                  {/* Unread dot */}
+                  <div className={`th-notif-dot ${entry.read ? 'th-notif-dot--read' : ''}`} />
+
+                  {/* Kind icon */}
+                  <div className={`th-notif-icon ${notifIconClass(entry.kind)}`}>
+                    <NotifKindIcon kind={entry.kind} />
+                  </div>
+
+                  {/* Body */}
+                  <div className="th-notif-body">
+                    <div className="th-notif-body__meta">
+                      <span className="th-notif-body__kind">
+                        {notificationKindLabel(entry.kind)}
                       </span>
-                      <span style={{
-                        fontSize: '11px',
-                        color: 'var(--th-color-text-secondary)',
-                      }}>
-                        {formatTimeAgo(entry.createdAt)}
+                      <span className="th-notif-body__time">
+                        {formatRelativeTime(entry.createdAt)}
                       </span>
                     </div>
-                    <div style={{
-                      fontWeight: entry.read ? 400 : 600,
-                      fontSize: '14px',
-                      color: 'var(--th-color-text-primary)',
-                    }}>
-                      {entry.title}
-                    </div>
+                    <div className="th-notif-body__title">{entry.title}</div>
                     {entry.body && (
-                      <div style={{
-                        fontSize: '12px',
-                        color: 'var(--th-color-text-secondary)',
-                        marginTop: '4px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}>
-                        {entry.body}
-                      </div>
+                      <div className="th-notif-body__desc">{entry.body}</div>
                     )}
                   </div>
                 </button>
@@ -223,18 +219,4 @@ export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
       </div>
     </Screen>
   );
-}
-
-function formatTimeAgo(isoDate: string): string {
-  const now = Date.now();
-  const then = new Date(isoDate).getTime();
-  const diffMs = now - then;
-  const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return 'Just now';
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
-  const diffDay = Math.floor(diffHr / 24);
-  if (diffDay < 7) return `${diffDay}d ago`;
-  return new Date(isoDate).toLocaleDateString();
 }

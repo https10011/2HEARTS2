@@ -1,8 +1,8 @@
 /**
- * SearchScreen (Phase 18).
+ * SearchScreen (Stage 14 — Search + Notification Center Visual Productization).
  *
- * Global search across all features. Uses the existing Phase 3 search
- * engine with registered feature providers.
+ * Global search with branded field, polished result cards, clear
+ * empty/no-result/loading states. Architecture unchanged.
  */
 
 import { useState, useCallback, useEffect, useRef, type ComponentType } from 'react';
@@ -10,22 +10,18 @@ import { useNavigate } from 'react-router-dom';
 import { Screen } from '../../../components/Screen.tsx';
 import { Header } from '../../../components/Header.tsx';
 import { IconButton } from '../../../components/IconButton.tsx';
-import { Input } from '../../../components/Input.tsx';
-import { EmptyState } from '../../../components/EmptyState.tsx';
 import {
-  IconCamera, IconCalendar, IconMapPin, IconBell, IconFileText, IconFile, IconSearch,
+  IconCamera, IconCalendar, IconMapPin, IconBell, IconFileText, IconFile, IconSearch, IconClose,
   type IconProps,
 } from '../../../components/index.ts';
 import type { SearchMatch, SearchResults } from '../../../services/search/searchEngine.ts';
 import { RoutePath } from '../../../navigation/routes.ts';
-
-const KIND_LABELS: Record<string, string> = {
-  memory: 'Memory',
-  timeline: 'Timeline',
-  place: 'Place',
-  reminder: 'Reminder',
-  note: 'Note',
-};
+import {
+  searchHint,
+  kindLabel,
+  noResultMessage,
+  resultCountText,
+} from '../../notifications/searchNotificationPresentation.ts';
 
 const KIND_ICONS: Record<string, ComponentType<IconProps>> = {
   memory: IconCamera,
@@ -64,6 +60,7 @@ export function SearchScreen({ onSearch }: SearchScreenProps) {
   const [searched, setSearched] = useState(false);
   const navigate = useNavigate();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const performSearch = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -96,6 +93,13 @@ export function SearchScreen({ onSearch }: SearchScreenProps) {
     };
   }, [query, performSearch]);
 
+  const handleClear = useCallback(() => {
+    setQuery('');
+    setResults([]);
+    setSearched(false);
+    inputRef.current?.focus();
+  }, []);
+
   const handleResultPress = useCallback((match: SearchMatch) => {
     const route = resolveRoute(match);
     if (route) navigate(route);
@@ -112,103 +116,97 @@ export function SearchScreen({ onSearch }: SearchScreenProps) {
         }
       />
 
-      <div className="search-container" style={{ padding: '16px' }}>
-        <div style={{ position: 'relative' }}>
-          <Input
+      <div className="th-content-pad">
+        {/* Branded search field */}
+        <div className="th-search-field">
+          <span className="th-search-field__icon">
+            <IconSearch size={18} />
+          </span>
+          <input
+            ref={inputRef}
+            className="th-search-field__input"
+            type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search memories, notes, places..."
-            style={{ paddingLeft: '36px' } as React.CSSProperties}
+            placeholder={searchHint()}
+            autoFocus
+            autoComplete="off"
           />
-          <span
-            style={{
-              position: 'absolute',
-              left: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              opacity: 0.5,
-              color: 'var(--th-color-text-secondary)',
-              display: 'inline-flex',
-            }}
-          >
-            <IconSearch size={16} />
-          </span>
+          {query.length > 0 && (
+            <button
+              className="th-search-field__clear"
+              onClick={handleClear}
+              aria-label="Clear search"
+            >
+              <IconClose size={14} />
+            </button>
+          )}
         </div>
 
+        {/* Loading state */}
         {loading && (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--th-color-text-secondary)' }}>
-            Searching...
+          <div className="th-search-loading">
+            <div className="th-search-loading__spinner" />
+            <span>Searching...</span>
           </div>
         )}
 
+        {/* No results after search */}
         {!loading && searched && results.length === 0 && (
-          <EmptyState
-            title="No results found"
-            description={`No matches for "${query}"`}
-          />
-        )}
-
-        {!loading && !searched && (
-          <EmptyState
-            title="Search your content"
-            description="Find memories, notes, places, reminders, and more"
-          />
-        )}
-
-        {!loading && results.length > 0 && (
-          <div className="th-hub-grid--enhanced">
-            {results.map((match) => (
-              <button
-                key={match.id}
-                onClick={() => handleResultPress(match)}
-                className="th-feature-card th-feature-card--enhanced th-stagger-item"
-                style={{ textAlign: 'left' }}
-              >
-                <span style={{ color: 'var(--th-color-burgundy)', display: 'inline-flex', flexShrink: 0 }}>
-                  {(() => {
-                    const KindIcon = KIND_ICONS[match.kind] ?? IconFile;
-                    return <KindIcon size={24} />;
-                  })()}
-                </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontWeight: 600,
-                    fontSize: '14px',
-                    color: 'var(--th-color-text-primary)',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}>
-                    {match.title}
-                  </div>
-                  {match.snippet && (
-                    <div style={{
-                      fontSize: '12px',
-                      color: 'var(--th-color-text-secondary)',
-                      marginTop: '2px',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}>
-                      {match.snippet}
-                    </div>
-                  )}
-                  <span style={{
-                    display: 'inline-block',
-                    fontSize: '10px',
-                    fontWeight: 500,
-                    color: 'var(--th-color-burgundy)',
-                    marginTop: '4px',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    background: 'var(--th-color-blush)',
-                  }}>
-                    {KIND_LABELS[match.kind] ?? match.kind}
-                  </span>
-                </div>
-              </button>
-            ))}
+          <div className="th-search-no-results th-game-enter">
+            <div className="th-search-no-results__query">{noResultMessage(query)}</div>
+            <h3 className="th-search-no-results__title">No matches found</h3>
+            <p className="th-search-no-results__desc">
+              Try a different search term or check your content.
+            </p>
+            <button className="th-btn th-btn--secondary" onClick={handleClear} style={{ marginTop: 'var(--th-space-4)' }}>
+              Clear search
+            </button>
           </div>
+        )}
+
+        {/* Empty/default state */}
+        {!loading && !searched && (
+          <div className="th-search-empty th-game-enter">
+            <div className="th-search-empty__icon">
+              <IconSearch size={28} />
+            </div>
+            <h3 className="th-search-empty__title">Search your content</h3>
+            <p className="th-search-empty__desc">
+              Find memories, notes, places, reminders, and more — all stored privately on your device.
+            </p>
+          </div>
+        )}
+
+        {/* Results */}
+        {!loading && results.length > 0 && (
+          <>
+            <div className="th-search-count">{resultCountText(results.length)}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
+              {results.map((match, i) => {
+                const KindIcon = KIND_ICONS[match.kind] ?? IconFile;
+                return (
+                  <button
+                    key={match.id}
+                    onClick={() => handleResultPress(match)}
+                    className="th-search-result th-game-stagger"
+                    style={{ animationDelay: `${i * 40}ms` }}
+                  >
+                    <div className="th-search-result__icon">
+                      <KindIcon size={20} />
+                    </div>
+                    <div className="th-search-result__body">
+                      <div className="th-search-result__title">{match.title}</div>
+                      {match.snippet && (
+                        <div className="th-search-result__snippet">{match.snippet}</div>
+                      )}
+                      <span className="th-search-result__kind">{kindLabel(match.kind)}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </Screen>
