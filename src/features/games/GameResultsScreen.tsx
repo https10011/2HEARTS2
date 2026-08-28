@@ -48,7 +48,7 @@ export function GameResultsScreen() {
     return (
       <div className="th-content-pad th-game-screen th-game-screen--warm">
         <div className="th-empty-state th-empty-state--enhanced">
-          <div className="th-empty-state__visual"><span style={{ fontSize: '2rem' }}>?</span></div>
+          <div className="th-empty-state__visual"><span style={{ fontSize: 'var(--th-font-size-2xl)' }}>?</span></div>
           <h3 className="th-empty-state__title">No results to display</h3>
           <button className="th-btn th-btn--primary" onClick={() => navigate(RoutePath.appGames)}>Back to Games</button>
         </div>
@@ -65,7 +65,7 @@ export function GameResultsScreen() {
       <div className="th-game-result-hero th-result-enter">
         <div className="th-game-result-hero__ring th-badge-enter">
           {winner === 0 ? (
-            <span style={{ fontSize: '1.6rem' }}>=</span>
+            <span style={{ fontSize: 'var(--th-font-size-xl)' }}>=</span>
           ) : (
             <IconHeart size={32} />
           )}

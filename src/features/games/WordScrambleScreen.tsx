@@ -119,7 +119,7 @@ export function WordScrambleScreen() {
     return (
       <div className="th-content-pad th-game-intro th-game-intro--enhanced th-game-enter th-game-screen--warm">
         <div className="th-game-intro__circle">
-          <span style={{ fontSize: '1.6rem', fontWeight: 'var(--th-font-weight-bold)', fontFamily: 'var(--th-font-family-display)' }}>Aa</span>
+          <span style={{ fontSize: 'var(--th-font-size-xl)', fontWeight: 'var(--th-font-weight-bold)', fontFamily: 'var(--th-font-family-display)' }}>Aa</span>
         </div>
         <h1 className="th-game-intro__title">Word Scramble</h1>
         <div className="th-game-intro__vibe">{personality.vibe}</div>
