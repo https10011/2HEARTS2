@@ -21,7 +21,7 @@ import {
   IconEdit,
   IconFileText,
   LoadingState,
-  Modal,
+  ConfirmDialog,
   RoseLilyDecoration,
   useToast,
 } from '../../components/index.ts';
@@ -192,23 +192,18 @@ export function NoteDetail() {
         </p>
       </div>
 
-      {/* Delete confirmation modal */}
-      <Modal open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} label="Delete note">
-        <div style={{ padding: 'var(--th-space-2) 0' }}>
-          <h3 className="th-note-confirm-title">Delete this note?</h3>
-          <p className="th-note-confirm-copy">
-            “{note.title}” will be removed permanently. This action cannot be undone.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
-            <Button variant="primary" full onClick={handleDelete} disabled={deleting}>
-              {deleting ? 'Deleting…' : 'Delete'}
-            </Button>
-            <Button variant="ghost" full onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      {/* Delete confirmation */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        label="Delete note"
+        title="Delete this note?"
+        description={`“${note.title}” will be removed permanently. This action cannot be undone.`}
+        actionLabel="Delete"
+        onAction={handleDelete}
+        busy={deleting}
+        busyLabel="Deleting…"
+      />
     </div>
   );
 }

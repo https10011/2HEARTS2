@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Input, Modal, IconLock, IconCheck, IconHeart } from '../../components/index.ts';
+import { Button, Input, Modal, ConfirmDialog, IconLock, IconCheck, IconHeart } from '../../components/index.ts';
 import { appSettingsStore, useAppSettings } from '../../core/appSettings.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { safeUserMessage } from '../../services/errors/appError.ts';
@@ -236,18 +236,17 @@ export function SecuritySettingsScreen() {
       </Modal>
 
       {/* Disable confirmation */}
-      <Modal open={confirmDisable} onClose={() => setConfirmDisable(false)} label="Turn off App Lock">
-        <h2 style={{ marginTop: 0 }}>Turn Off App Lock?</h2>
-        <p style={{ color: 'var(--th-color-text-secondary)' }}>
-          TwoHearts will no longer require a lock when opening the app. Your PIN is removed from this device.
-        </p>
-        <div style={{ display: 'flex', gap: 'var(--th-space-3)' }}>
-          <Button variant="ghost" full onClick={() => setConfirmDisable(false)} disabled={busy}>Cancel</Button>
-          <Button variant="primary" full onClick={() => void disableLock()} disabled={busy}>
-            {busy ? 'Turning off…' : 'Turn Off'}
-          </Button>
-        </div>
-      </Modal>
+      <ConfirmDialog
+        open={confirmDisable}
+        onClose={() => setConfirmDisable(false)}
+        label="Turn off App Lock"
+        title="Turn Off App Lock?"
+        description="TwoHearts will no longer require a lock when opening the app. Your PIN is removed from this device."
+        actionLabel="Turn Off"
+        onAction={() => void disableLock()}
+        busy={busy}
+        busyLabel="Turning off…"
+      />
 
       {/* Auto-lock timeout picker */}
       <Modal open={timeoutPicker} onClose={() => setTimeoutPicker(false)} label="Auto-lock timing">

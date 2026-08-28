@@ -13,6 +13,7 @@ export const componentClassNames = {
   buttonPrimary: 'th-button--primary',
   buttonSecondary: 'th-button--secondary',
   buttonGhost: 'th-button--ghost',
+  buttonDanger: 'th-button--danger',
   buttonFull: 'th-button--full',
   card: 'th-card',
   input: 'th-input',

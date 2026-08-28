@@ -28,7 +28,7 @@ import {
   IconMapPin,
   IconTrash,
   LoadingState,
-  Modal,
+  ConfirmDialog,
   RoseLilyDecoration,
   useToast,
 } from '../../components/index.ts';
@@ -253,28 +253,18 @@ export function PlaceDetail() {
         </p>
       </div>
 
-      {/* Delete confirmation (centralized bottom-sheet) */}
-      <Modal
+      {/* Delete confirmation */}
+      <ConfirmDialog
         open={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         label="Delete place"
-      >
-        <div style={{ padding: 'var(--th-space-2) 0' }}>
-          <h3 className="th-note-confirm-title">Delete this place?</h3>
-          <p className="th-note-confirm-copy">
-            “{place.name}” will be removed from your places for good.
-            This action cannot be undone.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
-            <Button variant="primary" full onClick={handleDelete} disabled={deleting}>
-              {deleting ? 'Deleting…' : 'Delete place'}
-            </Button>
-            <Button variant="ghost" full onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
-              Keep it
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        title="Delete this place?"
+        description={`“${place.name}” will be removed from your places permanently. This action cannot be undone.`}
+        actionLabel="Delete place"
+        onAction={handleDelete}
+        busy={deleting}
+        busyLabel="Deleting…"
+      />
     </div>
   );
 }

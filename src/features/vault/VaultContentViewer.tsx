@@ -8,8 +8,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { IconLock, IconBack, IconEdit, IconTrash } from '../../components/index.ts';
-import { Modal, useToast } from '../../components/index.ts';
+import { Button, IconLock, IconBack, IconEdit, IconTrash } from '../../components/index.ts';
+import { ConfirmDialog, useToast } from '../../components/index.ts';
 import type { VaultItem } from '../../data/vault/vaultTypes.ts';
 import { CONTENT_TYPE_META } from './contentTypeMeta.tsx';
 import { formatVaultDate, securityLabel } from './vaultPresentation.ts';
@@ -249,51 +249,31 @@ export function VaultContentViewer({ service }: VaultContentViewerProps) {
 
           {/* Delete zone */}
           <div className="th-vault-danger-zone">
-            <button
-              type="button"
-              className="th-btn th-btn--danger th-btn--outline th-btn--full"
+            <Button
+              variant="danger"
+              full
               onClick={() => setShowDeleteConfirm(true)}
             >
               <IconTrash size={16} />
               Delete from Vault
-            </button>
+            </Button>
           </div>
         </>
       )}
 
-      {/* Delete confirmation modal */}
-      <Modal
+      {/* Delete confirmation */}
+      <ConfirmDialog
         open={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
         label="Delete vault item"
-      >
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ color: 'var(--th-color-error)', marginBottom: 'var(--th-space-3)' }}>
-            <IconTrash size={32} />
-          </div>
-          <p className="th-vault-delete-confirm__text">
-            Delete <strong>{item.title}</strong> permanently? This cannot be undone.
-          </p>
-          <div className="th-vault-delete-confirm__actions">
-            <button
-              type="button"
-              className="th-btn th-btn--outline"
-              onClick={() => setShowDeleteConfirm(false)}
-              disabled={deleting}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="th-btn th-btn--danger"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
-              {deleting ? 'Deleting…' : 'Delete'}
-            </button>
-          </div>
-        </div>
-      </Modal>
+        title="Delete this item?"
+
+        description="This item will be removed permanently. This action cannot be undone."
+        actionLabel="Delete"
+        onAction={handleDelete}
+        busy={deleting}
+        busyLabel="Deleting…"
+      />
     </div>
   );
 }

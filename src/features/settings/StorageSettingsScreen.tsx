@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Modal, IconFile, IconFileText } from '../../components/index.ts';
+import { ConfirmDialog, IconFile, IconFileText } from '../../components/index.ts';
 import { coreServices } from '../../services/bootstrap/appBootstrap.ts';
 import { safeUserMessage } from '../../services/errors/appError.ts';
 import type { StorageReport } from '../../services/maintenance/dataManagementService.ts';
@@ -212,36 +212,30 @@ export function StorageSettingsScreen() {
       </div>
 
       {/* Clear cache confirmation */}
-      <Modal open={confirmCache} onClose={() => setConfirmCache(false)} label="Clear cache">
-        <h2 style={{ marginTop: 0 }}>Clear cache?</h2>
-        <p style={{ color: 'var(--th-color-text-secondary)' }}>
-          Removes temporary media files that are no longer referenced. Your memories, notes, and
-          other saved data are not affected.
-        </p>
-        <div style={{ display: 'flex', gap: 'var(--th-space-3)' }}>
-          <Button variant="ghost" full onClick={() => setConfirmCache(false)} disabled={busy}>Cancel</Button>
-          <Button variant="primary" full onClick={() => void clearCache()} disabled={busy}>
-            {busy ? 'Clearing…' : 'Clear Cache'}
-          </Button>
-        </div>
-      </Modal>
+      <ConfirmDialog
+        open={confirmCache}
+        onClose={() => setConfirmCache(false)}
+        label="Clear cache"
+        title="Clear cache?"
+        description="Removes temporary media files that are no longer referenced. Your memories, notes, and other saved data are not affected."
+        actionLabel="Clear Cache"
+        onAction={() => void clearCache()}
+        busy={busy}
+        busyLabel="Clearing…"
+      />
 
       {/* Full reset confirmation */}
-      <Modal open={confirmReset} onClose={() => setConfirmReset(false)} label="Clear local data">
-        <h2 style={{ marginTop: 0 }}>Clear all local data?</h2>
-        <p style={{ color: 'var(--th-color-text-secondary)' }}>
-          This permanently deletes everything TwoHearts stored on this device: profiles,
-          relationship details, memories, notes, timeline events, reminders, places, mood and
-          period entries, vault content, media files, scheduled reminders, your App Lock PIN, and
-          all preferences. This cannot be undone.
-        </p>
-        <div style={{ display: 'flex', gap: 'var(--th-space-3)' }}>
-          <Button variant="ghost" full onClick={() => setConfirmReset(false)} disabled={busy}>Cancel</Button>
-          <Button variant="primary" full onClick={() => void resetAll()} disabled={busy}>
-            {busy ? 'Deleting…' : 'Delete Everything'}
-          </Button>
-        </div>
-      </Modal>
+      <ConfirmDialog
+        open={confirmReset}
+        onClose={() => setConfirmReset(false)}
+        label="Clear local data"
+        title="Clear all local data?"
+        description="This permanently deletes everything TwoHearts stored on this device: profiles, relationship details, memories, notes, timeline events, reminders, places, mood and period entries, vault content, media files, scheduled reminders, your App Lock PIN, and all preferences. This cannot be undone."
+        actionLabel="Delete Everything"
+        onAction={() => void resetAll()}
+        busy={busy}
+        busyLabel="Deleting…"
+      />
     </SettingsScreen>
   );
 }

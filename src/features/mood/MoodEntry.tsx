@@ -33,7 +33,7 @@ import {
   IconLock,
   IconTrash,
   LoadingState,
-  Modal,
+  ConfirmDialog,
   RoseLilyDecoration,
   useToast,
 } from '../../components/index.ts';
@@ -235,26 +235,17 @@ export function MoodEntryScreen() {
         <IconLock size={13} /> Stays on this device — just for the two of you.
       </p>
 
-      <Modal
+      <ConfirmDialog
         open={showRemoveConfirm}
         onClose={() => setShowRemoveConfirm(false)}
         label="Remove check-in"
-      >
-        <div style={{ padding: 'var(--th-space-2) 0' }}>
-          <h3 className="th-note-confirm-title">Remove this check-in?</h3>
-          <p className="th-note-confirm-copy">
-            This day&apos;s mood will be removed for good. This action cannot be undone.
-          </p>
-          <div className="th-mood-actions">
-            <Button variant="secondary" onClick={() => setShowRemoveConfirm(false)}>
-              Keep it
-            </Button>
-            <Button variant="primary" onClick={handleRemove} disabled={removing}>
-              {removing ? 'Removing…' : 'Remove'}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        title="Remove this check-in?"
+        description="This day's mood will be removed permanently. This action cannot be undone."
+        actionLabel="Remove"
+        onAction={handleRemove}
+        busy={removing}
+        busyLabel="Removing…"
+      />
     </div>
   );
 }

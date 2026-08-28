@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import { RoutePath } from '../../navigation/routes.ts';
-import { Button, Modal, IconCheck, IconSettings } from '../../components/index.ts';
+import { ConfirmDialog, IconCheck, IconSettings } from '../../components/index.ts';
 import {
   appSettingsStore,
   useAppSettings,
@@ -107,29 +107,21 @@ export function AppearanceSettingsScreen() {
         />
       </div>
 
-      <Modal open={confirmReset} onClose={() => setConfirmReset(false)} label="Reset appearance">
-        <h2 style={{ marginTop: 0 }}>Reset appearance?</h2>
-        <p style={{ color: 'var(--th-color-text-secondary)' }}>
-          Theme, text size, and motion return to the TwoHearts defaults. Your data is not affected.
-        </p>
-        <div style={{ display: 'flex', gap: 'var(--th-space-3)' }}>
-          <Button variant="ghost" full onClick={() => setConfirmReset(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            full
-            onClick={() => {
-              appSettingsStore.setThemeMode('light');
-              appSettingsStore.setTextSize('default');
-              appSettingsStore.setReduceMotion(false);
-              setConfirmReset(false);
-            }}
-          >
-            Reset
-          </Button>
-        </div>
-      </Modal>
+      <ConfirmDialog
+        open={confirmReset}
+        onClose={() => setConfirmReset(false)}
+        label="Reset appearance"
+        title="Reset appearance?"
+        description="Theme, text size, and motion return to the TwoHearts defaults. Your data is not affected."
+        actionLabel="Reset"
+        actionVariant="primary"
+        onAction={() => {
+          appSettingsStore.setThemeMode('light');
+          appSettingsStore.setTextSize('default');
+          appSettingsStore.setReduceMotion(false);
+          setConfirmReset(false);
+        }}
+      />
     </SettingsScreen>
   );
 }

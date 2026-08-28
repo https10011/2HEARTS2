@@ -22,7 +22,7 @@ import {
   IconRepeat,
   IconButton,
   LoadingState,
-  Modal,
+  ConfirmDialog,
   Switch,
   useToast,
   RoseLilyDecoration,
@@ -231,30 +231,17 @@ export function ReminderDetail() {
       </div>
 
       {/* Delete confirmation — centralized Modal bottom sheet */}
-      <Modal open={confirmDelete} onClose={() => !deleting && setConfirmDelete(false)} label="Delete reminder">
-        <div className="th-rem-delete-sheet">
-          <h3 className="th-date-picker__title">Delete this reminder?</h3>
-          <p className="th-rem-delete-sheet__text">
-            “{reminder.title}” will be removed for good.
-          </p>
-          <div className="th-rem-delete-sheet__actions">
-            <button
-              className="th-btn th-btn--danger th-btn--full"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
-              {deleting ? 'Deleting…' : 'Delete reminder'}
-            </button>
-            <button
-              className="th-btn th-btn--ghost th-btn--full"
-              onClick={() => setConfirmDelete(false)}
-              disabled={deleting}
-            >
-              Keep it
-            </button>
-          </div>
-        </div>
-      </Modal>
+      <ConfirmDialog
+        open={confirmDelete}
+        onClose={() => !deleting && setConfirmDelete(false)}
+        label="Delete reminder"
+        title="Delete this reminder?"
+        description={`“${reminder.title}” will be removed permanently. This action cannot be undone.`}
+        actionLabel="Delete reminder"
+        onAction={handleDelete}
+        busy={deleting}
+        busyLabel="Deleting…"
+      />
     </div>
   );
 }

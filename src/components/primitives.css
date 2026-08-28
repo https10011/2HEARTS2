@@ -479,6 +479,11 @@
   background-color: transparent;
   color: var(--th-color-burgundy);
 }
+.th-button--danger {
+  background-color: var(--th-color-error);
+  color: var(--th-color-text-on-accent);
+  box-shadow: var(--th-shadow-sm);
+}
 .th-button--full {
   width: 100%;
 }
@@ -9487,4 +9492,81 @@ html[data-th-motion='reduced'] .th-decor-ambient--sway {
 }
 .th-settings-switch-row:last-child {
   border-bottom: none;
+}
+
+
+/* ==========================================================================
+   Stage 16 — System States: ConfirmDialog + StatusBanner
+   ==========================================================================
+
+   Shared confirmation dialog and inline status banners. Token-driven,
+   dark-mode safe, reduced-motion aware.
+   ========================================================================== */
+
+/* --- ConfirmDialog --- */
+.th-confirm-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-3);
+}
+.th-confirm-dialog__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin: 0;
+}
+.th-confirm-dialog__description {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  line-height: var(--th-line-height-relaxed);
+  margin: 0;
+}
+.th-confirm-dialog__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-3);
+  margin-top: var(--th-space-2);
+}
+
+/* --- StatusBanner --- */
+.th-status-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--th-space-3);
+  padding: var(--th-space-3) var(--th-space-4);
+  border-radius: var(--th-radius-md);
+  font-size: var(--th-font-size-sm);
+  line-height: var(--th-line-height-normal);
+}
+.th-status-banner__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  margin-top: 1px;
+}
+.th-status-banner__text {
+  flex: 1;
+  min-width: 0;
+}
+.th-status-banner--error {
+  background-color: var(--th-color-error-bg);
+  color: var(--th-color-error);
+}
+.th-status-banner--success {
+  background-color: var(--th-color-success-bg);
+  color: var(--th-color-success);
+}
+.th-status-banner--info {
+  background-color: var(--th-color-neutral-soft);
+  color: var(--th-color-text-secondary);
+}
+:root[data-th-theme='dark'] .th-status-banner--error {
+  background-color: rgba(163, 58, 42, 0.15);
+}
+:root[data-th-theme='dark'] .th-status-banner--success {
+  background-color: rgba(79, 122, 90, 0.15);
+}
+:root[data-th-theme='dark'] .th-status-banner--info {
+  background-color: rgba(255, 255, 255, 0.05);
 }

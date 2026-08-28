@@ -27,7 +27,7 @@ import {
   IconCalendar,
   LoadingState,
   RoseLilyDecoration,
-  Modal,
+  ConfirmDialog,
   useToast,
 } from '../../components/index.ts';
 
@@ -241,25 +241,18 @@ export function MemoryDetail() {
         </div>
       </div>
 
-      {/* Delete confirmation modal */}
-      <Modal open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} label="Delete memory">
-        <div style={{ padding: 'var(--th-space-2) 0' }}>
-          <h3 className="th-memory-confirm-title">
-            Delete this memory?
-          </h3>
-          <p className="th-memory-confirm-copy">
-            “{memory.title}” will be removed permanently. This action cannot be undone.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--th-space-3)' }}>
-            <Button variant="primary" full onClick={handleDelete} disabled={deleting}>
-              {deleting ? 'Deleting…' : 'Delete'}
-            </Button>
-            <Button variant="ghost" full onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      {/* Delete confirmation */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        label="Delete memory"
+        title="Delete this memory?"
+        description={`“${memory.title}” will be removed permanently. This action cannot be undone.`}
+        actionLabel="Delete"
+        onAction={handleDelete}
+        busy={deleting}
+        busyLabel="Deleting…"
+      />
     </div>
   );
 }
