@@ -12,6 +12,7 @@ import { Header } from '../../../components/Header.tsx';
 import { IconButton } from '../../../components/IconButton.tsx';
 import {
   IconCamera, IconCalendar, IconMapPin, IconBell, IconFileText, IconFile, IconSearch, IconClose,
+  RoseLilyDecoration,
   type IconProps,
 } from '../../../components/index.ts';
 import type { SearchMatch, SearchResults } from '../../../services/search/searchEngine.ts';
@@ -117,6 +118,9 @@ export function SearchScreen({ onSearch }: SearchScreenProps) {
       />
 
       <div className="th-content-pad">
+        {/* Subtle decorative accent */}
+        <RoseLilyDecoration variant={7} size={80} position="top-right" opacity={0.06} />
+
         {/* Branded search field */}
         <div className="th-search-field">
           <span className="th-search-field__icon">

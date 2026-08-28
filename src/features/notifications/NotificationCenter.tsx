@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { Screen } from '../../components/Screen.tsx';
 import { Header } from '../../components/Header.tsx';
 import { IconButton } from '../../components/IconButton.tsx';
-import { IconCheck, IconBell, IconHeart, IconInfo, useToast } from '../../components/index.ts';
+import { IconCheck, IconBell, IconHeart, IconInfo, RoseLilyDecoration, useToast } from '../../components/index.ts';
 import type { NotificationCenterEntry } from '../../data/notification/notificationCenterTypes.ts';
 import {
   unreadCountText,
@@ -133,6 +133,9 @@ export function NotificationCenter({ repo }: NotificationCenterProps = {}) {
       />
 
       <div className="th-content-pad">
+        {/* Subtle decorative accent */}
+        <RoseLilyDecoration variant={11} size={80} position="top-right" opacity={0.06} />
+
         {/* Loading */}
         {loading && (
           <div className="th-notif-loading">

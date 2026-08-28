@@ -12,6 +12,7 @@ import {
   IconChevronRight,
   IconHeart,
   IconSparkle,
+  RoseLilyDecoration,
 } from '../../../components/index.ts';
 import {
   COUPLE_GAME_DEFINITIONS,
@@ -47,6 +48,9 @@ const GAME_EMOJI: Record<string, string> = {
 export function GamesHubScreen() {
   return (
     <div className="th-content-pad th-screen-warm th-game-screen--warm">
+      {/* Subtle floral accent */}
+      <RoseLilyDecoration variant={9} size={100} position="top-right" opacity={0.1} />
+
       {/* Hero */}
       <div className="th-games-hero th-game-enter">
         <div className="th-games-hero__label">TwoHearts Games</div>

@@ -10,7 +10,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import type { VaultService } from '../../services/vault/vaultService.ts';
-import { IconPlus, IconLock } from '../../components/index.ts';
+import { IconPlus, IconLock, RoseLilyDecoration } from '../../components/index.ts';
 import type { VaultItem, VaultContentType } from '../../data/vault/vaultTypes.ts';
 import { CONTENT_TYPE_META } from './contentTypeMeta.tsx';
 import { itemCountText, relativeVaultDate, VAULT_FILTER_OPTIONS } from './vaultPresentation.ts';
@@ -57,6 +57,9 @@ export function VaultHome({ service }: { service?: VaultService }) {
 
   return (
     <div className="th-content-pad">
+      {/* Subtle decorative accent */}
+      <RoseLilyDecoration variant={14} size={90} position="top-right" opacity={0.08} />
+
       {/* Hero band */}
       <div className="th-vault-hero" role="banner" aria-label="Private Vault">
         <div className="th-vault-hero__icon th-scale-in" aria-hidden="true">
