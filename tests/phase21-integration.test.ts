@@ -102,7 +102,7 @@ test('integration: full onboarding flow derives stages from domain truth', async
   appState.markFirstLaunchIfNeeded();
   const firstLaunchAt = appState.getSnapshot().firstLaunchAt;
   assert.ok(firstLaunchAt);
-  assert.strictEqual(await appState.reconcileOnboardingStage(), 'owner');
+  assert.strictEqual(await appState.reconcileOnboardingStage(), 'fresh'); // no owner → Welcome screen
 
   // Owner profile done → next unmet step is the relationship.
   await relationship.saveOwner({ displayName: 'Alex', birthDate: '1995-04-12' });
@@ -522,5 +522,5 @@ test('integration: full reset wipes domain data but preserves install identity',
 
   // The app is back on the onboarding path, derived from domain truth.
   assert.notStrictEqual(appSettingsStore.getState().onboardingStage, 'complete');
-  assert.strictEqual(await appState.reconcileOnboardingStage(), 'owner');
+  assert.strictEqual(await appState.reconcileOnboardingStage(), 'fresh'); // no owner in DB → Welcome screen
 });
