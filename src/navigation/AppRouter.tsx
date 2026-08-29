@@ -35,7 +35,7 @@ import { NotificationCenter } from '../features/notifications/NotificationCenter
 import {
   SettingsHomeScreen, ProfileSettingsScreen, RelationshipSettingsScreen,
   AppearanceSettingsScreen, NotificationSettingsScreen, SecuritySettingsScreen,
-  StorageSettingsScreen, AboutScreen,
+  StorageSettingsScreen, AboutScreen, ImportScreen,
 } from '../features/settings/index.ts';
 
 /**
@@ -190,6 +190,7 @@ const router = createBrowserRouter([
       { path: 'more/settings/notifications', element: <NotificationSettingsScreen /> },
       { path: 'more/settings/security', element: <SecuritySettingsScreen /> },
       { path: 'more/settings/storage', element: <StorageSettingsScreen /> },
+      { path: 'more/settings/import', element: <ImportScreen /> },
       {
         path: 'more/search',
         element: <SearchScreen />,

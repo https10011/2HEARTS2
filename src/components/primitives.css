@@ -1028,6 +1028,247 @@
   margin: 0 0 var(--th-space-3);
 }
 
+/* ===== Import Screen (Stage 7 — Import / Data Portability) ===== */
+.th-import-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  min-height: 100dvh;
+  background: var(--th-color-bg);
+}
+.th-import-content {
+  flex: 1 1 auto;
+  position: relative;
+  padding: var(--th-space-4) var(--th-space-4) var(--th-space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-4);
+}
+.th-import-hero {
+  text-align: center;
+  padding: var(--th-space-4) 0;
+}
+.th-import-hero__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin: 0 0 var(--th-space-2);
+}
+.th-import-hero__description {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: 0;
+  max-width: 320px;
+  margin-inline: auto;
+}
+.th-import-info-card {
+  background: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-lg);
+  padding: var(--th-space-4);
+  border: 1px solid var(--th-color-border);
+}
+.th-import-info-card__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin: 0 0 var(--th-space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+}
+.th-import-info-card__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-2);
+}
+.th-import-info-card__item {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}
+.th-import-info-card__note {
+  margin: var(--th-space-3) 0 0;
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  font-style: italic;
+}
+.th-import-errors {
+  background: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-lg);
+  padding: var(--th-space-4);
+  border: 1px solid var(--th-color-error);
+}
+.th-import-error {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-error);
+  margin: 0 0 var(--th-space-1);
+}
+.th-import-error:last-child {
+  margin-bottom: 0;
+}
+.th-import-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-3);
+}
+/* Preview */
+.th-import-preview-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--th-space-2);
+}
+.th-import-preview-summary__text {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: 0;
+}
+.th-import-preview-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--th-space-1);
+  background: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-pill);
+  padding: var(--th-space-1) var(--th-space-3);
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  border: 1px solid var(--th-color-border);
+}
+.th-import-preview-section {
+  background: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-lg);
+  padding: var(--th-space-4);
+  border: 1px solid var(--th-color-border);
+}
+.th-import-preview-section__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin: 0 0 var(--th-space-3);
+}
+.th-import-preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-2);
+}
+.th-import-preview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--th-space-2) 0;
+  border-bottom: 1px solid var(--th-color-border);
+}
+.th-import-preview-item:last-child {
+  border-bottom: none;
+}
+.th-import-preview-item__title {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-primary);
+  font-weight: var(--th-font-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
+}
+.th-import-preview-item__meta {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+.th-import-preview-more {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  margin: var(--th-space-2) 0 0;
+  font-style: italic;
+}
+/* Progress */
+.th-import-progress-text {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: var(--th-space-4) 0 0;
+}
+/* Result */
+.th-import-result {
+  text-align: center;
+  padding: var(--th-space-6) 0;
+}
+.th-import-result__icon {
+  color: var(--th-color-success);
+  margin-bottom: var(--th-space-4);
+}
+.th-import-result__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin: 0 0 var(--th-space-2);
+}
+.th-import-result__description {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: 0;
+}
+.th-import-result-card {
+  background: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-lg);
+  padding: var(--th-space-4);
+  border: 1px solid var(--th-color-border);
+}
+.th-import-result-card__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin: 0 0 var(--th-space-3);
+}
+.th-import-result-card__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-2);
+}
+.th-import-result-card__item {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}
+.th-import-result-errors {
+  background: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-lg);
+  padding: var(--th-space-4);
+  border: 1px solid var(--th-color-error);
+}
+.th-import-result-errors__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-error);
+  margin: 0 0 var(--th-space-3);
+}
+.th-import-result-errors__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-1);
+}
+.th-import-result-errors__item {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-error);
+}
+
 /* ===== First Launch / Welcome (reference 02) =====
    Full-screen branded welcome — no header bar, no step dots. */
 .th-welcome {

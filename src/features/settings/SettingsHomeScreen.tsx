@@ -120,6 +120,12 @@ export function SettingsHomeScreen() {
           label="Storage"
           description="Manage local app data"
         />
+        <SettingRow
+          to={RoutePath.appMoreSettingsImport}
+          icon={<IconFileText size={18} />}
+          label="Import Data"
+          description="Import notes, reminders, and more"
+        />
       </div>
 
       <div className="th-settings-section--enhanced">

@@ -10,4 +10,5 @@ export { NotificationSettingsScreen } from './NotificationSettingsScreen.tsx';
 export { SecuritySettingsScreen } from './SecuritySettingsScreen.tsx';
 export { StorageSettingsScreen } from './StorageSettingsScreen.tsx';
 export { AboutScreen } from './AboutScreen.tsx';
+export { ImportScreen } from './ImportScreen.tsx';
 export { AppLockGate } from './AppLockGate.tsx';

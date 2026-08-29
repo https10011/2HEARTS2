@@ -118,6 +118,7 @@ export const RoutePath = {
   appMoreSettingsNotifications: '/app/more/settings/notifications',
   appMoreSettingsSecurity: '/app/more/settings/security',
   appMoreSettingsStorage: '/app/more/settings/storage',
+  appMoreSettingsImport: '/app/more/settings/import',
 
   /** Notification Center (Phase 18). */
   appNotifications: '/app/notifications',
