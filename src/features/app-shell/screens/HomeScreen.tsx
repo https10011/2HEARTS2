@@ -178,7 +178,7 @@ export function HomeScreen() {
       {/* Everyday actions — curated, calm, exactly four */}
       <div className="th-home-grid">
         {HOME_PRIMARY_ITEMS.map((item, i) => (
-          <Link key={item.id} to={item.route} className="th-home-card th-home-card--enhanced th-stagger-item" style={{ animationDelay: `${i * 50}ms` }}>
+          <Link key={item.id} to={item.route} className={`th-home-card th-home-card--enhanced th-stagger-item th-home-card--accent-${item.id === 'notes' ? 'rose' : item.id === 'reminders' ? 'lavender' : item.id === 'us' ? 'gold' : 'sage'}`} style={{ animationDelay: `${i * 50}ms` }}>
             <span className="th-home-card__icon">
               <NavIcon icon={item.icon} size={22} />
             </span>

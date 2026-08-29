@@ -1365,14 +1365,13 @@
 
 /* ===== App Shell (Phase 6) ===== */
 
-/* App shell — screen container with bottom nav */
+/* App shell — screen container with floating pill bottom nav (Stage 9) */
 .th-app-shell {
   display: flex;
   flex-direction: column;
   min-height: 100%;
   min-height: 100dvh;
   padding-top: var(--th-safe-area-top);
-  padding-bottom: var(--th-safe-area-bottom);
 }
 .th-app-content {
   flex: 1 1 auto;
@@ -1381,20 +1380,27 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  padding-bottom: calc(var(--th-bottom-nav-height) + var(--th-safe-area-bottom, 0px) + var(--th-space-6));
 }
 
-/* Bottom navigation bar — five positions (Phase 24):
+/* Bottom navigation bar — floating pill (Stage 9):
    Home · Notifications · TWOHEARTS · Notes · More */
 .th-bottom-nav {
   flex: 0 0 auto;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: space-around;
-  height: var(--th-bottom-nav-height);
-  padding-bottom: var(--th-safe-area-bottom);
+  height: 60px;
+  margin: 0 var(--th-space-3) calc(var(--th-safe-area-bottom, 0px) + var(--th-space-2));
+  padding: 0 var(--th-space-2);
   background-color: var(--th-color-surface);
-  border-top: var(--th-border-width-thin) solid var(--th-color-divider);
-  box-shadow: var(--th-shadow-nav);
+  border-radius: var(--th-radius-pill);
+  box-shadow: var(--th-shadow-lg), 0 0 0 1px var(--th-color-border);
+  position: sticky;
+  bottom: 0;
+  z-index: var(--th-z-nav);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .th-bottom-nav-item {
   flex: 1;
@@ -1427,38 +1433,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 28px;
+  width: 40px;
+  height: 26px;
   border-radius: var(--th-radius-pill);
-  transition: background-color var(--th-motion-fast);
+  transition: background-color var(--th-motion-fast), transform var(--th-motion-fast);
 }
 .th-bottom-nav-item--active .th-bottom-nav-icon {
   background-color: var(--th-color-blush);
+  transform: scale(1.05);
 }
 /* Active indicator — shape signal, not color-only */
 .th-bottom-nav-dot {
-  width: 5px;
-  height: 5px;
-  margin-top: 1px;
+  width: 4px;
+  height: 4px;
+  margin-top: 2px;
   border-radius: var(--th-radius-circle);
   background-color: transparent;
   transition: background-color var(--th-motion-fast), transform var(--th-motion-fast);
 }
 .th-bottom-nav-item--active .th-bottom-nav-dot {
   background-color: var(--th-color-burgundy);
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 .th-bottom-nav-label {
-  font-size: var(--th-font-size-xs);
-  font-weight: var(--th-font-weight-medium);
+  font-size: 10px;
+  font-weight: var(--th-font-weight-semibold);
+  letter-spacing: 0.02em;
   line-height: 1;
   white-space: nowrap;
 }
 
-/* Central TwoHearts hub position — elevated circular brand button */
+/* Central TwoHearts hub position — elevated circular brand button (Stage 9) */
 .th-bottom-nav-item--center {
-  justify-content: flex-end;
-  padding-bottom: var(--th-space-3);
+  justify-content: center;
+  padding-bottom: 0;
 }
 /* Official mark recolored to cream on the dark brand ring */
 .th-brand-logo--light {
@@ -1470,33 +1478,28 @@
   filter: brightness(0) invert(1);
 }
 .th-bottom-nav-item--center:active {
-  transform: none; /* press feedback lives on the ring itself */
+  transform: none;
 }
 .th-bottom-nav-center__ring {
-  position: absolute;
-  top: calc(-1 * (var(--th-nav-center-size) / 2) - 4px);
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--th-nav-center-size);
-  height: var(--th-nav-center-size);
+  width: 44px;
+  height: 44px;
   border-radius: var(--th-radius-circle);
   background: linear-gradient(135deg, var(--th-color-burgundy) 0%, var(--th-color-burgundy-light) 100%);
-  border: var(--th-border-width-medium) solid var(--th-color-surface);
-  box-shadow: var(--th-shadow-lg);
+  box-shadow: var(--th-shadow-md);
   transition: transform var(--th-motion-press), box-shadow var(--th-motion-standard);
 }
 .th-bottom-nav-item--center:active .th-bottom-nav-center__ring {
-  transform: translateX(-50%) scale(0.93);
+  transform: scale(0.92);
 }
 .th-bottom-nav-item--center.th-bottom-nav-item--active {
   color: var(--th-color-burgundy);
 }
 .th-bottom-nav-item--center.th-bottom-nav-item--active .th-bottom-nav-center__ring {
-  transform: translateX(-50%) scale(1.06);
-  box-shadow: var(--th-shadow-lg), 0 0 0 4px var(--th-color-blush);
+  transform: scale(1.08);
+  box-shadow: var(--th-shadow-lg), 0 0 0 3px var(--th-color-blush);
 }
 
 /* Route entrance — subtle fade + rise so navigation feels alive, never slow.
@@ -2113,6 +2116,7 @@
   z-index: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
+  margin-bottom: var(--th-space-8);
   gap: var(--th-space-3);
 }
 .th-home-card {
@@ -3447,6 +3451,41 @@ html[data-th-motion='reduced'] .th-decor--animated {
   );
   box-shadow: var(--th-shadow-sm);
 }
+
+
+/* Home card accent colors — each destination gets a warm, unique tint */
+.th-home-card--accent-rose {
+  background: linear-gradient(145deg, #fef2f0 0%, var(--th-color-surface) 100%);
+}
+.th-home-card--accent-rose .th-home-card__icon {
+  background: linear-gradient(135deg, #fce4e1 0%, #f5d0cc 100%);
+  color: #8b3a3a;
+}
+.th-home-card--accent-lavender {
+  background: linear-gradient(145deg, #f5f0fa 0%, var(--th-color-surface) 100%);
+}
+.th-home-card--accent-lavender .th-home-card__icon {
+  background: linear-gradient(135deg, #e8daf5 0%, #d6c4eb 100%);
+  color: #5b3a8b;
+}
+.th-home-card--accent-gold {
+  background: linear-gradient(145deg, #fdf6eb 0%, var(--th-color-surface) 100%);
+}
+.th-home-card--accent-gold .th-home-card__icon {
+  background: linear-gradient(135deg, #f5e6c8 0%, #ecdcb5 100%);
+  color: #8b6a3a;
+}
+.th-home-card--accent-sage {
+  background: linear-gradient(145deg, #f0f5f0 0%, var(--th-color-surface) 100%);
+}
+.th-home-card--accent-sage .th-home-card__icon {
+  background: linear-gradient(135deg, #d8ead8 0%, #c5ddc5 100%);
+  color: #3a6b3a;
+}
+:root[data-th-theme="dark"] .th-home-card--accent-rose { background: linear-gradient(145deg, #2d1f1f 0%, var(--th-color-surface) 100%); }
+:root[data-th-theme="dark"] .th-home-card--accent-lavender { background: linear-gradient(145deg, #1f1f2d 0%, var(--th-color-surface) 100%); }
+:root[data-th-theme="dark"] .th-home-card--accent-gold { background: linear-gradient(145deg, #2d2a1f 0%, var(--th-color-surface) 100%); }
+:root[data-th-theme="dark"] .th-home-card--accent-sage { background: linear-gradient(145deg, #1f2d1f 0%, var(--th-color-surface) 100%); }
 
 /* --- Enhanced empty state: more polished composition --- */
 .th-empty-state--enhanced {

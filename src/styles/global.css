@@ -94,7 +94,7 @@ body,
   max-width: var(--th-screen-max-width);
   margin: 0 auto;
   min-height: 100%;
-  background: var(--th-color-surface);
+  background: var(--th-color-bg);
   /* Enforce app-like, non-selectable chrome (content surfaces opt back in). */
   -webkit-user-select: none;
   user-select: none;
