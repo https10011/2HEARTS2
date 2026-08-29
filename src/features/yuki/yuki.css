@@ -1,0 +1,706 @@
+/**
+ * Yuki Companion (Stage 8).
+ *
+ * Styles for the Yuki companion experience. Uses existing tokens.css
+ * design tokens only — no new --th-* definitions.
+ *
+ * Animation philosophy: gentle, organic, low-cost. Uses transform + opacity
+ * only (compositor-friendly). Honors prefers-reduced-motion and in-app
+ * reduce-motion setting via token durations.
+ */
+
+/* ===========================================================================
+   Environment / Screen
+   =========================================================================== */
+
+.yuki-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: var(--th-space-6) var(--th-space-5);
+  padding-bottom: calc(var(--th-space-16) + var(--th-safe-area-bottom));
+  position: relative;
+  overflow: hidden;
+}
+
+/* Warm gradient backdrop for Yuki's space */
+.yuki-environment {
+  position: relative;
+  border-radius: var(--th-radius-xl);
+  padding: var(--th-space-8) var(--th-space-5) var(--th-space-6);
+  background: linear-gradient(
+    180deg,
+    rgba(245, 197, 167, 0.3) 0%,
+    rgba(253, 246, 240, 0.6) 40%,
+    var(--th-color-surface) 100%
+  );
+  box-shadow: var(--th-shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-5);
+  overflow: hidden;
+}
+
+:root[data-th-theme='dark'] .yuki-environment {
+  background: linear-gradient(
+    180deg,
+    rgba(100, 60, 40, 0.25) 0%,
+    rgba(42, 33, 28, 0.6) 40%,
+    var(--th-color-surface) 100%
+  );
+}
+
+/* Subtle floor line */
+.yuki-floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--th-color-border) 20%,
+    var(--th-color-border) 80%,
+    transparent 100%
+  );
+  opacity: 0.5;
+}
+
+/* ===========================================================================
+   Character
+   =========================================================================== */
+
+.yuki-character-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--th-space-4) 0;
+}
+
+.yuki-character {
+  width: 160px;
+  height: 160px;
+  position: relative;
+  transition: transform var(--th-motion-standard);
+}
+
+.yuki-character__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(232, 133, 74, 0.2));
+}
+
+/* ===========================================================================
+   Mood indicator
+   =========================================================================== */
+
+.yuki-mood-bubble {
+  position: absolute;
+  top: -8px;
+  right: 10px;
+  background: var(--th-color-surface);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-pill);
+  padding: var(--th-space-1) var(--th-space-3);
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  box-shadow: var(--th-shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-1);
+  white-space: nowrap;
+  z-index: 2;
+  animation: yuki-bubble-in var(--th-duration-normal) var(--th-ease-decelerate);
+}
+
+@keyframes yuki-bubble-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ===========================================================================
+   Name & Level
+   =========================================================================== */
+
+.yuki-name-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-1);
+}
+
+.yuki-name {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-2xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-text-primary);
+  letter-spacing: 0.01em;
+}
+
+.yuki-level-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--th-space-1);
+  background: linear-gradient(135deg, #E8854A 0%, #F09858 100%);
+  color: white;
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
+  padding: var(--th-space-1) var(--th-space-3);
+  border-radius: var(--th-radius-pill);
+  letter-spacing: 0.03em;
+}
+
+.yuki-level-pill__star {
+  font-size: 10px;
+}
+
+/* ===========================================================================
+   Needs bars
+   =========================================================================== */
+
+.yuki-needs {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-2);
+  padding: 0 var(--th-space-2);
+}
+
+.yuki-need {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+}
+
+.yuki-need__label {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.yuki-need__bar {
+  flex: 1;
+  height: 6px;
+  background: var(--th-color-divider);
+  border-radius: var(--th-radius-pill);
+  overflow: hidden;
+}
+
+.yuki-need__fill {
+  height: 100%;
+  border-radius: var(--th-radius-pill);
+  transition: width var(--th-duration-normal) var(--th-ease-standard),
+              background-color var(--th-duration-normal) var(--th-ease-standard);
+}
+
+.yuki-need__fill--hunger {
+  background: linear-gradient(90deg, #E8854A, #F09858);
+}
+
+.yuki-need__fill--energy {
+  background: linear-gradient(90deg, #7BAF6E, #9FCF92);
+}
+
+.yuki-need__fill--happiness {
+  background: linear-gradient(90deg, #D4745A, #E8946A);
+}
+
+.yuki-need__fill--cleanliness {
+  background: linear-gradient(90deg, #7EAFCF, #A0C8E0);
+}
+
+.yuki-need__fill--low {
+  background: var(--th-color-error) !important;
+}
+
+.yuki-need__value {
+  font-size: 10px;
+  color: var(--th-color-text-secondary);
+  width: 24px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ===========================================================================
+   Action buttons
+   =========================================================================== */
+
+.yuki-actions {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--th-space-2);
+  padding: var(--th-space-2) 0;
+}
+
+.yuki-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-1);
+  padding: var(--th-space-3) var(--th-space-2);
+  border-radius: var(--th-radius-lg);
+  background: var(--th-color-surface);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  color: var(--th-color-text-primary);
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-medium);
+  transition: transform var(--th-motion-fast),
+              box-shadow var(--th-motion-fast),
+              background-color var(--th-motion-fast);
+  min-height: var(--th-touch-target-min);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.yuki-action-btn:active {
+  transform: scale(0.95);
+}
+
+.yuki-action-btn--active {
+  background: var(--th-color-burgundy);
+  color: var(--th-color-text-on-accent);
+  border-color: var(--th-color-burgundy);
+  box-shadow: var(--th-shadow-md);
+}
+
+.yuki-action-btn--disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.yuki-action-btn__icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.yuki-action-btn__label {
+  font-size: 11px;
+}
+
+/* ===========================================================================
+   Activity speech bubble
+   =========================================================================== */
+
+.yuki-speech {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--th-color-surface);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  border-radius: var(--th-radius-md);
+  padding: var(--th-space-2) var(--th-space-3);
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-primary);
+  box-shadow: var(--th-shadow-sm);
+  white-space: nowrap;
+  z-index: 5;
+  animation: yuki-speech-in var(--th-duration-normal) var(--th-ease-decelerate);
+}
+
+.yuki-speech::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: var(--th-color-surface);
+  border-right: var(--th-border-width-thin) solid var(--th-color-border);
+  border-bottom: var(--th-border-width-thin) solid var(--th-color-border);
+}
+
+@keyframes yuki-speech-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* ===========================================================================
+   Streak / Stats row
+   =========================================================================== */
+
+.yuki-stats-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: var(--th-space-6);
+  padding: var(--th-space-2) 0;
+}
+
+.yuki-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.yuki-stat__value {
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-text-primary);
+  font-family: var(--th-font-family-display);
+}
+
+.yuki-stat__label {
+  font-size: 10px;
+  color: var(--th-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ===========================================================================
+   Accessory area
+   =========================================================================== */
+
+.yuki-accessory-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: var(--th-space-2);
+  padding: var(--th-space-2) 0;
+  flex-wrap: wrap;
+}
+
+.yuki-accessory-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--th-space-1);
+  padding: var(--th-space-1) var(--th-space-2);
+  border-radius: var(--th-radius-pill);
+  background: var(--th-color-surface);
+  border: var(--th-border-width-thin) solid var(--th-color-border);
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  cursor: pointer;
+  transition: all var(--th-motion-fast);
+  min-height: 32px;
+}
+
+.yuki-accessory-chip:active {
+  transform: scale(0.95);
+}
+
+.yuki-accessory-chip--active {
+  background: var(--th-color-blush);
+  border-color: var(--th-color-burgundy-light);
+  color: var(--th-color-text-primary);
+  font-weight: var(--th-font-weight-medium);
+}
+
+/* ===========================================================================
+   XP Progress bar
+   =========================================================================== */
+
+.yuki-xp {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-1);
+}
+
+.yuki-xp__bar {
+  width: 100%;
+  max-width: 200px;
+  height: 4px;
+  background: var(--th-color-divider);
+  border-radius: var(--th-radius-pill);
+  overflow: hidden;
+}
+
+.yuki-xp__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #E8854A, #F5C563);
+  border-radius: var(--th-radius-pill);
+  transition: width var(--th-duration-normal) var(--th-ease-standard);
+}
+
+.yuki-xp__label {
+  font-size: 10px;
+  color: var(--th-color-text-secondary);
+}
+
+/* ===========================================================================
+   Animations (character expressions)
+   =========================================================================== */
+
+/* Idle breathing — gentle, organic */
+@keyframes yuki-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.yuki-character--idle .yuki-character__img {
+  animation: yuki-breathe 3.5s ease-in-out infinite;
+}
+
+/* Eating animation */
+@keyframes yuki-eating {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-2px) scale(1.02); }
+  50% { transform: translateY(0) scale(1); }
+  75% { transform: translateY(-1px) scale(1.01); }
+}
+
+.yuki-character--eating .yuki-character__img {
+  animation: yuki-eating 0.6s ease-in-out 3;
+}
+
+/* Being petted — gentle sway */
+@keyframes yuki-petting {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-2deg) translateY(-1px); }
+  75% { transform: rotate(2deg) translateY(-1px); }
+}
+
+.yuki-character--being-petted .yuki-character__img {
+  animation: yuki-petting 0.8s ease-in-out 2;
+}
+
+/* Playing — bounce */
+@keyframes yuki-playing {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-12px) scale(1.05); }
+  50% { transform: translateY(0) scale(0.97); }
+  70% { transform: translateY(-6px) scale(1.02); }
+}
+
+.yuki-character--playing .yuki-character__img {
+  animation: yuki-playing 0.7s ease-out 3;
+}
+
+/* Sleeping — very slow, subtle */
+@keyframes yuki-sleeping {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(2px); opacity: 0.92; }
+}
+
+.yuki-character--sleeping .yuki-character__img {
+  animation: yuki-sleeping 4s ease-in-out infinite;
+}
+
+/* Grooming — slight tilt */
+@keyframes yuki-grooming {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-5deg); }
+}
+
+.yuki-character--grooming .yuki-character__img {
+  animation: yuki-grooming 1.2s ease-in-out 2;
+}
+
+/* Heart particles for petting */
+@keyframes yuki-heart-float {
+  0% { opacity: 1; transform: translateY(0) scale(0.5); }
+  50% { opacity: 0.8; transform: translateY(-20px) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.8); }
+}
+
+.yuki-hearts {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.yuki-heart {
+  position: absolute;
+  animation: yuki-heart-float 1.2s ease-out forwards;
+  width: 12px;
+  height: 12px;
+  background: var(--th-color-burgundy-light);
+  transform: rotate(-45deg);
+  opacity: 0.85;
+}
+
+.yuki-heart::before,
+.yuki-heart::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: inherit;
+  border-radius: 50%;
+}
+
+.yuki-heart::before {
+  top: -6px;
+  left: 0;
+}
+
+.yuki-heart::after {
+  top: 0;
+  left: 6px;
+}
+
+.yuki-heart--1 { left: -15px; animation-delay: 0s; }
+.yuki-heart--2 { left: 5px; animation-delay: 0.2s; width: 10px; height: 10px; }
+.yuki-heart--2::before, .yuki-heart--2::after { width: 10px; height: 10px; }
+.yuki-heart--2::before { top: -5px; }
+.yuki-heart--2::after { left: 5px; }
+.yuki-heart--3 { left: 20px; animation-delay: 0.4s; width: 8px; height: 8px; }
+.yuki-heart--3::before, .yuki-heart--3::after { width: 8px; height: 8px; }
+.yuki-heart--3::before { top: -4px; }
+.yuki-heart--3::after { left: 4px; }
+
+/* ZZZ for sleeping */
+@keyframes yuki-zzz {
+  0% { opacity: 0; transform: translateY(0) translateX(0) scale(0.5); }
+  30% { opacity: 1; transform: translateY(-10px) translateX(5px) scale(0.8); }
+  100% { opacity: 0; transform: translateY(-30px) translateX(15px) scale(1); }
+}
+
+.yuki-zzz {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.yuki-zzz span {
+  position: absolute;
+  font-size: 14px;
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-text-secondary);
+  opacity: 0;
+}
+
+.yuki-zzz span:nth-child(1) { animation: yuki-zzz 2s ease-out infinite; }
+.yuki-zzz span:nth-child(2) { animation: yuki-zzz 2s ease-out 0.6s infinite; left: 8px; }
+.yuki-zzz span:nth-child(3) { animation: yuki-zzz 2s ease-out 1.2s infinite; left: 16px; }
+
+/* Sparkle for leveling up */
+@keyframes yuki-sparkle {
+  0% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+  100% { opacity: 0; transform: scale(0) rotate(360deg); }
+}
+
+.yuki-levelup-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(232, 133, 74, 0.15);
+  border-radius: var(--th-radius-xl);
+  z-index: 10;
+  animation: yuki-fade-in var(--th-duration-normal) var(--th-ease-decelerate);
+}
+
+@keyframes yuki-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.yuki-levelup-text {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-2xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-burgundy);
+  text-align: center;
+  animation: yuki-levelup-pop 0.5s var(--th-ease-emphasized);
+}
+
+@keyframes yuki-levelup-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===========================================================================
+   Streak flame
+   =========================================================================== */
+
+@keyframes yuki-flame {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.1); }
+}
+
+.yuki-streak-flame {
+  display: inline-block;
+  animation: yuki-flame 1s ease-in-out infinite;
+  font-size: 14px;
+}
+
+/* ===========================================================================
+   Accessory overlay on character
+   =========================================================================== */
+
+.yuki-accessory-overlay {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ===========================================================================
+   Reduced motion
+   =========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .yuki-character--idle .yuki-character__img,
+  .yuki-character--eating .yuki-character__img,
+  .yuki-character--being-petted .yuki-character__img,
+  .yuki-character--playing .yuki-character__img,
+  .yuki-character--sleeping .yuki-character__img,
+  .yuki-character--grooming .yuki-character__img,
+  .yuki-streak-flame {
+    animation: none !important;
+  }
+
+  .yuki-heart,
+  .yuki-zzz span {
+    animation: none !important;
+    display: none;
+  }
+
+  .yuki-mood-bubble,
+  .yuki-speech,
+  .yuki-levelup-overlay,
+  .yuki-levelup-text {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+:root[data-th-motion='reduced'] .yuki-character--idle .yuki-character__img,
+:root[data-th-motion='reduced'] .yuki-character--eating .yuki-character__img,
+:root[data-th-motion='reduced'] .yuki-character--being-petted .yuki-character__img,
+:root[data-th-motion='reduced'] .yuki-character--playing .yuki-character__img,
+:root[data-th-motion='reduced'] .yuki-character--sleeping .yuki-character__img,
+:root[data-th-motion='reduced'] .yuki-character--grooming .yuki-character__img,
+:root[data-th-motion='reduced'] .yuki-streak-flame {
+  animation: none !important;
+}
+
+:root[data-th-motion='reduced'] .yuki-heart,
+:root[data-th-motion='reduced'] .yuki-zzz span {
+  animation: none !important;
+  display: none;
+}

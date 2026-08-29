@@ -373,3 +373,15 @@ export function IconSettings(props: IconProps) {
     </svg>
   );
 }
+
+/** Cat icon for Yuki companion (Stage 8). */
+export function IconCat(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <path d="M12 2C10 2 8 3 7 5L5 1C4 0 3 1 3 2l2 5c-1 1-2 2-2 4v1c0 1.1.9 2 2 2h1c.55 0 1-.45 1-1v-1h6v1c0 .55.45 1 1 1h1c1.1 0 2-.9 2-2v-1c0-2-1-3-2-4l2-5c0-1-1-2-2-1l-2 4c-1-2-3-3-5-3z" />
+      <circle cx="9" cy="11" r="1" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="11" r="1" fill="currentColor" stroke="none" />
+      <path d="M10 13c0 .55.45 1 1 1h2c.55 0 1-.45 1-1" />
+    </svg>
+  );
+}

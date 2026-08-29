@@ -17,7 +17,8 @@ import { OnboardingGate } from '../features/onboarding/OnboardingGate.tsx';
 import { AppShell } from '../features/app-shell/AppShell.tsx';
 import { HomeScreen } from '../features/app-shell/screens/HomeScreen.tsx';
 import { UsScreen } from '../features/app-shell/screens/UsScreen.tsx';
-import { GamesHubScreen } from '../features/app-shell/screens/GamesHubScreen.tsx';
+import { YukiScreen } from '../features/yuki/index.ts';
+import '../features/yuki/yuki.css';
 import { NotesHome, NoteEditor, NoteDetail } from '../features/notes/index.ts';
 import { MoreScreen } from '../features/app-shell/screens/MoreScreen.tsx';
 import { ImportantDatesScreen } from '../features/app-shell/screens/ImportantDatesScreen.tsx';
@@ -123,8 +124,10 @@ const router = createBrowserRouter([
         element: <RelationshipCounterScreen />,
       },
 
-      // Games (Phase 11 + Phase 12)
-      { path: 'games', element: <GamesHubScreen /> },
+      // Yuki companion (Stage 8)
+      { path: 'yuki', element: <YukiScreen /> },
+      // Legacy games redirects
+      { path: 'games', element: <Navigate to="/app/yuki" replace /> },
       { path: 'games/memory-match', element: <MemoryMatchScreen /> },
       { path: 'games/memory-match/results', element: <GameResultsScreen /> },
       { path: 'games/word-scramble', element: <WordScrambleScreen /> },

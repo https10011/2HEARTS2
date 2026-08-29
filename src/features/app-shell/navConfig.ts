@@ -33,7 +33,8 @@ export type NavIconKey =
   | 'lock'
   | 'settings'
   | 'search'
-  | 'camera';
+  | 'camera'
+  | 'cat';
 
 export interface NavDestination {
   /** Stable semantic id (used for tests + aria). */
@@ -124,11 +125,11 @@ export const HOME_PRIMARY_ITEMS: readonly NavDestination[] = [
     icon: 'heart',
   },
   {
-    id: 'games',
-    route: RoutePath.appGames,
-    label: 'Games',
-    caption: 'Play together',
-    icon: 'gamepad',
+    id: 'yuki',
+    route: RoutePath.appYuki,
+    label: 'Yuki',
+    caption: 'Your companion',
+    icon: 'cat',
   },
 ] as const;
 

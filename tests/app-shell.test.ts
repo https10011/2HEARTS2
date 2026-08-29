@@ -19,7 +19,7 @@ describe('Phase 6 route structure', () => {
     assert.equal(RoutePath.appRoot, '/app');
     assert.equal(RoutePath.appHome, '/app/home');
     assert.equal(RoutePath.appUs, '/app/us');
-    assert.equal(RoutePath.appGames, '/app/games');
+    assert.equal(RoutePath.appYuki, '/app/yuki');
     assert.equal(RoutePath.appNotes, '/app/notes');
     assert.equal(RoutePath.appMore, '/app/more');
   });
@@ -30,11 +30,8 @@ describe('Phase 6 route structure', () => {
     assert.equal(RoutePath.appUsReminders, '/app/us/reminders');
   });
 
-  it('defines Games sub-routes', () => {
-    assert.equal(RoutePath.appGamesWhoKnows, '/app/games/who-knows');
-    assert.equal(RoutePath.appGamesWouldYouRather, '/app/games/would-you-rather');
-    assert.equal(RoutePath.appGamesTwentyQuestions, '/app/games/twenty-questions');
-    assert.equal(RoutePath.appGamesHowWell, '/app/games/how-well');
+  it('defines Yuki route', () => {
+    assert.equal(RoutePath.appYuki, '/app/yuki');
   });
 
   it('defines Notes sub-routes', () => {
@@ -73,7 +70,7 @@ describe('Phase 6 route structure', () => {
     const appRoutes = [
       RoutePath.appHome,
       RoutePath.appUs,
-      RoutePath.appGames,
+      RoutePath.appYuki,
       RoutePath.appNotes,
       RoutePath.appMore,
     ];
@@ -84,7 +81,6 @@ describe('Phase 6 route structure', () => {
 
   it('sub-routes follow parent path convention', () => {
     assert.ok(RoutePath.appUsMemories.startsWith('/app/us/'));
-    assert.ok(RoutePath.appGamesWhoKnows.startsWith('/app/games/'));
     assert.ok(RoutePath.appNotesShared.startsWith('/app/notes/'));
     assert.ok(RoutePath.appMoreSettings.startsWith('/app/more/'));
   });
@@ -157,11 +153,9 @@ describe('Feature placeholders', () => {
     assert.ok(RoutePath.appUsReminders);
   });
 
-  it('Games hub has all four game sub-routes', () => {
-    assert.ok(RoutePath.appGamesWhoKnows);
-    assert.ok(RoutePath.appGamesWouldYouRather);
-    assert.ok(RoutePath.appGamesTwentyQuestions);
-    assert.ok(RoutePath.appGamesHowWell);
+  it('Yuki companion route exists', () => {
+    assert.ok(RoutePath.appYuki);
+    assert.equal(RoutePath.appYuki, '/app/yuki');
   });
 
   it('Notes hub has shared and private sub-routes', () => {

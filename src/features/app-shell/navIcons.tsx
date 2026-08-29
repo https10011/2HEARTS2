@@ -22,6 +22,7 @@ import {
   IconSettings,
   IconSearch,
   IconCamera,
+  IconCat,
   type IconProps,
 } from '../../components/index.ts';
 
@@ -39,6 +40,7 @@ const NAV_ICONS: Record<NavIconKey, (props: IconProps) => JSX.Element> = {
   settings: IconSettings,
   search: IconSearch,
   camera: IconCamera,
+  cat: IconCat,
 };
 
 /** All icon keys guaranteed to resolve (compile-time + test assertion). */

@@ -45,22 +45,11 @@ export const RoutePath = {
   appMemoriesDetail: '/app/memories/:memoryId',
   appMemoriesEdit: '/app/memories/:memoryId/edit',
 
-  /** Games hub (Phase 11 + Phase 12). */
+  /** Yuki companion (Stage 8 — replaced Games). */
+  appYuki: '/app/yuki',
+
+  /** Legacy games routes (kept for redirect compatibility). */
   appGames: '/app/games',
-  appGamesPlay: '/app/games/:gameType',
-  appGamesResults: '/app/games/:gameType/results',
-  appGamesWhoKnows: '/app/games/who-knows',
-  appGamesWouldYouRather: '/app/games/would-you-rather',
-  appGamesTwentyQuestions: '/app/games/twenty-questions',
-  appGamesHowWell: '/app/games/how-well',
-  appGamesGuessMyAnswer: '/app/games/guess-my-answer',
-  appGamesThisOrThat: '/app/games/this-or-that',
-  appGamesFinishMySentence: '/app/games/finish-my-sentence',
-  appGamesCoupleTrivia: '/app/games/couple-trivia',
-  appGamesMemoryMatch: '/app/games/memory-match',
-  appGamesWordScramble: '/app/games/word-scramble',
-  appGamesCasualTrivia: '/app/games/casual-trivia',
-  appGamesRiddleRoom: '/app/games/riddle-room',
 
   /** Reminders feature (Phase 13). */
   appReminders: '/app/reminders',

@@ -6,7 +6,7 @@
  *
  *   1. Five-position bottom navigation with the TwoHearts hub in the CENTER.
  *   2. Home offers exactly the curated everyday set (Notes · Reminders ·
- *      Us · Games) and never the relationship archives.
+ *      Us · Yuki) and never the relationship archives.
  *   3. The central couple hub covers every relationship-specific feature.
  *   4. The More menu holds utilities only — no duplication.
  *   5. Every destination route exists in the authoritative RoutePath map.
@@ -86,14 +86,14 @@ test('NAV_ROOT_ROUTES is derived from the five navigation positions', () => {
 // 2. Home primary content — curated, not a dashboard of everything
 // ---------------------------------------------------------------------------
 
-test('Home offers exactly Notes · Reminders · Us · Games', () => {
+test('Home offers exactly Notes · Reminders · Us · Yuki', () => {
   assert.deepEqual(
     HOME_PRIMARY_ITEMS.map((i) => i.id),
-    ['notes', 'reminders', 'us', 'games'],
+    ['notes', 'reminders', 'us', 'yuki'],
   );
   assert.deepEqual(
     HOME_PRIMARY_ITEMS.map((i) => i.route),
-    [RoutePath.appNotes, RoutePath.appReminders, RoutePath.appUs, RoutePath.appGames],
+    [RoutePath.appNotes, RoutePath.appReminders, RoutePath.appUs, RoutePath.appYuki],
   );
 });
 

@@ -35,17 +35,12 @@ const FIXED_CLOCK = () => new Date('2026-01-15T12:00:00Z');
 // ---------------------------------------------------------------------------
 
 describe('Phase 11 routes', () => {
-  it('defines game routes', () => {
+  it('defines legacy game redirect route', () => {
     assert.ok(RoutePath.appGames);
-    assert.ok(RoutePath.appGamesPlay);
-    assert.ok(RoutePath.appGamesResults);
   });
 
-  it('defines legacy game routes', () => {
-    assert.ok(RoutePath.appGamesWhoKnows);
-    assert.ok(RoutePath.appGamesWouldYouRather);
-    assert.ok(RoutePath.appGamesTwentyQuestions);
-    assert.ok(RoutePath.appGamesHowWell);
+  it('defines Yuki companion route (replaced games)', () => {
+    assert.ok(RoutePath.appYuki);
   });
 });
 
