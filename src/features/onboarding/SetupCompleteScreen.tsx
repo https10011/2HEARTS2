@@ -12,6 +12,7 @@
  * short (600px) and tall (2400px) devices.
  */
 
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoutePath } from '../../navigation/routes.ts';
 import {
@@ -23,14 +24,73 @@ import {
 } from '../../components/index.ts';
 import { appSettingsStore } from '../../core/appSettings.ts';
 import { OnboardingLayout } from './OnboardingLayout.tsx';
+import { NotificationPermissionPrompt } from '../permissions/NotificationPermissionPrompt.tsx';
+import { PermissionService, type PermissionState } from '../../services/permissions/permissionService.ts';
+
+const permissions = new PermissionService();
 
 export function SetupCompleteScreen() {
   const navigate = useNavigate();
   const appLockEnabled = appSettingsStore.getState().appLockEnabled;
+  const [permissionState, setPermissionState] = useState<PermissionState | null>(null);
+
+  // Check notification permission state once on mount
+  useEffect(() => {
+    let cancelled = false;
+    permissions.check('notifications').then((state) => {
+      if (!cancelled) setPermissionState(state);
+    }).catch(() => {
+      if (!cancelled) setPermissionState('unavailable');
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const handleEnter = () => {
     navigate(RoutePath.appHome);
   };
+
+  // If permission hasn't been checked yet, show loading state
+  if (permissionState === null) {
+    return (
+      <OnboardingLayout currentPath={RoutePath.onboardingComplete} showBack={false}>
+        <div className="th-setup-complete" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="th-spinner" aria-label="Loading" />
+        </div>
+      </OnboardingLayout>
+    );
+  }
+
+  // If permission hasn't been requested yet, show the prompt
+  if (permissionState === 'prompt') {
+    return <NotificationPermissionPrompt onComplete={handleEnter} mode="onboarding" />;
+  }
+
+  // If permission was denied, show a brief note then continue
+  if (permissionState === 'denied') {
+    return (
+      <OnboardingLayout currentPath={RoutePath.onboardingComplete} showBack={false}>
+        <RoseLilyDecoration variant={11} size={130} position="top-right" opacity={0.2} animated />
+        <RoseLilyDecoration variant={1} size={120} position="bottom-left" opacity={0.15} animated />
+        <div className="th-setup-complete">
+          <div className="th-setup-complete__illustration th-stagger-item">
+            <OnboardingArt variant="paired-hearts-check" size={170} />
+          </div>
+          <h2 className="th-onboarding-heading th-stagger-item">You're all set</h2>
+          <p className="th-setup-complete__subtitle th-stagger-item">
+            Notifications are off — you can enable them later in Settings.
+          </p>
+          <div className="th-onboarding-actions th-stagger-item">
+            <Button variant="primary" full onClick={handleEnter}>
+              <IconHeart size={16} />
+              Enter TwoHearts
+            </Button>
+          </div>
+        </div>
+      </OnboardingLayout>
+    );
+  }
+
+  // Permission granted or unavailable — show the full completion screen
 
   const summaryItems: { label: string; detail?: string }[] = [
     { label: 'Your profile' },

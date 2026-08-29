@@ -947,6 +947,87 @@
   color: var(--th-color-text-primary);
 }
 
+/* ===== Permission Prompt (Stage 6 — Permission Experience) =====
+   Used in onboarding post-AppLock and just-in-time when creating reminders. */
+.th-permission-prompt-card {
+  background: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-lg);
+  padding: var(--th-space-5);
+  border: 1px solid var(--th-color-border);
+}
+.th-permission-prompt-card__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin: 0 0 var(--th-space-3);
+}
+.th-permission-prompt-card__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--th-space-2);
+}
+.th-permission-prompt-card__item {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+}
+.th-permission-prompt-card__icon {
+  font-size: var(--th-font-size-lg);
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.th-permission-prompt-card__privacy {
+  margin: var(--th-space-3) 0 0;
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  font-style: italic;
+}
+
+/* Inline permission prompt (just-in-time when creating reminders) */
+.th-permission-prompt-inline {
+  background: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-lg);
+  padding: var(--th-space-4);
+  border: 1px solid var(--th-color-border);
+  margin-bottom: var(--th-space-4);
+}
+.th-permission-prompt-inline__body {
+  margin-bottom: var(--th-space-3);
+}
+.th-permission-prompt-inline__text {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: 0;
+}
+.th-permission-prompt-inline__actions {
+  display: flex;
+  gap: var(--th-space-3);
+}
+.th-permission-prompt-inline__actions .th-btn {
+  flex: 1;
+}
+
+/* Denied state inline */
+.th-permission-denied-inline {
+  background: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-lg);
+  padding: var(--th-space-4);
+  border: 1px solid var(--th-color-border);
+  margin-bottom: var(--th-space-4);
+}
+.th-permission-denied-inline__text {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: 0 0 var(--th-space-3);
+}
+
 /* ===== First Launch / Welcome (reference 02) =====
    Full-screen branded welcome — no header bar, no step dots. */
 .th-welcome {

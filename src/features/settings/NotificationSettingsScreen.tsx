@@ -13,6 +13,8 @@ import { PermissionService, type PermissionState } from '../../services/permissi
 import { SettingsScreen, SettingSwitchRow, InfoCard } from './settingsUi.tsx';
 import { permissionStatusLabel, permissionStatusDescription } from './settingsPresentation.ts';
 
+
+
 const permissions = new PermissionService();
 
 export function NotificationSettingsScreen() {
@@ -125,13 +127,26 @@ export function NotificationSettingsScreen() {
             {permissionStatusLabel(deviceState)}
           </span>
         </div>
-      </div>
-
-      {deviceState === 'prompt' ? (
+      </div>        {deviceState === 'prompt' ? (
         <div style={{ marginTop: 'var(--th-space-3)' }}>
           <Button variant="secondary" full onClick={() => void requestPermission()}>
             Allow Notifications
           </Button>
+        </div>
+      ) : null}
+
+      {deviceState === 'denied' ? (
+        <div style={{ marginTop: 'var(--th-space-3)' }}>
+          <InfoCard
+            title="Notifications blocked"
+            text="TwoHearts can't send notifications because they're blocked in your device settings. To enable them, open your device Settings → Apps → TwoHearts → Notifications."
+            icon={<IconBell size={16} />}
+          />
+          <div style={{ marginTop: 'var(--th-space-3)' }}>
+            <Button variant="ghost" full onClick={() => void requestPermission()}>
+              Try Again
+            </Button>
+          </div>
         </div>
       ) : null}
     </SettingsScreen>
