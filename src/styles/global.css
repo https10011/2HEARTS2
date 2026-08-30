@@ -1,6 +1,7 @@
 @import '../theme/tokens.css';
 
 /* TwoHearts global foundation styles: mobile-first, touch-first, offline. */
+/* Stage 10 — Enhanced for premium, warm, emotionally-rich visual language. */
 
 *,
 *::before,
@@ -18,10 +19,8 @@ body,
 }
 
 html {
-  /* Prevent text size adjustment on orientation change; we manage scaling via tokens. */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  /* Smooth scrolling but never momentum bounce leaking to body. */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -31,21 +30,13 @@ body {
   line-height: var(--th-line-height-normal);
   color: var(--th-color-text-primary);
   background-color: var(--th-color-bg);
-  /* Portrait-first: lock to natural mobile flow. Overscroll containment. */
   overscroll-behavior-y: contain;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Avoid iOS/Android text auto-zoom on input focus. */
-  -webkit-text-size-adjust: 100%;
+  letter-spacing: var(--th-letter-normal);
 }
 
-/**
- * Theme transition (Phase 25): light ↔ dark flips animate surface colors
- * smoothly instead of flashing. Scoped to shell surfaces (never `*` on
- * interactive elements, whose own transitions already own background-color
- * via more specific component rules); reduced-motion collapses the duration
- * to ~1ms via the token system.
- */
+/* ── Smooth theme transition ──────────────────────────────────────── */
 body,
 #root,
 .th-app-shell,
@@ -64,17 +55,17 @@ body,
 .th-empty-emotional,
 .th-screen-warm,
 .th-card-emotional,
-  .th-home-greeting__bell,
-  .th-home-pill,
-  .th-home-invite,
-  .th-more-profile,
-  .th-couple-card,
-  .th-us-dates-invite,
-  .th-counter-hero,
-  .th-counter-stats,
-  .th-counter-milestone,
-  .th-counter-linkrow,
-  .th-counter-cta,
+.th-home-greeting__bell,
+.th-home-pill,
+.th-home-invite,
+.th-more-profile,
+.th-couple-card,
+.th-us-dates-invite,
+.th-counter-hero,
+.th-counter-stats,
+.th-counter-milestone,
+.th-counter-linkrow,
+.th-counter-cta,
 .th-modal-sheet,
 .th-modal,
 .th-game-question,
@@ -84,23 +75,23 @@ body,
 .th-scramble-display--enhanced {
   transition:
     background-color var(--th-duration-normal) var(--th-ease-standard),
-    border-color var(--th-duration-normal) var(--th-ease-standard);
+    border-color var(--th-duration-normal) var(--th-ease-standard),
+    color var(--th-duration-normal) var(--th-ease-standard);
 }
 
+/* ── App root — phone-first column ────────────────────────────────── */
 #root {
   display: flex;
   flex-direction: column;
-  /* Phone-first content column, centered on larger viewports during dev. */
   max-width: var(--th-screen-max-width);
   margin: 0 auto;
   min-height: 100%;
   background: var(--th-color-bg);
-  /* Enforce app-like, non-selectable chrome (content surfaces opt back in). */
   -webkit-user-select: none;
   user-select: none;
 }
 
-/* Inputs/content may be selected by the user. */
+/* ── Selectable content ───────────────────────────────────────────── */
 input,
 textarea,
 [contenteditable='true'],
@@ -109,6 +100,7 @@ textarea,
   user-select: text;
 }
 
+/* ── Base elements ────────────────────────────────────────────────── */
 a {
   color: var(--th-color-burgundy);
   text-decoration: none;
@@ -127,7 +119,13 @@ img {
   max-width: 100%;
 }
 
-/* Utility: screen reader only */
+h1, h2, h3, h4 {
+  font-family: var(--th-font-family-display);
+  line-height: var(--th-line-height-tight);
+  letter-spacing: var(--th-letter-tight);
+}
+
+/* ── Screen reader only ───────────────────────────────────────────── */
 .th-sr-only {
   position: absolute;
   width: 1px;
@@ -140,7 +138,7 @@ img {
   border: 0;
 }
 
-/* Mobile keyboard-aware: when an input is focused, avoid layout collapse. */
+/* ── Screen container ─────────────────────────────────────────────── */
 .th-screen {
   display: flex;
   flex-direction: column;
@@ -156,4 +154,556 @@ img {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+
+/* ── Warm screen background ─────────────────────────────────────────
+   A subtle warm gradient backdrop applied to screens that want a
+   cozy, non-plain background without any visual noise. */
+.th-screen-warm {
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(246, 225, 222, 0.25) 0%, transparent 55%),
+    radial-gradient(ellipse at 0% 100%, rgba(246, 225, 222, 0.15) 0%, transparent 50%),
+    var(--th-color-bg);
+}
+
+:root[data-th-theme='dark'] .th-screen-warm {
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(58, 42, 40, 0.3) 0%, transparent 55%),
+    radial-gradient(ellipse at 0% 100%, rgba(58, 42, 40, 0.2) 0%, transparent 50%),
+    var(--th-color-bg);
+}
+
+/* ── Stagger entrance animation ─────────────────────────────────────
+   Children with .th-stagger-item animate in sequentially. Composable
+   with animation-delay set via inline style. */
+@keyframes th-stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.th-stagger-item {
+  animation: th-stagger-in var(--th-duration-normal) var(--th-ease-decelerate) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .th-stagger-item {
+    animation: none;
+  }
+}
+
+:root[data-th-motion='reduced'] .th-stagger-item {
+  animation: none;
+}
+
+/* ── Scale-in animation ───────────────────────────────────────────── */
+@keyframes th-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.th-scale-in {
+  animation: th-scale-in var(--th-duration-slow) var(--th-ease-spring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .th-scale-in {
+    animation: none;
+  }
+}
+
+:root[data-th-motion='reduced'] .th-scale-in {
+  animation: none;
+}
+
+/* ── Spinner ──────────────────────────────────────────────────────── */
+@keyframes th-spin {
+  to { transform: rotate(360deg); }
+}
+
+.th-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--th-color-border);
+  border-top-color: var(--th-color-burgundy);
+  border-radius: var(--th-radius-circle);
+  animation: th-spin var(--th-duration-spin) linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .th-spinner {
+    animation: none;
+    border-top-color: var(--th-color-border);
+  }
+}
+
+/* ── Floating Action Button ───────────────────────────────────────── */
+.th-fab {
+  position: fixed;
+  bottom: calc(var(--th-bottom-nav-height) + var(--th-safe-area-bottom) + var(--th-space-6));
+  right: var(--th-space-5);
+  width: 52px;
+  height: 52px;
+  border-radius: var(--th-radius-circle);
+  background: linear-gradient(135deg, var(--th-color-burgundy) 0%, var(--th-color-burgundy-light) 100%);
+  color: var(--th-color-text-on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--th-shadow-lg);
+  border: none;
+  cursor: pointer;
+  z-index: var(--th-z-fab);
+  transition: transform var(--th-motion-press), box-shadow var(--th-motion-standard);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.th-fab:active {
+  transform: scale(0.92);
+  box-shadow: var(--th-shadow-md);
+}
+
+/* ── Section title pattern ────────────────────────────────────────── */
+.th-hub-section-title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  letter-spacing: var(--th-letter-tight);
+  margin-bottom: var(--th-space-3);
+}
+
+/* ── Screen header with title + subtitle ──────────────────────────── */
+.th-screen-header--enhanced {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--th-space-3);
+  margin-bottom: var(--th-space-5);
+}
+
+/* ── Card emotional — enhanced warm surface ───────────────────────── */
+.th-card-emotional {
+  background: linear-gradient(
+    135deg,
+    var(--th-color-surface-elevated) 0%,
+    var(--th-color-surface-warm) 100%
+  );
+}
+
+:root[data-th-theme='dark'] .th-card-emotional {
+  background: linear-gradient(
+    135deg,
+    var(--th-color-surface-elevated) 0%,
+    var(--th-color-surface-warm) 100%
+  );
+}
+
+/* ── Feature card enhanced — subtle warmth ────────────────────────── */
+.th-feature-card--enhanced {
+  background: linear-gradient(
+    160deg,
+    var(--th-color-surface-elevated) 0%,
+    var(--th-color-surface-warm) 100%
+  );
+  border: var(--th-border-width-thin) solid var(--th-color-border-blush);
+  transition:
+    transform var(--th-motion-fast),
+    box-shadow var(--th-motion-standard),
+    background-color var(--th-duration-normal) var(--th-ease-standard);
+}
+
+.th-feature-card--enhanced:active {
+  transform: scale(0.985);
+  box-shadow: var(--th-shadow-sm);
+}
+
+/* ── Empty emotional state ────────────────────────────────────────── */
+.th-empty-emotional {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--th-space-12) var(--th-space-6);
+  gap: var(--th-space-3);
+}
+
+.th-empty-emotional__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--th-radius-circle);
+  background: linear-gradient(135deg, var(--th-color-blush) 0%, var(--th-color-neutral-soft) 100%);
+  color: var(--th-color-burgundy);
+  margin-bottom: var(--th-space-2);
+}
+
+.th-empty-emotional__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-xl);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  letter-spacing: var(--th-letter-tight);
+}
+
+.th-empty-emotional__message {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  line-height: var(--th-line-height-relaxed);
+  max-width: 28ch;
+  margin: 0;
+}
+
+.th-empty-emotional__action {
+  margin-top: var(--th-space-2);
+}
+
+/* ── Error message ────────────────────────────────────────────────── */
+.th-error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-6);
+  text-align: center;
+  color: var(--th-color-error);
+  font-size: var(--th-font-size-sm);
+}
+
+/* ── Notes / feature header pattern ───────────────────────────────── */
+.th-notes-header,
+.th-mem-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--th-space-3);
+  margin-bottom: var(--th-space-5);
+  overflow: visible;
+}
+
+.th-notes-title,
+.th-mem-title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-2xl);
+  font-weight: var(--th-font-weight-bold);
+  color: var(--th-color-text-primary);
+  letter-spacing: var(--th-letter-tight);
+  margin: 0;
+}
+
+.th-notes-subtitle,
+.th-mem-subtitle {
+  font-size: var(--th-font-size-sm);
+  color: var(--th-color-text-secondary);
+  margin: var(--th-space-1) 0 0;
+}
+
+/* ── Settings enhancements (Stage 10) ─────────────────────────────── */
+.th-settings-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    150deg,
+    var(--th-color-burgundy-dark) 0%,
+    var(--th-color-burgundy) 50%,
+    var(--th-color-burgundy-light) 100%
+  );
+  color: var(--th-color-text-on-accent);
+  border-radius: 0 0 var(--th-radius-xl) var(--th-radius-xl);
+  padding: var(--th-space-8) var(--th-space-5) var(--th-space-6);
+  margin-bottom: var(--th-space-6);
+}
+
+.th-settings-hero__label {
+  font-size: var(--th-font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--th-letter-widest);
+  opacity: 0.75;
+  margin-bottom: var(--th-space-2);
+}
+
+.th-settings-hero__title {
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-2xl);
+  font-weight: var(--th-font-weight-bold);
+  margin: 0;
+}
+
+.th-settings-hero__desc {
+  font-size: var(--th-font-size-sm);
+  opacity: 0.85;
+  margin-top: var(--th-space-1);
+}
+
+.th-settings-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-4);
+  padding: var(--th-space-4);
+  margin-bottom: var(--th-space-5);
+  background: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-xl);
+  border: var(--th-border-width-thin) solid var(--th-color-border-blush);
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--th-shadow-sm);
+  transition: transform var(--th-motion-press), box-shadow var(--th-motion-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.th-settings-profile:active {
+  transform: scale(0.98);
+  box-shadow: var(--th-shadow-xs);
+}
+
+.th-settings-profile__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--th-radius-circle);
+  background: linear-gradient(135deg, var(--th-color-blush) 0%, var(--th-color-neutral-soft) 100%);
+  color: var(--th-color-burgundy);
+  font-family: var(--th-font-family-display);
+  font-size: var(--th-font-size-lg);
+  font-weight: var(--th-font-weight-bold);
+  flex-shrink: 0;
+}
+
+.th-settings-profile__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.th-settings-profile__name {
+  font-weight: var(--th-font-weight-semibold);
+  font-size: var(--th-font-size-md);
+}
+
+.th-settings-profile__subtitle {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+
+.th-settings-profile__chevron {
+  flex-shrink: 0;
+  color: var(--th-color-text-tertiary);
+}
+
+.th-settings-section--enhanced {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  padding: var(--th-space-3) 0 var(--th-space-2);
+  font-size: var(--th-font-size-xs);
+  font-weight: var(--th-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--th-letter-widest);
+  color: var(--th-color-text-tertiary);
+}
+
+.th-settings-section--enhanced__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--th-radius-circle);
+  background: var(--th-color-burgundy);
+  opacity: 0.6;
+}
+
+.th-settings-group--enhanced {
+  background: var(--th-color-surface-elevated);
+  border-radius: var(--th-radius-lg);
+  border: var(--th-border-width-thin) solid var(--th-color-border-blush);
+  margin-bottom: var(--th-space-4);
+  overflow: hidden;
+}
+
+/* ── Setting row ──────────────────────────────────────────────────── */
+.th-setting-row {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-3) var(--th-space-4);
+  text-decoration: none;
+  color: inherit;
+  border-bottom: var(--th-border-width-thin) solid var(--th-color-divider);
+  transition: background-color var(--th-motion-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.th-setting-row:last-child {
+  border-bottom: none;
+}
+
+.th-setting-row:active {
+  background-color: var(--th-color-neutral-soft);
+}
+
+.th-setting-row__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--th-radius-sm);
+  background: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+
+.th-setting-row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.th-setting-row__label {
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-medium);
+  color: var(--th-color-text-primary);
+}
+
+.th-setting-row__desc {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  margin-top: 1px;
+}
+
+.th-setting-row__chevron {
+  flex-shrink: 0;
+  color: var(--th-color-text-tertiary);
+}
+
+/* ── Settings row — Stage 15 enhanced pattern ────────────────────── */
+.th-settings-row--stage15 {
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-3);
+  padding: var(--th-space-3) var(--th-space-4);
+  text-decoration: none;
+  color: inherit;
+  border-bottom: var(--th-border-width-thin) solid var(--th-color-divider);
+  transition: background-color var(--th-motion-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.th-settings-row--stage15:last-child {
+  border-bottom: none;
+}
+
+.th-settings-row--stage15:active {
+  background-color: var(--th-color-neutral-soft);
+}
+
+.th-settings-row--stage15--static {
+  cursor: default;
+}
+
+.th-settings-row--stage15--static:active {
+  background: none;
+}
+
+.th-settings-row--danger .th-settings-row__label,
+.th-settings-row--danger .th-settings-row__description {
+  color: var(--th-color-error);
+}
+
+.th-settings-row--stage15__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--th-radius-sm);
+  background: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+
+.th-settings-row__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.th-settings-row__label {
+  font-size: var(--th-font-size-md);
+  font-weight: var(--th-font-weight-medium);
+  color: var(--th-color-text-primary);
+}
+
+.th-settings-row__description,
+.th-settings-row__desc {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+}
+
+.th-settings-row__trailing {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--th-space-2);
+  color: var(--th-color-text-tertiary);
+}
+
+/* ── Settings info card — enhanced ────────────────────────────────── */
+.th-settings-info--enhanced {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--th-space-3);
+  padding: var(--th-space-4);
+  background: var(--th-color-surface-warm);
+  border-radius: var(--th-radius-lg);
+  border: var(--th-border-width-thin) solid var(--th-color-border-blush);
+}
+
+.th-settings-info--enhanced__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--th-radius-circle);
+  background: var(--th-color-blush);
+  color: var(--th-color-burgundy);
+}
+
+.th-settings-info--enhanced__body {
+  flex: 1;
+}
+
+.th-settings-info--enhanced__title {
+  font-size: var(--th-font-size-sm);
+  font-weight: var(--th-font-weight-semibold);
+  color: var(--th-color-text-primary);
+  margin: 0 0 var(--th-space-1);
+}
+
+.th-settings-info--enhanced__text {
+  font-size: var(--th-font-size-xs);
+  color: var(--th-color-text-secondary);
+  line-height: var(--th-line-height-normal);
+  margin: 0;
 }

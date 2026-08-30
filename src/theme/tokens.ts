@@ -1,12 +1,10 @@
 /**
- * TwoHearts design tokens — typed mirror.
+ * TwoHearts design tokens — typed mirror (Stage 10 enhanced).
  *
  * The CSS custom properties in tokens.css are the runtime source of truth.
- * This module exposes typed constants for use in JS/TS (e.g. animation
- * durations passed to Framer-motion-free transitions, or hex colors for
- * canvas/SVG drawing where CSS vars are inconvenient).
+ * This module exposes typed constants for use in JS/TS.
  *
- * Keep these in sync with src/theme/tokens.css.
+ * Keep in sync with src/theme/tokens.css.
  */
 
 export const palette = {
@@ -20,6 +18,10 @@ export const palette = {
   beige: '#EDE0D4',
   charcoal: '#2B2420',
   neutralSoft: '#F2E9E4',
+  warmIvory: '#FBF4ED',
+  dustyRose: '#C9A0A8',
+  plum: '#7A3F5E',
+  sage: '#8B9E7C',
 } as const;
 
 /** Semantic brand aliases (JS mirror of tokens.css). */
@@ -32,34 +34,40 @@ export const brand = {
 } as const;
 
 export const duration = {
-  fast: 120,
-  normal: 220,
-  slow: 360,
+  instant: 1,
+  fast: 100,
+  normal: 200,
+  slow: 320,
   drift: 6400,
 } as const;
 
 export const ease = {
-  standard: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
+  standard: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
   decelerate: 'cubic-bezier(0, 0, 0.2, 1)',
   accelerate: 'cubic-bezier(0.4, 0, 1, 1)',
   emphasized: 'cubic-bezier(0.2, 0, 0, 1)',
   press: 'cubic-bezier(0.3, 0, 0.2, 1)',
+  spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
 } as const;
 
 /** Semantic motion pairs: `${durationMs} ${cubicBezier}` ready for JS-driven transitions. */
 export const motion = {
   fast: `${duration.fast}ms ${ease.standard}`,
   standard: `${duration.normal}ms ${ease.standard}`,
-  emphasized: `${duration.slow}ms ${ease.emphasized}`,
+  slow: `${duration.slow}ms ${ease.emphasized}`,
   entrance: `${duration.normal}ms ${ease.decelerate}`,
   exit: `${duration.fast}ms ${ease.accelerate}`,
   press: `${duration.fast}ms ${ease.press}`,
   modal: `${duration.normal}ms ${ease.decelerate}`,
   drift: `${duration.drift}ms ease-in-out`,
+  spring: `${duration.slow}ms ${ease.spring}`,
 } as const;
 
 /** Elevation layers (JS mirror of --th-z-*). */
 export const zIndex = {
+  base: 0,
+  content: 1,
+  sticky: 5,
   nav: 10,
   fab: 100,
   modal: 1000,
