@@ -89,28 +89,6 @@ class BootstrapService(private val context: Context) {
         }
     }
 
-    /**
-     * Get the database initializer.
-     */
-    fun getDatabaseInitializer(): DatabaseInitializer = databaseInitializer
-
-    /**
-     * Get the device capabilities.
-     */
-    fun getDeviceCapabilities(): DeviceCapabilities = deviceCapabilities
-
-    /**
-     * Get the lifecycle service.
-     */
-    fun getLifecycleService(): LifecycleService = lifecycleService
-
-    /**
-     * Get the notification service.
-     */
-    fun getNotificationService(): NotificationService = notificationService
-
-    /**
-     * Get the app lock service.
-     */
-    fun getAppLockService(): AppLockService = appLockService
+// Access services via their property names directly:
+// bootstrap.databaseInitializer, bootstrap.deviceCapabilities, etc.
 }
