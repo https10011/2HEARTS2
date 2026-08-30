@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextArea
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -48,7 +48,7 @@ fun ThInput(
     )
 
     if (multiline) {
-        TextArea(
+        TextField(
             value = value,
             onValueChange = onValueChange,
             modifier = modifier

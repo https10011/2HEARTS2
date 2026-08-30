@@ -7,6 +7,7 @@ import com.twohearts.app.services.lifecycle.LifecycleService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -37,7 +38,7 @@ class AppLockService(
      * Cold start always locks when enabled.
      */
     suspend fun initialize() {
-        val settings = settingsStorage.settings
+        val settings = settingsStorage.settings.first()
         if (settings.appLockEnabled) {
             _lockState.value = AppLockState.LOCKED
             isUnlocked = false
@@ -49,7 +50,7 @@ class AppLockService(
         lifecycleService.addListener(object : LifecycleListener {
             override fun onForeground() {
                 if (_lockState.value == AppLockState.UNLOCKED) {
-                    val lockTimeout = settingsStorage.settings.lockTimeoutSeconds
+                    val lockTimeout = settingsStorage.settings.first().lockTimeoutSeconds
                     if (lifecycleService.hasExceededTimeout(lockTimeout)) {
                         lock()
                     }

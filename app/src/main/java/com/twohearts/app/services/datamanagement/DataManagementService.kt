@@ -7,6 +7,7 @@ import com.twohearts.app.services.media.MediaStorage
 import com.twohearts.app.services.security.AppLockService
 import com.twohearts.app.services.logger.Logger
 import com.twohearts.app.data.settings.SettingsStorage as DataSettingsStorage
+import kotlinx.coroutines.flow.first
 
 /**
  * DataManagementService — data management operations.
@@ -55,7 +56,7 @@ class DataManagementService(
      */
     suspend fun clearCache(): CacheClearResult {
         val db = databaseInitializer.getDatabase()
-        val knownMediaIds = db?.mediaAssetDao()?.getAll()?.map { it.id }?.toSet() ?: emptySet()
+        val knownMediaIds = db?.mediaAssetDao()?.getAll()?.first()?.map { it.id }?.toSet() ?: emptySet()
         val cleaned = mediaStorage.cleanupOrphans(knownMediaIds)
 
         logger.info("Cache cleared: $cleaned orphan files removed")

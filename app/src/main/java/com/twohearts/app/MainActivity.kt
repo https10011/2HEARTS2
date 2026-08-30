@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import com.twohearts.app.ui.navigation.AppRouter
 import com.twohearts.app.ui.theme.TwoHeartsTheme
 import com.twohearts.app.ui.theme.TextScalingLevel
-import com.twohearts.app.ui.components.LoadingState
+import com.twohearts.app.ui.components.ThLoadingState
 import com.twohearts.app.services.bootstrap.BootstrapService
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
@@ -75,7 +75,8 @@ class MainActivity : ComponentActivity() {
                         }
                         val memoryRepository = remember {
                             com.twohearts.app.data.repository.MemoryRepository(
-                                bootstrapService.getDatabaseInitializer().memoryDao()
+                                dao = bootstrapService.getDatabaseInitializer().memoryDao(),
+                                memoryMediaDao = bootstrapService.getDatabaseInitializer().memoryMediaDao()
                             )
                         }
                         val timelineEventRepository = remember {
@@ -130,7 +131,7 @@ class MainActivity : ComponentActivity() {
                         )
                     } else {
                         // Loading state
-                        LoadingState(
+                        ThLoadingState(
                             message = "Loading..."
                         )
                     }

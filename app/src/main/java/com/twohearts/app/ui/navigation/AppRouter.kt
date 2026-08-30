@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.twohearts.app.ui.onboarding.OnboardingGate
 import com.twohearts.app.ui.screens.home.HomeScreen

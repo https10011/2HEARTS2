@@ -131,7 +131,10 @@ class NotificationService(
                 ownerRef = ownerRef,
                 osNotificationId = notificationId,
                 channelId = channelId,
-                metaJson = """{"scheduledTimeMs":$scheduledTimeMs}"""
+                metaJson = """{"scheduledTimeMs":$scheduledTimeMs}""",
+                id = java.util.UUID.randomUUID().toString(),
+                createdAt = java.time.Instant.now().toString(),
+                updatedAt = java.time.Instant.now().toString()
             )
             kotlinx.coroutines.runBlocking {
                 registryDao.insert(registry)
