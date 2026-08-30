@@ -17,6 +17,16 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 
 /**
+ * Text scaling levels for accessibility (MasterPrompt §28).
+ */
+enum class TextScalingLevel(val scale: Float) {
+    SMALL(0.88f),
+    DEFAULT(1f),
+    LARGE(1.12f),
+    EXTRA_LARGE(1.28f);
+}
+
+/**
  * TwoHearts Extended Color Scheme
  *
  * Beyond Material 3's standard color slots, TwoHearts needs additional
@@ -253,6 +263,11 @@ private val DarkColorScheme = darkColorScheme(
  * - Text scaling (via Density multiplier)
  *
  * Follows legacy tokens.css exactly for all color values.
+ *
+ * @param darkTheme Whether to use dark theme
+ * @param dynamicColor Whether to use Material You dynamic colors (default true)
+ * @param textSizeScale Text size multiplier for accessibility
+ * @param content Composable content
  */
 @Composable
 fun TwoHeartsTheme(
@@ -289,6 +304,26 @@ fun TwoHeartsTheme(
             content = content
         )
     }
+}
+
+/**
+ * Stage 2 convenience overload with named parameters for toggle-based previews.
+ *
+ * @param darkMode Whether dark mode is active
+ * @param textScalingLevel Text scaling level preset
+ */
+@Composable
+fun TwoHeartsTheme(
+    darkMode: Boolean,
+    textScalingLevel: TextScalingLevel = TextScalingLevel.DEFAULT,
+    content: @Composable () -> Unit
+) {
+    TwoHeartsTheme(
+        darkTheme = darkMode,
+        dynamicColor = false,
+        textSizeScale = textScalingLevel.scale,
+        content = content
+    )
 }
 
 /**

@@ -5,76 +5,40 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.twohearts.app.ui.components.ConfirmDialog
+import com.twohearts.app.ui.components.TwoHeartsPreview
 import com.twohearts.app.ui.theme.TwoHeartsTheme
+import com.twohearts.app.ui.theme.TextScalingLevel
 
-/**
- * TwoHearts — Main Activity
- *
- * Entry point for the native Android application.
- * Currently a placeholder scaffold — features will be migrated
- * from the legacy React/Vite/Capacitor implementation per the
- * migration roadmap.
- *
- * Theme: Uses TwoHeartsTheme which provides:
- * - Material 3 color scheme (light/dark, matching legacy tokens.css)
- * - Extended brand colors via LocalTwoHeartsColors
- * - Typography (serif display, system body)
- * - Text scaling support
- */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            var darkMode by remember { mutableStateOf(false) }
+            var textScaling by remember { mutableStateOf(TextScalingLevel.DEFAULT) }
+
             TwoHeartsTheme(
-                darkTheme = false,
-                dynamicColor = false,
-                textSizeScale = 1f
+                darkMode = darkMode,
+                textScalingLevel = textScaling
             ) {
-                TwoHeartsApp()
+                Surface(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    TwoHeartsPreview(
+                        onToggleDarkMode = { darkMode = !darkMode },
+                        darkMode = darkMode,
+                        textScaling = textScaling,
+                        onTextScalingChange = { textScaling = it }
+                    )
+                }
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TwoHeartsApp() {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text("TwoHearts") }
-            )
-        }
-    ) { innerPadding ->
-        Greeting(
-            name = "TwoHearts",
-            modifier = Modifier.padding(innerPadding)
-        )
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Welcome to $name",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TwoHeartsAppPreview() {
-    TwoHeartsTheme(darkTheme = false, dynamicColor = false) {
-        TwoHeartsApp()
     }
 }

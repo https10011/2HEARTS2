@@ -31,11 +31,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * TwoHearts Design System Preview
+ * TwoHeartsDesignPreview — Full design system verification.
  *
  * Renders the complete color palette, typography scale, spacing,
- * and component styles to verify the design system works correctly.
- * Used for Stage 1 verification.
+ * and component dimensions to verify the design system works correctly.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -277,6 +276,80 @@ fun TwoHeartsDesignPreview(modifier: Modifier = Modifier) {
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
+}
+
+/**
+ * TwoHeartsPreview — Full app preview with toggle controls.
+ *
+ * Provides dark mode toggle and text scaling controls for testing
+ * the complete theme system interactively.
+ */
+@Composable
+fun TwoHeartsPreview(
+    onToggleDarkMode: () -> Unit,
+    darkMode: Boolean,
+    textScaling: TextScalingLevel,
+    onTextScalingChange: (TextScalingLevel) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        // Header
+        Text(
+            text = "TwoHearts — Component Library",
+            style = MaterialTheme.typography.displaySmall,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        // ─── Controls ────────────────────────────────────────────────
+        SectionTitle("Controls")
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Dark Mode:",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = if (darkMode) "ON" else "OFF",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Text Scaling:",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            TextScalingLevel.entries.forEach { level ->
+                Text(
+                    text = level.name,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (level == textScaling) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // ─── Design System Preview ───────────────────────────────────
+        SectionTitle("Design System")
+
+        TwoHeartsDesignPreview()
     }
 }
 
