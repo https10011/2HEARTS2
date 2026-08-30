@@ -12,11 +12,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+
 import com.twohearts.app.data.entity.VaultItem
 
 /**
@@ -105,16 +104,34 @@ fun VaultContentViewer(
                     // Photo display
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
                     ) {
-                        AsyncImage(
-                            model = item.contentUri,
-                            contentDescription = item.title,
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(1f),
-                            contentScale = ContentScale.Crop
-                        )
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Image,
+                                    contentDescription = "Photo",
+                                    modifier = Modifier.size(64.dp),
+                                    tint = Color(0xFF6A1B2B)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Photo Viewer",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                 }
                 
@@ -164,7 +181,7 @@ fun VaultContentViewer(
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Text(
-                            text = item.contentUri ?: "No content",
+                            text = item.contentText ?: item.mediaRef ?: "No content",
                             modifier = Modifier.padding(16.dp),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface
