@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Yuki — Original TwoHearts companion cat. Solid orange (not tabby). -->
+  <!-- Body -->
+  <ellipse cx="100" cy="130" rx="52" ry="45" fill="#E8854A"/>
+  <ellipse cx="100" cy="130" rx="46" ry="40" fill="#F09858"/>
+  
+  <!-- Head -->
+  <circle cx="100" cy="85" r="38" fill="#F09858"/>
+  
+  <!-- Inner face highlight -->
+  <circle cx="100" cy="88" r="30" fill="#F5A872"/>
+  
+  <!-- Ears -->
+  <path d="M72 65 L62 30 L85 55 Z" fill="#F09858"/>
+  <path d="M128 65 L138 30 L115 55 Z" fill="#F09858"/>
+  <path d="M73 63 L65 35 L83 56 Z" fill="#E8854A"/>
+  <path d="M127 63 L135 35 L117 56 Z" fill="#E8854A"/>
+  <!-- Inner ears -->
+  <path d="M74 61 L68 40 L82 57 Z" fill="#F5B894"/>
+  <path d="M126 61 L132 40 L118 57 Z" fill="#F5B894"/>
+  
+  <!-- Eyes -->
+  <ellipse cx="87" cy="82" rx="6" ry="6.5" fill="#2B2420"/>
+  <ellipse cx="113" cy="82" rx="6" ry="6.5" fill="#2B2420"/>
+  <!-- Eye highlights -->
+  <circle cx="89" cy="80" r="2" fill="white" opacity="0.9"/>
+  <circle cx="115" cy="80" r="2" fill="white" opacity="0.9"/>
+  <circle cx="86" cy="83" r="1" fill="white" opacity="0.5"/>
+  <circle cx="112" cy="83" r="1" fill="white" opacity="0.5"/>
+  
+  <!-- Nose -->
+  <path d="M97 90 L100 94 L103 90 Z" fill="#D4745A"/>
+  
+  <!-- Mouth -->
+  <path d="M94 95 Q100 101 106 95" stroke="#C06848" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Whiskers -->
+  <line x1="68" y1="87" x2="82" y2="90" stroke="#D4946A" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+  <line x1="66" y1="93" x2="82" y2="93" stroke="#D4946A" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+  <line x1="118" y1="90" x2="132" y2="87" stroke="#D4946A" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+  <line x1="118" y1="93" x2="134" y2="93" stroke="#D4946A" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
+  
+  <!-- Paws -->
+  <ellipse cx="75" cy="165" rx="14" ry="10" fill="#E8854A"/>
+  <ellipse cx="125" cy="165" rx="14" ry="10" fill="#E8854A"/>
+  <ellipse cx="75" cy="165" rx="11" ry="8" fill="#F5A872"/>
+  <ellipse cx="125" cy="165" rx="11" ry="8" fill="#F5A872"/>
+  <!-- Paw pads -->
+  <circle cx="72" cy="165" r="2.5" fill="#E8854A" opacity="0.6"/>
+  <circle cx="78" cy="165" r="2.5" fill="#E8854A" opacity="0.6"/>
+  <circle cx="122" cy="165" r="2.5" fill="#E8854A" opacity="0.6"/>
+  <circle cx="128" cy="165" r="2.5" fill="#E8854A" opacity="0.6"/>
+  
+  <!-- Tail -->
+  <path d="M148 130 Q165 115 160 95 Q158 88 152 90" stroke="#E8854A" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M148 130 Q163 117 158 98 Q156 92 152 93" stroke="#F09858" stroke-width="5" fill="none" stroke-linecap="round"/>
+</svg>

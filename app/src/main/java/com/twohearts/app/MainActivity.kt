@@ -18,17 +18,27 @@ import com.twohearts.app.ui.theme.TwoHeartsTheme
 /**
  * TwoHearts — Main Activity
  *
- * This is the entry point for the native Android application.
+ * Entry point for the native Android application.
  * Currently a placeholder scaffold — features will be migrated
  * from the legacy React/Vite/Capacitor implementation per the
- * migration roadmap in Migration/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md.
+ * migration roadmap.
+ *
+ * Theme: Uses TwoHeartsTheme which provides:
+ * - Material 3 color scheme (light/dark, matching legacy tokens.css)
+ * - Extended brand colors via LocalTwoHeartsColors
+ * - Typography (serif display, system body)
+ * - Text scaling support
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TwoHeartsTheme {
+            TwoHeartsTheme(
+                darkTheme = false,
+                dynamicColor = false,
+                textSizeScale = 1f
+            ) {
                 TwoHeartsApp()
             }
         }
@@ -64,7 +74,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun TwoHeartsAppPreview() {
-    TwoHeartsTheme {
+    TwoHeartsTheme(darkTheme = false, dynamicColor = false) {
         TwoHeartsApp()
     }
 }
