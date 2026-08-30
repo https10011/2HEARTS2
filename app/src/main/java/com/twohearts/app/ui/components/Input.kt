@@ -55,15 +55,15 @@ fun ThInput(
             modifier = modifier
                 .fillMaxWidth()
                 .heightIn(min = 100.dp),
-            label = if (label.isNotEmpty()) {{ Text(label) }} else null,
-            placeholder = if (placeholder.isNotEmpty()) {{ Text(placeholder) }} else null,
+            label = if (label.isNotEmpty()) { Text(label) } else null,
+            placeholder = if (placeholder.isNotEmpty()) { Text(placeholder) } else null,
             enabled = enabled,
             shape = shape,
             colors = colors,
             maxLines = maxLines,
             isError = error != null,
             supportingText = if (error != null) {
-                {{ Text(error, color = MaterialTheme.colorScheme.error) }}
+                { Text(error, color = MaterialTheme.colorScheme.error) }
             } else null,
         )
     } else {
@@ -71,8 +71,8 @@ fun ThInput(
             value = value,
             onValueChange = onValueChange,
             modifier = modifier.fillMaxWidth(),
-            label = if (label.isNotEmpty()) {{ Text(label) }} else null,
-            placeholder = if (placeholder.isNotEmpty()) {{ Text(placeholder) }} else null,
+            label = if (label.isNotEmpty()) { Text(label) } else null,
+            placeholder = if (placeholder.isNotEmpty()) { Text(placeholder) } else null,
             enabled = enabled,
             shape = shape,
             colors = colors,
@@ -80,7 +80,7 @@ fun ThInput(
             maxLines = maxLines,
             isError = error != null,
             supportingText = if (error != null) {
-                {{ Text(error, color = MaterialTheme.colorScheme.error) }}
+                { Text(error, color = MaterialTheme.colorScheme.error) }
             } else null,
         )
     }

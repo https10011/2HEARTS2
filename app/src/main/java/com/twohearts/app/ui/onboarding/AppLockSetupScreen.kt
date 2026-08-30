@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.twohearts.app.ui.components.TextThButton
 import com.twohearts.app.ui.components.ThButton
 import com.twohearts.app.ui.components.ThInput
 import com.twohearts.app.services.validation.Validator

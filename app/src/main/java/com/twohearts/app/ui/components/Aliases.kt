@@ -102,15 +102,15 @@ fun Input(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier.fillMaxWidth(),
-        label = if (label.isNotEmpty()) {{ Text(label) }} else null,
-        placeholder = if (placeholder.isNotEmpty()) {{ Text(placeholder) }} else null,
+        label = if (label.isNotEmpty()) { Text(label) } else null,
+        placeholder = if (placeholder.isNotEmpty()) { Text(placeholder) } else null,
         enabled = enabled && !readOnly,
         readOnly = readOnly,
         shape = shape,
         colors = colors,
         isError = error != null,
         supportingText = if (error != null) {
-            {{ Text(error, color = MaterialTheme.colorScheme.error) }}
+            { Text(error, color = MaterialTheme.colorScheme.error) }
         } else null,
     )
 }
