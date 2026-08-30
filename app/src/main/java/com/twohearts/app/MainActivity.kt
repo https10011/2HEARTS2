@@ -56,57 +56,57 @@ class MainActivity : ComponentActivity() {
                         val relationshipService = remember {
                             RelationshipService(
                                 profileRepository = com.twohearts.app.data.repository.ProfileRepository(
-                                    bootstrapService.getDatabaseInitializer().profileDao()
+                                    bootstrapService.databaseInitializer.profileDao()
                                 ),
                                 relationshipRepository = com.twohearts.app.data.repository.CoupleRelationshipRepository(
-                                    bootstrapService.getDatabaseInitializer().coupleRelationshipDao()
+                                    bootstrapService.databaseInitializer.coupleRelationshipDao()
                                 )
                             )
                         }
                         val appLockService = remember {
-                            bootstrapService.getAppLockService()
+                            bootstrapService.appLockService
                         }
 
                         // Create repositories for AppRouter
                         val noteRepository = remember {
                             com.twohearts.app.data.repository.NoteRepository(
-                                bootstrapService.getDatabaseInitializer().noteDao()
+                                bootstrapService.databaseInitializer.noteDao()
                             )
                         }
                         val memoryRepository = remember {
                             com.twohearts.app.data.repository.MemoryRepository(
-                                dao = bootstrapService.getDatabaseInitializer().memoryDao(),
-                                memoryMediaDao = bootstrapService.getDatabaseInitializer().memoryMediaDao()
+                                dao = bootstrapService.databaseInitializer.memoryDao(),
+                                memoryMediaDao = bootstrapService.databaseInitializer.memoryMediaDao()
                             )
                         }
                         val timelineEventRepository = remember {
                             com.twohearts.app.data.repository.TimelineEventRepository(
-                                bootstrapService.getDatabaseInitializer().timelineEventDao()
+                                bootstrapService.databaseInitializer.timelineEventDao()
                             )
                         }
                         val reminderRepository = remember {
                             com.twohearts.app.data.repository.ReminderRepository(
-                                bootstrapService.getDatabaseInitializer().reminderDao()
+                                bootstrapService.databaseInitializer.reminderDao()
                             )
                         }
                         val placeRepository = remember {
                             com.twohearts.app.data.repository.PlaceRepository(
-                                bootstrapService.getDatabaseInitializer().placeDao()
+                                bootstrapService.databaseInitializer.placeDao()
                             )
                         }
                         val moodEntryRepository = remember {
                             com.twohearts.app.data.repository.MoodEntryRepository(
-                                bootstrapService.getDatabaseInitializer().moodEntryDao()
+                                bootstrapService.databaseInitializer.moodEntryDao()
                             )
                         }
                         val periodEntryRepository = remember {
                             com.twohearts.app.data.repository.PeriodEntryRepository(
-                                bootstrapService.getDatabaseInitializer().periodEntryDao()
+                                bootstrapService.databaseInitializer.periodEntryDao()
                             )
                         }
                         val importantDateRepository = remember {
                             com.twohearts.app.data.repository.ImportantDateRepository(
-                                bootstrapService.getDatabaseInitializer().importantDateDao()
+                                bootstrapService.databaseInitializer.importantDateDao()
                             )
                         }
 
