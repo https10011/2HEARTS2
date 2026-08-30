@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,7 +35,7 @@ fun ThInput(
     error: String? = null,
 ) {
     val shape = RoundedCornerShape(TwoHeartsTokens.Radius.sm)
-    val colors = OutlinedTextFieldDefaults.colors(
+    val colors = TextFieldDefaults.colors(
         focusedContainerColor = MaterialTheme.colorScheme.surface,
         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
         disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
@@ -45,40 +45,48 @@ fun ThInput(
         cursorColor = MaterialTheme.colorScheme.primary,
     )
 
+    val labelComposable: @Composable (() -> Unit)? = if (label.isNotEmpty()) {
+        { Text(label) }
+    } else null
+
+    val placeholderComposable: @Composable (() -> Unit)? = if (placeholder.isNotEmpty()) {
+        { Text(placeholder) }
+    } else null
+
+    val errorComposable: @Composable (() -> Unit)? = if (error != null) {
+        { Text(error, color = MaterialTheme.colorScheme.error) }
+    } else null
+
     if (multiline) {
-        OutlinedTextField(
+        TextField(
             value = value,
             onValueChange = onValueChange,
             modifier = modifier
                 .fillMaxWidth()
                 .heightIn(min = 100.dp),
-            label = if (label.isNotEmpty()) { Text(label) } else null,
-            placeholder = if (placeholder.isNotEmpty()) { Text(placeholder) } else null,
+            label = labelComposable,
+            placeholder = placeholderComposable,
             enabled = enabled,
             shape = shape,
             colors = colors,
             maxLines = maxLines,
             isError = error != null,
-            supportingText = if (error != null) {
-                { Text(error, color = MaterialTheme.colorScheme.error) }
-            } else null,
+            supportingText = errorComposable,
         )
     } else {
-        OutlinedTextField(
+        TextField(
             value = value,
             onValueChange = onValueChange,
             modifier = modifier.fillMaxWidth(),
-            label = if (label.isNotEmpty()) { Text(label) } else null,
-            placeholder = if (placeholder.isNotEmpty()) { Text(placeholder) } else null,
+            label = labelComposable,
+            placeholder = placeholderComposable,
             enabled = enabled,
             shape = shape,
             colors = colors,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             maxLines = maxLines,
             isError = error != null,
-            supportingText = if (error != null) {
-                { Text(error, color = MaterialTheme.colorScheme.error) }
-            } else null,
+            supportingText = errorComposable,
         )
     }
 }

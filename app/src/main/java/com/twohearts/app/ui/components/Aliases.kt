@@ -9,10 +9,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -84,7 +84,7 @@ fun Input(
     multiline: Boolean = false,
 ) {
     val shape = RoundedCornerShape(TwoHeartsTokens.Radius.sm)
-    val colors = OutlinedTextFieldDefaults.colors(
+    val colors = TextFieldDefaults.colors(
         focusedContainerColor = MaterialTheme.colorScheme.surface,
         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
         disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
@@ -94,20 +94,30 @@ fun Input(
         cursorColor = MaterialTheme.colorScheme.primary,
     )
 
-    OutlinedTextField(
+    val labelComposable: @Composable (() -> Unit)? = if (label.isNotEmpty()) {
+        { Text(label) }
+    } else null
+
+    val placeholderComposable: @Composable (() -> Unit)? = if (placeholder.isNotEmpty()) {
+        { Text(placeholder) }
+    } else null
+
+    val errorComposable: @Composable (() -> Unit)? = if (error != null) {
+        { Text(error, color = MaterialTheme.colorScheme.error) }
+    } else null
+
+    TextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier.fillMaxWidth(),
-        label = if (label.isNotEmpty()) { Text(label) } else null,
-        placeholder = if (placeholder.isNotEmpty()) { Text(placeholder) } else null,
+        label = labelComposable,
+        placeholder = placeholderComposable,
         enabled = enabled && !readOnly,
         readOnly = readOnly,
         shape = shape,
         colors = colors,
         isError = error != null,
-        supportingText = if (error != null) {
-            { Text(error, color = MaterialTheme.colorScheme.error) }
-        } else null,
+        supportingText = errorComposable,
     )
 }
 
