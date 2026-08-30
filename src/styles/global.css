@@ -36,7 +36,13 @@ body {
   letter-spacing: var(--th-letter-normal);
 }
 
-/* ── Smooth theme transition ──────────────────────────────────────── */
+/**
+ * Theme transition (Phase 25): light ↔ dark flips animate surface colors
+ * smoothly instead of flashing. Scoped to shell surfaces (never `*` on
+ * interactive elements, whose own transitions already own background-color
+ * via more specific component rules); reduced-motion collapses the duration
+ * to ~1ms via the token system.
+ */
 body,
 #root,
 .th-app-shell,
@@ -225,27 +231,6 @@ h1, h2, h3, h4 {
 
 :root[data-th-motion='reduced'] .th-scale-in {
   animation: none;
-}
-
-/* ── Spinner ──────────────────────────────────────────────────────── */
-@keyframes th-spin {
-  to { transform: rotate(360deg); }
-}
-
-.th-spinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid var(--th-color-border);
-  border-top-color: var(--th-color-burgundy);
-  border-radius: var(--th-radius-circle);
-  animation: th-spin var(--th-duration-spin) linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .th-spinner {
-    animation: none;
-    border-top-color: var(--th-color-border);
-  }
 }
 
 /* ── Floating Action Button ───────────────────────────────────────── */
