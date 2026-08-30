@@ -6,8 +6,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.Button
-import com.twohearts.app.ui.components.Input
+import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThInput
 import com.twohearts.app.services.validation.Validator
 
 /**
@@ -56,7 +56,7 @@ fun ProfileSetupScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // Name input
-            Input(
+            ThInput(
                 value = name,
                 onValueChange = {
                     name = it
@@ -71,7 +71,7 @@ fun ProfileSetupScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Birthday input
-            Input(
+            ThInput(
                 value = birthday,
                 onValueChange = { birthday = it },
                 label = "Birthday (optional)",
@@ -82,7 +82,7 @@ fun ProfileSetupScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             // Next button
-            Button(
+            ThButton(
                 onClick = {
                     // Validate
                     val nameValidation = Validator.length(name, "name", min = 1, max = 50)

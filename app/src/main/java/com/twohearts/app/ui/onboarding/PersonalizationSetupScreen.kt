@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.Button
+import com.twohearts.app.ui.components.ThButton
 
 /**
  * PersonalizationSetupScreen — theme and text size selection.
@@ -142,7 +142,7 @@ fun PersonalizationSetupScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             // Next button
-            Button(
+            ThButton(
                 onClick = {
                     onNext(
                         data.copy(

@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.components.BrandLogo
-import com.twohearts.app.ui.components.Button
+import com.twohearts.app.ui.components.ThButton
 import com.twohearts.app.ui.theme.TwoHeartsTokens
 
 /**
@@ -63,7 +63,7 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             // Get Started button
-            Button(
+            ThButton(
                 onClick = onGetStarted,
                 text = "Get Started",
                 modifier = Modifier.fillMaxWidth(0.8f)

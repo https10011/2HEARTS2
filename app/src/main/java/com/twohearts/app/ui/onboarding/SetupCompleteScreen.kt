@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.components.BrandLogo
-import com.twohearts.app.ui.components.Button
+import com.twohearts.app.ui.components.ThButton
 
 /**
  * SetupCompleteScreen — celebration and navigation to app.
@@ -63,7 +63,7 @@ fun SetupCompleteScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             // Start button
-            Button(
+            ThButton(
                 onClick = onComplete,
                 text = "Start Using TwoHearts",
                 modifier = Modifier.fillMaxWidth(0.8f)

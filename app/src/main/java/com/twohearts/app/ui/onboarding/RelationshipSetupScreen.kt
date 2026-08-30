@@ -6,8 +6,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.Button
-import com.twohearts.app.ui.components.Input
+import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThInput
 import com.twohearts.app.services.validation.Validator
 
 /**
@@ -57,7 +57,7 @@ fun RelationshipSetupScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // Partner name input
-            Input(
+            ThInput(
                 value = partnerName,
                 onValueChange = {
                     partnerName = it
@@ -72,7 +72,7 @@ fun RelationshipSetupScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Start date input
-            Input(
+            ThInput(
                 value = startDate,
                 onValueChange = {
                     startDate = it
@@ -87,7 +87,7 @@ fun RelationshipSetupScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             // Next button
-            Button(
+            ThButton(
                 onClick = {
                     // Validate
                     val partnerNameValidation = Validator.length(partnerName, "partner name", min = 1, max = 50)
