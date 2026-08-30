@@ -132,7 +132,7 @@ class MainActivity : ComponentActivity() {
                     } else {
                         // Loading state
                         ThLoadingState(
-                            message = "Loading..."
+                            label = "Loading..."
                         )
                     }
                 }
