@@ -13,26 +13,38 @@ import com.twohearts.app.ui.screens.us.UsScreen
 import com.twohearts.app.ui.screens.more.MoreScreen
 import com.twohearts.app.ui.screens.notes.NotesHome
 import com.twohearts.app.ui.screens.notes.NoteEditor
-import com.twohearts.app.ui.screens.notes.NoteDetail
 import com.twohearts.app.ui.screens.memories.MemoriesHome
 import com.twohearts.app.ui.screens.memories.AddMemory
-import com.twohearts.app.ui.screens.memories.MemoryDetail
 import com.twohearts.app.ui.screens.timeline.TimelineHome
 import com.twohearts.app.ui.screens.timeline.AddEvent
-import com.twohearts.app.ui.screens.timeline.EventDetail
+import com.twohearts.app.ui.screens.reminders.RemindersHome
+import com.twohearts.app.ui.screens.reminders.CreateReminder
+import com.twohearts.app.ui.screens.places.PlacesHome
+import com.twohearts.app.ui.screens.places.CreatePlace
+import com.twohearts.app.ui.screens.mood.MoodHome
+import com.twohearts.app.ui.screens.mood.MoodEntryScreen
+import com.twohearts.app.ui.screens.mood.MoodHistory
+import com.twohearts.app.ui.screens.period.PeriodHome
+import com.twohearts.app.ui.screens.period.LogPeriod
+import com.twohearts.app.ui.screens.importantdates.ImportantDatesScreen
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.services.security.AppLockService
 import com.twohearts.app.data.repository.NoteRepository
 import com.twohearts.app.data.repository.MemoryRepository
 import com.twohearts.app.data.repository.TimelineEventRepository
+import com.twohearts.app.data.repository.ReminderRepository
+import com.twohearts.app.data.repository.PlaceRepository
+import com.twohearts.app.data.repository.MoodEntryRepository
+import com.twohearts.app.data.repository.PeriodEntryRepository
+import com.twohearts.app.data.repository.ImportantDateRepository
 import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.data.repository.generateId
 
 /**
  * AppRouter — main application router.
  *
- * Matches legacy AppRouter with:
+ * matches legacy AppRouter with:
  * - All routes defined
  * - Onboarding gate
  * - App shell
@@ -45,7 +57,12 @@ fun AppRouter(
     appLockService: AppLockService,
     noteRepository: NoteRepository,
     memoryRepository: MemoryRepository,
-    timelineEventRepository: TimelineEventRepository
+    timelineEventRepository: TimelineEventRepository,
+    reminderRepository: ReminderRepository,
+    placeRepository: PlaceRepository,
+    moodEntryRepository: MoodEntryRepository,
+    periodEntryRepository: PeriodEntryRepository,
+    importantDateRepository: ImportantDateRepository
 ) {
     val navController = rememberNavController()
     val currentRoute by navController.currentBackStackEntryAsState()
@@ -195,12 +212,10 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_NOTES_DETAIL) {
-                    // Placeholder - will need to pass note ID
                     Text("Note Detail Screen")
                 }
 
                 composable(RoutePath.APP_NOTES_EDIT) {
-                    // Placeholder - will need to pass note ID
                     Text("Edit Note Screen")
                 }
 
@@ -245,12 +260,10 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_MEMORIES_DETAIL) {
-                    // Placeholder - will need to pass memory ID
                     Text("Memory Detail Screen")
                 }
 
                 composable(RoutePath.APP_MEMORIES_EDIT) {
-                    // Placeholder - will need to pass memory ID
                     Text("Edit Memory Screen")
                 }
 
@@ -295,22 +308,53 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_TIMELINE_DETAIL) {
-                    // Placeholder - will need to pass event ID
                     Text("Event Detail Screen")
                 }
 
                 composable(RoutePath.APP_TIMELINE_EDIT) {
-                    // Placeholder - will need to pass event ID
                     Text("Edit Event Screen")
                 }
 
                 // Reminders
                 composable(RoutePath.APP_REMINDERS) {
-                    Text("Reminders Screen")
+                    val reminders by reminderRepository.observeAll().collectAsState(initial = emptyList())
+                    RemindersHome(
+                        reminders = reminders,
+                        onReminderClick = { reminderId ->
+                            navController.navigate("/app/reminders/$reminderId")
+                        },
+                        onAddReminder = {
+                            navController.navigate(RoutePath.APP_REMINDERS_ADD)
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_REMINDERS_ADD) {
-                    Text("Add Reminder Screen")
+                    CreateReminder(
+                        onSave = { title, description, scheduledDate, scheduledTime, recurrence ->
+                            kotlinx.coroutines.runBlocking {
+                                reminderRepository.create(
+                                    com.twohearts.app.data.entity.Reminder(
+                                        title = title,
+                                        description = description,
+                                        scheduledDate = scheduledDate,
+                                        scheduledTime = scheduledTime,
+                                        recurrence = recurrence,
+                                        id = generateId(),
+                                        createdAt = DateTimeHelper.nowUtc(),
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    )
+                                )
+                            }
+                            navController.popBackStack()
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_REMINDERS_DETAIL) {
@@ -323,11 +367,44 @@ fun AppRouter(
 
                 // Places
                 composable(RoutePath.APP_PLACES) {
-                    Text("Places Screen")
+                    val places by placeRepository.observeAll().collectAsState(initial = emptyList())
+                    PlacesHome(
+                        places = places,
+                        onPlaceClick = { placeId ->
+                            navController.navigate("/app/places/$placeId")
+                        },
+                        onAddPlace = {
+                            navController.navigate(RoutePath.APP_PLACES_ADD)
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_PLACES_ADD) {
-                    Text("Add Place Screen")
+                    CreatePlace(
+                        onSave = { name, address, city, notes, category ->
+                            kotlinx.coroutines.runBlocking {
+                                placeRepository.create(
+                                    com.twohearts.app.data.entity.Place(
+                                        name = name,
+                                        address = address,
+                                        city = city,
+                                        notes = notes,
+                                        category = category,
+                                        id = generateId(),
+                                        createdAt = DateTimeHelper.nowUtc(),
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    )
+                                )
+                            }
+                            navController.popBackStack()
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_PLACES_DETAIL) {
@@ -340,15 +417,56 @@ fun AppRouter(
 
                 // Mood
                 composable(RoutePath.APP_MOOD) {
-                    Text("Mood Screen")
+                    val moods by moodEntryRepository.observeAll().collectAsState(initial = emptyList())
+                    val todayMood = moods.find { it.entryDate == DateTimeHelper.todayLocal() }
+                    MoodHome(
+                        todayMood = todayMood,
+                        recentMoods = moods.take(7),
+                        onAddMood = {
+                            navController.navigate(RoutePath.APP_MOOD_ADD)
+                        },
+                        onViewHistory = {
+                            navController.navigate(RoutePath.APP_MOOD_HISTORY)
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_MOOD_ADD) {
-                    Text("Add Mood Screen")
+                    MoodEntryScreen(
+                        onSave = { moodValue, moodEmoji, note ->
+                            kotlinx.coroutines.runBlocking {
+                                moodEntryRepository.create(
+                                    com.twohearts.app.data.entity.MoodEntry(
+                                        moodValue = moodValue,
+                                        moodEmoji = moodEmoji,
+                                        note = note,
+                                        profileId = "owner", // Placeholder
+                                        entryDate = DateTimeHelper.todayLocal(),
+                                        id = generateId(),
+                                        createdAt = DateTimeHelper.nowUtc(),
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    )
+                                )
+                            }
+                            navController.popBackStack()
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_MOOD_HISTORY) {
-                    Text("Mood History Screen")
+                    val moods by moodEntryRepository.observeAll().collectAsState(initial = emptyList())
+                    MoodHistory(
+                        moods = moods,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_MOOD_EDIT) {
@@ -357,11 +475,51 @@ fun AppRouter(
 
                 // Period
                 composable(RoutePath.APP_PERIOD) {
-                    Text("Period Screen")
+                    val entries by periodEntryRepository.observeAll().collectAsState(initial = emptyList())
+                    val latestEntry = entries.firstOrNull()
+                    PeriodHome(
+                        latestEntry = latestEntry,
+                        onLogPeriod = {
+                            navController.navigate(RoutePath.APP_PERIOD_LOG)
+                        },
+                        onViewCalendar = {
+                            navController.navigate(RoutePath.APP_PERIOD_CALENDAR)
+                        },
+                        onViewHistory = {
+                            navController.navigate(RoutePath.APP_PERIOD_HISTORY)
+                        },
+                        onSettings = {
+                            navController.navigate(RoutePath.APP_PERIOD_SETTINGS)
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_PERIOD_LOG) {
-                    Text("Log Period Screen")
+                    LogPeriod(
+                        onSave = { startDate, endDate, flowLevel, note ->
+                            kotlinx.coroutines.runBlocking {
+                                periodEntryRepository.create(
+                                    com.twohearts.app.data.entity.PeriodEntry(
+                                        startDate = startDate,
+                                        endDate = endDate,
+                                        flowLevel = flowLevel,
+                                        note = note,
+                                        profileId = "owner", // Placeholder
+                                        id = generateId(),
+                                        createdAt = DateTimeHelper.nowUtc(),
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    )
+                                )
+                            }
+                            navController.popBackStack()
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_PERIOD_CALENDAR) {
@@ -482,7 +640,16 @@ fun AppRouter(
 
                 // Important dates
                 composable(RoutePath.APP_IMPORTANT_DATES) {
-                    Text("Important Dates Screen")
+                    val dates by importantDateRepository.observeAll().collectAsState(initial = emptyList())
+                    ImportantDatesScreen(
+                        dates = dates,
+                        onAddDate = {
+                            // Will be implemented
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             }
         }
