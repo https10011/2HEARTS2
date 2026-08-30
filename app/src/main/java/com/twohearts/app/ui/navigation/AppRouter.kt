@@ -11,9 +11,23 @@ import com.twohearts.app.ui.onboarding.OnboardingGate
 import com.twohearts.app.ui.screens.home.HomeScreen
 import com.twohearts.app.ui.screens.us.UsScreen
 import com.twohearts.app.ui.screens.more.MoreScreen
+import com.twohearts.app.ui.screens.notes.NotesHome
+import com.twohearts.app.ui.screens.notes.NoteEditor
+import com.twohearts.app.ui.screens.notes.NoteDetail
+import com.twohearts.app.ui.screens.memories.MemoriesHome
+import com.twohearts.app.ui.screens.memories.AddMemory
+import com.twohearts.app.ui.screens.memories.MemoryDetail
+import com.twohearts.app.ui.screens.timeline.TimelineHome
+import com.twohearts.app.ui.screens.timeline.AddEvent
+import com.twohearts.app.ui.screens.timeline.EventDetail
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.services.security.AppLockService
+import com.twohearts.app.data.repository.NoteRepository
+import com.twohearts.app.data.repository.MemoryRepository
+import com.twohearts.app.data.repository.TimelineEventRepository
+import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.data.repository.generateId
 
 /**
  * AppRouter — main application router.
@@ -28,7 +42,10 @@ import com.twohearts.app.services.security.AppLockService
 fun AppRouter(
     appStateService: AppStateService,
     relationshipService: RelationshipService,
-    appLockService: AppLockService
+    appLockService: AppLockService,
+    noteRepository: NoteRepository,
+    memoryRepository: MemoryRepository,
+    timelineEventRepository: TimelineEventRepository
 ) {
     val navController = rememberNavController()
     val currentRoute by navController.currentBackStackEntryAsState()
@@ -139,52 +156,151 @@ fun AppRouter(
 
                 // Notes
                 composable(RoutePath.APP_NOTES) {
-                    Text("Notes Screen")
+                    val notes by noteRepository.observeAll().collectAsState(initial = emptyList())
+                    NotesHome(
+                        notes = notes,
+                        onNoteClick = { noteId ->
+                            navController.navigate("/app/notes/$noteId")
+                        },
+                        onAddNote = {
+                            navController.navigate(RoutePath.APP_NOTES_ADD)
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_NOTES_ADD) {
-                    Text("Add Note Screen")
+                    NoteEditor(
+                        onSave = { title, content, category ->
+                            kotlinx.coroutines.runBlocking {
+                                noteRepository.create(
+                                    com.twohearts.app.data.entity.Note(
+                                        title = title,
+                                        content = content,
+                                        category = category.name.lowercase(),
+                                        id = generateId(),
+                                        createdAt = DateTimeHelper.nowUtc(),
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    )
+                                )
+                            }
+                            navController.popBackStack()
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_NOTES_DETAIL) {
+                    // Placeholder - will need to pass note ID
                     Text("Note Detail Screen")
                 }
 
                 composable(RoutePath.APP_NOTES_EDIT) {
+                    // Placeholder - will need to pass note ID
                     Text("Edit Note Screen")
                 }
 
                 // Memories
                 composable(RoutePath.APP_MEMORIES) {
-                    Text("Memories Screen")
+                    val memories by memoryRepository.observeAll().collectAsState(initial = emptyList())
+                    MemoriesHome(
+                        memories = memories,
+                        onMemoryClick = { memoryId ->
+                            navController.navigate("/app/memories/$memoryId")
+                        },
+                        onAddMemory = {
+                            navController.navigate(RoutePath.APP_MEMORIES_ADD)
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_MEMORIES_ADD) {
-                    Text("Add Memory Screen")
+                    AddMemory(
+                        onSave = { title, caption, memoryDate ->
+                            kotlinx.coroutines.runBlocking {
+                                memoryRepository.create(
+                                    com.twohearts.app.data.entity.Memory(
+                                        title = title,
+                                        caption = caption,
+                                        memoryDate = memoryDate,
+                                        id = generateId(),
+                                        createdAt = DateTimeHelper.nowUtc(),
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    )
+                                )
+                            }
+                            navController.popBackStack()
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_MEMORIES_DETAIL) {
+                    // Placeholder - will need to pass memory ID
                     Text("Memory Detail Screen")
                 }
 
                 composable(RoutePath.APP_MEMORIES_EDIT) {
+                    // Placeholder - will need to pass memory ID
                     Text("Edit Memory Screen")
                 }
 
                 // Timeline
                 composable(RoutePath.APP_TIMELINE) {
-                    Text("Timeline Screen")
+                    val events by timelineEventRepository.observeAll().collectAsState(initial = emptyList())
+                    TimelineHome(
+                        events = events,
+                        onEventClick = { eventId ->
+                            navController.navigate("/app/timeline/$eventId")
+                        },
+                        onAddEvent = {
+                            navController.navigate(RoutePath.APP_TIMELINE_ADD)
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_TIMELINE_ADD) {
-                    Text("Add Event Screen")
+                    AddEvent(
+                        onSave = { title, eventDate, description ->
+                            kotlinx.coroutines.runBlocking {
+                                timelineEventRepository.create(
+                                    com.twohearts.app.data.entity.TimelineEvent(
+                                        title = title,
+                                        eventDate = eventDate,
+                                        description = description,
+                                        id = generateId(),
+                                        createdAt = DateTimeHelper.nowUtc(),
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    )
+                                )
+                            }
+                            navController.popBackStack()
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_TIMELINE_DETAIL) {
+                    // Placeholder - will need to pass event ID
                     Text("Event Detail Screen")
                 }
 
                 composable(RoutePath.APP_TIMELINE_EDIT) {
+                    // Placeholder - will need to pass event ID
                     Text("Edit Event Screen")
                 }
 
