@@ -8,6 +8,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.twohearts.app.ui.onboarding.OnboardingGate
+import com.twohearts.app.ui.screens.home.HomeScreen
+import com.twohearts.app.ui.screens.us.UsScreen
+import com.twohearts.app.ui.screens.more.MoreScreen
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.services.security.AppLockService
@@ -97,18 +100,31 @@ fun AppRouter(
             ) {
                 // Home
                 composable(RoutePath.APP_HOME) {
-                    // Placeholder - will be implemented in Stage 7
-                    Text("Home Screen")
+                    HomeScreen(
+                        relationshipService = relationshipService,
+                        onNavigate = { route ->
+                            navController.navigate(route)
+                        }
+                    )
                 }
 
                 // Us / Relationship Hub
                 composable(RoutePath.APP_US) {
-                    Text("Us Screen")
+                    UsScreen(
+                        relationshipService = relationshipService,
+                        onNavigate = { route ->
+                            navController.navigate(route)
+                        }
+                    )
                 }
 
                 // More
                 composable(RoutePath.APP_MORE) {
-                    Text("More Screen")
+                    MoreScreen(
+                        onNavigate = { route ->
+                            navController.navigate(route)
+                        }
+                    )
                 }
 
                 // Notifications
