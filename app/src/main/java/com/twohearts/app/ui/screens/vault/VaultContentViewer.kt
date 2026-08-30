@@ -12,7 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -210,7 +210,7 @@ fun VaultContentViewer(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = item.title,
+                                text = item.title ?: "Untitled",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -247,9 +247,9 @@ fun VaultContentViewer(
                     
                     Spacer(modifier = Modifier.height(12.dp))
                     
-                    DetailRow(label = "Title", value = item.title)
+                    DetailRow(label = "Title", value = item.title ?: "Untitled")
                     DetailRow(label = "Type", value = contentType.displayName)
-                    DetailRow(label = "Added", value = item.createdAt)
+                    DetailRow(label = "Added", value = item.createdAt.toString())
                 }
             }
         }

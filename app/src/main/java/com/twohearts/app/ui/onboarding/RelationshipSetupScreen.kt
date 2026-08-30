@@ -95,12 +95,12 @@ fun RelationshipSetupScreen(
 
                     if (!partnerNameValidation.ok) {
                         partnerNameError = partnerNameValidation.errors.firstOrNull()?.message
-                        return@Button
+                        return@ThButton
                     }
 
                     if (!startDateValidation.ok) {
                         startDateError = startDateValidation.errors.firstOrNull()?.message
-                        return@Button
+                        return@ThButton
                     }
 
                     onNext(

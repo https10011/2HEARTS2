@@ -88,7 +88,7 @@ fun ProfileSetupScreen(
                     val nameValidation = Validator.length(name, "name", min = 1, max = 50)
                     if (!nameValidation.ok) {
                         nameError = nameValidation.errors.firstOrNull()?.message
-                        return@Button
+                        return@ThButton
                     }
 
                     onNext(

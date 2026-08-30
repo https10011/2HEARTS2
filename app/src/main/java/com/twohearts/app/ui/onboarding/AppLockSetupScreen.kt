@@ -106,13 +106,13 @@ fun AppLockSetupScreen(
                     val pinValidation = Validator.pin(pin)
                     if (!pinValidation.ok) {
                         pinError = pinValidation.errors.firstOrNull()?.message
-                        return@Button
+                        return@ThButton
                     }
 
                     // Validate confirm PIN
                     if (pin != confirmPin) {
                         confirmPinError = "PINs do not match"
-                        return@Button
+                        return@ThButton
                     }
 
                     onNext(

@@ -161,7 +161,7 @@ fun AddVaultContent(
                     if (selectedUri != null) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "File selected: ${selectedUri.lastPathSegment}",
+                            text = "File selected: ${selectedUri?.lastPathSegment ?: "unknown"}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

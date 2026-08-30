@@ -72,25 +72,25 @@ fun VaultContentType.getDisplayInfo(fileName: String? = null): ContentTypeDispla
     val ext = fileName?.substringAfterLast('.', "")?.uppercase() ?: ""
     
     return when (this) {
-        PHOTO -> ContentTypeDisplayInfo(
+        VaultContentType.PHOTO -> ContentTypeDisplayInfo(
             type = this,
             title = "Photo",
             description = "Private photo stored securely",
             extension = ext.ifEmpty { "IMG" }
         )
-        VIDEO -> ContentTypeDisplayInfo(
+        VaultContentType.VIDEO -> ContentTypeDisplayInfo(
             type = this,
             title = "Video",
             description = "Private video stored securely",
             extension = ext.ifEmpty { "VID" }
         )
-        NOTE -> ContentTypeDisplayInfo(
+        VaultContentType.NOTE -> ContentTypeDisplayInfo(
             type = this,
             title = "Note",
             description = "Private note stored securely",
             extension = ext.ifEmpty { "TXT" }
         )
-        FILE -> ContentTypeDisplayInfo(
+        VaultContentType.FILE -> ContentTypeDisplayInfo(
             type = this,
             title = "File",
             description = "Private file stored securely",
