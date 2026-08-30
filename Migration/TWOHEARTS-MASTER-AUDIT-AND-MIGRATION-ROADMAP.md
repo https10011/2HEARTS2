@@ -922,17 +922,101 @@ PIN hashing (PBKDF2), secure storage (Keystore), vault access control, and all s
 ## P8: Preserve Accessibility
 Text scaling, reduced motion, touch targets, screen reader support, and contrast ratios must be maintained.
 
-## P9: Preserve the Design Language
-The burgundy brand identity, warm design tokens, rose-lily decorations, and overall visual language should be preserved. The migration may improve visual quality but must not abandon the established design identity.
+## P9: Preserve the Core Brand Identity
+The TwoHearts name, official TwoHearts logo, core brand identity, and couples-oriented purpose must be preserved. The current visual implementation (CSS, components, Rose/Lily SVGs, icons, 77 screen designs) should be treated as a reference for product intent — not as a mandatory visual specification for the native Android application.
 
-## P10: Clean Architecture
+## P10: The Agent Has Full Authority
+See the detailed "Future Migration Authority" section (after Part 9) for the complete scope of the agent's authority.
+
+## P11: Clean Architecture
 The migration should improve code organization, reduce technical debt (Yuki localStorage, CSS file size), and establish a cleaner architecture for future development.
 
-## P11: Preserve or Improve All 77 Screens
+## P12: Preserve or Improve All 77 Screens
 Every screen that exists in V1 must have an equivalent in the migrated version. The migration may improve screens but must not remove functionality.
 
-## P12: Archive, Don't Delete
-Old code should be archived (moved to Archive/ folder), not deleted, during migration. This preserves reference material and prevents data loss.
+## P13: Archive, Don't Delete
+Old code and assets should be archived (moved to Archive/ folder), not deleted, during migration. This preserves reference material and prevents data loss. See Part 13 for complete archive rules.
+
+---
+
+# PART 9A — FUTURE MIGRATION AUTHORITY
+
+The future agent(s) performing the TwoHearts migration have **full authority** over every aspect of the migration:
+
+- **Full engineering authority** — choose the best architecture, frameworks, tools, and patterns for the native Android application.
+- **Full architectural authority** — redesign the data layer, service layer, UI layer, and navigation as needed.
+- **Full creative authority** — redesign layouts, visual presentation, interaction patterns, and user experience.
+- **Full UI/UX design authority** — create modern Android-native UI patterns, components, navigation, animations, typography, layouts, icons, illustrations, graphics, materials, motion, and interaction patterns.
+- **Full asset-selection authority** — source, create, or replace any visual assets.
+- **Freedom to recreate systems** when direct conversion from the React/Vite/Capacitor implementation is inappropriate, difficult, or would produce an inferior result.
+- **Freedom to replace outdated implementations** that do not serve the product well.
+- **Freedom to redesign features** for the new native Android environment.
+
+The future agent must migrate the **TwoHearts product**, not blindly reproduce the current implementation.
+
+If an existing implementation is difficult, obsolete, poorly designed, or unsuitable for the new architecture, the agent may build a better native equivalent while preserving the intended functionality and product purpose.
+
+**This is NOT a one-to-one code translation.**
+
+The existing repository, feature documentation, historical screens, and this master roadmap exist to help the agent understand what TwoHearts is. The agent should use its own engineering and design judgment to determine how TwoHearts should be implemented natively.
+
+---
+
+# PART 9B — DESIGN / ASSET DIRECTIVE
+
+## Current Implementation Is a Reference, Not a Specification
+
+The current TwoHearts visual implementation must **not** be treated as the permanent design system for the future native Android application.
+
+The current UI was created around the React/Vite/Capacitor environment and should therefore be treated as a **reference for existing product intent and functionality**, not as a mandatory visual specification.
+
+The future native Android application **may** use modern Android-native:
+
+- UI patterns, components, and layouts
+- Navigation patterns (Android standard navigation)
+- Animations and transitions
+- Typography and text rendering
+- Icons and iconography
+- Illustrations and graphics
+- Materials and elevation
+- Motion and interaction patterns
+- Accessibility patterns
+
+## Brand Exception — Non-Negotiable
+
+The following remain **fixed product identity elements** unless the master product requirements explicitly change them:
+
+- **TwoHearts name**
+- **Official TwoHearts logo**
+- **Core TwoHearts identity**
+- **Couples-oriented purpose**
+
+Everything else in the visual implementation **may** be reconsidered during migration if doing so produces a substantially better native Android experience.
+
+## Asset Freedom
+
+- The existing **Rose/Lily SVG collection may be replaced**.
+- The existing **77 screen visual designs** may be treated as historical/reference material rather than mandatory designs.
+ - **Existing icons may be replaced**.
+- **Existing decorative assets may be replaced**.
+- **Existing UI components may be redesigned**.
+- **New SVGs/assets may be created** specifically for the native Android application.
+- Appropriate **free/open-license assets may be sourced** when useful.
+ - Any externally sourced asset **must** have a license compatible with use and redistribution in TwoHearts.
+ - Do **not** use assets with unclear licensing.
+ - Do **not** introduce remote asset dependencies.
+
+## Important: This Is Not a "React → Native" Translation
+
+The future migration is **not** an exercise in:
+
+> "React/Vite/Capacitor → native Android one-to-one translation."
+
+It **is**:
+
+> "Existing TwoHearts product → best possible native Android implementation."
+
+The future agent should use the existing repository, feature documentation, historical screens, and this master roadmap to understand what TwoHearts is, while using its own engineering and design judgment to determine how TwoHearts should be implemented natively.
 
 ---
 
@@ -1835,10 +1919,13 @@ After migration replaces old systems, the following should be moved to the `Arch
 - All `STAGE-*-*.md` reports — development history
 - This migration document itself
 
-### Do NOT Archive
-- Brand SVG assets (branding, decorations) — these are the canonical assets
-- Test files that are still relevant
-- Configuration files that are still used
+### Do NOT Archive (Yet)
+- Brand SVG assets until the migration agent has decided whether to use them or replace them
+- Test files that are still relevant to the active application
+- Configuration files that are still used by the active application
+- Any file that is still imported by active code in the current repository
+
+**Important:** The future migration agent has full authority to archive brand assets (branding/, decorations/), legacy UI assets, and old icon sets if the agent has replaced them with new native Android assets. Do not archive files that are still referenced by the active V1 application, but once the native application no longer depends on them, they may be moved to Archive/ as historical reference.
 
 ## Archive Structure
 
