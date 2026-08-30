@@ -1,6 +1,5 @@
 package com.twohearts.app.ui.components
 
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -93,9 +92,6 @@ fun Input(
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
         cursorColor = MaterialTheme.colorScheme.primary,
-        errorIndicatorColor = MaterialTheme.colorScheme.error,
-        errorCursorColor = MaterialTheme.colorScheme.error,
-        errorContainerColor = MaterialTheme.colorScheme.surface,
     )
 
     OutlinedTextField(
@@ -162,18 +158,14 @@ fun ConfirmDialog(
         title = { Text(text = title) },
         text = { Text(text = message) },
         confirmButton = {
-            ThButton(
-                onClick = onConfirm,
-                variant = ButtonVariant.DANGER,
-                text = confirmText,
-            )
+            TextButton(onClick = onConfirm) {
+                Text(text = confirmText)
+            }
         },
         dismissButton = {
-            ThButton(
-                onClick = onDismiss,
-                variant = ButtonVariant.GHOST,
-                text = dismissText,
-            )
+            TextButton(onClick = onDismiss) {
+                Text(text = dismissText)
+            }
         },
         modifier = modifier,
     )

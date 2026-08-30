@@ -43,9 +43,6 @@ fun ThInput(
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
         cursorColor = MaterialTheme.colorScheme.primary,
-        errorIndicatorColor = MaterialTheme.colorScheme.error,
-        errorCursorColor = MaterialTheme.colorScheme.error,
-        errorContainerColor = MaterialTheme.colorScheme.surface,
     )
 
     if (multiline) {
