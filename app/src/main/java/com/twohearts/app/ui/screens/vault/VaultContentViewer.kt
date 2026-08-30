@@ -39,7 +39,7 @@ fun VaultContentViewer(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(item.title) },
+                title = { Text(item.title ?: "") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(

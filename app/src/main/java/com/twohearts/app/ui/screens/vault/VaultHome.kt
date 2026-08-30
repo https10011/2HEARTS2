@@ -165,7 +165,7 @@ private fun VaultItemCard(
             // Item Info
             Column {
                 Text(
-                    text = item.title,
+                    text = item.title ?: "",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface,

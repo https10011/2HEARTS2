@@ -37,8 +37,8 @@ fun CouplePair(
         ) {
             ProfileAvatar(
                 name = ownerName,
-                photoRef = ownerPhotoRef,
-                size = TwoHeartsTokens.Dimensions.avatarLg
+                photoUrl = ownerPhotoRef,
+                size = TwoHeartsTokens.Dimensions.avatarLg.value.toInt()
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -66,8 +66,8 @@ fun CouplePair(
         ) {
             ProfileAvatar(
                 name = partnerName,
-                photoRef = partnerPhotoRef,
-                size = TwoHeartsTokens.Dimensions.avatarLg
+                photoUrl = partnerPhotoRef,
+                size = TwoHeartsTokens.Dimensions.avatarLg.value.toInt()
             )
 
             Spacer(modifier = Modifier.height(8.dp))
