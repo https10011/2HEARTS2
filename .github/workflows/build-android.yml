@@ -1,17 +1,12 @@
 name: Build Android APK
 
-# TwoHearts V1 — Android APK build workflow (MasterPrompt §61).
-#
-# Builds the React web bundle, syncs it into the Capacitor Android
-# project via `cap sync`, then assembles a debug (and release-ready)
-# APK using Gradle. No hosted website, no cloud build service, no
-# proprietary deployment platform — the APK bundles all web assets for
-# offline use.
+# TwoHearts — Native Android build workflow.
+# Builds the Kotlin/Jetpack Android application via Gradle and produces a debug APK.
 
 on:
   push:
     branches: [master, main]
-  workflow_dispatch: # Allow the owner to run the build manually from Actions.
+  workflow_dispatch:
 
 jobs:
   build-apk:
@@ -23,46 +18,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22' # 22.7+ required by the persistence test runner
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run persistence unit tests
-        run: npm test
-
-      - name: Build React production bundle
-        run: npm run build
-
-      - name: Set up Java
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: 'platforms;android-34 build-tools;34.0.0 platform-tools'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Install Capacitor CLI
-        run: npm install -D @capacitor/cli
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      - name: Sync Capacitor (copy web assets + update plugins)
-        run: npx cap sync android
-
-      - name: Build Android debug APK
-        working-directory: android
+      - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon
+
+      - name: Run unit tests
+        run: ./gradlew test --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: twohearts-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30

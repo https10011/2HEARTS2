@@ -2,7 +2,7 @@
 
 This archive preserves the **complete legacy React/Vite/Capacitor TwoHearts
 implementation** and all associated historical documentation for reference
-during the future native Android migration.
+during the native Android migration.
 
 ---
 
@@ -12,29 +12,26 @@ The archive exists so that:
 
 - **Nothing is lost.** Every file from the completed V1 implementation is
   preserved in Git history and accessible here.
-- **Future agents can reference it.** When migrating to native Android,
-  agents can inspect archived code to understand how features worked, what
-  data models were used, how persistence was handled, and what design
-  decisions were made.
+- **Future agents can reference it.** When building the native Android
+  application, agents can inspect archived code to understand how features
+  worked, what data models were used, how persistence was handled, and what
+  design decisions were made.
 - **The active repository stays clean.** The root of the repository now
-  contains only what is needed for the active build workflow and the
-  future migration.
+  contains only the native Android project and migration documentation.
 
 ---
 
 ## ⚠️ Important Rules
 
 1. **Do NOT treat archived files as the active application.**
-   The active TwoHearts codebase lives at the repository root (`src/`,
-   `tests/`, `package.json`, etc.). The archived materials are reference
-   only.
+   The active TwoHearts codebase is the **native Kotlin/Android/Jetpack**
+   project at the repository root. The archived materials are reference only.
 
 2. **Do NOT delete archived files.** Archiving is permanent preservation,
-   not disposal. If something is in the archive, it stays there.
+   not disposal.
 
 3. **Do NOT modify archived source code.** Archived files are preserved
-   exactly as they were at the time of archiving. Do not rewrite,
-   refactor, or cosmetically alter them.
+   exactly as they were at the time of archiving.
 
 4. **Do NOT import from the archive in active code.** The archive is
    read-only reference material.
@@ -49,134 +46,140 @@ The archive exists so that:
 ```
 Archive/
 ├── README.md                                  ← This file
-├── Legacy-React-Vite-Capacitor/
-│   ├── Stage-Reports/                         ← Visual productization stage reports
-│   │   ├── STAGE-1-VISUAL-PRODUCTIZATION.md
-│   │   ├── STAGE-2-VISUAL-PRODUCTIZATION.md
-│   │   ├── ...
-│   │   └── STAGE-24-FINAL-GIT-CHECKPOINT.md
-│   ├── Architecture-Docs/                     ← Architecture & feature documentation
-│   │   ├── app-shell.md                       ← Phase 24 navigation architecture
-│   │   ├── core-services.md                   ← Phase 3 core services
-│   │   ├── design-system.md                   ← Design token documentation
-│   │   ├── memories.md                        ← Phase 7 memories feature
-│   │   ├── onboarding.md                      ← Phase 5 onboarding
-│   │   ├── persistence.md                     ← Phase 2 database architecture
-│   │   ├── relationship-state.md              ← Phase 4 relationship foundation
-│   │   ├── screens.md                         ← 77-screen reference mapping
-│   │   ├── settings.md                        ← Phase 19 settings architecture
-│   │   ├── phase-22-release.md                ← V1 release readiness
-│   │   ├── phase26-screen-audit.md            ← Visual experience overhaul
-│   │   ├── phase31-ux-consistency-audit.md    ← UX consistency audit
-│   │   ├── phase32-performance-accessibility-audit.md
-│   │   └── phase33-final-visual-qa.md
-│   ├── Final-Reports/                         ← Final completion reports
-│   │   ├── FINAL-77-SCREEN-VISUAL-STATUS.md   ← Authoritative 77-screen status
-│   │   ├── FINAL-TWOHEARTS-ACCEPTANCE-REPORT.md
-│   │   └── FINAL-V1-VISUAL-PRODUCTIZATION-REPORT.md
-│   ├── Directive-Guidelines/                  ← Stage-by-stage development directives
-│   │   ├── STAGE-00-MASTER-RECONNAISSANCE.md
-│   │   ├── STAGE-01-FIRST-LAUNCH-ONBOARDING-REPAIR.md
-│   │   ├── ...
-│   │   └── STAGE-09-COMPLETE-VISUAL-PRODUCTIZATION.md
-│   ├── Screen-References/                     ← 77 approved PNG visual references
-│   │   ├── 01-SplashScreen.png
-│   │   ├── 02-Welcome-FirstLaunch.png
-│   │   ├── ...
-│   │   └── 77-VaultContentView.png
-│   ├── Directives/                            ← Original build/roadmap directives
-│   │   ├── MasterPrompt.txt                   ← Original master build prompt (79 sections)
-│   │   ├── TwoHeartsRDMap.txt                 ← Authoritative V1 roadmap
-│   │   ├── TWOHEARTS-MASTER-AUTONOMY-AND-FINAL-PRODUCT-REBUILD-DIRECTIVE.txt
-│   │   ├── TWOHEARTS-VISUAL-PRODUCTIZATION-DIRECTIVE.txt
-│   │   └── TwoHearts-Post-V1-UI-UX_Experience-Ovehaul-RoadMap.txt
-│   ├── Guides/                                ← Legacy customization documentation
-│   │   └── TWOHEARTS_CUSTOMIZATION_GUIDE.md
-│   ├── Legacy-Vectors/                        ← Original SVG source vectors
-│   │   ├── Rose Lily Vectors/                 ← 20 rose-lily SVG source files
-│   │   └── TwoHearts-Logo-BrandName/          ← Logo/brand name SVG source
-│   └── Legacy-Archived-Assets-README.md       ← Original src/assets/archive/ notes
+└── Legacy-React-Vite-Capacitor/
+    ├── src/                                   ← Complete React source code (~265 files)
+    │   ├── main.tsx                           ← App entry point
+    │   ├── App.tsx                            ← Root component
+    │   ├── components/                        ← 19 shared UI components + primitives.css
+    │   ├── features/                          ← All feature modules
+    │   │   ├── app-shell/                     ← App shell, bottom nav, screens
+    │   │   ├── games/                         ← Game screens
+    │   │   ├── memories/                      ← Memories feature
+    │   │   ├── mood/                          ← Mood feature
+    │   │   ├── notes/                         ← Notes feature
+    │   │   ├── notifications/                 ← Notification center
+    │   │   ├── onboarding/                    ← Onboarding flow
+    │   │   ├── period/                        ← Period tracker
+    │   │   ├── permissions/                   ← Permission prompts
+    │   │   ├── places/                        ← Places feature
+    │   │   ├── reminders/                     ← Reminders feature
+    │   │   ├── settings/                      ← Settings screens
+    │   │   ├── timeline/                      ← Timeline feature
+    │   │   ├── vault/                         ← Private vault
+    │   │   └── yuki/                          ← Yuki companion cat
+    │   ├── services/                          ← 25+ service modules
+    │   ├── repositories/                      ← 14 repository classes
+    │   ├── data/                              ← Database, models, serialization, media
+    │   ├── navigation/                        ← App router + routes
+    │   ├── theme/                             ← Design tokens (CSS + TypeScript)
+    │   ├── styles/                            ← Global CSS
+    │   ├── customization/                     ← Owner customization (theme, games, defaults)
+    │   ├── assets/                            ← SVG assets (branding, decorations, images)
+    │   ├── config/                            ← App config + persistence config
+    │   ├── core/                              ← App root provider, error boundary, settings
+    │   └── utils/                             ← Shared utilities
+    ├── tests/                                 ← 56 test files (948+ tests)
+    ├── package.json                           ← npm dependencies
+    ├── package-lock.json                      ← npm lockfile
+    ├── index.html                             ← Vite entry point
+    ├── vite.config.ts                         ← Vite configuration
+    ├── capacitor.config.ts                    ← Capacitor configuration
+    ├── tsconfig.json                          ← TypeScript root config
+    ├── tsconfig.app.json                      ← TypeScript app config
+    ├── tsconfig.node.json                     ← TypeScript node config
+    ├── android/                               ← Capacitor Android project
+    ├── scripts/                               ← Design asset scripts
+    ├── AGENTS.md                              ← Agent memory (legacy context)
+    ├── README.md                              ← Legacy project README
+    ├── .github-workflows/                     ← Legacy GitHub Actions workflow
+    │   └── build-android.yml                  ← Capacitor APK build pipeline
+    ├── Architecture-Docs/                     ← 14 architecture documentation files
+    ├── Stage-Reports/                         ← 21 visual productization reports
+    ├── Final-Reports/                         ← 3 final completion reports
+    ├── Directive-Guidelines/                  ← 10 stage development directives
+    ├── Directives/                            ← 5 original build/roadmap .txt files
+    ├── Guides/                                ← Owner customization guide
+    ├── Legacy-Vectors/                        ← 21 SVG source files
+    │   ├── Rose Lily Vectors/                 ← 20 rose-lily SVGs
+    │   └── TwoHearts-Logo-BrandName/          ← Logo SVG
+    ├── Screen-References/                     ← 77 approved PNG visual references
+    └── Legacy-Archived-Assets-README.md       ← Original src/assets/archive notes
 ```
 
 ---
 
 ## What Each Category Contains
 
-### Stage-Reports/
-The 21 stage-by-stage visual productization reports documenting the
-progressive UI/UX rebuild of TwoHearts through Stages 1–22 (with
-Stage 24 as the final git checkpoint). These are historical records
-of what was done at each stage.
+### src/
+The complete React/Vite/Capacitor application source code. ~265 TypeScript/TSX
+files implementing all 77 screens across 15 feature modules. This is the
+primary reference for understanding how TwoHearts V1 worked.
+
+### tests/
+56 test files with 948+ tests covering services, repositories, data layer,
+migrations, and feature integration. Uses Node's test runner on real sql.js.
+
+### Package & Build Files
+`package.json`, `package-lock.json`, `index.html`, `vite.config.ts`,
+`capacitor.config.ts`, `tsconfig*.json` — the complete web build toolchain.
+
+### android/
+The Capacitor Android project (Gradle build, manifest, native plugins).
+
+### .github-workflows/
+The legacy GitHub Actions workflow that built the Capacitor APK (Node →
+Vite build → Capacitor sync → Gradle → APK).
 
 ### Architecture-Docs/
-Detailed architecture documentation for each major system: database
-persistence, core services, relationship state, onboarding, app shell
-navigation, memories, settings, design system, and the 77-screen
-reference mapping. These contain the technical decisions and patterns
-used in the legacy implementation.
+Detailed architecture documentation: persistence, core services, navigation,
+memories, settings, onboarding, design system, 77-screen mapping.
+
+### Stage-Reports/
+21 stage-by-stage visual productization reports documenting the progressive
+UI/UX rebuild of TwoHearts.
 
 ### Final-Reports/
-The authoritative final status reports: 77-screen visual status,
-acceptance report, and V1 visual productization completion report.
+Authoritative final status: 77-screen visual status, acceptance report,
+V1 visual productization completion.
 
 ### Directive-Guidelines/
-The 10 stage-by-stage development directives (STAGE-00 through
-STAGE-09) that guided the Freebuff platform's implementation work.
-These document what was planned, what problems were found, and how
-they were resolved.
-
-### Screen-References/
-The 77 approved PNG visual reference images (1080×2400 portrait)
-used as the visual foundation for the TwoHearts V1 implementation.
-These are the original design targets that the implementation
-was built against.
+10 stage development directives (STAGE-00 through STAGE-09) with
+problems found and solutions applied.
 
 ### Directives/
-The original authoritative build documents:
-- **MasterPrompt.txt** — The 79-section master build prompt defining
-  every requirement for TwoHearts V1.
-- **TwoHeartsRDMap.txt** — The authoritative V1 feature roadmap with
-  screen numbering and implementation status.
-- **TWOHEARTS-MASTER-AUTONOMY-AND-FINAL-PRODUCT-REBUILD-DIRECTIVE.txt**
-  — The master autonomy directive for the final rebuild cycle.
-- **TWOHEARTS-VISUAL-PRODUCTIZATION-DIRECTIVE.txt** — The visual
-  productization directive.
-- **TwoHearts-Post-V1-UI-UX_Experience-Ovehaul-RoadMap.txt** — The
-  post-V1 UI/UX overhaul roadmap.
+Original authoritative build documents: MasterPrompt.txt (79 sections),
+TwoHeartsRDMap.txt (roadmap), and other specification files.
 
-### Guides/
-The legacy owner customization guide explaining how to modify the
-React/Vite/Capacitor application (logos, colors, game content, etc.).
+### Screen-References/
+77 approved PNG visual reference images (1080×2400 portrait) that served
+as the design foundation for the V1 implementation.
+
+### Legacy-Vectors/
+Source SVG files: 20 rose-lily decorative vectors and the TwoHearts logo.
 
 ---
 
 ## Legacy Implementation Summary
 
-The archived React/Vite/Capacitor implementation consisted of:
-
 | Component | Description |
 |-----------|------------|
-| **Source** | ~265 TypeScript/TSX files across `src/` (components, features, services, repositories, data, navigation, theme, customization) |
-| **Tests** | 55 test files with 948+ tests (in `tests/` at repository root) |
-| **Assets** | 25 SVG assets (branding, decorations, images, Yuki character) |
-| **CSS** | 10,700+ lines of custom CSS (design tokens, primitives, global styles) |
-| **Build** | Vite → dist/ → Capacitor sync → Android APK via Gradle |
-| **Database** | SQLite with 13 migration versions (schema v13) |
-| **Features** | 77 screens: onboarding, home, memories, notes, timeline, games (6 couple + 4 casual), reminders, places, mood, period tracker, vault, Yuki companion, search, notification center, settings |
-| **CI** | GitHub Actions workflow for Android APK build |
-
-The active `src/`, `tests/`, `package.json`, `index.html`, build
-configs (Vite, TypeScript, Capacitor), and the GitHub Actions workflow
-remain at the repository root because they are required by the build
-system. They constitute the **active legacy codebase** — still
-buildable but no longer the target for new development.
+| **Language** | TypeScript (strict mode) |
+| **UI Framework** | React 18 |
+| **Build Tool** | Vite 5.4 |
+| **Mobile Shell** | Capacitor 6.2 |
+| **Database** | SQLite (13 migrations, schema v13) |
+| **Tests** | 948+ tests, 56 test files |
+| **Screens** | 77 approved references, 67 implemented |
+| **CSS** | 10,700+ lines custom CSS |
+| **Assets** | 25 SVGs, 77 PNG references |
+| **Features** | Onboarding, Home, Memories, Notes, Timeline, Games, Reminders, Places, Mood, Period Tracker, Vault, Yuki, Search, Notifications, Settings |
 
 ---
 
 ## Migration Directory
 
 The `Migration/` directory at the repository root is **NOT** part of
-this archive. It is the dedicated location for the future native
-Android migration planning and documentation. See
+this archive. It is the dedicated location for the native Android
+migration planning and documentation. See
 `Migration/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md` for the
 comprehensive migration roadmap.
