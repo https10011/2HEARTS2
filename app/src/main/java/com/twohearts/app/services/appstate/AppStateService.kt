@@ -4,6 +4,7 @@ import com.twohearts.app.data.settings.SettingsStorage
 import com.twohearts.app.services.logger.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
@@ -35,11 +36,12 @@ class AppStateService(private val settingsStorage: SettingsStorage) {
      * Initialize app state from settings.
      */
     suspend fun initialize() {
-        val settings = settingsStorage.settings
-        _themeMode.value = settings.themeMode
-        _textSize.value = settings.textSize
-        _isOnboarded.value = settings.onboarded
-        _onboardingStage.value = settings.onboardingStage
+        settingsStorage.settings.first().let { settings ->
+            _themeMode.value = settings.themeMode
+            _textSize.value = settings.textSize
+            _isOnboarded.value = settings.onboarded
+            _onboardingStage.value = settings.onboardingStage
+        }
         logger.info("App state initialized")
     }
 

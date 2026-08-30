@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import com.twohearts.app.ui.navigation.AppRouter
 import com.twohearts.app.ui.theme.TwoHeartsTheme
 import com.twohearts.app.ui.theme.TextScalingLevel
+import com.twohearts.app.ui.components.LoadingState
 import com.twohearts.app.services.bootstrap.BootstrapService
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
@@ -66,6 +67,48 @@ class MainActivity : ComponentActivity() {
                             bootstrapService.getAppLockService()
                         }
 
+                        // Create repositories for AppRouter
+                        val noteRepository = remember {
+                            com.twohearts.app.data.repository.NoteRepository(
+                                bootstrapService.getDatabaseInitializer().noteDao()
+                            )
+                        }
+                        val memoryRepository = remember {
+                            com.twohearts.app.data.repository.MemoryRepository(
+                                bootstrapService.getDatabaseInitializer().memoryDao()
+                            )
+                        }
+                        val timelineEventRepository = remember {
+                            com.twohearts.app.data.repository.TimelineEventRepository(
+                                bootstrapService.getDatabaseInitializer().timelineEventDao()
+                            )
+                        }
+                        val reminderRepository = remember {
+                            com.twohearts.app.data.repository.ReminderRepository(
+                                bootstrapService.getDatabaseInitializer().reminderDao()
+                            )
+                        }
+                        val placeRepository = remember {
+                            com.twohearts.app.data.repository.PlaceRepository(
+                                bootstrapService.getDatabaseInitializer().placeDao()
+                            )
+                        }
+                        val moodEntryRepository = remember {
+                            com.twohearts.app.data.repository.MoodEntryRepository(
+                                bootstrapService.getDatabaseInitializer().moodEntryDao()
+                            )
+                        }
+                        val periodEntryRepository = remember {
+                            com.twohearts.app.data.repository.PeriodEntryRepository(
+                                bootstrapService.getDatabaseInitializer().periodEntryDao()
+                            )
+                        }
+                        val importantDateRepository = remember {
+                            com.twohearts.app.data.repository.ImportantDateRepository(
+                                bootstrapService.getDatabaseInitializer().importantDateDao()
+                            )
+                        }
+
                         // Initialize app state
                         LaunchedEffect(Unit) {
                             appStateService.initialize()
@@ -75,11 +118,19 @@ class MainActivity : ComponentActivity() {
                         AppRouter(
                             appStateService = appStateService,
                             relationshipService = relationshipService,
-                            appLockService = appLockService
+                            appLockService = appLockService,
+                            noteRepository = noteRepository,
+                            memoryRepository = memoryRepository,
+                            timelineEventRepository = timelineEventRepository,
+                            reminderRepository = reminderRepository,
+                            placeRepository = placeRepository,
+                            moodEntryRepository = moodEntryRepository,
+                            periodEntryRepository = periodEntryRepository,
+                            importantDateRepository = importantDateRepository
                         )
                     } else {
                         // Loading state
-                        com.twohearts.app.ui.components.LoadingState(
+                        LoadingState(
                             message = "Loading..."
                         )
                     }

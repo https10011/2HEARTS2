@@ -5,7 +5,6 @@ import com.twohearts.app.data.database.DatabaseInitializer
 import com.twohearts.app.services.media.FileService
 import com.twohearts.app.services.media.MediaStorage
 import com.twohearts.app.services.security.AppLockService
-import com.twohearts.app.services.settings.SettingsStorage
 import com.twohearts.app.services.logger.Logger
 import com.twohearts.app.data.settings.SettingsStorage as DataSettingsStorage
 
