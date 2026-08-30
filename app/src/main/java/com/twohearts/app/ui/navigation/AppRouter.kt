@@ -27,6 +27,8 @@ import com.twohearts.app.ui.screens.mood.MoodHistory
 import com.twohearts.app.ui.screens.period.PeriodHome
 import com.twohearts.app.ui.screens.period.LogPeriod
 import com.twohearts.app.ui.screens.importantdates.ImportantDatesScreen
+import com.twohearts.app.ui.screens.vault.*
+import com.twohearts.app.ui.screens.security.*
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.services.security.AppLockService
@@ -540,15 +542,42 @@ fun AppRouter(
 
                 // Vault
                 composable(RoutePath.APP_VAULT) {
-                    Text("Vault Screen")
+                    val vaultItems by remember { mutableStateOf(emptyList<com.twohearts.app.data.entity.VaultItem>()) }
+                    val isVaultLocked by appLockService.isLocked.collectAsState()
+                    
+                    VaultEntryRoute(
+                        isVaultLocked = isVaultLocked,
+                        vaultItems = vaultItems,
+                        onPinEntered = { pin ->
+                            appLockService.verifyPin(pin)
+                        },
+                        onPinError = { error ->
+                            // Show error toast
+                        },
+                        onItemClicked = { item ->
+                            navController.navigate("/app/vault/${item.id}")
+                        },
+                        onAddClicked = {
+                            navController.navigate(RoutePath.APP_VAULT_ADD)
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_VAULT_ADD) {
-                    Text("Add Vault Content Screen")
+                    AddVaultContent(
+                        onBack = {
+                            navController.popBackStack()
+                        },
+                        onContentAdded = { title, contentType, contentUri ->
+                            // Will be implemented with repository
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_VAULT_CONTENT) {
-                    Text("Vault Content Screen")
+                    // Placeholder - will be implemented with item loading
+                    Text("Vault Content Viewer")
                 }
 
                 // Yuki
@@ -623,7 +652,24 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_SETTINGS_SECURITY) {
-                    Text("Security Settings Screen")
+                    val isAppLockEnabled by appLockService.isEnabled.collectAsState()
+                    
+                    SecuritySettingsScreen(
+                        isAppLockEnabled = isAppLockEnabled,
+                        onAppLockToggle = { enabled ->
+                            if (enabled) {
+                                // Will prompt for PIN setup
+                            } else {
+                                appLockService.disable()
+                            }
+                        },
+                        onChangePin = { oldPin, newPin ->
+                            appLockService.changePin(oldPin, newPin)
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_SETTINGS_STORAGE) {
