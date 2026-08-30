@@ -2181,4 +2181,52 @@ Before marking any migration stage as complete, verify:
 
 ---
 
+# PART 14 — TARGET MIGRATION STACK
+
+The target technology stack for the future TwoHearts migration is:
+
+- **Kotlin** — primary language
+- **Android SDK** — native Android platform
+- **Android Jetpack** — modern Android architecture components
+
+The future TwoHearts application should be rebuilt as a **genuinely native Android application** using this stack.
+
+The future agent has **full engineering and architectural authority** to determine:
+
+- The best Kotlin architecture (e.g., MVVM, MVI, Clean Architecture, or hybrid)
+- Android SDK configuration (minSdk, targetSdk, compileSdk)
+- Which Jetpack libraries to use (Room, Navigation, Compose, WorkManager, DataStore, etc.)
+- Component structure and implementation approach
+- Gradle build configuration and modules
+- Testing framework and strategy
+- Any other native Android libraries or tools that produce the best result
+
+The current React/Vite/Capacitor implementation is the **source product and functionality reference**, but the future agent should build the **best native Android version** of TwoHearts, rather than performing a one-to-one translation of the existing WebView-based implementation.
+
+## Workflow: Repository → GitHub Actions → APK
+
+The future migration should follow the same repository-based development workflow used throughout the project:
+
+> **Agent writes the code → code is placed in the GitHub repository → GitHub Actions builds the Android project → APK is produced.**
+
+The future agent should:
+
+- Put the Kotlin/Android source code **directly into the repository**
+- Maintain the complete native Android project and Gradle configuration in the repository
+- Configure the necessary **GitHub Actions workflow** to build the native Android application
+- Use **GitHub Actions** to produce the build APK
+- Ensure the project can be built through the repository workflow **without requiring Android Studio** to be available in the agent environment, where technically possible
+- Verify the GitHub Actions build and APK generation whenever possible
+- Use its own engineering judgment for the exact Gradle, SDK, Jetpack, build variant, signing, and workflow configuration
+
+The intended workflow is:
+
+```
+TwoHearts → Kotlin + Android SDK + Jetpack → GitHub Repository → GitHub Actions → Android APK
+```
+
+**This is a future migration directive only. Do not begin the migration now.**
+
+---
+
 *Document generated from comprehensive repository audit. All information is based on actual source code inspection, not assumptions.*
