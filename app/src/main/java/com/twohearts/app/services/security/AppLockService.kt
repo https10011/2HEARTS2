@@ -47,7 +47,7 @@ class AppLockService(
         }
 
         // Listen for foreground events to re-lock
-        val lockTimeout = settings.first().lockTimeoutSeconds
+        val lockTimeout = settings.lockTimeoutSeconds
         lifecycleService.addListener(object : LifecycleListener {
             override fun onForeground() {
                 if (_lockState.value == AppLockState.UNLOCKED) {

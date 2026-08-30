@@ -4,7 +4,9 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.launch
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -547,7 +549,7 @@ fun AppRouter(
                 // Vault
                 composable(RoutePath.APP_VAULT) {
                     val vaultItems by remember { mutableStateOf(emptyList<com.twohearts.app.data.entity.VaultItem>()) }
-                    val isVaultLocked by appLockService.isLocked.collectAsState()
+                    val isVaultLocked = appLockService.isLocked()
                     
                     VaultEntryRoute(
                         isVaultLocked = isVaultLocked,
@@ -656,19 +658,24 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_SETTINGS_SECURITY) {
-                    val isAppLockEnabled by appLockService.isEnabled.collectAsState()
+                    val isAppLockEnabled = appLockService.isEnabled()
                     
+                    val scope = rememberCoroutineScope()
                     SecuritySettingsScreen(
                         isAppLockEnabled = isAppLockEnabled,
                         onAppLockToggle = { enabled ->
-                            if (enabled) {
-                                // Will prompt for PIN setup
-                            } else {
-                                appLockService.disable()
+                            scope.launch {
+                                if (enabled) {
+                                    // Will prompt for PIN setup
+                                } else {
+                                    appLockService.disable()
+                                }
                             }
                         },
                         onChangePin = { oldPin, newPin ->
-                            appLockService.changePin(oldPin, newPin)
+                            scope.launch {
+                                appLockService.changePin(oldPin, newPin)
+                            }
                         },
                         onBack = {
                             navController.popBackStack()

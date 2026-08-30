@@ -8,8 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.Button
-import com.twohearts.app.ui.components.Input
+import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThInput
 import com.twohearts.app.services.validation.Validator
 
 /**
@@ -60,7 +60,7 @@ fun AppLockSetupScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // PIN input
-            Input(
+            ThInput(
                 value = pin,
                 onValueChange = {
                     pin = it
@@ -75,7 +75,7 @@ fun AppLockSetupScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Confirm PIN input
-            Input(
+            ThInput(
                 value = confirmPin,
                 onValueChange = {
                     confirmPin = it
@@ -100,7 +100,7 @@ fun AppLockSetupScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             // Continue button (with PIN)
-            Button(
+            ThButton(
                 onClick = {
                     // Validate PIN
                     val pinValidation = Validator.pin(pin)
@@ -129,7 +129,7 @@ fun AppLockSetupScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             // Skip button
-            TextButton(
+            TextThButton(
                 onClick = {
                     onNext(data.copy(pin = null, confirmPin = null))
                 }
