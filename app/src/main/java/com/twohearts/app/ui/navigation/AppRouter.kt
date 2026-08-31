@@ -602,49 +602,107 @@ fun AppRouter(
                     )
                 }
 
-                // Games
+                // Games — archived (Stage 12).
+                // Legacy games are preserved in Archive/Legacy-React-Vite-Capacitor/
+                // Yuki replaced games as the primary engagement feature.
+                // All game routes redirect to Yuki companion.
                 composable(RoutePath.APP_GAMES) {
-                    Text("Games Screen")
+                    LaunchedEffect(Unit) {
+                        navController.navigate(RoutePath.APP_YUKI) {
+                            popUpTo(RoutePath.APP_HOME) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 composable(RoutePath.APP_GAMES_MEMORY_MATCH) {
-                    Text("Memory Match Screen")
+                    LaunchedEffect(Unit) {
+                        navController.navigate(RoutePath.APP_YUKI) {
+                            popUpTo(RoutePath.APP_HOME) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 composable(RoutePath.APP_GAMES_WORD_SCRAMBLE) {
-                    Text("Word Scramble Screen")
+                    LaunchedEffect(Unit) {
+                        navController.navigate(RoutePath.APP_YUKI) {
+                            popUpTo(RoutePath.APP_HOME) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 composable(RoutePath.APP_GAMES_COUPLE_TRIVIA) {
-                    Text("Couple Trivia Screen")
+                    LaunchedEffect(Unit) {
+                        navController.navigate(RoutePath.APP_YUKI) {
+                            popUpTo(RoutePath.APP_HOME) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 composable(RoutePath.APP_GAMES_WHO_KNOWS) {
-                    Text("Who Knows Screen")
+                    LaunchedEffect(Unit) {
+                        navController.navigate(RoutePath.APP_YUKI) {
+                            popUpTo(RoutePath.APP_HOME) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 composable(RoutePath.APP_GAMES_WOULD_YOU_RATHER) {
-                    Text("Would You Rather Screen")
+                    LaunchedEffect(Unit) {
+                        navController.navigate(RoutePath.APP_YUKI) {
+                            popUpTo(RoutePath.APP_HOME) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 composable(RoutePath.APP_GAMES_THIS_OR_THAT) {
-                    Text("This Or That Screen")
+                    LaunchedEffect(Unit) {
+                        navController.navigate(RoutePath.APP_YUKI) {
+                            popUpTo(RoutePath.APP_HOME) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 composable(RoutePath.APP_GAMES_GUESS_MY_ANSWER) {
-                    Text("Guess My Answer Screen")
+                    LaunchedEffect(Unit) {
+                        navController.navigate(RoutePath.APP_YUKI) {
+                            popUpTo(RoutePath.APP_HOME) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 composable(RoutePath.APP_GAMES_CASUAL_TRIVIA) {
-                    Text("Casual Trivia Screen")
+                    LaunchedEffect(Unit) {
+                        navController.navigate(RoutePath.APP_YUKI) {
+                            popUpTo(RoutePath.APP_HOME) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 composable(RoutePath.APP_GAMES_RIDDLE_ROOM) {
-                    Text("Riddle Room Screen")
+                    LaunchedEffect(Unit) {
+                        navController.navigate(RoutePath.APP_YUKI) {
+                            popUpTo(RoutePath.APP_HOME) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 composable(RoutePath.APP_GAMES_RESULTS) {
-                    Text("Game Results Screen")
+                    LaunchedEffect(Unit) {
+                        navController.navigate(RoutePath.APP_YUKI) {
+                            popUpTo(RoutePath.APP_HOME) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    }
                 }
 
                 // Settings

@@ -71,7 +71,12 @@ object RoutePath {
     // Yuki
     const val APP_YUKI = "/app/yuki"
 
-    // Games
+    // Games — ARCHIVED (Stage 12).
+    // Legacy games (Memory Match, Word Scramble, Couple Trivia, Who Knows,
+    // Would You Rather, This Or That, Guess My Answer, Casual Trivia,
+    // Riddle Room) were superseded by Yuki companion (Stage 11).
+    // All game routes redirect to APP_YUKI for backward compatibility.
+    // Full legacy game source preserved in Archive/Legacy-React-Vite-Capacitor/
     const val APP_GAMES = "/app/games"
     const val APP_GAMES_MEMORY_MATCH = "/app/games/memory-match"
     const val APP_GAMES_WORD_SCRAMBLE = "/app/games/word-scramble"
