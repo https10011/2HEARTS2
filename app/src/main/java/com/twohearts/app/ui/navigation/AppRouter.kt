@@ -21,19 +21,28 @@ import com.twohearts.app.ui.screens.us.UsScreen
 import com.twohearts.app.ui.screens.more.MoreScreen
 import com.twohearts.app.ui.screens.notes.NotesHome
 import com.twohearts.app.ui.screens.notes.NoteEditor
+import com.twohearts.app.ui.screens.notes.NoteDetail
+import com.twohearts.app.ui.screens.notes.NoteCategory
 import com.twohearts.app.ui.screens.memories.MemoriesHome
 import com.twohearts.app.ui.screens.memories.AddMemory
+import com.twohearts.app.ui.screens.memories.MemoryDetail
 import com.twohearts.app.ui.screens.timeline.TimelineHome
 import com.twohearts.app.ui.screens.timeline.AddEvent
+import com.twohearts.app.ui.screens.timeline.EventDetail
 import com.twohearts.app.ui.screens.reminders.RemindersHome
 import com.twohearts.app.ui.screens.reminders.CreateReminder
+import com.twohearts.app.ui.screens.reminders.ReminderDetail
 import com.twohearts.app.ui.screens.places.PlacesHome
 import com.twohearts.app.ui.screens.places.CreatePlace
+import com.twohearts.app.ui.screens.places.PlaceDetail
 import com.twohearts.app.ui.screens.mood.MoodHome
 import com.twohearts.app.ui.screens.mood.MoodEntryScreen
 import com.twohearts.app.ui.screens.mood.MoodHistory
 import com.twohearts.app.ui.screens.period.PeriodHome
 import com.twohearts.app.ui.screens.period.LogPeriod
+import com.twohearts.app.ui.screens.period.PeriodCalendarScreen
+import com.twohearts.app.ui.screens.period.PeriodHistoryScreen
+import com.twohearts.app.ui.screens.period.PeriodSettingsScreen
 import com.twohearts.app.ui.screens.importantdates.ImportantDatesScreen
 import com.twohearts.app.ui.screens.vault.*
 import com.twohearts.app.ui.screens.security.*
@@ -42,6 +51,8 @@ import com.twohearts.app.ui.screens.settings.AppearanceSettingsScreen
 import com.twohearts.app.ui.screens.settings.NotificationSettingsScreen
 import com.twohearts.app.ui.screens.settings.StorageSettingsScreen
 import com.twohearts.app.ui.screens.settings.ImportScreen
+import com.twohearts.app.ui.screens.settings.ProfileSettingsScreen
+import com.twohearts.app.ui.screens.settings.RelationshipSettingsScreen
 import com.twohearts.app.ui.screens.search.SearchScreen
 import com.twohearts.app.ui.screens.notifications.NotificationCenterScreen
 import com.twohearts.app.ui.screens.about.AboutScreen
@@ -264,12 +275,59 @@ fun AppRouter(
                     )
                 }
 
-                composable(RoutePath.APP_NOTES_DETAIL) {
-                    Text("Note Detail Screen")
+                composable("/app/notes/{noteId}") { backStackEntry ->
+                    val noteId = backStackEntry.arguments?.getString("noteId") ?: return@composable
+                    var note by remember { mutableStateOf<com.twohearts.app.data.entity.Note?>(null) }
+                    LaunchedEffect(noteId) {
+                        note = noteRepository.getById(noteId)
+                    }
+                    note?.let { n ->
+                        NoteDetail(
+                            note = n,
+                            onEdit = {
+                                navController.navigate("/app/notes/$noteId/edit")
+                            },
+                            onDelete = {
+                                kotlinx.coroutines.runBlocking {
+                                    noteRepository.softDelete(n.id)
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
-                composable(RoutePath.APP_NOTES_EDIT) {
-                    Text("Edit Note Screen")
+                composable("/app/notes/{noteId}/edit") { backStackEntry ->
+                    val noteId = backStackEntry.arguments?.getString("noteId") ?: return@composable
+                    var note by remember { mutableStateOf<com.twohearts.app.data.entity.Note?>(null) }
+                    LaunchedEffect(noteId) {
+                        note = noteRepository.getById(noteId)
+                    }
+                    note?.let { n ->
+                        NoteEditor(
+                            noteId = n.id,
+                            initialTitle = n.title,
+                            initialContent = n.content,
+                            initialCategory = NoteCategory.fromString(n.category),
+                            onSave = { title, content, category ->
+                                kotlinx.coroutines.runBlocking {
+                                    noteRepository.update(n.copy(
+                                        title = title,
+                                        content = content,
+                                        category = category.name.lowercase(),
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    ))
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
                 // Memories
@@ -312,12 +370,59 @@ fun AppRouter(
                     )
                 }
 
-                composable(RoutePath.APP_MEMORIES_DETAIL) {
-                    Text("Memory Detail Screen")
+                composable("/app/memories/{memoryId}") { backStackEntry ->
+                    val memoryId = backStackEntry.arguments?.getString("memoryId") ?: return@composable
+                    var memory by remember { mutableStateOf<com.twohearts.app.data.entity.Memory?>(null) }
+                    LaunchedEffect(memoryId) {
+                        memory = memoryRepository.getById(memoryId)
+                    }
+                    memory?.let { m ->
+                        MemoryDetail(
+                            memory = m,
+                            onEdit = {
+                                navController.navigate("/app/memories/$memoryId/edit")
+                            },
+                            onDelete = {
+                                kotlinx.coroutines.runBlocking {
+                                    memoryRepository.softDelete(m.id)
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
-                composable(RoutePath.APP_MEMORIES_EDIT) {
-                    Text("Edit Memory Screen")
+                composable("/app/memories/{memoryId}/edit") { backStackEntry ->
+                    val memoryId = backStackEntry.arguments?.getString("memoryId") ?: return@composable
+                    var memory by remember { mutableStateOf<com.twohearts.app.data.entity.Memory?>(null) }
+                    LaunchedEffect(memoryId) {
+                        memory = memoryRepository.getById(memoryId)
+                    }
+                    memory?.let { m ->
+                        AddMemory(
+                            memoryId = m.id,
+                            initialTitle = m.title,
+                            initialCaption = m.caption ?: "",
+                            initialDate = m.memoryDate,
+                            onSave = { title, caption, memoryDate ->
+                                kotlinx.coroutines.runBlocking {
+                                    memoryRepository.update(m.copy(
+                                        title = title,
+                                        caption = caption,
+                                        memoryDate = memoryDate,
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    ))
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
                 // Timeline
@@ -360,12 +465,59 @@ fun AppRouter(
                     )
                 }
 
-                composable(RoutePath.APP_TIMELINE_DETAIL) {
-                    Text("Event Detail Screen")
+                composable("/app/timeline/{eventId}") { backStackEntry ->
+                    val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
+                    var event by remember { mutableStateOf<com.twohearts.app.data.entity.TimelineEvent?>(null) }
+                    LaunchedEffect(eventId) {
+                        event = timelineEventRepository.getById(eventId)
+                    }
+                    event?.let { e ->
+                        EventDetail(
+                            event = e,
+                            onEdit = {
+                                navController.navigate("/app/timeline/$eventId/edit")
+                            },
+                            onDelete = {
+                                kotlinx.coroutines.runBlocking {
+                                    timelineEventRepository.softDelete(e.id)
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
-                composable(RoutePath.APP_TIMELINE_EDIT) {
-                    Text("Edit Event Screen")
+                composable("/app/timeline/{eventId}/edit") { backStackEntry ->
+                    val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
+                    var event by remember { mutableStateOf<com.twohearts.app.data.entity.TimelineEvent?>(null) }
+                    LaunchedEffect(eventId) {
+                        event = timelineEventRepository.getById(eventId)
+                    }
+                    event?.let { e ->
+                        AddEvent(
+                            eventId = e.id,
+                            initialTitle = e.title,
+                            initialDescription = e.description ?: "",
+                            initialDate = e.eventDate,
+                            onSave = { title, eventDate, description ->
+                                kotlinx.coroutines.runBlocking {
+                                    timelineEventRepository.update(e.copy(
+                                        title = title,
+                                        eventDate = eventDate,
+                                        description = description,
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    ))
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
                 // Reminders
@@ -410,12 +562,63 @@ fun AppRouter(
                     )
                 }
 
-                composable(RoutePath.APP_REMINDERS_DETAIL) {
-                    Text("Reminder Detail Screen")
+                composable("/app/reminders/{reminderId}") { backStackEntry ->
+                    val reminderId = backStackEntry.arguments?.getString("reminderId") ?: return@composable
+                    var reminder by remember { mutableStateOf<com.twohearts.app.data.entity.Reminder?>(null) }
+                    LaunchedEffect(reminderId) {
+                        reminder = reminderRepository.getById(reminderId)
+                    }
+                    reminder?.let { r ->
+                        ReminderDetail(
+                            reminder = r,
+                            onEdit = {
+                                navController.navigate("/app/reminders/$reminderId/edit")
+                            },
+                            onDelete = {
+                                kotlinx.coroutines.runBlocking {
+                                    reminderRepository.softDelete(r.id)
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
-                composable(RoutePath.APP_REMINDERS_EDIT) {
-                    Text("Edit Reminder Screen")
+                composable("/app/reminders/{reminderId}/edit") { backStackEntry ->
+                    val reminderId = backStackEntry.arguments?.getString("reminderId") ?: return@composable
+                    var reminder by remember { mutableStateOf<com.twohearts.app.data.entity.Reminder?>(null) }
+                    LaunchedEffect(reminderId) {
+                        reminder = reminderRepository.getById(reminderId)
+                    }
+                    reminder?.let { r ->
+                        CreateReminder(
+                            reminderId = r.id,
+                            initialTitle = r.title,
+                            initialDescription = r.description ?: "",
+                            initialDate = r.scheduledDate ?: "",
+                            initialTime = r.scheduledTime ?: "",
+                            initialRecurrence = r.recurrence ?: "none",
+                            onSave = { title, description, scheduledDate, scheduledTime, recurrence ->
+                                kotlinx.coroutines.runBlocking {
+                                    reminderRepository.update(r.copy(
+                                        title = title,
+                                        description = description,
+                                        scheduledDate = scheduledDate,
+                                        scheduledTime = scheduledTime,
+                                        recurrence = recurrence,
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    ))
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
                 // Places
@@ -460,12 +663,63 @@ fun AppRouter(
                     )
                 }
 
-                composable(RoutePath.APP_PLACES_DETAIL) {
-                    Text("Place Detail Screen")
+                composable("/app/places/{placeId}") { backStackEntry ->
+                    val placeId = backStackEntry.arguments?.getString("placeId") ?: return@composable
+                    var place by remember { mutableStateOf<com.twohearts.app.data.entity.Place?>(null) }
+                    LaunchedEffect(placeId) {
+                        place = placeRepository.getById(placeId)
+                    }
+                    place?.let { p ->
+                        PlaceDetail(
+                            place = p,
+                            onEdit = {
+                                navController.navigate("/app/places/$placeId/edit")
+                            },
+                            onDelete = {
+                                kotlinx.coroutines.runBlocking {
+                                    placeRepository.softDelete(p.id)
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
-                composable(RoutePath.APP_PLACES_EDIT) {
-                    Text("Edit Place Screen")
+                composable("/app/places/{placeId}/edit") { backStackEntry ->
+                    val placeId = backStackEntry.arguments?.getString("placeId") ?: return@composable
+                    var place by remember { mutableStateOf<com.twohearts.app.data.entity.Place?>(null) }
+                    LaunchedEffect(placeId) {
+                        place = placeRepository.getById(placeId)
+                    }
+                    place?.let { p ->
+                        CreatePlace(
+                            placeId = p.id,
+                            initialName = p.name,
+                            initialAddress = p.address ?: "",
+                            initialCity = p.city ?: "",
+                            initialNotes = p.notes ?: "",
+                            initialCategory = p.category ?: "",
+                            onSave = { name, address, city, notes, category ->
+                                kotlinx.coroutines.runBlocking {
+                                    placeRepository.update(p.copy(
+                                        name = name,
+                                        address = address,
+                                        city = city,
+                                        notes = notes,
+                                        category = category,
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    ))
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
                 // Mood
@@ -522,8 +776,32 @@ fun AppRouter(
                     )
                 }
 
-                composable(RoutePath.APP_MOOD_EDIT) {
-                    Text("Edit Mood Screen")
+                composable("/app/mood/{entryId}/edit") { backStackEntry ->
+                    val entryId = backStackEntry.arguments?.getString("entryId") ?: return@composable
+                    var entry by remember { mutableStateOf<com.twohearts.app.data.entity.MoodEntry?>(null) }
+                    LaunchedEffect(entryId) {
+                        entry = moodEntryRepository.getById(entryId)
+                    }
+                    entry?.let { e ->
+                        MoodEntryScreen(
+                            initialMood = e.moodValue,
+                            initialNote = e.note ?: "",
+                            onSave = { moodValue, moodEmoji, note ->
+                                kotlinx.coroutines.runBlocking {
+                                    moodEntryRepository.update(e.copy(
+                                        moodValue = moodValue,
+                                        moodEmoji = moodEmoji,
+                                        note = note,
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    ))
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
                 // Period
@@ -576,19 +854,63 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_PERIOD_CALENDAR) {
-                    Text("Period Calendar Screen")
+                    val entries by periodEntryRepository.observeAll().collectAsState(initial = emptyList())
+                    PeriodCalendarScreen(
+                        entries = entries,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_PERIOD_HISTORY) {
-                    Text("Period History Screen")
+                    val entries by periodEntryRepository.observeAll().collectAsState(initial = emptyList())
+                    PeriodHistoryScreen(
+                        entries = entries,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_PERIOD_SETTINGS) {
-                    Text("Period Settings Screen")
+                    PeriodSettingsScreen(
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
-                composable(RoutePath.APP_PERIOD_LOG_EDIT) {
-                    Text("Edit Period Screen")
+                composable("/app/period/{entryId}/edit") { backStackEntry ->
+                    val entryId = backStackEntry.arguments?.getString("entryId") ?: return@composable
+                    var entry by remember { mutableStateOf<com.twohearts.app.data.entity.PeriodEntry?>(null) }
+                    LaunchedEffect(entryId) {
+                        entry = periodEntryRepository.getById(entryId)
+                    }
+                    entry?.let { e ->
+                        LogPeriod(
+                            entryId = e.id,
+                            initialStartDate = e.startDate,
+                            initialEndDate = e.endDate ?: "",
+                            initialFlowLevel = e.flowLevel,
+                            initialNote = e.note ?: "",
+                            onSave = { startDate, endDate, flowLevel, note ->
+                                kotlinx.coroutines.runBlocking {
+                                    periodEntryRepository.update(e.copy(
+                                        startDate = startDate,
+                                        endDate = endDate,
+                                        flowLevel = flowLevel,
+                                        note = note,
+                                        updatedAt = DateTimeHelper.nowUtc()
+                                    ))
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    } ?: Text("Loading...")
                 }
 
                 // Vault
@@ -758,11 +1080,19 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_SETTINGS_PROFILE) {
-                    Text("Profile Settings Screen")
+                    ProfileSettingsScreen(
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_SETTINGS_RELATIONSHIP) {
-                    Text("Relationship Settings Screen")
+                    RelationshipSettingsScreen(
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_SETTINGS_APPEARANCE) {
