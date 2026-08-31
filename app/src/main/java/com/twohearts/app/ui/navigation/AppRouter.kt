@@ -37,8 +37,20 @@ import com.twohearts.app.ui.screens.period.LogPeriod
 import com.twohearts.app.ui.screens.importantdates.ImportantDatesScreen
 import com.twohearts.app.ui.screens.vault.*
 import com.twohearts.app.ui.screens.security.*
+import com.twohearts.app.ui.screens.settings.SettingsHomeScreen
+import com.twohearts.app.ui.screens.settings.AppearanceSettingsScreen
+import com.twohearts.app.ui.screens.settings.NotificationSettingsScreen
+import com.twohearts.app.ui.screens.settings.StorageSettingsScreen
+import com.twohearts.app.ui.screens.settings.ImportScreen
+import com.twohearts.app.ui.screens.search.SearchScreen
+import com.twohearts.app.ui.screens.notifications.NotificationCenterScreen
+import com.twohearts.app.ui.screens.about.AboutScreen
 import com.twohearts.app.ui.screens.yuki.YukiScreen
 import com.twohearts.app.ui.screens.yuki.YukiViewModel
+import com.twohearts.app.services.datamanagement.DataManagementService
+import com.twohearts.app.services.search.SearchEngine
+import com.twohearts.app.data.repository.NotificationCenterRepository
+import com.twohearts.app.data.settings.SettingsStorage
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
@@ -75,7 +87,11 @@ fun AppRouter(
     placeRepository: PlaceRepository,
     moodEntryRepository: MoodEntryRepository,
     periodEntryRepository: PeriodEntryRepository,
-    importantDateRepository: ImportantDateRepository
+    importantDateRepository: ImportantDateRepository,
+    dataManagementService: DataManagementService,
+    searchEngine: SearchEngine,
+    notificationCenterRepository: NotificationCenterRepository,
+    settingsStorage: SettingsStorage
 ) {
     val navController = rememberNavController()
     val currentRoute by navController.currentBackStackEntryAsState()
@@ -176,12 +192,36 @@ fun AppRouter(
 
                 // Notifications
                 composable(RoutePath.APP_NOTIFICATIONS) {
-                    Text("Notifications Screen")
+                    NotificationCenterScreen(
+                        notificationCenterRepository = notificationCenterRepository,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 // Search
                 composable(RoutePath.APP_SEARCH) {
-                    Text("Search Screen")
+                    SearchScreen(
+                        searchEngine = searchEngine,
+                        noteRepository = noteRepository,
+                        memoryRepository = memoryRepository,
+                        reminderRepository = reminderRepository,
+                        placeRepository = placeRepository,
+                        timelineEventRepository = timelineEventRepository,
+                        onResultClick = { type, id ->
+                            when (type) {
+                                "note" -> navController.navigate("/app/notes/$id")
+                                "memory" -> navController.navigate("/app/memories/$id")
+                                "reminder" -> navController.navigate("/app/reminders/$id")
+                                "place" -> navController.navigate("/app/places/$id")
+                                "timeline" -> navController.navigate("/app/timeline/$id")
+                            }
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 // Notes
@@ -707,7 +747,14 @@ fun AppRouter(
 
                 // Settings
                 composable(RoutePath.APP_SETTINGS) {
-                    Text("Settings Screen")
+                    SettingsHomeScreen(
+                        onNavigate = { route ->
+                            navController.navigate(route)
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_SETTINGS_PROFILE) {
@@ -719,11 +766,21 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_SETTINGS_APPEARANCE) {
-                    Text("Appearance Settings Screen")
+                    AppearanceSettingsScreen(
+                        appStateService = appStateService,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_SETTINGS_NOTIFICATIONS) {
-                    Text("Notification Settings Screen")
+                    NotificationSettingsScreen(
+                        settingsStorage = settingsStorage,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_SETTINGS_SECURITY) {
@@ -753,15 +810,30 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_SETTINGS_STORAGE) {
-                    Text("Storage Settings Screen")
+                    StorageSettingsScreen(
+                        dataManagementService = dataManagementService,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_SETTINGS_IMPORT) {
-                    Text("Import Screen")
+                    ImportScreen(
+                        noteRepository = noteRepository,
+                        reminderRepository = reminderRepository,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 composable(RoutePath.APP_ABOUT) {
-                    Text("About Screen")
+                    AboutScreen(
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 // Important dates
