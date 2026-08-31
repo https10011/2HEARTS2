@@ -37,6 +37,9 @@ import com.twohearts.app.ui.screens.period.LogPeriod
 import com.twohearts.app.ui.screens.importantdates.ImportantDatesScreen
 import com.twohearts.app.ui.screens.vault.*
 import com.twohearts.app.ui.screens.security.*
+import com.twohearts.app.ui.screens.yuki.YukiScreen
+import com.twohearts.app.ui.screens.yuki.YukiViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.services.security.AppLockService
@@ -590,7 +593,13 @@ fun AppRouter(
 
                 // Yuki
                 composable(RoutePath.APP_YUKI) {
-                    Text("Yuki Screen")
+                    val yukiViewModel: YukiViewModel = viewModel()
+                    YukiScreen(
+                        viewModel = yukiViewModel,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
                 // Games
