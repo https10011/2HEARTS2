@@ -2,6 +2,12 @@ name: Build Android APK
 
 # TwoHearts — Native Android build workflow.
 # Builds the Kotlin/Jetpack Android application via Gradle and produces a debug APK.
+#
+# Technology stack:
+# - Kotlin 2.1.0 + Jetpack Compose + Material 3
+# - Room (SQLite) for persistence
+# - Android SDK 35, AGP 8.7.3, Gradle 8.11
+# - JDK 17 (Temurin)
 
 on:
   push:
@@ -31,7 +37,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Run unit tests
         run: ./gradlew test --no-daemon

@@ -101,6 +101,7 @@ abstract class TwoHeartsDatabase : RoomDatabase() {
                     "twohearts.db"
                 )
                     .addMigrations(*allMigrations)
+                    .fallbackToDestructiveMigration()
                     .addCallback(DatabaseCallback())
                     .build()
                 INSTANCE = instance

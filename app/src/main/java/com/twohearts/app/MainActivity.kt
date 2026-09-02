@@ -16,6 +16,12 @@ import com.twohearts.app.services.bootstrap.BootstrapService
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.services.security.AppLockService
+import com.twohearts.app.services.search.SearchEngine
+import com.twohearts.app.services.datamanagement.DataManagementService
+import com.twohearts.app.services.media.MediaStorage
+import com.twohearts.app.services.media.FileService
+import com.twohearts.app.data.repository NotificationCenterRepository
+import com.twohearts.app.data.settings.SettingsStorage
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -115,6 +121,35 @@ class MainActivity : ComponentActivity() {
                             appStateService.initialize()
                         }
 
+                        // Create services required by AppRouter
+                        val settingsStorage = remember {
+                            SettingsStorage(this@MainActivity)
+                        }
+                        val searchEngine = remember { SearchEngine() }
+                        val notificationCenterRepository = remember {
+                            NotificationCenterRepository(
+                                bootstrapService.databaseInitializer.notificationCenterDao()
+                            )
+                        }
+
+                        // MediaStorage + FileService stubs (placeholder until full integration)
+                        val fileService = remember {
+                            FileService(this@MainActivity)
+                        }
+                        val mediaStorage = remember {
+                            MediaStorage(this@MainActivity)
+                        }
+                        val dataManagementService = remember {
+                            DataManagementService(
+                                context = this@MainActivity,
+                                databaseInitializer = bootstrapService.databaseInitializer,
+                                mediaStorage = mediaStorage,
+                                fileService = fileService,
+                                appLockService = appLockService,
+                                settingsStorage = settingsStorage
+                            )
+                        }
+
                         // App router
                         AppRouter(
                             appStateService = appStateService,
@@ -127,7 +162,11 @@ class MainActivity : ComponentActivity() {
                             placeRepository = placeRepository,
                             moodEntryRepository = moodEntryRepository,
                             periodEntryRepository = periodEntryRepository,
-                            importantDateRepository = importantDateRepository
+                            importantDateRepository = importantDateRepository,
+                            dataManagementService = dataManagementService,
+                            searchEngine = searchEngine,
+                            notificationCenterRepository = notificationCenterRepository,
+                            settingsStorage = settingsStorage
                         )
                     } else {
                         // Loading state
