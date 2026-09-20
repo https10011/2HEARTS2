@@ -314,11 +314,10 @@ fun AppRouter(
                             initialCategory = NoteCategory.fromString(n.category),
                             onSave = { title, content, category ->
                                 kotlinx.coroutines.runBlocking {
-                                    noteRepository.update(n.copy(
-                                        title = title,
-                                        content = content,
-                                        category = category.name.lowercase(),
-                                        updatedAt = DateTimeHelper.nowUtc()
+                                    noteRepository.update(n.id, mapOf(
+                                        "title" to title,
+                                        "content" to content,
+                                        "category" to category.name.lowercase()
                                     ))
                                 }
                                 navController.popBackStack()
@@ -409,11 +408,10 @@ fun AppRouter(
                             initialDate = m.memoryDate,
                             onSave = { title, caption, memoryDate ->
                                 kotlinx.coroutines.runBlocking {
-                                    memoryRepository.update(m.copy(
-                                        title = title,
-                                        caption = caption,
-                                        memoryDate = memoryDate,
-                                        updatedAt = DateTimeHelper.nowUtc()
+                                    memoryRepository.update(m.id, mapOf(
+                                        "title" to title,
+                                        "caption" to caption,
+                                        "memoryDate" to memoryDate
                                     ))
                                 }
                                 navController.popBackStack()
@@ -504,11 +502,10 @@ fun AppRouter(
                             initialDate = e.eventDate,
                             onSave = { title, eventDate, description ->
                                 kotlinx.coroutines.runBlocking {
-                                    timelineEventRepository.update(e.copy(
-                                        title = title,
-                                        eventDate = eventDate,
-                                        description = description,
-                                        updatedAt = DateTimeHelper.nowUtc()
+                                    timelineEventRepository.update(e.id, mapOf(
+                                        "title" to title,
+                                        "eventDate" to eventDate,
+                                        "description" to description
                                     ))
                                 }
                                 navController.popBackStack()
@@ -603,13 +600,12 @@ fun AppRouter(
                             initialRecurrence = r.recurrence ?: "none",
                             onSave = { title, description, scheduledDate, scheduledTime, recurrence ->
                                 kotlinx.coroutines.runBlocking {
-                                    reminderRepository.update(r.copy(
-                                        title = title,
-                                        description = description,
-                                        scheduledDate = scheduledDate,
-                                        scheduledTime = scheduledTime,
-                                        recurrence = recurrence,
-                                        updatedAt = DateTimeHelper.nowUtc()
+                                    reminderRepository.update(r.id, mapOf(
+                                        "title" to title,
+                                        "description" to description,
+                                        "scheduledDate" to scheduledDate,
+                                        "scheduledTime" to scheduledTime,
+                                        "recurrence" to recurrence
                                     ))
                                 }
                                 navController.popBackStack()
@@ -704,13 +700,12 @@ fun AppRouter(
                             initialCategory = p.category ?: "",
                             onSave = { name, address, city, notes, category ->
                                 kotlinx.coroutines.runBlocking {
-                                    placeRepository.update(p.copy(
-                                        name = name,
-                                        address = address,
-                                        city = city,
-                                        notes = notes,
-                                        category = category,
-                                        updatedAt = DateTimeHelper.nowUtc()
+                                    placeRepository.update(p.id, mapOf(
+                                        "name" to name,
+                                        "address" to address,
+                                        "city" to city,
+                                        "notes" to notes,
+                                        "category" to category
                                     ))
                                 }
                                 navController.popBackStack()
@@ -788,11 +783,10 @@ fun AppRouter(
                             initialNote = e.note ?: "",
                             onSave = { moodValue, moodEmoji, note ->
                                 kotlinx.coroutines.runBlocking {
-                                    moodEntryRepository.update(e.copy(
-                                        moodValue = moodValue,
-                                        moodEmoji = moodEmoji,
-                                        note = note,
-                                        updatedAt = DateTimeHelper.nowUtc()
+                                    moodEntryRepository.update(e.id, mapOf(
+                                        "moodValue" to moodValue,
+                                        "moodEmoji" to moodEmoji,
+                                        "note" to note
                                     ))
                                 }
                                 navController.popBackStack()
@@ -896,12 +890,11 @@ fun AppRouter(
                             initialNote = e.note ?: "",
                             onSave = { startDate, endDate, flowLevel, note ->
                                 kotlinx.coroutines.runBlocking {
-                                    periodEntryRepository.update(e.copy(
-                                        startDate = startDate,
-                                        endDate = endDate,
-                                        flowLevel = flowLevel,
-                                        note = note,
-                                        updatedAt = DateTimeHelper.nowUtc()
+                                    periodEntryRepository.update(e.id, mapOf(
+                                        "startDate" to startDate,
+                                        "endDate" to endDate,
+                                        "flowLevel" to flowLevel,
+                                        "note" to note
                                     ))
                                 }
                                 navController.popBackStack()

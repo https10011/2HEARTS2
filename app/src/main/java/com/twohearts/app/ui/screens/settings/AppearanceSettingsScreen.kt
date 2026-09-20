@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.twohearts.app.services.appstate.AppStateService
+import kotlinx.coroutines.launch
 
 /**
  * AppearanceSettingsScreen — theme, text size, and motion settings.
@@ -38,6 +39,7 @@ fun AppearanceSettingsScreen(
     val currentTextSize by appStateService.textSize.collectAsState()
     
     var reduceMotion by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -97,21 +99,21 @@ fun AppearanceSettingsScreen(
                             label = "Light",
                             icon = Icons.Default.LightMode,
                             selected = currentThemeMode == "light",
-                            onClick = { appStateService.setThemeMode("light") },
+                            onClick = { scope.launch { appStateService.setThemeMode("light") } },
                             modifier = Modifier.weight(1f)
                         )
                         ThemeOption(
                             label = "Dark",
                             icon = Icons.Default.DarkMode,
                             selected = currentThemeMode == "dark",
-                            onClick = { appStateService.setThemeMode("dark") },
+                            onClick = { scope.launch { appStateService.setThemeMode("dark") } },
                             modifier = Modifier.weight(1f)
                         )
                         ThemeOption(
                             label = "System",
                             icon = Icons.Default.SettingsBrightness,
                             selected = currentThemeMode == "system",
-                            onClick = { appStateService.setThemeMode("system") },
+                            onClick = { scope.launch { appStateService.setThemeMode("system") } },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -148,28 +150,28 @@ fun AppearanceSettingsScreen(
                         label = "Small",
                         scale = 0.88f,
                         selected = currentTextSize == "small",
-                        onClick = { appStateService.setTextSize("small") }
+                        onClick = { scope.launch { appStateService.setTextSize("small") } }
                     )
 
                     TextSizeOption(
                         label = "Default",
                         scale = 1.0f,
                         selected = currentTextSize == "default",
-                        onClick = { appStateService.setTextSize("default") }
+                        onClick = { scope.launch { appStateService.setTextSize("default") } }
                     )
 
                     TextSizeOption(
                         label = "Large",
                         scale = 1.12f,
                         selected = currentTextSize == "large",
-                        onClick = { appStateService.setTextSize("large") }
+                        onClick = { scope.launch { appStateService.setTextSize("large") } }
                     )
 
                     TextSizeOption(
                         label = "Extra Large",
                         scale = 1.28f,
                         selected = currentTextSize == "extra_large",
-                        onClick = { appStateService.setTextSize("extra_large") }
+                        onClick = { scope.launch { appStateService.setTextSize("extra_large") } }
                     )
                 }
             }

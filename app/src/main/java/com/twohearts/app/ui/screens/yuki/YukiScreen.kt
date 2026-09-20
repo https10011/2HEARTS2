@@ -299,6 +299,7 @@ private fun YukiNeedBar(label: String, value: Int, type: NeedType) {
         type == NeedType.ENERGY -> Color(0xFF7BAF6E)
         type == NeedType.HAPPINESS -> Color(0xFFD4745A)
         type == NeedType.CLEAN -> Color(0xFF7EAFCF)
+        else -> TwoHeartsTokens.Color.divider
     }
 
     Row(

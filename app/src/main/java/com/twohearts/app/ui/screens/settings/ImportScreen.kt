@@ -24,6 +24,7 @@ import com.twohearts.app.data.repository.NoteRepository
 import com.twohearts.app.data.repository.ReminderRepository
 import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.data.repository.generateId
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -43,6 +44,7 @@ fun ImportScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var importState by remember { mutableStateOf<ImportState>(ImportState.Idle) }
     var importPreview by remember { mutableStateOf<ImportPreview?>(null) }
     var selectedUri by remember { mutableStateOf<Uri?>(null) }
@@ -247,16 +249,18 @@ fun ImportScreen(
                             Button(
                                 onClick = {
                                     importState = ImportState.Importing
-                                    val result = executeImport(
-                                        context,
-                                        selectedUri!!,
-                                        noteRepository,
-                                        reminderRepository
-                                    )
-                                    importState = if (result.success) {
-                                        ImportState.Success(result)
-                                    } else {
-                                        ImportState.Error(result.errors)
+                                    scope.launch {
+                                        val result = executeImport(
+                                            context,
+                                            selectedUri!!,
+                                            noteRepository,
+                                            reminderRepository
+                                        )
+                                        importState = if (result.success) {
+                                            ImportState.Success(result)
+                                        } else {
+                                            ImportState.Error(result.errors)
+                                        }
                                     }
                                 },
                                 modifier = Modifier.weight(1f),

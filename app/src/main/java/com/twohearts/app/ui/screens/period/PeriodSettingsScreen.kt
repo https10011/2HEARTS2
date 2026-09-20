@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.ui.components.Input
-import com.twohearts.app.ui.components.Button
-import com.twohearts.app.ui.theme.Burgundy
+import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ButtonVariant
 
 /**
  * PeriodSettingsScreen — cycle/period length configuration.
@@ -77,12 +77,13 @@ fun PeriodSettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Save button
-            Button(
+            ThButton(
                 onClick = {
                     // TODO: Save settings via PeriodSettingsRepository
                     onBack()
                 },
                 modifier = Modifier.fillMaxWidth(),
+                variant = ButtonVariant.PRIMARY,
                 text = "Save Settings"
             )
 

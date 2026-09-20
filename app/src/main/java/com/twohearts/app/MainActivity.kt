@@ -20,7 +20,7 @@ import com.twohearts.app.services.search.SearchEngine
 import com.twohearts.app.services.datamanagement.DataManagementService
 import com.twohearts.app.services.media.MediaStorage
 import com.twohearts.app.services.media.FileService
-import com.twohearts.app.data.repository NotificationCenterRepository
+import com.twohearts.app.data.repository.NotificationCenterRepository
 import com.twohearts.app.data.settings.SettingsStorage
 import kotlinx.coroutines.launch
 

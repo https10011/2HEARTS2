@@ -352,7 +352,7 @@ private fun ZzzParticles() {
  */
 @Composable
 private fun LevelUpOverlay(level: Int) {
-    val scale by remember { Animatable(0.5f) }
+    val scale = remember { Animatable(0.5f) }
 
     LaunchedEffect(level) {
         scale.animateTo(

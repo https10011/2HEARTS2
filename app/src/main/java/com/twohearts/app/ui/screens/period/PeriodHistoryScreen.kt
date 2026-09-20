@@ -38,7 +38,7 @@ fun PeriodHistoryScreen(
         if (entries.isEmpty()) {
             EmptyState(
                 title = "No Period Entries",
-                subtitle = "Start logging your period to see your history here.",
+                message = "Start logging your period to see your history here.",
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
