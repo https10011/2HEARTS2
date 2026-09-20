@@ -31,34 +31,51 @@ class MainActivity : ComponentActivity() {
 
         // Initialize bootstrap service
         val bootstrapService = BootstrapService(this)
+        // Created before setContent so the theme can observe persisted
+        // appearance settings from the very first frame.
+        val settingsStorage = SettingsStorage(this)
+        val appStateService = AppStateService(settingsStorage)
 
         setContent {
-            var darkMode by remember { mutableStateOf(false) }
-            var textScaling by remember { mutableStateOf(TextScalingLevel.DEFAULT) }
+            val isSystemDark = androidx.compose.foundation.isSystemInDarkTheme()
+
+            // Appearance settings are read from AppStateService rather than
+            // held in local state. Phase 1: these previously lived as
+            // `remember { mutableStateOf(...) }` in this composable and were
+            // never connected to SettingsStorage, so the Appearance screen's
+            // theme / text-size / reduce-motion controls had no visible
+            // effect on the running app.
+            val themeMode by appStateService.themeMode.collectAsState()
+            val textSize by appStateService.textSize.collectAsState()
+            val reduceMotion by appStateService.reduceMotion.collectAsState()
+
+            val darkMode = when (themeMode) {
+                "dark" -> true
+                "light" -> false
+                else -> isSystemDark
+            }
+
             var isInitialized by remember { mutableStateOf(false) }
 
             // Initialize services
             LaunchedEffect(Unit) {
                 val success = bootstrapService.bootstrap()
                 if (success) {
+                    // Must run before the first frame reads the settings.
+                    appStateService.initialize()
                     isInitialized = true
                 }
             }
 
             TwoHeartsTheme(
                 darkMode = darkMode,
-                textScalingLevel = textScaling
+                textSize = textSize,
+                reduceMotion = reduceMotion
             ) {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     if (isInitialized) {
-                        // Create services
-                        val appStateService = remember {
-                            AppStateService(
-                                com.twohearts.app.data.settings.SettingsStorage(this@MainActivity)
-                            )
-                        }
                         val relationshipService = remember {
                             RelationshipService(
                                 profileRepository = com.twohearts.app.data.repository.ProfileRepository(
@@ -122,9 +139,6 @@ class MainActivity : ComponentActivity() {
                         }
 
                         // Create services required by AppRouter
-                        val settingsStorage = remember {
-                            SettingsStorage(this@MainActivity)
-                        }
                         val searchEngine = remember { SearchEngine() }
                         val notificationCenterRepository = remember {
                             NotificationCenterRepository(

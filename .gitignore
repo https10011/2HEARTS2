@@ -82,3 +82,6 @@ pnpm-debug.log*
 # Vite / TS cache (legacy)
 *.tsbuildinfo
 .vite/
+
+# Brand-asset generator scratch install (see tools/generate-brand-assets.mjs)
+tools/node_modules/

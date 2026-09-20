@@ -5,10 +5,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
 import com.twohearts.app.ui.theme.TwoHeartsTokens
 import kotlinx.coroutines.delay
 
@@ -98,16 +103,22 @@ fun ToastProvider(
     }
 
     CompositionLocalProvider(LocalToastApi provides api) {
-        content()
+        Box(modifier = Modifier.fillMaxSize()) {
+            content()
 
-        // Toast viewport
-        AnimatedVisibility(
-            visible = message != null,
-            enter = fadeIn(),
-            exit = fadeOut(),
-        ) {
-            message?.let { msg ->
-                ToastViewport(msg)
+            // Toast viewport — anchored to the bottom of whatever this
+            // provider wraps. The Box guarantees the toast overlays the
+            // content rather than being laid out beside it, regardless of
+            // the parent layout.
+            AnimatedVisibility(
+                visible = message != null,
+                modifier = Modifier.align(Alignment.BottomCenter),
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                message?.let { msg ->
+                    ToastViewport(msg)
+                }
             }
         }
     }
@@ -116,35 +127,59 @@ fun ToastProvider(
 @Composable
 private fun ToastViewport(message: ToastMessage) {
     val thColors = LocalTwoHeartsColors.current
+    val motion = LocalTwoHeartsMotion.current
+
     val bgColor = when (message.variant) {
         ToastVariant.SUCCESS -> thColors.success
         ToastVariant.ERROR -> thColors.error
-        ToastVariant.INFO -> MaterialTheme.colorScheme.primary
+        ToastVariant.INFO -> thColors.inkBase
     }
+    // Phase 1: real icons from the central set instead of "✓ / ✕ / ℹ"
+    // text glyphs, which rendered at different weights across OEM fonts.
     val icon = when (message.variant) {
-        ToastVariant.SUCCESS -> "✓"
-        ToastVariant.ERROR -> "✕"
-        ToastVariant.INFO -> "ℹ"
+        ToastVariant.SUCCESS -> ThIcons.Check
+        ToastVariant.ERROR -> ThIcons.Close
+        ToastVariant.INFO -> ThIcons.Info
     }
 
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = TwoHeartsTokens.Spacing.space4)
-            .background(bgColor, RoundedCornerShape(TwoHeartsTokens.Radius.md))
-            .padding(TwoHeartsTokens.Spacing.space3),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space2),
+            .padding(
+                horizontal = TwoHeartsTokens.Spacing.screenGutter,
+                vertical = TwoHeartsTokens.Spacing.space3,
+            ),
+        contentAlignment = Alignment.BottomCenter,
     ) {
-        Text(
-            text = icon,
-            color = Color.White,
-        )
-        Text(
-            text = message.text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.White,
-        )
+        Row(
+            modifier = Modifier
+                .then(
+                    if (motion.reduced) Modifier
+                    else Modifier.thSoftShadow(
+                        RoundedCornerShape(TwoHeartsTokens.Radius.md),
+                        TwoHeartsTokens.Elevation.raise,
+                    )
+                )
+                .background(bgColor, RoundedCornerShape(TwoHeartsTokens.Radius.md))
+                .padding(
+                    horizontal = TwoHeartsTokens.Spacing.space4,
+                    vertical = TwoHeartsTokens.Spacing.space3,
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space3),
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(18.dp),
+            )
+            Text(
+                text = message.text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White,
+            )
+        }
     }
 }
 

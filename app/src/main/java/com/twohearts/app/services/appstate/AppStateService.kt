@@ -26,6 +26,9 @@ class AppStateService(private val settingsStorage: SettingsStorage) {
     private val _textSize = MutableStateFlow("default")
     val textSize: StateFlow<String> = _textSize.asStateFlow()
 
+    private val _reduceMotion = MutableStateFlow(false)
+    val reduceMotion: StateFlow<Boolean> = _reduceMotion.asStateFlow()
+
     private val _isOnboarded = MutableStateFlow(false)
     val isOnboarded: StateFlow<Boolean> = _isOnboarded.asStateFlow()
 
@@ -39,6 +42,7 @@ class AppStateService(private val settingsStorage: SettingsStorage) {
         settingsStorage.settings.first().let { settings ->
             _themeMode.value = settings.themeMode
             _textSize.value = settings.textSize
+            _reduceMotion.value = settings.reduceMotion
             _isOnboarded.value = settings.onboarded
             _onboardingStage.value = settings.onboardingStage
         }
@@ -61,6 +65,15 @@ class AppStateService(private val settingsStorage: SettingsStorage) {
         settingsStorage.updateTextSize(size)
         _textSize.value = size
         logger.info("Text size updated: $size")
+    }
+
+    /**
+     * Update the reduce-motion preference.
+     */
+    suspend fun setReduceMotion(reduce: Boolean) {
+        settingsStorage.setReduceMotion(reduce)
+        _reduceMotion.value = reduce
+        logger.info("Reduce motion updated: $reduce")
     }
 
     /**
@@ -105,6 +118,7 @@ class AppStateService(private val settingsStorage: SettingsStorage) {
         settingsStorage.reset()
         _themeMode.value = "system"
         _textSize.value = "default"
+        _reduceMotion.value = false
         _isOnboarded.value = false
         _onboardingStage.value = "fresh"
         logger.info("App state reset")

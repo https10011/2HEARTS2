@@ -1,10 +1,11 @@
 package com.twohearts.app.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,12 +17,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.TwoHeartsTokens
 
 /**
- * ProfileAvatar — shared avatar component matching legacy ProfileAvatar.tsx.
+ * ProfileAvatar — the shared avatar for the owner and partner.
  *
- * Displays a profile photo when available, or a styled initial-letter fallback.
- * Falls back to a smile icon when no name is provided.
+ * Renders, in priority order:
+ *  1. the profile photo, when the URI resolves;
+ *  2. the person's initial on a warm burgundy-to-rose gradient;
+ *  3. a heart glyph when no name is known yet.
+ *
+ * Phase 1: the empty state used to render a "☺" text emoji, which fell
+ * outside the app's icon system and rendered inconsistently across OEM
+ * fonts (Tecno/Transsion devices in particular). It now uses a vector icon
+ * from the central set. The gradient was also flattened slightly and the
+ * initial re-weighted so small avatars (28–32dp in list rows) stay legible.
  */
 @Composable
 fun ProfileAvatar(
@@ -40,27 +50,29 @@ fun ProfileAvatar(
             .clip(CircleShape)
             .background(
                 Brush.linearGradient(
-                    colors = listOf(
-                        thColors.burgundy.copy(alpha = 0.7f),
-                        thColors.roseMuted.copy(alpha = 0.7f),
-                    )
+                    colors = listOf(thColors.burgundy, thColors.roseDeep)
                 )
+            )
+            .border(
+                TwoHeartsTokens.Border.hairline,
+                thColors.textOnAccent.copy(alpha = 0.22f),
+                CircleShape,
             ),
         contentAlignment = Alignment.Center,
     ) {
         if (initial.isNotEmpty()) {
             Text(
                 text = initial,
-                fontSize = (size * 0.44).sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White,
+                fontSize = (size * 0.42).sp,
+                fontWeight = FontWeight.SemiBold,
+                color = thColors.textOnAccent,
             )
         } else {
-            // Smile icon placeholder
-            Text(
-                text = "☺",
-                fontSize = (size * 0.44).sp,
-                color = Color.White,
+            Icon(
+                imageVector = ThIcons.Heart,
+                contentDescription = null,
+                tint = thColors.textOnAccent.copy(alpha = 0.9f),
+                modifier = Modifier.size((size * 0.46).dp),
             )
         }
     }

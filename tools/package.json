@@ -1,0 +1,12 @@
+{
+  "name": "twohearts-tools",
+  "private": true,
+  "description": "Build-time tooling for TwoHearts. Not part of the Android application.",
+  "type": "module",
+  "scripts": {
+    "generate-brand-assets": "node generate-brand-assets.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.47.0"
+  }
+}

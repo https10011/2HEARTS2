@@ -69,6 +69,10 @@ fun EmptyState(
 /**
  * Bridge alias so screen files can call
  * `Input(value, onValueChange, label, placeholder, readOnly, error)`.
+ *
+ * Delegates to [ThInput] — this used to be a second, independent
+ * implementation of the same field, which is why some screens had
+ * differently-styled inputs.
  */
 @Composable
 fun Input(
@@ -83,47 +87,25 @@ fun Input(
     keyboardType: KeyboardType = KeyboardType.Text,
     multiline: Boolean = false,
 ) {
-    val shape = RoundedCornerShape(TwoHeartsTokens.Radius.sm)
-    val colors = TextFieldDefaults.colors(
-        focusedContainerColor = MaterialTheme.colorScheme.surface,
-        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-        disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-        focusedIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-        disabledIndicatorColor = Color.Transparent,
-        cursorColor = MaterialTheme.colorScheme.primary,
-    )
-
-    val labelComposable: @Composable (() -> Unit)? = if (label.isNotEmpty()) {
-        { Text(label) }
-    } else null
-
-    val placeholderComposable: @Composable (() -> Unit)? = if (placeholder.isNotEmpty()) {
-        { Text(placeholder) }
-    } else null
-
-    val errorComposable: @Composable (() -> Unit)? = if (error != null) {
-        { Text(error, color = MaterialTheme.colorScheme.error) }
-    } else null
-
-    TextField(
+    ThInput(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth(),
-        label = labelComposable,
-        placeholder = placeholderComposable,
-        enabled = enabled && !readOnly,
+        modifier = modifier,
+        label = label,
+        placeholder = placeholder,
+        multiline = multiline,
+        enabled = enabled,
         readOnly = readOnly,
-        shape = shape,
-        colors = colors,
-        isError = error != null,
-        supportingText = errorComposable,
+        keyboardType = keyboardType,
+        error = error,
     )
 }
 
 // ─── Card (clickable) ──────────────────────────────────────────────
 /**
  * Bridge alias so screen files can call `Card(onClick, modifier) { content }`.
+ * Delegates to [ThSurfaceCard] so gesture cards and static cards share one
+ * container treatment.
  */
 @Composable
 fun Card(
@@ -132,17 +114,9 @@ fun Card(
     enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    androidx.compose.material3.Card(
-        onClick = onClick,
+    ThSurfaceCard(
         modifier = modifier,
-        enabled = enabled,
-        shape = RoundedCornerShape(TwoHeartsTokens.Radius.lg),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp,
-        ),
+        onClick = if (enabled) onClick else null,
     ) {
         content()
     }
