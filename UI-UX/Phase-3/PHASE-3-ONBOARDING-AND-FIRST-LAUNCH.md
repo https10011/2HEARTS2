@@ -8,7 +8,7 @@
 | Date | 2026-09-21 |
 | Branch | `master` |
 | Starting commit | `20221af` (`docs(ui-ux): correct Phase 2 git record wording`) |
-| Ending commit | recorded in §16 after the phase commit |
+| Ending commit | `56c27db` — `feat(ui-ux): refine onboarding and first-launch experience` |
 | Device target | Tecno Spark 10 Pro class — 720×1612, ~360dp wide, Android 13+ |
 | Build verified | `:app:assembleDebug` → `BUILD SUCCESSFUL` → `app-debug.apk` (24,776,469 bytes) |
 | Tests | `:app:testDebugUnitTest` — 44/44 passing (13 new in `Phase3OnboardingTest`) |
@@ -432,4 +432,4 @@ exists. No Home, Us, Memories, Notes, Timeline, Settings, or Yuki redesign.
 - [x] Documentation created
 - [x] Evidence captured
 - [x] Build passes; 44/44 tests pass
-- [x] Commit created and pushed to `origin/master` (§1)
+- [x] Commit `56c27db` created and pushed to `origin/master`
