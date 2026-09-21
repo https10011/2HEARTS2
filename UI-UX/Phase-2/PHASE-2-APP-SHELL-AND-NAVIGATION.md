@@ -8,7 +8,7 @@
 | Date | 2026-09-21 |
 | Branch | `master` |
 | Starting commit | `63b90cc` (`feat(ui-ux): establish global visual language and design system foundation`) |
-| Ending commit | the Phase 2 commit, `feat(ui-ux): refine app shell and navigation experience`, which is the tip of `master` (`git rev-parse --short HEAD` at completion) — see §16 Git Record |
+| Ending commit | `28fa14b` — `feat(ui-ux): refine app shell and navigation experience`. See §16 |
 | Device target | Tecno Spark 10 Pro class — ~360dp wide, Android 13+ |
 | Build verified | `:app:assembleDebug --offline` → `BUILD SUCCESSFUL` → `app-debug.apk` (24,024,915 bytes) |
 | Tests | `:app:testDebugUnitTest` — 22/22 passing |
@@ -598,10 +598,11 @@ Explicitly reserved for later phases; not attempted here:
 |---|---|
 | Branch | `master` |
 | Starting commit | `63b90cc` `feat(ui-ux): establish global visual language and design system foundation` |
-| Phase 2 commit | `feat(ui-ux): refine app shell and navigation experience` — the tip of `master`; this document is committed in that same commit, so the hash is the one produced by it |
-| Remote | `origin/master`, verified to contain the Phase 2 commit |
+| Phase 2 commit | `28fa14b` `feat(ui-ux): refine app shell and navigation experience` — contains all Phase 2 code, tests, this document and the evidence renders |
+| Note | A later commit on `master` revises one wording correction in this document. `git log -1` on `master` is authoritative for the tip. |
+| Remote | `origin/master`, verified to contain `28fa14b` |
 | Working tree | clean |
-| Sync | `HEAD == origin/master` |
+| Sync | `HEAD == origin/master`, working tree clean |
 
 No Migration Stage 16 was created, and no migration work was restarted.
 
