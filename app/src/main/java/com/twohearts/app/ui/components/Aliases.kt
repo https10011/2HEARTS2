@@ -109,6 +109,12 @@ fun Input(
     enabled: Boolean = true,
     keyboardType: KeyboardType = KeyboardType.Text,
     multiline: Boolean = false,
+    visualTransformation: androidx.compose.ui.text.input.VisualTransformation =
+        androidx.compose.ui.text.input.VisualTransformation.None,
+    imeAction: androidx.compose.ui.text.input.ImeAction =
+        androidx.compose.ui.text.input.ImeAction.Default,
+    capitalization: androidx.compose.ui.text.input.KeyboardCapitalization =
+        androidx.compose.ui.text.input.KeyboardCapitalization.None,
 ) {
     ThInput(
         value = value,
@@ -120,6 +126,9 @@ fun Input(
         enabled = enabled,
         readOnly = readOnly,
         keyboardType = keyboardType,
+        visualTransformation = visualTransformation,
+        imeAction = imeAction,
+        capitalization = capitalization,
         error = error,
     )
 }

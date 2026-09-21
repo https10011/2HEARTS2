@@ -42,6 +42,47 @@ enum class OnboardingStage(val order: Int) {
      * Check if this is the last stage.
      */
     fun isLast(): Boolean = this == COMPLETE
+
+    companion object {
+        /**
+         * The order value of the last step that collects input.
+         *
+         * The welcome screen (`FRESH`) is the front door and the completion
+         * screen (`COMPLETE`) is the exit, so neither is a numbered "step" —
+         * the progress indicator counts only the four setup steps between
+         * them. Deriving this from the enum means adding a stage cannot
+         * silently desync the indicator's denominator.
+         */
+        val LAST_SETUP_ORDER: Int = COMPLETE.order - 1
+
+        /** Number of numbered setup steps, used by the progress indicator. */
+        val SETUP_STEP_COUNT: Int = LAST_SETUP_ORDER
+
+        /**
+         * Resolves the persisted stage string.
+         *
+         * The storage keys are the legacy strings that `SettingsStorage`
+         * already writes ("app-lock", not "APP_LOCK"), so a person who was
+         * mid-setup before this phase keeps their position. The mapping used
+         * to be duplicated as two matching `when` blocks in the flow — one
+         * forward, one backward — which is exactly how the two drift.
+         * Unrecognised values, including a cleared store, fall back to FRESH.
+         */
+        fun fromStorageKey(key: String?): OnboardingStage = entries.firstOrNull {
+            it.storageKey == key
+        } ?: FRESH
+    }
+
+    /** The string persisted in settings for this stage. */
+    val storageKey: String
+        get() = when (this) {
+            FRESH -> "fresh"
+            OWNER -> "owner"
+            RELATIONSHIP -> "relationship"
+            PERSONALIZATION -> "personalization"
+            APP_LOCK -> "app-lock"
+            COMPLETE -> "complete"
+        }
 }
 
 /**

@@ -49,6 +49,7 @@ import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.Place
@@ -119,6 +120,9 @@ object ThIcons {
     val Clear = Icons.Outlined.Clear
     val Check = Icons.Outlined.Check
     val CheckCircle = Icons.Outlined.CheckCircle
+
+    /** Unselected counterpart to [CheckCircle] for radio-style option rows. */
+    val CircleOutline = Icons.Outlined.RadioButtonUnchecked
     val Attach = Icons.Outlined.AttachFile
 
     /** Destructive actions — the one place a filled glyph is intentional. */
@@ -214,6 +218,7 @@ object ThIcons {
         "Clear" to Clear,
         "Check" to Check,
         "CheckCircle" to CheckCircle,
+        "CircleOutline" to CircleOutline,
         "Attach" to Attach,
         "Trash" to Trash,
         "DeleteForever" to DeleteForever,

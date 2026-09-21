@@ -24,7 +24,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 import com.twohearts.app.ui.theme.TwoHeartsTokens
@@ -44,6 +49,13 @@ import com.twohearts.app.ui.theme.TwoHeartsTokens
  *    animation, which also removes a whole class of text-scaling overlap);
  *  - an error state that changes both border *and* supporting text, so it
  *    is never communicated by colour alone.
+ *
+ * Phase 3 adds two things the onboarding steps need:
+ *  - [visualTransformation], so a PIN can be masked. The field previously had
+ *    no way to obscure input at all, which meant the app's own lock setup
+ *    screen displayed the PIN in clear text above the keyboard.
+ *  - proper IME/autocorrect configuration, so a password field does not offer
+ *    autocorrect and a name field does not offer a spellchecker's opinions.
  */
 @Composable
 fun ThInput(
@@ -57,6 +69,9 @@ fun ThInput(
     readOnly: Boolean = false,
     singleLine: Boolean = !multiline,
     keyboardType: KeyboardType = KeyboardType.Text,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    imeAction: ImeAction = ImeAction.Default,
+    capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
     error: String? = null,
     maxLines: Int = if (multiline) 8 else 1,
 ) {
@@ -125,7 +140,13 @@ fun ThInput(
                     .align(
                         if (multiline) androidx.compose.ui.Alignment.TopStart
                         else androidx.compose.ui.Alignment.CenterStart
-                    ),
+                    )
+                    // Publishes the validation message to assistive technology
+                    // as a field error, so it is announced with the field
+                    // rather than only being read as loose text below it.
+                    .semantics {
+                        error?.let { error(it) }
+                    },
                 enabled = isEditable,
                 readOnly = readOnly,
                 singleLine = singleLine,
@@ -136,7 +157,15 @@ fun ThInput(
                     )
                 ),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                visualTransformation = visualTransformation,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = keyboardType,
+                    imeAction = imeAction,
+                    capitalization = capitalization,
+                    // Autocorrect only where prose is expected. A masked PIN
+                    // field must never be touched by a spellchecker.
+                    autoCorrect = keyboardType == KeyboardType.Text,
+                ),
                 interactionSource = interactionSource,
             )
         }

@@ -46,4 +46,12 @@ object AppSettingsKeys {
     const val NOTIFICATIONS_ENABLED = "notifications_enabled"
     const val REMINDERS_ENABLED = "reminders_enabled"
     const val REDUCE_MOTION = "reduce_motion"
+
+    /**
+     * In-progress onboarding draft (Phase 3).
+     *
+     * Holds the setup answers until the flow commits them to the domain
+     * database, so a restart mid-setup resumes with the person's input intact.
+     */
+    const val ONBOARDING_DRAFT = "onboarding_draft"
 }

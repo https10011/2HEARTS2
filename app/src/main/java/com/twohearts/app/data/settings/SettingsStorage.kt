@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 /**
@@ -105,6 +106,58 @@ class SettingsStorage(private val context: Context) {
     }
 
     /**
+     * Persists the in-progress onboarding draft.
+     *
+     * ## Why this exists (Phase 3)
+     *
+     * The migrated flow kept the collected names, birthday and start date in
+     * transient Compose state and persisted only the *stage*. A process death
+     * mid-setup therefore returned the person to the correct step with an
+     * empty form — the stage survived, the input did not.
+     *
+     * The draft is stored here, beside the stage, rather than in the domain
+     * database on purpose: the profiles and couple row are created in one
+     * commit at the end of setup, so there must not be a half-written couple
+     * record to reconcile if someone abandons setup. DataStore is the correct
+     * home for "intent that has not become domain state yet".
+     *
+     * The draft is one JSON object under a single key, so a partial write
+     * cannot produce a mixed old/new set of fields.
+     */
+    suspend fun saveOnboardingDraft(draft: OnboardingDraft) {
+        context.dataStore.edit { preferences ->
+            preferences[ONBOARDING_DRAFT] = draft.toJson()
+        }
+    }
+
+    /**
+     * Reads the in-progress draft, or null when setup has not started or the
+     * stored value is unreadable.
+     *
+     * A malformed value resolves to null rather than throwing: losing draft
+     * input is recoverable (the person re-enters a name), whereas crashing on
+     * first launch is not.
+     */
+    suspend fun loadOnboardingDraft(): OnboardingDraft? {
+        val raw = context.dataStore.data.map { it[ONBOARDING_DRAFT] }.first() ?: return null
+        return OnboardingDraft.fromJson(raw)
+    }
+
+    /**
+     * Removes the draft once setup has been committed to the domain.
+     *
+     * It is the PIN that makes this a privacy requirement rather than
+     * tidiness: the draft holds the chosen PIN so a restart mid-setup does
+     * not lose it, and it must not outlive the commit that moves it into
+     * secure storage.
+     */
+    suspend fun clearOnboardingDraft() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(ONBOARDING_DRAFT)
+        }
+    }
+
+    /**
      * Reset all settings to defaults.
      */
     suspend fun reset() {
@@ -124,5 +177,6 @@ class SettingsStorage(private val context: Context) {
         private val NOTIFICATIONS_ENABLED = booleanPreferencesKey(AppSettingsKeys.NOTIFICATIONS_ENABLED)
         private val REMINDERS_ENABLED = booleanPreferencesKey(AppSettingsKeys.REMINDERS_ENABLED)
         private val REDUCE_MOTION = booleanPreferencesKey(AppSettingsKeys.REDUCE_MOTION)
+        private val ONBOARDING_DRAFT = stringPreferencesKey(AppSettingsKeys.ONBOARDING_DRAFT)
     }
 }

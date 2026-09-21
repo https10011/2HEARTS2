@@ -127,6 +127,7 @@ fun AppRouter(
             appStateService = appStateService,
             relationshipService = relationshipService,
             appLockService = appLockService,
+            settingsStorage = settingsStorage,
             onComplete = {
                 // Navigate to home after onboarding
                 navController.navigate(RoutePath.APP_HOME) {
