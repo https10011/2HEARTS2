@@ -16,6 +16,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+import com.twohearts.app.ui.components.ThIconButton
+import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.ThTopBar
 import com.twohearts.app.data.entity.VaultItem
 
 /**
@@ -38,28 +41,21 @@ fun VaultContentViewer(
     
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(item.title ?: "") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
+            ThTopBar(
+                title = item.title ?: "",
+                onBack = onBack,
                 actions = {
-                    IconButton(onClick = { showDeleteDialog = true }) {
+                    ThIconButton(
+                        onClick = { showDeleteDialog = true },
+                        label = "Delete",
+                    ) {
                         Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = Color(0xFFA33A2A) // Error red
+                            imageVector = ThIcons.Trash,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
             )
         }
     ) { paddingValues ->

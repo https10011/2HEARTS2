@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
 import kotlinx.coroutines.launch
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -110,6 +111,12 @@ fun AppRouter(
     // Determine current route
     val currentRoutePath = currentRoute?.destination?.route ?: RoutePath.APP_HOME
 
+    // Phase 2: transitions respect the user's reduce-motion preference.
+    // Previously the durations were literal 300s, so the in-app "reduce
+    // motion" setting and the OS animator scale had no effect on navigation
+    // at all.
+    val motion = LocalTwoHeartsMotion.current
+
     // Check if onboarding is complete
     val isOnboarded by appStateService.isOnboarded.collectAsState()
     val onboardingStage by appStateService.onboardingStage.collectAsState()
@@ -129,24 +136,39 @@ fun AppRouter(
         )
     } else {
         // App shell with navigation
+        //
+        // Phase 2: "can we go back" is derived from the actual back stack.
+        // The migrated shell could not answer that question — it kept an
+        // unconditional BackHandler that no-oped at the root — which left
+        // system back unable to leave the app, and let the header decide
+        // independently whether to draw a back button. One source of truth
+        // now feeds both.
+        val canNavigateBack = navController.previousBackStackEntry != null
         AppShell(
             currentRoute = currentRoutePath,
+            canNavigateBack = canNavigateBack,
             onNavigate = { route ->
-                navController.navigate(route) {
-                    // Pop up to start destination to avoid building up large back stack
-                    popUpTo(RoutePath.APP_HOME) {
-                        saveState = true
+                // Phase 2: a destination already showing is not re-pushed.
+                // Previously selecting the current area still ran the full
+                // navigate() dance (and its animation), which made the bar
+                // feel unresponsive — the screen appeared to reload for no
+                // reason.
+                if (route != currentRoutePath) {
+                    navController.navigate(route) {
+                        // Pop up to the start destination rather than letting
+                        // the stack grow with every area switch.
+                        popUpTo(RoutePath.APP_HOME) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
-                    // Avoid multiple copies of the same destination
-                    launchSingleTop = true
-                    // Restore state when re-selecting a tab
-                    restoreState = true
                 }
             },
             onBack = {
-                if (navController.previousBackStackEntry != null) {
-                    navController.popBackStack()
-                }
+                // Only reached while canNavigateBack is true, so this always
+                // has an effect.
+                navController.popBackStack()
             }
         ) { paddingValues ->
             NavHost(
@@ -154,21 +176,27 @@ fun AppRouter(
                 startDestination = RoutePath.APP_HOME,
                 modifier = Modifier.padding(paddingValues),
                 enterTransition = {
-                    fadeIn(animationSpec = tween(300)) + slideInVertically(
-                        initialOffsetY = { it / 20 },
-                        animationSpec = tween(300)
+                    thForward(
+                        targetRoute = targetState.destination.route,
+                        reduced = motion.reduced,
                     )
                 },
                 exitTransition = {
-                    fadeOut(animationSpec = tween(300))
+                    thForwardExit(
+                        targetRoute = targetState.destination.route,
+                        reduced = motion.reduced,
+                    )
                 },
                 popEnterTransition = {
-                    fadeIn(animationSpec = tween(300))
+                    thBackEnter(
+                        fromRoute = initialState.destination.route,
+                        reduced = motion.reduced,
+                    )
                 },
                 popExitTransition = {
-                    fadeOut(animationSpec = tween(300)) + slideOutVertically(
-                        targetOffsetY = { it / 20 },
-                        animationSpec = tween(300)
+                    thBackExit(
+                        fromRoute = initialState.destination.route,
+                        reduced = motion.reduced,
                     )
                 }
             ) {

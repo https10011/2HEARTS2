@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.twohearts.app.ui.components.ThTopBar
 import com.twohearts.app.config.AppInfo
 
 /**
@@ -33,20 +34,7 @@ fun AboutScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("About") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
+            ThTopBar(title = "About", onBack = onBack)
         }
     ) { paddingValues ->
         Column(

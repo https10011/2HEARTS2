@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.twohearts.app.ui.components.ThTopBar
 import com.twohearts.app.data.entity.Note
 import com.twohearts.app.data.entity.Reminder
 import com.twohearts.app.data.repository.NoteRepository
@@ -62,20 +63,7 @@ fun ImportScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Import Data") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
+            ThTopBar(title = "Import Data", onBack = onBack)
         }
     ) { paddingValues ->
         Column(

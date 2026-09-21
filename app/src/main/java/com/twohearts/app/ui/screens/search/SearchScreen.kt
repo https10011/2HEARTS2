@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.twohearts.app.ui.components.ThTopBar
 import com.twohearts.app.data.entity.Memory
 import com.twohearts.app.data.entity.Note
 import com.twohearts.app.data.entity.Place
@@ -64,20 +65,7 @@ fun SearchScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Search") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
+            ThTopBar(title = "Search", onBack = onBack)
         }
     ) { paddingValues ->
         Column(

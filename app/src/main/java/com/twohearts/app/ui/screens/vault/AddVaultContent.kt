@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.twohearts.app.ui.components.ThTopBar
 
 /**
  * Add vault content screen - allows adding photos, videos, notes, or files.
@@ -43,20 +44,7 @@ fun AddVaultContent(
     
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Add to Vault") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
+            ThTopBar(title = "Add to Vault", onBack = onBack)
         }
     ) { paddingValues ->
         Column(

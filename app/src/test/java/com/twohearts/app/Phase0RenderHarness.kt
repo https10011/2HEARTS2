@@ -293,7 +293,8 @@ class Phase0RenderHarness {
             com.twohearts.app.ui.navigation.AppShell(
                 currentRoute = "/app/home",
                 onNavigate = {},
-                onBack = {}
+                onBack = {},
+                canNavigateBack = false
             ) { padding ->
                 Box(modifier = Modifier.fillMaxSize().padding(padding)) {
                     com.twohearts.app.ui.screens.home.HomeScreen(relationshipService(), {})
@@ -304,7 +305,8 @@ class Phase0RenderHarness {
             com.twohearts.app.ui.navigation.AppShell(
                 currentRoute = "/app/notes",
                 onNavigate = {},
-                onBack = {}
+                onBack = {},
+                canNavigateBack = false
             ) { padding ->
                 Box(modifier = Modifier.fillMaxSize().padding(padding)) {
                     NotesHome(

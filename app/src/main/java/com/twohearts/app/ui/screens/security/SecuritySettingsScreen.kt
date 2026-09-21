@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.twohearts.app.ui.components.ThTopBar
 
 /**
  * Security settings screen - manage app lock and PIN.
@@ -38,20 +39,7 @@ fun SecuritySettingsScreen(
     
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Security Settings") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
+            ThTopBar(title = "Security Settings", onBack = onBack)
         }
     ) { paddingValues ->
         Column(

@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.twohearts.app.data.entity.NotificationCenterEntry
 import com.twohearts.app.data.repository.NotificationCenterRepository
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.ui.components.ThTopBar
 
 /**
  * NotificationCenterScreen — notification center.
@@ -38,32 +39,19 @@ fun NotificationCenterScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Notifications")
-                        if (unreadCount > 0) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Badge(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            ) {
-                                Text("$unreadCount")
-                            }
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                actions = {
-                    if (unreadCount > 0) {
+            // Phase 2: this is a top-level navigation destination, but it was
+            // the one place in the app built from a stock Material `TopAppBar`
+            // — a second header system with different height, elevation and
+            // colour behaviour from `ThHeader`, so the same navigation level
+            // looked different depending on where you were. It now uses the
+            // shell header, and the unread count and "mark all read" action
+            // ride in the header's own slots.
+            ThTopBar(
+                title = "Notifications",
+                onBack = onBack,
+                titleBadge = if (unreadCount > 0) "$unreadCount" else null,
+                actions = if (unreadCount > 0) {
+                    {
                         TextButton(
                             onClick = {
                                 kotlinx.coroutines.runBlocking {
@@ -74,10 +62,7 @@ fun NotificationCenterScreen(
                             Text("Mark all read")
                         }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+                } else null,
             )
         }
     ) { paddingValues ->

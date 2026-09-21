@@ -300,9 +300,38 @@ object TwoHeartsTokens {
         /** Minimum comfortable touch target (WCAG 2.5.8 / Material). */
         val touchTargetMin = 44.dp
         val headerHeight = 56.dp
-        val bottomNavHeight = 64.dp
+        /**
+         * Minimum height of the bottom navigation *bar body*, excluding the
+         * system navigation-bar inset.
+         *
+         * Phase 2: this is sized from the bar's tallest column, not guessed.
+         * The migrated bar was 64dp tall while its centre column — a brand
+         * circle, a gap and a caption — needed about 76dp, so the centre
+         * caption was clipped through the middle of its glyphs. The renders
+         * show it plainly.
+         *
+         *   44dp brand circle + gap + caption + 2 × 6dp padding = 76dp
+         *
+         * It is a *minimum*: columns lay out taller when text is enlarged
+         * rather than being cropped, and the shell's content inset derives
+         * from the same token so navigation and content can never disagree
+         * about how much room the bar occupies.
+         */
+        val bottomNavHeight = 76.dp
+        /** Floating-pill side margin from the screen edge. */
+        val bottomNavMargin = 12.dp
+        /**
+         * Brand button diameter — the bar's one deliberately larger target.
+         * Deliberately restrained: the directive warns against navigation that
+         * dominates content, and the approved reference screens draw the
+         * centre mark at roughly 4% of screen width — about 43dp against the
+         * reference's own 1080px canvas. A 58dp bubble read as an oversized
+         * button rather than a quiet brand anchor.
+         */
+        val bottomNavBrandSize = 44.dp
         val screenMaxWidth = 480.dp
-        val navCenterSize = 58.dp
+        /** Kept as the legacy name for the brand button (see bottomNavBrandSize). */
+        val navCenterSize = 44.dp
         val avatarLg = 72.dp
     }
 
