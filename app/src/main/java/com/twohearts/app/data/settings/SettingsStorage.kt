@@ -146,10 +146,9 @@ class SettingsStorage(private val context: Context) {
     /**
      * Removes the draft once setup has been committed to the domain.
      *
-     * It is the PIN that makes this a privacy requirement rather than
-     * tidiness: the draft holds the chosen PIN so a restart mid-setup does
-     * not lose it, and it must not outlive the commit that moves it into
-     * secure storage.
+     * The draft holds personalisation only — names and dates. The PIN is
+     * never stored here (see [OnboardingDraft]), so clearing is about not
+     * leaving a half-finished setup behind, not about scrubbing a credential.
      */
     suspend fun clearOnboardingDraft() {
         context.dataStore.edit { preferences ->

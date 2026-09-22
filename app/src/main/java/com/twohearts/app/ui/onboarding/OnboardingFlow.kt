@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
@@ -130,12 +131,27 @@ fun OnboardingFlow(
      * The one place the domain is written.
      *
      * Everything setup collected lands here in a single suspend block, and the
-     * stage flips to COMPLETE only after every write has returned.
+     * stage flips to COMPLETE only after every write has returned, so
+     * "complete" states a fact rather than an intent.
+     *
+     * It deliberately does **not** call [onComplete]. Persisting `COMPLETE`
+     * makes the shell eligible, but the person still has to be shown the
+     * completion screen that names what was created; the hand-off happens
+     * when they tap through it. Calling back here — as the first
+     * implementation did — swapped in the shell before the completion screen
+     * could ever render, so the celebration and summary were unreachable in
+     * the real app.
+     *
+     * The re-entrancy guard is set *before* the write is launched rather than
+     * inside it: two fast taps on the lock step (or on the retry sheet) would
+     * otherwise both pass the check and create a second owner, partner and
+     * couple row.
      */
     fun commit(final: OnboardingDraft, chosenPin: String?) {
+        if (committing) return
+        committing = true
+        commitError = null
         scope.launch {
-            committing = true
-            commitError = null
             try {
                 val owner = relationshipService.createOwner(
                     name = final.ownerName,
@@ -161,7 +177,6 @@ fun OnboardingFlow(
                 appStateService.setOnboarded(true)
 
                 committing = false
-                onComplete()
             } catch (t: Throwable) {
                 // Recoverable: nothing has been marked complete, so the person
                 // can retry without re-entering anything.
@@ -217,6 +232,18 @@ fun OnboardingFlow(
             if (currentStage == OnboardingStage.APP_LOCK) pin = null
             scope.launch { appStateService.updateOnboardingStage(previous.storageKey) }
         }
+    }
+
+    // System back steps the flow, matching the header's back affordance.
+    //
+    // The migrated flow installed no handler at all, so the hardware/gesture
+    // back gesture fell through to the Activity default and left the app —
+    // mid-setup — from every step. It is bounded to the numbered steps: on the
+    // welcome screen there is nothing behind, and on the completion screen the
+    // domain has already been written, so going "back" there would re-open the
+    // lock step and let a second commit create duplicate profiles.
+    BackHandler(enabled = currentStage.order in 1..OnboardingStage.LAST_SETUP_ORDER) {
+        handleBack()
     }
 
     // Direction-aware transition: `forward` is true when the step order grows.

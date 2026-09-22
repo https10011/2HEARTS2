@@ -86,6 +86,32 @@ enum class OnboardingStage(val order: Int) {
 }
 
 /**
+ * Decides whether the shell should replace onboarding.
+ *
+ * Completed setup is persisted the instant the domain commit returns, so a
+ * crash cannot undo it. But the completion screen is the moment the person is
+ * told what was created, and it must still be shown *after* that write — if
+ * the gate swapped in the shell the moment `stage == "complete"`, the
+ * completion screen would be unreachable in the real app.
+ *
+ * [acknowledged] therefore records that the person has actually seen the
+ * completion screen and tapped through it. It is deliberately in-memory: a
+ * cold start of an already-complete install must land in the app, never on a
+ * second celebration, so the caller seeds it from the persisted state and
+ * only clears it when setup is genuinely incomplete again.
+ *
+ * Extracted as a pure function so the rule can be tested without a composed
+ * tree.
+ */
+fun shouldShowApp(
+    onboarded: Boolean,
+    stageKey: String?,
+    acknowledged: Boolean,
+): Boolean = onboarded &&
+    OnboardingStage.fromStorageKey(stageKey) == OnboardingStage.COMPLETE &&
+    acknowledged
+
+/**
  * OnboardingData — data collected during onboarding.
  */
 data class OnboardingData(

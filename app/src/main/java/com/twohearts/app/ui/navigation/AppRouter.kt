@@ -17,6 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.twohearts.app.ui.onboarding.OnboardingFlow
 import com.twohearts.app.ui.onboarding.OnboardingGate
+import com.twohearts.app.ui.onboarding.shouldShowApp
 import com.twohearts.app.ui.screens.home.HomeScreen
 import com.twohearts.app.ui.screens.us.UsScreen
 import com.twohearts.app.ui.screens.more.MoreScreen
@@ -121,18 +122,33 @@ fun AppRouter(
     val isOnboarded by appStateService.isOnboarded.collectAsState()
     val onboardingStage by appStateService.onboardingStage.collectAsState()
 
+    // Phase 3: the shell is eligible once the commit has persisted, but the
+    // completion screen still has to be shown. `acknowledged` is seeded from
+    // the persisted state on first composition — so a cold start of an
+    // already-complete install goes straight to the app — and is only cleared
+    // again when setup becomes incomplete (a data reset).
+    var onboardingAcknowledged by remember { mutableStateOf(
+        shouldShowApp(isOnboarded, onboardingStage, acknowledged = true)
+    ) }
+    LaunchedEffect(isOnboarded, onboardingStage) {
+        if (!shouldShowApp(isOnboarded, onboardingStage, acknowledged = true)) {
+            onboardingAcknowledged = false
+        }
+    }
+
     // Show onboarding or app
-    if (!isOnboarded || onboardingStage != "complete") {
+    if (!shouldShowApp(isOnboarded, onboardingStage, onboardingAcknowledged)) {
         OnboardingFlow(
             appStateService = appStateService,
             relationshipService = relationshipService,
             appLockService = appLockService,
             settingsStorage = settingsStorage,
             onComplete = {
-                // Navigate to home after onboarding
-                navController.navigate(RoutePath.APP_HOME) {
-                    popUpTo(0) { inclusive = true }
-                }
+                // The person has seen the completion screen and tapped through
+                // it. The domain and the "complete" stage were already
+                // persisted by the commit, so this only drops the gate — the
+                // shell's NavHost starts at Home.
+                onboardingAcknowledged = true
             }
         )
     } else {

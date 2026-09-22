@@ -3,6 +3,7 @@ package com.twohearts.app
 import com.twohearts.app.data.settings.OnboardingDraft
 import com.twohearts.app.ui.onboarding.OnboardingData
 import com.twohearts.app.ui.onboarding.OnboardingStage
+import com.twohearts.app.ui.onboarding.shouldShowApp
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -157,6 +158,34 @@ class Phase3OnboardingTest {
 
         val tooLong = OnboardingData(pin = "123456789", confirmPin = "123456789")
         assertFalse(tooLong.isPinValid())
+    }
+
+    // ─── Completion hand-off ──────────────────────────────────────────
+
+    @Test
+    fun `the shell replaces onboarding only once completion has been acknowledged`() {
+        // Regression guard for the Phase 3 follow-up: the commit persisted
+        // "complete" and called the hand-off in the same coroutine, so the
+        // gate swapped in the shell before SetupCompleteScreen could render
+        // and the completion screen was unreachable in the real app.
+        assertFalse(
+            "a completed-but-unacknowledged session must still show the completion screen",
+            shouldShowApp(onboarded = true, stageKey = "complete", acknowledged = false),
+        )
+        assertTrue(
+            shouldShowApp(onboarded = true, stageKey = "complete", acknowledged = true),
+        )
+    }
+
+    @Test
+    fun `the shell stays behind onboarding until setup is actually complete`() {
+        // A cold start mid-setup resumes the flow no matter what the in-memory
+        // acknowledgement happens to be.
+        assertFalse(shouldShowApp(onboarded = false, stageKey = "fresh", acknowledged = true))
+        assertFalse(shouldShowApp(onboarded = false, stageKey = "app-lock", acknowledged = true))
+        assertFalse(shouldShowApp(onboarded = true, stageKey = "app-lock", acknowledged = true))
+        assertFalse(shouldShowApp(onboarded = true, stageKey = null, acknowledged = true))
+        assertFalse(shouldShowApp(onboarded = true, stageKey = "nonsense", acknowledged = true))
     }
 
     // ─── Step validity ────────────────────────────────────────────────

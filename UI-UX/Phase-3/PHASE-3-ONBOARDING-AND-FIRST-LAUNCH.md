@@ -1,5 +1,78 @@
 # Phase 3 — Onboarding & First-Launch Experience
 
+## 0. Continuation Pass (2026-09-22)
+
+The original Phase 3 landed as `56c27db`, with a follow-up docs commit
+`668592f`. A later continuation pass was asked to determine the *actual*
+state rather than trust the record, finish anything genuinely unfinished, and
+verify the rendered UI and behaviour. This section records what that pass
+found and did; the rest of the document is the original record, corrected in
+place where it was inaccurate.
+
+### 0.1 Preflight — what actually existed
+
+| | |
+|---|---|
+| Branch | `master` |
+| HEAD at continuation start | `668592f` (`docs(ui-ux): record Phase 3 commit hash`) |
+| Working tree | clean |
+| Commits after Phase 2 | `56c27db` (implementation) and `668592f` (docs bookkeeping) |
+| Build | `:app:assembleDebug` → `BUILD SUCCESSFUL`; `app-debug.apk` = 24,776,469 bytes |
+| Tests | `:app:testDebugUnitTest` → 44/44 passing |
+| Environment | JDK 21 + Android SDK 35 installed for verification |
+
+So Phase 3 was **substantially implemented and genuinely committed** — not
+merely documented. The source changes were real, the tests ran, the render
+harness produced 26 states, and the page-pixel analyzer found no clipping.
+
+### 0.2 What the continuation pass changed
+
+Verification is not the same as acceptance, and three real defects survived
+the original commit. Each was confirmed against the running code, fixed
+within Phase 3 scope, and covered by a regression test.
+
+1. **The completion screen was unreachable in the real app.**
+   `OnboardingFlow.commit()` persisted `COMPLETE`, flipped `onboarded`, and
+   called the hand-off callback — all in one coroutine, before any
+   recomposition. `AppRouter`'s gate then saw `stage == "complete"` and
+   swapped in `AppShell` in the same frame, so `SetupCompleteScreen` could
+   never render outside the harness. A real person went straight from the PIN
+   step to Home and never saw the summary naming both people. The gate now
+   requires an explicit **acknowledgement** (`shouldShowApp`); the commit no
+   longer calls back, the completion screen renders, and the hand-off fires
+   when "Open TwoHearts" is tapped. Cold starts of an already-complete install
+   still land directly in the app, because the acknowledgement is seeded from
+   persisted state.
+
+2. **System back had no handler**, despite the original document claiming
+   "back … is always available via the header affordance and system back".
+   The hardware/gesture back gesture fell through to the Activity default and
+   left the app from any setup step. `OnboardingFlow` now installs a
+   `BackHandler` bounded to the numbered steps (welcome and completion opt
+   out, since nothing sits behind the welcome and the completion screen's
+   domain writes are already committed).
+
+3. **A fast double-tap could create duplicate profiles.** `commit()` launched
+   a coroutine and only set `committing` inside it, so two quick taps (on the
+   lock step or the retry sheet) could both pass the guard and insert a second
+   owner, partner and couple row. The guard is now set synchronously before
+   the write is launched.
+
+Two documentation defects were also corrected: §3's claim that no historical
+first-launch reference exists (it does — see the corrected section above), and
+`SettingsStorage.clearOnboardingDraft`'s comment, which stated the draft holds
+the PIN and contradicted the draft's deliberate design.
+
+### 0.3 Evidence and tests after the continuation
+
+- Renders regenerated from the committed harness; the 12 curated evidence
+  images are now derived from the same 26-state sweep (no stale captures).
+- Palette QA across all evidence images: **0.00% Material-purple leakage**,
+  burgundy present on every screen.
+- Tests now **46/46** (two new regression tests in `Phase3OnboardingTest`
+  covering the acknowledgement rule).
+- `:app:assembleDebug` → `BUILD SUCCESSFUL`.
+
 ## 1. Phase Information
 
 | | |
@@ -12,7 +85,10 @@
 | Device target | Tecno Spark 10 Pro class — 720×1612, ~360dp wide, Android 13+ |
 | Build verified | `:app:assembleDebug` → `BUILD SUCCESSFUL` → `app-debug.apk` (24,776,469 bytes) |
 | Tests | `:app:testDebugUnitTest` — 44/44 passing (13 new in `Phase3OnboardingTest`) |
-| Visual evidence | `UI-UX/Phase-3/evidence/` (12 curated Robolectric native-graphics renders) |
+| Visual evidence | `UI-UX/Phase-3/evidence/` (12 curated native-graphics renders, regenerated in the continuation pass) |
+
+> Continuation-pass figures: tests `46/46`; build `BUILD SUCCESSFUL`;
+> `app-debug.apk` 24,991,090 bytes. See §0.
 
 ## 2. Objective
 
@@ -47,13 +123,20 @@ Settings, or Yuki. Home begins in Phase 4 (§12).
 
 ### Historical reference material
 
-The directive's historical UI references were searched for a first-launch
-reference (`02-Welcome-FirstLaunch.png` or equivalent). No such asset exists in
-the repository: the `Yuki Assets/` tree and the migrated `res/` drawables
-contain brand and decoration art, but no legacy welcome screenshot. The
-reconstruction therefore works from the master directive, the Phase 0
-description of the old welcome, and the assets that *do* exist. The native
-Compose implementation remains authoritative.
+**Correction (continuation pass).** The original Phase 3 document claimed no
+first-launch reference exists in the repository. That was wrong. The legacy
+screen reference ships in the archive:
+
+`Archive/Legacy-React-Vite-Capacitor/Screen-References/02-Welcome-FirstLaunch.png`
+(1080×2400, warm cream `#F8EFE6` field), alongside its implementation
+`Archive/…/src/features/onboarding/WelcomeScreen.tsx` and the other onboarding
+screens. It was located during the continuation pass and used as reference
+material: it confirms the intended intent — official brand lockup first, the
+owner-supplied welcome artwork as hero, a decorative rule between image and
+headline, relationship-neutral body copy, one full-width primary action, and a
+privacy line beneath it. The native Compose implementation follows that
+intent; it does not reproduce the legacy markup. The native Compose source
+remains authoritative.
 
 ## 4. Existing Onboarding Baseline
 
@@ -111,9 +194,12 @@ counts exactly those.
 - **Forward** is one primary action per step. No step presents a second
   equally-weighted button.
 - **Back** steps to the previous stage and is always available via the header
-  affordance and system back; it never leaves the flow. Stepping back out of the
-  lock step discards any typed PIN so a half-entered code cannot be committed by
-  a later fast tap.
+  affordance and — since the continuation pass — the system back gesture. The
+  `BackHandler` is bounded to the numbered steps, so it never leaves the flow
+  mid-setup; the welcome screen (nothing behind it) and the completion screen
+  (the domain is already committed) let the platform default apply. Stepping
+  back out of the lock step discards any typed PIN so a half-entered code
+  cannot be committed by a later fast tap.
 - **Skip** exists on exactly one step, the app lock, because that step is
   genuinely optional and says so ("Optional" eyebrow, "Not now" secondary). No
   other step is skippable, and no skip was invented to shorten the flow.
@@ -176,8 +262,10 @@ denominator.
 ### 6.7 Completion and transitions
 
 `SetupCompleteScreen` names both people over the pair artwork, states that the
-space is ready, and offers one action: "Open TwoHearts". Steps animate with a
-short direction-aware slide + fade from Phase 2's motion foundation; the
+space is ready, and offers one action: "Open TwoHearts". The summary is
+rendered *after* the commit and *before* the shell, because the gate requires
+an explicit acknowledgement (see §0.2 and §7.1). Steps animate with a short
+direction-aware slide + fade from Phase 2's motion foundation; the
 reduced-motion preference collapses the durations. No theatrical animation.
 
 ## 7. UX Changes
@@ -192,6 +280,12 @@ at every step, written **before** the stage advances. Consequences:
   answers — the safe direction, so the person sees their input again rather
   than skipping past a step with nothing recorded.
 - `COMPLETE` is persisted only after every domain write has returned.
+
+The commit performs the domain writes, clears the draft, persists `COMPLETE`
+and flips `onboarded` together. The gate that decides "onboarding or shell"
+additionally requires the completion screen to have been acknowledged
+(`shouldShowApp`), so the persisted completion cannot pre-empt the screen that
+reports it; the hand-off runs on the "Open TwoHearts" tap.
 
 Malformed or absent draft JSON degrades to a fresh draft rather than throwing:
 losing a draft costs one field of re-entry, while throwing would crash first
@@ -331,8 +425,11 @@ pixel/palette inspection.
 ### 10.4 Evidence
 
 `UI-UX/Phase-3/evidence/` — 12 curated renders: welcome (light, dark, 360dp),
-owner, empty/validation, relationship, personalization (light, dark), app lock,
-completion (full and 360dp), and owner at 360dp with Extra Large text.
+owner step, owner validation state, relationship step, personalization step,
+app-lock step, completion, completion at 360dp, personalization dark, and the
+owner step at 360dp with extra-large text. The underlying sweeps are 15 states
+at `w411dp-h891dp-xxhdpi` and 11 at `w360dp-h780dp-mdpi`, produced by
+`Phase3RenderHarness` and `Phase3NarrowRenderHarness`.
 
 ## 11. Performance
 
@@ -378,11 +475,11 @@ exists. No Home, Us, Memories, Notes, Timeline, Settings, or Yuki redesign.
 | `ui/onboarding/PersonalizationSetupScreen.kt` | Selectable theme/text-size choices with real selected states. |
 | `ui/onboarding/AppLockSetupScreen.kt` | Clearly optional framing, credential explanation, PIN handling kept off disk. |
 | `ui/onboarding/SetupCompleteScreen.kt` | Both names, pair artwork, single meaningful exit action. |
-| `ui/onboarding/OnboardingFlow.kt` | Draft persistence, advance-before-commit ordering, PIN separation, direction-aware transitions, failure handling. |
-| `ui/onboarding/OnboardingState.kt` | Stage derivation (`SETUP_STEP_COUNT`, `LAST_SETUP_ORDER`), single storage-key mapping. |
-| `ui/navigation/AppRouter.kt` | Onboarding hand-off; route to existing Home; reduced-motion-aware transitions. |
+| `ui/onboarding/OnboardingFlow.kt` | Draft persistence, advance-before-commit ordering, PIN separation, direction-aware transitions, failure handling; continuation: system-back handler, synchronous double-commit guard, completion hand-off moved to the acknowledgement tap. |
+| `ui/onboarding/OnboardingState.kt` | Stage derivation (`SETUP_STEP_COUNT`, `LAST_SETUP_ORDER`), single storage-key mapping; continuation: pure `shouldShowApp` gate rule. |
+| `ui/navigation/AppRouter.kt` | Onboarding hand-off; route to existing Home; reduced-motion-aware transitions; continuation: completion-screen acknowledgement gate so the celebration actually renders. |
 | `ui/components/Input.kt`, `Aliases.kt`, `Icons.kt` | Token adoption and icon vocabulary for onboarding controls. |
-| `data/settings/AppSettings.kt`, `SettingsStorage.kt` | Draft persistence keys and accessors. |
+| `data/settings/AppSettings.kt`, `SettingsStorage.kt` | Draft persistence keys and accessors; continuation: corrected `clearOnboardingDraft` comment (draft never holds the PIN). |
 
 ### Added
 
@@ -393,7 +490,7 @@ exists. No Home, Us, Memories, Notes, Timeline, Settings, or Yuki redesign.
 | `ui/decorations/OnboardingArt.kt` | Onboarding decoration placement. |
 | `res/drawable-nodpi/onboarding_welcome_photo.png`, `decor_rose_lily_01/11/15.png` | Official onboarding and decoration art. |
 | `app/src/test/java/com/twohearts/app/Phase3RenderHarness.kt` | 26-state render harness. |
-| `app/src/test/java/com/twohearts/app/Phase3OnboardingTest.kt` | 13 onboarding invariants (progression, resume, credential safety, validation). |
+| `app/src/test/java/com/twohearts/app/Phase3OnboardingTest.kt` | Onboarding invariants (progression, resume, credential safety, validation) plus, after the continuation, the completion-acknowledgement gate rule. |
 | `tools/generate-onboarding-assets.mjs` | Reproducible onboarding art pipeline. |
 | `tools/analyze-phase3-renders.py` | Render inspection helper. |
 
@@ -431,5 +528,5 @@ exists. No Home, Us, Memories, Notes, Timeline, Settings, or Yuki redesign.
 - [x] No migration restarted; no Migration Stage 16
 - [x] Documentation created
 - [x] Evidence captured
-- [x] Build passes; 44/44 tests pass
+- [x] Build passes; 46/46 tests pass (44 at the original commit + 2 continuation regression tests)
 - [x] Commit `56c27db` created and pushed to `origin/master`
