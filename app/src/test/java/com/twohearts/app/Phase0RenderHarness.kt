@@ -76,7 +76,7 @@ class Phase0RenderHarness {
 
     private fun appState(): AppStateService {
         val app = ApplicationProvider.getApplicationContext<Application>()
-        return AppStateService(SettingsStorage(app))
+        return AppStateService(SettingsStorage.getInstance(app))
     }
 
     private fun relationshipService(): RelationshipService {
@@ -232,7 +232,7 @@ class Phase0RenderHarness {
         render("36-relationship-settings") { RelationshipSettingsScreen({}) }
         render("37-appearance-settings") { AppearanceSettingsScreen(appState(), {}) }
         render("38-notification-settings") {
-            NotificationSettingsScreen(SettingsStorage(ApplicationProvider.getApplicationContext()), {})
+            NotificationSettingsScreen(SettingsStorage.getInstance(ApplicationProvider.getApplicationContext()), {})
         }
         render("39-about") { AboutScreen({}) }
 

@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         val bootstrapService = BootstrapService(this)
         // Created before setContent so the theme can observe persisted
         // appearance settings from the very first frame.
-        val settingsStorage = SettingsStorage(this)
+        val settingsStorage = SettingsStorage.getInstance(this)
         val appStateService = AppStateService(settingsStorage)
 
         setContent {

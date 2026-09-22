@@ -1,0 +1,102 @@
+TwoHearts — Real-Device Launch Crash: Logcat Evidence
+======================================================
+
+Captured from a real Android emulator boot (adb logcat), NOT Robolectric.
+Both APKs were built from the same commit; the only difference is the
+SettingsStorage DataStore wiring.
+
+Reproduction: fresh install, `am start -n com.twohearts.app/.MainActivity`.
+
+================================================================
+1. PRE-FIX APK — FATAL EXCEPTION (app stops immediately)
+================================================================
+
+09-22 04:51:28.170  3095  3095 E AndroidRuntime: FATAL EXCEPTION: main
+09-22 04:51:28.170  3095  3095 E AndroidRuntime: Process: com.twohearts.app, PID: 3095
+09-22 04:51:28.170  3095  3095 E AndroidRuntime: java.lang.IllegalStateException: There are multiple DataStores active for the same file: /data/user/0/com.twohearts.app/files/datastore/twohearts_settings.preferences_pb. You should either maintain your DataStore as a singleton or confirm that there is no two DataStore's active on the same file (by confirming that the scope is cancelled).
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at androidx.datastore.core.okio.OkioStorage.createConnection(OkioStorage.kt:65)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at androidx.datastore.core.DataStoreImpl$storageConnectionDelegate$1.invoke(DataStoreImpl.kt:189)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at androidx.datastore.core.DataStoreImpl$storageConnectionDelegate$1.invoke(DataStoreImpl.kt:188)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at kotlin.SynchronizedLazyImpl.getValue(LazyJVM.kt:83)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at androidx.datastore.core.DataStoreImpl.getStorageConnection$datastore_core_release(DataStoreImpl.kt:191)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at androidx.datastore.core.DataStoreImpl$coordinator$2.invoke(DataStoreImpl.kt:192)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at androidx.datastore.core.DataStoreImpl$coordinator$2.invoke(DataStoreImpl.kt:192)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at kotlin.SynchronizedLazyImpl.getValue(LazyJVM.kt:83)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at androidx.datastore.core.DataStoreImpl.getCoordinator(DataStoreImpl.kt:192)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at androidx.datastore.core.DataStoreImpl.readAndInitOrPropagateAndThrowFailure(DataStoreImpl.kt:272)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at androidx.datastore.core.DataStoreImpl.access$readAndInitOrPropagateAndThrowFailure(DataStoreImpl.kt:53)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at androidx.datastore.core.DataStoreImpl$readState$2.invokeSuspend(DataStoreImpl.kt:226)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:108)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:115)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:103)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:584)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:793)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:697)
+09-22 04:51:28.170  3095  3095 E AndroidRuntime:        at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:684)
+
+Post-crash state: mResumedActivity = com.android.launcher3/.uioverrides.QuickstepLauncher
+(the app was gone; the launcher had focus). FATAL EXCEPTION count: 1.
+
+
+================================================================
+2. POST-FIX APK — CLEAN LAUNCH, NO EXCEPTION
+================================================================
+
+Process starts, bootstrap completes every stage, and the Activity is
+resumed by the system.
+
+09-22 04:47:42.215  558   605 I ActivityManager: Start proc 2443:com.twohearts.app/u0a130 for pre-top-activity {com.twohearts.app/com.twohearts.app.MainActivity}
+09-22 04:48:22.684  2443  2443 I TH:Bootstrap: Starting bootstrap pipeline
+09-22 04:48:22.740  2443  2443 I TH:Bootstrap: Stage 1: Initializing database
+09-22 04:48:23.499  2443  2443 I TH:Bootstrap: Stage 2: Verifying schema version
+09-22 04:48:23.636  2443  2443 I TH:Bootstrap: Stage 3: Initializing device capabilities
+09-22 04:48:23.709  2443  2443 I TH:Bootstrap: Stage 4: Starting lifecycle service
+09-22 04:48:23.946  2443  2443 I TH:Bootstrap: Stage 5: Initializing notification service
+09-22 04:48:24.453  2443  2443 I TH:Bootstrap: Stage 6: Initializing app lock service
+09-22 04:48:33.359  2443  2443 I TH:Bootstrap: Stage 7: Application state services (placeholder)
+09-22 04:48:33.400  2443  2443 I TH:Bootstrap: Bootstrap pipeline completed successfully
+09-22 04:48:33.838  2443  2443 I TH:AppState: App state initialized          <-- MainActivity line 65
+09-22 04:48:35.375  2443  2443 W m.twohearts.ap: Verification of ... OnboardingFlow(...) ...
+09-22 04:48:36.020  2443  2443 I TH:AppState: App state initialized          <-- second init, Compose gate
+
+mResumedActivity: ActivityRecord{40ecc9 u0 com.twohearts.app/.MainActivity t9}
+mFocusedApp=ActivityRecord{40ecc9 u0 com.twohearts.app/.MainActivity t9}
+Process alive: u0_a130  2443  300 ... S com.twohearts.app
+FATAL EXCEPTION count: 0
+
+"App state initialized" at 04:48:33.838 is the decisive line: that is
+`AppStateService.initialize()` called from MainActivity straight after
+`bootstrap()` returned true — the exact call that threw on the pre-fix
+build. It now completes, and the app then composes OnboardingFlow.
+
+
+================================================================
+3. RELAUNCH (force-stop -> start), EXISTING INSTALL
+================================================================
+
+09-22 04:49:50.216  2963  2963 I TH:Bootstrap: Starting bootstrap pipeline
+09-22 04:49:50.297  2963  2963 I TH:Bootstrap: Stage 1: Initializing database
+09-22 04:49:55.397  2963  2963 I TH:Bootstrap: Bootstrap pipeline completed successfully
+09-22 04:49:55.486  2963  2963 I TH:AppState: App state initialized
+09-22 04:49:56.507  2963  2963 I TH:AppState: App state initialized
+
+mResumedActivity: com.twohearts.app/.MainActivity
+FATAL EXCEPTION count: 0
+
+Note the shorter Stage 6 (04:49:51.322 -> 04:49:55.352) versus first launch:
+the DataStore and Keystore-backed secure storage already exist, so cold start
+is meaningfully faster on an established install.
+
+
+================================================================
+4. INTERPRETATION
+================================================================
+
+The exception is thrown from a coroutine worker (`CoroutineScheduler`), not the
+main thread directly, which is why the app is reported as an immediate
+"has stopped" rather than a visible error screen: `AppStateService.initialize()`
+runs in a `LaunchedEffect` coroutine, and an uncaught exception there reaches the
+default uncaught-exception handler and terminates the process.
+
+This is consistent with the reported symptom: install succeeds, launch crashes.

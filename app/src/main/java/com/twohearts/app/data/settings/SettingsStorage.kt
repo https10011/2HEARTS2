@@ -13,16 +13,42 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 /**
+ * The one DataStore for settings, scoped to the process rather than to a
+ * [SettingsStorage] instance. DataStore enforces one active instance per file,
+ * so this must not be a member property (see the class docs).
+ */
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "twohearts_settings"
+)
+
+/**
  * SettingsStorage — DataStore-based implementation matching legacy localStorage settings.
  *
  * This replaces the legacy SettingsStorage abstraction that used localStorage.
  * All settings are persisted using Jetpack DataStore (Preferences).
+ *
+ * ## Why the DataStore is a top-level delegate and the instance is shared
+ *
+ * DataStore allows exactly **one active instance per file per process**; a
+ * second one fails with *"There are multiple DataStores active for the same
+ * file"*. Two things about the original wiring made that reachable on a real
+ * device:
+ *
+ *  1. The delegate was a *member* of this class, so every `SettingsStorage(...)`
+ *     created another `DataStore` over the same file. A `by
+ *     preferencesDataStore(...)` delegate is safe as a top-level (or Activity)
+ *     property precisely because it is created once per process — as a member
+ *     it is created once per instance.
+ *  2. There were two instances: one in `MainActivity` and a second inside
+ *     `BootstrapService`. `MainActivity` subscribes to `settings` for the
+ *     theme, so the first DataStore was already active by the time bootstrap
+ *     reached the app-lock stage and built the second.
+ *
+ * Moving the delegate to the top of this file plus [getInstance] makes the
+ * one-instance rule structural rather than something every call site has to
+ * remember. See `SettingsStorageSingletonTest`.
  */
-class SettingsStorage(private val context: Context) {
-
-    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
-        name = "twohearts_settings"
-    )
+class SettingsStorage private constructor(private val context: Context) {
 
     /**
      * Observe all settings as a Flow.
@@ -166,6 +192,27 @@ class SettingsStorage(private val context: Context) {
     }
 
     companion object {
+        @Volatile
+        private var instance: SettingsStorage? = null
+
+        /**
+         * The process-wide [SettingsStorage].
+         *
+         * Every caller must go through here: a second instance would create a
+         * second [DataStore] over the same file and fail at runtime with
+         * *"There are multiple DataStores active for the same file"*, which is
+         * what crashed the app on launch. The constructor is private so that
+         * cannot be done accidentally.
+         *
+         * This is intentionally the same double-checked-singleton shape used by
+         * [com.twohearts.app.data.database.TwoHeartsDatabase.getDatabase].
+         */
+        fun getInstance(context: Context): SettingsStorage {
+            return instance ?: synchronized(this) {
+                instance ?: SettingsStorage(context.applicationContext).also { instance = it }
+            }
+        }
+
         private val TEXT_SIZE = stringPreferencesKey(AppSettingsKeys.TEXT_SIZE)
         private val THEME_MODE = stringPreferencesKey(AppSettingsKeys.THEME_MODE)
         private val ONBOARDED = booleanPreferencesKey(AppSettingsKeys.ONBOARDED)
