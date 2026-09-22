@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
 import kotlinx.coroutines.launch
@@ -19,6 +20,7 @@ import com.twohearts.app.ui.onboarding.OnboardingFlow
 import com.twohearts.app.ui.onboarding.OnboardingGate
 import com.twohearts.app.ui.onboarding.shouldShowApp
 import com.twohearts.app.ui.screens.home.HomeScreen
+import com.twohearts.app.ui.screens.home.yukiPresenceFor
 import com.twohearts.app.ui.screens.us.UsScreen
 import com.twohearts.app.ui.screens.more.MoreScreen
 import com.twohearts.app.ui.screens.notes.NotesHome
@@ -219,11 +221,27 @@ fun AppRouter(
             ) {
                 // Home
                 composable(RoutePath.APP_HOME) {
+                    // Phase 4: Home now reads the same repositories the feature
+                    // screens do, so it reflects real local state instead of a
+                    // fixed set of buttons. Yuki's presence comes from the
+                    // persisted companion state; it is optional because a
+                    // brand-new install has no Yuki record yet, and Home must
+                    // not invent one.
+                    val context = LocalContext.current
+                    val yukiPresence = remember(context) {
+                        runCatching { yukiPresenceFor(context = context) }.getOrNull()
+                    }
                     HomeScreen(
                         relationshipService = relationshipService,
+                        noteRepository = noteRepository,
+                        reminderRepository = reminderRepository,
+                        memoryRepository = memoryRepository,
+                        moodEntryRepository = moodEntryRepository,
+                        importantDateRepository = importantDateRepository,
                         onNavigate = { route ->
                             navController.navigate(route)
-                        }
+                        },
+                        yukiPresence = yukiPresence,
                     )
                 }
 

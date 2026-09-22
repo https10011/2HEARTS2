@@ -128,7 +128,7 @@ class Phase2RenderHarness {
     @Test
     fun renderPrimaryAreas() {
         render("p2-01-home", RoutePath.APP_HOME) {
-            HomeScreen(relationshipService(), {})
+            TestHomeScreen()
         }
         render("p2-02-notes", RoutePath.APP_NOTES) {
             NotesHome(
@@ -187,7 +187,7 @@ class Phase2RenderHarness {
     @Test
     fun renderDark() {
         render("p2-20-home-dark", RoutePath.APP_HOME, dark = true) {
-            HomeScreen(relationshipService(), {})
+            TestHomeScreen()
         }
         render("p2-21-notes-dark", RoutePath.APP_NOTES, dark = true) {
             NotesHome(
@@ -213,7 +213,7 @@ class Phase2RenderHarness {
     @Test
     fun renderExtraLargeText() {
         render("p2-30-home-xl", RoutePath.APP_HOME, scale = TextScalingLevel.EXTRA_LARGE) {
-            HomeScreen(relationshipService(), {})
+            TestHomeScreen()
         }
         render("p2-31-notes-xl", RoutePath.APP_NOTES, scale = TextScalingLevel.EXTRA_LARGE) {
             NotesHome(
@@ -234,7 +234,7 @@ class Phase2RenderHarness {
     @Config(sdk = [34], qualifiers = "w360dp-h780dp-mdpi")
     fun renderTargetDevice() {
         render("p2-40-home-360", RoutePath.APP_HOME) {
-            HomeScreen(relationshipService(), {})
+            TestHomeScreen()
         }
         render("p2-41-notes-360", RoutePath.APP_NOTES) {
             NotesHome(
@@ -262,7 +262,7 @@ class Phase2RenderHarness {
             RoutePath.APP_HOME,
             scale = TextScalingLevel.EXTRA_LARGE,
         ) {
-            HomeScreen(relationshipService(), {})
+            TestHomeScreen()
         }
     }
 
@@ -298,7 +298,7 @@ class Phase2RenderHarness {
             }
         }
         render("p2-60-home-seeded", RoutePath.APP_HOME) {
-            HomeScreen(relationshipService(), {})
+            TestHomeScreen()
         }
         render("p2-61-us-seeded", RoutePath.APP_US) {
             com.twohearts.app.ui.screens.us.UsScreen(relationshipService(), {})

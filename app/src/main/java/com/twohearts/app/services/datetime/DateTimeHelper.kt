@@ -52,11 +52,17 @@ object DateTimeHelper {
     /**
      * Calculate days until anniversary.
      * Matches legacy daysUntilAnniversary() exactly.
+     *
+     * Phase 4: [today] is injectable so a caller that has already resolved the
+     * current local date — and, more importantly, a test or render harness that
+     * has *pinned* one — gets the answer for that date. The default keeps every
+     * existing call site behaving identically, and the arithmetic is unchanged:
+     * the anniversary in the current year, rolled forward one year if it has
+     * passed.
      */
-    fun daysUntilAnniversary(startDate: String): Int {
+    fun daysUntilAnniversary(startDate: String, today: LocalDate = LocalDate.now()): Int {
         return try {
             val start = LocalDate.parse(startDate, dateFormatter)
-            val today = LocalDate.now()
             var nextAnniversary = start.withYear(today.year)
             if (nextAnniversary.isBefore(today)) {
                 nextAnniversary = nextAnniversary.plusYears(1)
@@ -70,11 +76,13 @@ object DateTimeHelper {
     /**
      * Calculate days since start date.
      * Matches legacy daysSinceStartDate() exactly.
+     *
+     * As with [daysUntilAnniversary], [today] is injectable for callers that
+     * have pinned the current date; the default preserves existing behaviour.
      */
-    fun daysSinceStartDate(startDate: String): Int {
+    fun daysSinceStartDate(startDate: String, today: LocalDate = LocalDate.now()): Int {
         return try {
             val start = LocalDate.parse(startDate, dateFormatter)
-            val today = LocalDate.now()
             abs(ChronoUnit.DAYS.between(start, today).toInt())
         } catch (e: Exception) {
             0

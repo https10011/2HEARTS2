@@ -124,8 +124,8 @@ class Phase0RenderHarness {
 
     @Test
     fun renderAll() {
-        render("01-home") { com.twohearts.app.ui.screens.home.HomeScreen(relationshipService(), {}) }
-        render("01b-home-dark", dark = true) { com.twohearts.app.ui.screens.home.HomeScreen(relationshipService(), {}) }
+        render("01-home") { TestHomeScreen() }
+        render("01b-home-dark", dark = true) { TestHomeScreen() }
         render("02-us") { UsScreen(relationshipService(), {}) }
         render("03-more") { MoreScreen({}) }
 
@@ -250,7 +250,7 @@ class Phase0RenderHarness {
         }
 
         render("50-home-large-text", scale = TextScalingLevel.EXTRA_LARGE) {
-            com.twohearts.app.ui.screens.home.HomeScreen(relationshipService(), {})
+            TestHomeScreen()
         }
         render("51-notes-list-large-text", scale = TextScalingLevel.EXTRA_LARGE) {
             NotesHome(
@@ -297,7 +297,7 @@ class Phase0RenderHarness {
                 canNavigateBack = false
             ) { padding ->
                 Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-                    com.twohearts.app.ui.screens.home.HomeScreen(relationshipService(), {})
+                    TestHomeScreen()
                 }
             }
         }
@@ -340,7 +340,7 @@ class Phase0RenderHarness {
             )
         }
         render("67-home-seeded") {
-            com.twohearts.app.ui.screens.home.HomeScreen(relationshipService(), {})
+            TestHomeScreen()
         }
         render("68-us-seeded") { UsScreen(relationshipService(), {}) }
 
@@ -363,7 +363,7 @@ class Phase0RenderHarness {
     @Config(sdk = [34], qualifiers = "w360dp-h780dp-mdpi")
     fun renderTargetDevice() {
         render("80-home-target", scale = TextScalingLevel.DEFAULT) {
-            com.twohearts.app.ui.screens.home.HomeScreen(relationshipService(), {})
+            TestHomeScreen()
         }
         render("81-notes-target") {
             NotesHome(
