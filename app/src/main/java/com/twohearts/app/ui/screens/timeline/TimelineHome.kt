@@ -1,138 +1,76 @@
 package com.twohearts.app.ui.screens.timeline
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.EmptyState
-import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.TimelineEvent
-import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.ui.components.Header
+import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import java.time.LocalDate
 
-/**
- * TimelineHome — timeline narrative view screen.
- *
- * Matches legacy TimelineHome with:
- * - "Our story" narrative view with spine
- * - Event cards
- * - Empty state
- * - Add event FAB
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimelineHome(
-    events: List<TimelineEvent>,
-    onEventClick: (String) -> Unit,
-    onAddEvent: () -> Unit,
-    onBack: () -> Unit
-) {
+fun TimelineHome(events: List<TimelineEvent>, onEventClick: (String) -> Unit, onAddEvent: () -> Unit, onBack: () -> Unit) {
+    val colors = LocalTwoHeartsColors.current
+    val ordered = events.sortedByDescending { runCatching { LocalDate.parse(it.eventDate) }.getOrNull() }
     Scaffold(
-        topBar = {
-            Header(
-                title = "Timeline",
-                onBack = onBack
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddEvent,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add Event"
-                )
+        topBar = { Header(title = "Our timeline", onBack = onBack) },
+        floatingActionButton = { ExtendedFloatingActionButton(onClick = onAddEvent, icon = { Icon(ThIcons.Add, null) }, text = { Text("Add a moment") }, containerColor = colors.burgundy, contentColor = colors.textOnAccent) },
+    ) { padding ->
+        if (events.isEmpty()) TimelineEmpty(onAddEvent, Modifier.padding(padding)) else LazyColumn(
+            Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 104.dp),
+        ) {
+            item {
+                Text("The story of us", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(6.dp)); Text("Every beginning, turning point, and ordinary day worth remembering.", color = colors.textSecondary)
+                Spacer(Modifier.height(24.dp))
             }
-        }
-    ) { paddingValues ->
-        if (events.isEmpty()) {
-            EmptyState(
-                title = "No Events Yet",
-                message = "Add your first timeline event to start your story",
-                modifier = Modifier.padding(paddingValues)
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(events) { event ->
-                    TimelineEventCard(
-                        event = event,
-                        onClick = { onEventClick(event.id) }
-                    )
-                }
+            itemsIndexed(ordered, key = { _, event -> event.id }) { index, event ->
+                TimelineMoment(event, index == 0, index == ordered.lastIndex) { onEventClick(event.id) }
             }
         }
     }
 }
 
-/**
- * TimelineEventCard — event card for timeline view.
- */
 @Composable
-fun TimelineEventCard(
-    event: TimelineEvent,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            // Date column
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.width(60.dp)
-            ) {
-                Text(
-                    text = DateTimeHelper.getMonthName(event.eventDate).take(3),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+private fun TimelineEmpty(onAdd: () -> Unit, modifier: Modifier) {
+    val colors = LocalTwoHeartsColors.current
+    Column(modifier.fillMaxSize().padding(36.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Box(Modifier.size(88.dp).clip(CircleShape).background(colors.surfaceBlush), contentAlignment = Alignment.Center) { Icon(ThIcons.Timeline, null, tint = colors.burgundy, modifier = Modifier.size(40.dp)) }
+        Spacer(Modifier.height(22.dp)); Text("Your story is waiting", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(8.dp)); Text("Begin with the moment that feels like the start, then add the chapters that followed.", color = colors.textSecondary)
+        Spacer(Modifier.height(24.dp)); Button(onClick = onAdd) { Icon(ThIcons.Add, null); Spacer(Modifier.width(8.dp)); Text("Add your first moment") }
+    }
+}
 
-                Text(
-                    text = DateTimeHelper.getYear(event.eventDate).toString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Event content
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = event.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                if (event.description != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = event.description.take(100),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        maxLines = 2
-                    )
-                }
+@Composable
+private fun TimelineMoment(event: TimelineEvent, first: Boolean, last: Boolean, onClick: () -> Unit) {
+    val colors = LocalTwoHeartsColors.current
+    val date = runCatching { LocalDate.parse(event.eventDate) }.getOrNull()
+    Row(Modifier.fillMaxWidth().heightIn(min = 142.dp)) {
+        Column(Modifier.width(38.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            if (!first) Box(Modifier.width(2.dp).height(18.dp).background(colors.dustyRose)) else Spacer(Modifier.height(18.dp))
+            Box(Modifier.size(16.dp).clip(CircleShape).background(if (first) colors.gold else colors.burgundy))
+            if (!last) Box(Modifier.width(2.dp).height(108.dp).background(colors.dustyRose))
+        }
+        Surface(Modifier.weight(1f).padding(bottom = 18.dp).clickable(onClick = onClick), shape = RoundedCornerShape(22.dp), color = if (first) colors.surfaceBlush else colors.surfaceElevated, tonalElevation = 1.dp) {
+            Column(Modifier.padding(18.dp)) {
+                Text(date?.let { "${it.month.name.lowercase().replaceFirstChar(Char::uppercase)} ${it.dayOfMonth}, ${it.year}" } ?: event.eventDate, style = MaterialTheme.typography.labelMedium, color = colors.roseDeep)
+                Spacer(Modifier.height(7.dp)); Text(event.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                event.description?.takeIf { it.isNotBlank() }?.let { Spacer(Modifier.height(7.dp)); Text(it, color = colors.textSecondary, maxLines = 3, overflow = TextOverflow.Ellipsis) }
             }
         }
     }

@@ -26,7 +26,7 @@ class TimelineEventRepository(private val dao: TimelineEventDao) : BaseRepositor
         val updated = existing.copy(
             title = changes["title"] as? String ?: existing.title,
             eventDate = changes["eventDate"] as? String ?: existing.eventDate,
-            description = changes["description"] as? String ?: existing.description,
+            description = if (changes.containsKey("description")) changes["description"] as? String else existing.description,
             updatedAt = nowUtc()
         )
         dao.update(updated)

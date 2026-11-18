@@ -557,9 +557,11 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_TIMELINE_ADD) {
+                    val scope = rememberCoroutineScope()
                     AddEvent(
                         onSave = { title, eventDate, description ->
-                            kotlinx.coroutines.runBlocking {
+                            scope.launch {
+                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                                 timelineEventRepository.create(
                                     com.twohearts.app.data.entity.TimelineEvent(
                                         title = title,
@@ -570,8 +572,9 @@ fun AppRouter(
                                         updatedAt = DateTimeHelper.nowUtc()
                                     )
                                 )
+                                }
+                                navController.popBackStack()
                             }
-                            navController.popBackStack()
                         },
                         onBack = {
                             navController.popBackStack()
@@ -582,6 +585,7 @@ fun AppRouter(
                 composable("/app/timeline/{eventId}") { backStackEntry ->
                     val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
                     var event by remember { mutableStateOf<com.twohearts.app.data.entity.TimelineEvent?>(null) }
+                    val scope = rememberCoroutineScope()
                     LaunchedEffect(eventId) {
                         event = timelineEventRepository.getById(eventId)
                     }
@@ -592,10 +596,10 @@ fun AppRouter(
                                 navController.navigate("/app/timeline/$eventId/edit")
                             },
                             onDelete = {
-                                kotlinx.coroutines.runBlocking {
-                                    timelineEventRepository.softDelete(e.id)
+                                scope.launch {
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { timelineEventRepository.softDelete(e.id) }
+                                    navController.popBackStack()
                                 }
-                                navController.popBackStack()
                             },
                             onBack = {
                                 navController.popBackStack()
@@ -607,6 +611,7 @@ fun AppRouter(
                 composable("/app/timeline/{eventId}/edit") { backStackEntry ->
                     val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
                     var event by remember { mutableStateOf<com.twohearts.app.data.entity.TimelineEvent?>(null) }
+                    val scope = rememberCoroutineScope()
                     LaunchedEffect(eventId) {
                         event = timelineEventRepository.getById(eventId)
                     }
@@ -617,14 +622,16 @@ fun AppRouter(
                             initialDescription = e.description ?: "",
                             initialDate = e.eventDate,
                             onSave = { title, eventDate, description ->
-                                kotlinx.coroutines.runBlocking {
+                                scope.launch {
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                                     timelineEventRepository.update(e.id, mapOf(
                                         "title" to title,
                                         "eventDate" to eventDate,
                                         "description" to description
                                     ))
+                                    }
+                                    navController.popBackStack()
                                 }
-                                navController.popBackStack()
                             },
                             onBack = {
                                 navController.popBackStack()

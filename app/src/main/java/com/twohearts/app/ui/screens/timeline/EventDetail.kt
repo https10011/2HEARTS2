@@ -3,9 +3,6 @@ package com.twohearts.app.ui.screens.timeline
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -14,6 +11,10 @@ import com.twohearts.app.ui.components.ConfirmDialog
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.TimelineEvent
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 
 /**
  * EventDetail — timeline event detail screen.
@@ -32,6 +33,7 @@ fun EventDetail(
     onBack: () -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val colors = LocalTwoHeartsColors.current
 
     Scaffold(
         topBar = {
@@ -41,15 +43,8 @@ fun EventDetail(
                 actions = {
                     IconButton(onClick = onEdit) {
                         Icon(
-                            imageVector = Icons.Default.Edit,
+                            imageVector = ThIcons.Edit,
                             contentDescription = "Edit"
-                        )
-                    }
-                    IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
@@ -61,7 +56,7 @@ fun EventDetail(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(horizontal = 24.dp, vertical = 22.dp)
         ) {
             // Date
             Text(
@@ -76,7 +71,8 @@ fun EventDetail(
             Text(
                 text = event.title,
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.SemiBold,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -86,7 +82,8 @@ fun EventDetail(
                 Text(
                     text = event.description,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = colors.textSecondary,
+                    fontFamily = FontFamily.Serif,
                 )
             }
 
@@ -106,14 +103,18 @@ fun EventDetail(
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
                 )
             }
+            Spacer(Modifier.height(32.dp))
+            OutlinedButton(onClick = { showDeleteDialog = true }, colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
+                Icon(ThIcons.Trash, null); Spacer(Modifier.width(8.dp)); Text("Delete moment")
+            }
         }
     }
 
     // Delete confirmation dialog
     if (showDeleteDialog) {
         ConfirmDialog(
-            title = "Delete Event",
-            message = "Are you sure you want to delete this event?",
+            title = "Delete this moment?",
+            message = "This chapter will be removed from your timeline. This cannot be undone.",
             confirmText = "Delete",
             onConfirm = {
                 showDeleteDialog = false

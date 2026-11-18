@@ -2,10 +2,10 @@
 
 ## Current checkpoint
 
-- **Active work** — Phase 8 (Timeline). The owner confirmed that TwoHearts now runs on their TECNO Spark 10 Pro. The startup gate is clear.
+- **Active work** — Phase 9 (Reminders and Important Dates). The owner confirmed that TwoHearts now runs on their TECNO Spark 10 Pro. The startup gate is clear.
 - **Completed UI/UX phases at intake** — Phase 0 reconnaissance, Phase 1 visual language, Phase 2 shell and navigation, Phase 3 onboarding, and Phase 4 Home. Their implementation and reports are in the repository history.
-- **Completed since intake** — Phase 5 replaced the Us directory with a live relationship summary and feature previews. Phase 6 redesigned Memories and connected private photo/video selection, persistence, browsing, editing, and deletion. Phase 7 transformed Notes into a searchable, category-aware private writing experience. [Phase 5 report](Phase-5/PHASE-5-US-RELATIONSHIP-HUB.md) · [Phase 6 report](Phase-6/PHASE-6-MEMORIES-EXPERIENCE.md) · [Phase 7 report](Phase-7/PHASE-7-NOTES-EXPERIENCE.md)
-- **Pending UI/UX phases** — Phase 8 through Phase 20 in the [master directive](MASTER-UI-UX-DIRECTIVE.md). Phase 8 begins with the relationship Timeline.
+- **Completed since intake** — Phase 5 replaced the Us directory with a live relationship summary and feature previews. Phase 6 redesigned Memories and connected private photo/video selection, persistence, browsing, editing, and deletion. Phase 7 transformed Notes into a searchable, category-aware private writing experience. Phase 8 rebuilt Timeline around a continuous chronological story. [Phase 5 report](Phase-5/PHASE-5-US-RELATIONSHIP-HUB.md) · [Phase 6 report](Phase-6/PHASE-6-MEMORIES-EXPERIENCE.md) · [Phase 7 report](Phase-7/PHASE-7-NOTES-EXPERIENCE.md) · [Phase 8 report](Phase-8/PHASE-8-TIMELINE-EXPERIENCE.md)
+- **Pending UI/UX phases** — Phase 9 through Phase 20 in the [master directive](MASTER-UI-UX-DIRECTIVE.md). Phase 9 covers Reminders and Important Dates.
 - **Latest verified remote checkpoint** — `ee23b153370d8534f43cd4d835111be528d152d1`. GitHub Actions run [44261918124](https://github.com/https10011/2HEARTS2/actions/runs/44261918124) passed its APK build, all 91 tests in both variants, and artifact upload. The worktree is ready for Phase 8.
 
 ## Repository and startup audit
