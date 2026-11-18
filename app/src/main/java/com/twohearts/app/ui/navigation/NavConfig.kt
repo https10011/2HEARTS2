@@ -139,7 +139,7 @@ object NavConfig {
         RoutePath.APP_SETTINGS_NOTIFICATIONS to Destination("Notification Settings", ThIcons.Bell),
         RoutePath.APP_SETTINGS_SECURITY to Destination("Security Settings", ThIcons.Security),
         RoutePath.APP_SETTINGS_STORAGE to Destination("Storage Settings", ThIcons.Storage),
-        RoutePath.APP_SETTINGS_IMPORT to Destination("Import", ThIcons.CloudUpload),
+        RoutePath.APP_SETTINGS_IMPORT to Destination("Import and export", ThIcons.File),
         RoutePath.APP_ABOUT to Destination("About", ThIcons.Info),
     )
 

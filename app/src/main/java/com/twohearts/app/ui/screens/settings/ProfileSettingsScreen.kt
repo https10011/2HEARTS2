@@ -1,111 +1,63 @@
 package com.twohearts.app.ui.screens.settings
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.Header
-import com.twohearts.app.ui.components.Input
-import com.twohearts.app.ui.components.ThButton
-import com.twohearts.app.ui.components.ButtonVariant
+import com.twohearts.app.data.entity.Profile
+import com.twohearts.app.ui.components.*
 
-/**
- * ProfileSettingsScreen — edit user profile (name, birthday).
- *
- * Matches legacy ProfileSettingsScreen with:
- * - Owner name editing
- * - Birthday editing
- * - Save button
- */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileSettingsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    profile: Profile? = null,
+    saving: Boolean = false,
+    error: String? = null,
+    onSave: (String, String?, Uri?) -> Unit = { _, _, _ -> },
 ) {
-    var ownerName by remember { mutableStateOf("") }
-    var birthday by remember { mutableStateOf("") }
+    var name by rememberSaveable(profile?.id) { mutableStateOf(profile?.name.orEmpty()) }
+    var birthday by rememberSaveable(profile?.id) { mutableStateOf(profile?.birthday.orEmpty()) }
+    var photo by remember { mutableStateOf<Uri?>(null) }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
+        if (it != null) photo = it
+    }
 
-    Scaffold(
-        topBar = {
-            Header(
-                title = "Profile",
-                onBack = onBack
-            )
-        }
-    ) { paddingValues ->
+    Scaffold(topBar = { Header(title = "Your profile", onBack = onBack) }) { insets ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            Text(
-                text = "Your Profile",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Text(
-                text = "Edit your name and birthday. Your partner's info is managed separately.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-            )
-
-            // Owner name
-            Input(
-                value = ownerName,
-                onValueChange = { ownerName = it },
-                label = "Your Name",
-                placeholder = "Enter your name",
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Birthday
-            Input(
-                value = birthday,
-                onValueChange = { birthday = it },
-                label = "Birthday",
-                placeholder = "yyyy-mm-dd",
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Save button
-            ThButton(
-                onClick = {
-                    // TODO: Save profile via AppStateService/RelationshipService
-                    onBack()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                variant = ButtonVariant.PRIMARY,
-                text = "Save Profile"
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Photo section
-            OutlinedCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = androidx.compose.ui.Alignment.Center
-                ) {
-                    Text(
-                        text = "📷 Add Profile Photo",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                ProfileAvatar(
+                    name, profile?.photoRef, size = 72,
+                    label = "Your profile photo", selectedPhoto = photo,
+                )
+                ThButton(
+                    onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                    enabled = !saving, variant = ButtonVariant.SECONDARY,
+                    text = if (photo != null || profile?.photoRef != null) "Change photo" else "Choose photo",
+                )
             }
+            Input(value = name, onValueChange = { name = it }, label = "Your name", modifier = Modifier.fillMaxWidth())
+            ThDatePicker(
+                value = birthday, onValueChange = { birthday = it },
+                label = "Birthday (optional)", enabled = !saving,
+                support = "Used to remember your birthday in TwoHearts.",
+            )
+            if (error != null) ThStatusBanner(StatusVariant.ERROR, error)
+            ThButton(
+                onClick = { onSave(name.trim(), birthday.ifBlank { null }, photo) },
+                full = true, enabled = name.isNotBlank(), loading = saving, text = "Save profile",
+            )
         }
     }
 }

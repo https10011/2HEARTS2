@@ -75,6 +75,43 @@ class Phase0RenderHarness {
 
     @Test
     @Config(qualifiers = "w360dp-h780dp-mdpi")
+    fun renderPhase12Utilities() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val initializer = com.twohearts.app.data.database.DatabaseInitializer(app)
+        val db = kotlinx.coroutines.runBlocking { initializer.initialize() }
+        val notes = com.twohearts.app.data.repository.NoteRepository(db.noteDao())
+        val reminders = com.twohearts.app.data.repository.ReminderRepository(db.reminderDao())
+        val profile = com.twohearts.app.data.entity.Profile(
+            name = "Alexandra River Montgomery Bell", birthday = "1995-03-05", role = "owner",
+            id = "profile-fixture", createdAt = now, updatedAt = now,
+        )
+        val services = com.twohearts.app.services.datamanagement.DataManagementService(
+            app, initializer, com.twohearts.app.services.media.MediaStorage(app),
+            com.twohearts.app.services.media.FileService(app),
+        )
+        render("p12-profile-large", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            ProfileSettingsScreen({}, profile = profile)
+        }
+        render("p12-settings-large", dark = true, scale = TextScalingLevel.EXTRA_LARGE) { SettingsHomeScreen({}, {}) }
+        render("p12-import-export", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            com.twohearts.app.ui.screens.settings.ImportScreen(notes, reminders, {})
+        }
+        render("p12-storage", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            com.twohearts.app.ui.screens.settings.StorageSettingsScreen(services, {})
+        }
+        render("p12-search", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            com.twohearts.app.ui.screens.search.SearchScreen(
+                com.twohearts.app.services.search.SearchEngine(), notes,
+                com.twohearts.app.data.repository.MemoryRepository(db.memoryDao(), db.memoryMediaDao()),
+                reminders, com.twohearts.app.data.repository.PlaceRepository(db.placeDao()),
+                com.twohearts.app.data.repository.TimelineEventRepository(db.timelineEventDao()),
+                onResultClick = { _, _ -> }, onBack = {},
+            )
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h780dp-mdpi")
     fun renderPhase11Period() {
         val today = java.time.LocalDate.of(2026, 11, 18)
         val entry = com.twohearts.app.data.entity.PeriodEntry(

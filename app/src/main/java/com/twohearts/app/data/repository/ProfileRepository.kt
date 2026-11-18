@@ -31,7 +31,7 @@ class ProfileRepository(private val dao: ProfileDao) : BaseRepository<Profile> {
         val existing = dao.getById(id) ?: return null
         val updated = existing.copy(
             name = changes["name"] as? String ?: existing.name,
-            birthday = changes["birthday"] as? String ?: existing.birthday,
+            birthday = if (changes.containsKey("birthday")) changes["birthday"] as? String else existing.birthday,
             role = changes["role"] as? String ?: existing.role,
             photoRef = changes["photoRef"] as? String ?: existing.photoRef,
             updatedAt = nowUtc()

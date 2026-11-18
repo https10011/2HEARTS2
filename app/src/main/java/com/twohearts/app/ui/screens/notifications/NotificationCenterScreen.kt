@@ -1,245 +1,100 @@
 package com.twohearts.app.ui.screens.notifications
 
-import androidx.compose.foundation.clickable
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twohearts.app.data.entity.NotificationCenterEntry
 import com.twohearts.app.data.repository.NotificationCenterRepository
 import com.twohearts.app.services.datetime.DateTimeHelper
-import com.twohearts.app.ui.components.ThTopBar
+import com.twohearts.app.ui.components.*
+import com.twohearts.app.ui.navigation.RoutePath
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import kotlinx.coroutines.launch
 
-/**
- * NotificationCenterScreen — notification center.
- *
- * Matches legacy NotificationCenter with:
- * - List of all notifications
- * - Mark as read / Mark all as read
- * - Unread count indicator
- * - Notification kind-based styling
- */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationCenterScreen(
     notificationCenterRepository: NotificationCenterRepository,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onOpenDestination: (String) -> Unit = {},
 ) {
-    val notifications by notificationCenterRepository.observeAll().collectAsState(initial = emptyList())
-    val unreadCount by notificationCenterRepository.observeUnreadCount().collectAsState(initial = 0)
+    val notifications by remember(notificationCenterRepository) { notificationCenterRepository.observeAll() }
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+    val unreadCount = notifications.count { !it.read }
+    val scope = rememberCoroutineScope()
+    val colors = LocalTwoHeartsColors.current
 
-    Scaffold(
-        topBar = {
-            // Phase 2: this is a top-level navigation destination, but it was
-            // the one place in the app built from a stock Material `TopAppBar`
-            // — a second header system with different height, elevation and
-            // colour behaviour from `ThHeader`, so the same navigation level
-            // looked different depending on where you were. It now uses the
-            // shell header, and the unread count and "mark all read" action
-            // ride in the header's own slots.
-            ThTopBar(
-                title = "Notifications",
-                onBack = onBack,
-                titleBadge = if (unreadCount > 0) "$unreadCount" else null,
-                actions = if (unreadCount > 0) {
-                    {
-                        TextButton(
-                            onClick = {
-                                kotlinx.coroutines.runBlocking {
-                                    notificationCenterRepository.markAllAsRead()
-                                }
-                            }
-                        ) {
-                            Text("Mark all read")
-                        }
-                    }
-                } else null,
-            )
-        }
-    ) { paddingValues ->
+    Scaffold(topBar = {
+        ThTopBar(title = "Notifications", onBack = onBack, titleBadge = unreadCount.takeIf { it > 0 }?.toString())
+    }) { insets ->
         if (notifications.isEmpty()) {
-            // Empty state
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.NotificationsNone,
-                        contentDescription = "No notifications",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "No notifications yet",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "Reminders and anniversaries will appear here",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            ThEmptyState(
+                title = "You’re all caught up",
+                modifier = Modifier.padding(insets).padding(top = 32.dp),
+                description = "New alerts from TwoHearts will appear here.",
+                visual = { Icon(ThIcons.BellNone, null, tint = colors.roseDeep) },
+            )
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp)
+                Modifier.fillMaxSize().padding(insets),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             ) {
-                items(notifications) { notification ->
-                    NotificationItem(
-                        notification = notification,
-                        onMarkAsRead = {
-                            kotlinx.coroutines.runBlocking {
-                                notificationCenterRepository.markAsRead(notification.id)
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun NotificationItem(
-    notification: NotificationCenterEntry,
-    onMarkAsRead: () -> Unit
-) {
-    val backgroundColor = if (!notification.read) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = backgroundColor
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onMarkAsRead() }
-                .padding(12.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            // Unread indicator
-            if (!notification.read) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .padding(top = 6.dp)
-                ) {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        shape = RoundedCornerShape(4.dp),
-                        color = MaterialTheme.colorScheme.primary
-                    ) {}
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-            } else {
-                Spacer(modifier = Modifier.width(20.dp))
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = notification.title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = if (!notification.read) FontWeight.Bold else FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
-                    )
-                    
-                    Text(
-                        text = formatNotificationTime(notification.createdAt),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = notification.body,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = notification.kind.replaceFirstChar { it.uppercase() },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = getKindColor(notification.kind)
-                    )
-                    if (notification.originFeature.isNotBlank()) {
-                        Text(
-                            text = " • ${notification.originFeature}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                if (unreadCount > 0) item {
+                    TextButton(onClick = { scope.launch { notificationCenterRepository.markAllAsRead() } }) {
+                        Text("Mark all as read")
                     }
                 }
+                items(notifications, key = { it.id }) { item ->
+                    val destination = notificationDestination(item)
+                    Surface(
+                        color = if (item.read) MaterialTheme.colorScheme.surface else colors.surfaceWarm,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                Column(Modifier.weight(1f)) {
+                                    Text(notificationKindLabel(item.kind), style = MaterialTheme.typography.labelMedium, color = colors.roseDeep)
+                                    Text(item.title, style = MaterialTheme.typography.titleMedium)
+                                }
+                                if (!item.read) Text("Unread", style = MaterialTheme.typography.labelMedium, color = colors.roseDeep)
+                            }
+                            if (item.body.isNotBlank()) Text(item.body, color = colors.textSecondary)
+                            Text(
+                                DateTimeHelper.formatShortDisplay(item.createdAt),
+                                style = MaterialTheme.typography.bodySmall, color = colors.textSecondary,
+                            )
+                            if (destination != null || !item.read) TextButton(onClick = {
+                                scope.launch {
+                                    if (!item.read) notificationCenterRepository.markAsRead(item.id)
+                                    if (destination != null) onOpenDestination(destination)
+                                }
+                            }) {
+                                Text(if (destination == null) "Mark as read" else "Open")
+                            }
+                        }
+                    }
+                    HorizontalDivider()
+                }
             }
         }
     }
 }
 
-private fun getKindColor(kind: String): Color {
-    return when (kind.lowercase()) {
-        "reminder" -> Color(0xFF4F7A5A) // Green
-        "anniversary" -> Color(0xFFB07A1E) // Gold
-        "system" -> Color(0xFF6B5D58) // Gray
-        else -> Color(0xFF6B5D58)
-    }
+internal fun notificationDestination(entry: NotificationCenterEntry): String? = when (entry.originFeature) {
+    "reminders" -> entry.originId?.let { "${RoutePath.APP_REMINDERS}/${Uri.encode(it)}" } ?: RoutePath.APP_REMINDERS
+    "important-dates" -> RoutePath.APP_IMPORTANT_DATES
+    "mood" -> RoutePath.APP_MOOD
+    else -> null
 }
 
-private fun formatNotificationTime(isoTimestamp: String): String {
-    return try {
-        // Simple time formatting - in production would use proper date library
-        val instant = java.time.Instant.parse(isoTimestamp)
-        val now = java.time.Instant.now()
-        val diff = java.time.Duration.between(instant, now)
-
-        when {
-            diff.toMinutes() < 1 -> "Just now"
-            diff.toMinutes() < 60 -> "${diff.toMinutes()}m ago"
-            diff.toHours() < 24 -> "${diff.toHours()}h ago"
-            diff.toDays() < 7 -> "${diff.toDays()}d ago"
-            else -> isoTimestamp.substring(0, 10)
-        }
-    } catch (e: Exception) {
-        isoTimestamp.substring(0, 10)
-    }
+private fun notificationKindLabel(kind: String): String = when (kind) {
+    "reminder" -> "Reminder"
+    "anniversary" -> "Anniversary"
+    "mood" -> "Mood"
+    else -> "TwoHearts"
 }

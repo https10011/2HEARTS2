@@ -1,309 +1,83 @@
 package com.twohearts.app.ui.screens.settings
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.twohearts.app.ui.components.ThTopBar
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twohearts.app.services.appstate.AppStateService
+import com.twohearts.app.ui.components.ThTopBar
 import kotlinx.coroutines.launch
 
-/**
- * AppearanceSettingsScreen — theme, text size, and motion settings.
- *
- * Matches legacy AppearanceSettingsScreen with:
- * - Theme mode selector (Light, Dark, System)
- * - Text size selector (Small, Default, Large, Extra Large)
- * - Reduce motion toggle
- */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppearanceSettingsScreen(
-    appStateService: AppStateService,
-    onBack: () -> Unit
-) {
-    val currentThemeMode by appStateService.themeMode.collectAsState()
-    val currentTextSize by appStateService.textSize.collectAsState()
-    
-    var reduceMotion by remember { mutableStateOf(false) }
+fun AppearanceSettingsScreen(appStateService: AppStateService, onBack: () -> Unit) {
+    val theme by appStateService.themeMode.collectAsStateWithLifecycle()
+    val textSize by appStateService.textSize.collectAsStateWithLifecycle()
+    val reduceMotion by appStateService.reduceMotion.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
-    Scaffold(
-        topBar = {
-            ThTopBar(title = "Appearance", onBack = onBack)
-        }
-    ) { paddingValues ->
+    Scaffold(topBar = { ThTopBar(title = "Appearance", onBack = onBack) }) { insets ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
+            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Theme Mode Section
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Theme",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Choose your preferred color scheme",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        ThemeOption(
-                            label = "Light",
-                            icon = Icons.Default.LightMode,
-                            selected = currentThemeMode == "light",
-                            onClick = { scope.launch { appStateService.setThemeMode("light") } },
-                            modifier = Modifier.weight(1f)
-                        )
-                        ThemeOption(
-                            label = "Dark",
-                            icon = Icons.Default.DarkMode,
-                            selected = currentThemeMode == "dark",
-                            onClick = { scope.launch { appStateService.setThemeMode("dark") } },
-                            modifier = Modifier.weight(1f)
-                        )
-                        ThemeOption(
-                            label = "System",
-                            icon = Icons.Default.SettingsBrightness,
-                            selected = currentThemeMode == "system",
-                            onClick = { scope.launch { appStateService.setThemeMode("system") } },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
+            AppearanceChoices("Theme", theme, listOf("system" to "Follow Android", "light" to "Light", "dark" to "Dark")) {
+                scope.launch { appStateService.setThemeMode(it) }
             }
-
-            // Text Size Section
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+            HorizontalDivider()
+            AppearanceChoices(
+                "Text size", textSize,
+                listOf("small" to "Small", "default" to "Default", "large" to "Large", "extra_large" to "Extra large"),
+            ) { scope.launch { appStateService.setTextSize(it) } }
+            HorizontalDivider()
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 60.dp).toggleable(
+                    value = reduceMotion, role = Role.Switch,
+                    onValueChange = { value -> scope.launch { appStateService.setReduceMotion(value) } },
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(Modifier.weight(1f)) {
+                    Text("Reduce motion", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        text = "Text Size",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Adjust text size for readability",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    TextSizeOption(
-                        label = "Small",
-                        scale = 0.88f,
-                        selected = currentTextSize == "small",
-                        onClick = { scope.launch { appStateService.setTextSize("small") } }
-                    )
-
-                    TextSizeOption(
-                        label = "Default",
-                        scale = 1.0f,
-                        selected = currentTextSize == "default",
-                        onClick = { scope.launch { appStateService.setTextSize("default") } }
-                    )
-
-                    TextSizeOption(
-                        label = "Large",
-                        scale = 1.12f,
-                        selected = currentTextSize == "large",
-                        onClick = { scope.launch { appStateService.setTextSize("large") } }
-                    )
-
-                    TextSizeOption(
-                        label = "Extra Large",
-                        scale = 1.28f,
-                        selected = currentTextSize == "extra_large",
-                        onClick = { scope.launch { appStateService.setTextSize("extra_large") } }
+                        "Use simpler transitions and fewer decorative animations.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            }
-
-            // Reduce Motion Section
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Reduce Motion",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Minimize animations throughout the app",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    
-                    Switch(
-                        checked = reduceMotion,
-                        onCheckedChange = { reduceMotion = it },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color(0xFF6A1B2B)
-                        )
-                    )
-                }
+                Switch(checked = reduceMotion, onCheckedChange = null)
             }
         }
     }
 }
 
 @Composable
-private fun ThemeOption(
-    label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+private fun AppearanceChoices(
+    title: String, selected: String,
+    choices: List<Pair<String, String>>, onSelect: (String) -> Unit,
 ) {
-    val backgroundColor = if (selected) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    }
-
-    val borderColor = if (selected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        Color.Transparent
-    }
-
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(backgroundColor)
-            .border(2.dp, borderColor, RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
-            .padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-        )
-    }
-}
-
-@Composable
-private fun TextSizeOption(
-    label: String,
-    scale: Float,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val backgroundColor = if (selected) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-    } else {
-        Color.Transparent
-    }
-
-    val borderColor = if (selected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.outlineVariant
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(backgroundColor)
-            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(
-            selected = selected,
-            onClick = onClick,
-            colors = RadioButtonDefaults.colors(
-                selectedColor = MaterialTheme.colorScheme.primary
-            )
-        )
-        
-        Spacer(modifier = Modifier.width(12.dp))
-        
-        Text(
-            text = label,
-            fontSize = (14 * scale).sp,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
-        )
-        
-        Text(
-            text = "Aa",
-            fontSize = (18 * scale).sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+    Column(Modifier.selectableGroup()) {
+        Text(title, style = MaterialTheme.typography.titleLarge)
+        choices.forEach { (key, label) ->
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 48.dp).selectable(
+                    selected = selected == key, role = Role.RadioButton, onClick = { onSelect(key) },
+                ),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(selected == key, onClick = null)
+                Text(label)
+            }
+        }
     }
 }

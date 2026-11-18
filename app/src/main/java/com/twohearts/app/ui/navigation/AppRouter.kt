@@ -8,9 +8,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.room.withTransaction
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -274,6 +279,7 @@ fun AppRouter(
                 composable(RoutePath.APP_NOTIFICATIONS) {
                     NotificationCenterScreen(
                         notificationCenterRepository = notificationCenterRepository,
+                        onOpenDestination = { navController.navigate(it) },
                         onBack = {
                             navController.popBackStack()
                         }
@@ -290,12 +296,13 @@ fun AppRouter(
                         placeRepository = placeRepository,
                         timelineEventRepository = timelineEventRepository,
                         onResultClick = { type, id ->
+                            val encodedId = android.net.Uri.encode(id)
                             when (type) {
-                                "note" -> navController.navigate("/app/notes/$id")
-                                "memory" -> navController.navigate("/app/memories/$id")
-                                "reminder" -> navController.navigate("/app/reminders/$id")
-                                "place" -> navController.navigate("/app/places/$id")
-                                "timeline" -> navController.navigate("/app/timeline/$id")
+                                "note" -> navController.navigate("${RoutePath.APP_NOTES}/$encodedId")
+                                "memory" -> navController.navigate("${RoutePath.APP_MEMORIES}/$encodedId")
+                                "reminder" -> navController.navigate("${RoutePath.APP_REMINDERS}/$encodedId")
+                                "place" -> navController.navigate("${RoutePath.APP_PLACES}/$encodedId")
+                                "timeline" -> navController.navigate("${RoutePath.APP_TIMELINE}/$encodedId")
                             }
                         },
                         onBack = {
@@ -1128,18 +1135,104 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_SETTINGS_PROFILE) {
+                    val context = LocalContext.current.applicationContext
+                    val owner by remember { relationshipService.observeOwner() }
+                        .collectAsStateWithLifecycle(initialValue = null)
+                    val scope = rememberCoroutineScope()
+                    var saving by remember { mutableStateOf(false) }
+                    var error by remember { mutableStateOf<String?>(null) }
+                    androidx.activity.compose.BackHandler(saving) {}
                     ProfileSettingsScreen(
-                        onBack = {
-                            navController.popBackStack()
-                        }
+                        profile = owner,
+                        saving = saving,
+                        error = error,
+                        onBack = { if (!saving) navController.popBackStack() },
+                        onSave = { name, birthday, photo ->
+                            if (!saving) {
+                                saving = true
+                                error = null
+                                scope.launch {
+                                    try {
+                                        val profile = checkNotNull(relationshipService.getOwner())
+                                        val stored = photo?.let { uri ->
+                                            withContext(Dispatchers.IO) {
+                                                val mime = context.contentResolver.getType(uri)
+                                                mime?.takeIf { it.startsWith("image/") }?.let { mediaStorage.store(uri, it) }
+                                            } ?: error("Could not read selected photo")
+                                        }
+                                        val db = com.twohearts.app.data.database.TwoHeartsDatabase.getDatabase(context)
+                                        db.withTransaction {
+                                            if (stored != null) {
+                                                val now = DateTimeHelper.nowUtc()
+                                                mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(
+                                                    filePath = stored.filePath, mimeType = stored.mimeType,
+                                                    fileSize = stored.fileSize, width = stored.width, height = stored.height,
+                                                    id = stored.id, createdAt = now, updatedAt = now,
+                                                ))
+                                            }
+                                            relationshipService.saveOwnerDetails(profile.id, name, birthday, stored?.id)
+                                        }
+                                        navController.popBackStack()
+                                    } catch (cancelled: CancellationException) {
+                                        throw cancelled
+                                    } catch (_: Exception) {
+                                        error = "Couldn’t save this profile. Check the selected photo and try again."
+                                    } finally {
+                                        saving = false
+                                    }
+                                }
+                            }
+                        },
                     )
                 }
 
                 composable(RoutePath.APP_SETTINGS_RELATIONSHIP) {
+                    val context = LocalContext.current.applicationContext
+                    val partner by remember { relationshipService.observePartner() }
+                        .collectAsStateWithLifecycle(initialValue = null)
+                    val relationship by remember { relationshipService.observeRelationship() }
+                        .collectAsStateWithLifecycle(initialValue = null)
+                    val scope = rememberCoroutineScope()
+                    var saving by remember { mutableStateOf(false) }
+                    var error by remember { mutableStateOf<String?>(null) }
+                    androidx.activity.compose.BackHandler(saving) {}
                     RelationshipSettingsScreen(
-                        onBack = {
-                            navController.popBackStack()
-                        }
+                        partner = partner,
+                        relationship = relationship,
+                        saving = saving,
+                        error = error,
+                        onBack = { if (!saving) navController.popBackStack() },
+                        onSave = { name, date ->
+                            if (!saving) {
+                                saving = true
+                                error = null
+                                scope.launch {
+                                    try {
+                                        val db = com.twohearts.app.data.database.TwoHeartsDatabase.getDatabase(context)
+                                        db.withTransaction {
+                                            val owner = checkNotNull(relationshipService.getOwner())
+                                            val savedPartner = relationshipService.getPartner()
+                                            val partnerId = if (savedPartner == null) {
+                                                relationshipService.createPartner(name, null).id
+                                            } else {
+                                                relationshipService.updatePartner(savedPartner.id, name, null)
+                                                savedPartner.id
+                                            }
+                                            val saved = relationshipService.getRelationship()
+                                            if (saved == null) relationshipService.createRelationship(owner.id, partnerId, date)
+                                            else relationshipService.updateRelationship(saved.id, date)
+                                        }
+                                        navController.popBackStack()
+                                    } catch (cancelled: CancellationException) {
+                                        throw cancelled
+                                    } catch (_: Exception) {
+                                        error = "Couldn’t save these changes. Try again."
+                                    } finally {
+                                        saving = false
+                                    }
+                                }
+                            }
+                        },
                     )
                 }
 

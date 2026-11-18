@@ -1,219 +1,91 @@
 package com.twohearts.app.ui.screens.settings
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.ThTopBar
+import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.twohearts.app.data.settings.AppSettings
 import com.twohearts.app.data.settings.SettingsStorage
+import com.twohearts.app.ui.components.*
+import kotlinx.coroutines.launch
 
-/**
- * NotificationSettingsScreen — enable/disable notifications.
- *
- * Matches legacy NotificationSettingsScreen with:
- * - Master notifications toggle
- * - Reminders notifications toggle
- * - Anniversary notifications toggle
- * - Notification permission request
- */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationSettingsScreen(
-    settingsStorage: SettingsStorage,
-    onBack: () -> Unit
-) {
-    val settings by settingsStorage.settings.collectAsState(
-        initial = com.twohearts.app.data.settings.AppSettings()
-    )
-
-    Scaffold(
-        topBar = {
-            ThTopBar(title = "Notifications", onBack = onBack)
+fun NotificationSettingsScreen(settingsStorage: SettingsStorage, onBack: () -> Unit) {
+    val settings by settingsStorage.settings.collectAsStateWithLifecycle(initialValue = AppSettings())
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val owner = LocalLifecycleOwner.current
+    val manager = remember(context) { NotificationManagerCompat.from(context) }
+    var allowed by remember { mutableStateOf(manager.areNotificationsEnabled()) }
+    DisposableEffect(owner, manager) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) allowed = manager.areNotificationsEnabled()
         }
-    ) { paddingValues ->
+        owner.lifecycle.addObserver(observer)
+        onDispose { owner.lifecycle.removeObserver(observer) }
+    }
+
+    Scaffold(topBar = { ThTopBar(title = "Notifications", onBack = onBack) }) { insets ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
+            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Master Toggle
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Enable Notifications",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Master switch for all notifications",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    Switch(
-                        checked = settings.notificationsEnabled,
-                        onCheckedChange = { enabled ->
-                            kotlinx.coroutines.runBlocking {
-                                settingsStorage.setNotificationsEnabled(enabled)
-                            }
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color(0xFF6A1B2B)
-                        )
-                    )
-                }
-            }
-
-            // Reminder Notifications
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Reminders",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Notifications for scheduled reminders",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    Switch(
-                        checked = settings.remindersEnabled,
-                        onCheckedChange = { enabled ->
-                            kotlinx.coroutines.runBlocking {
-                                settingsStorage.setRemindersEnabled(enabled)
-                            }
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color(0xFF6A1B2B)
-                        )
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Anniversary Notifications
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Anniversaries",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "Notifications for important dates",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    // Anniversary toggle — always enabled for now
-                    Switch(
-                        checked = true,
-                        onCheckedChange = { },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color(0xFF6A1B2B)
-                        )
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Info Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = "Info",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Notifications are scheduled locally on your device. No data is sent to external servers.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            NotificationPreference(
+                "TwoHearts notifications", "Control whether TwoHearts can send alerts.",
+                checked = settings.notificationsEnabled,
+                onChange = { enabled -> scope.launch { settingsStorage.setNotificationsEnabled(enabled) } },
+            )
+            HorizontalDivider()
+            NotificationPreference(
+                "Reminders", "Allow alerts for scheduled reminders.",
+                checked = settings.remindersEnabled, enabled = settings.notificationsEnabled,
+                onChange = { enabled -> scope.launch { settingsStorage.setRemindersEnabled(enabled) } },
+            )
+            if (!allowed) ThStatusBanner(StatusVariant.INFO, "Android notifications are off for TwoHearts.")
+            ThButton(
+                onClick = {
+                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    context.startActivity(intent)
+                },
+                variant = ButtonVariant.SECONDARY, text = "Android notification settings",
+            )
         }
+    }
+}
+
+@Composable
+private fun NotificationPreference(
+    title: String,
+    description: String,
+    checked: Boolean,
+    enabled: Boolean = true,
+    onChange: (Boolean) -> Unit,
+) {
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 60.dp)
+            .toggleable(checked, enabled = enabled, role = Role.Switch, onValueChange = onChange),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Switch(checked = checked, onCheckedChange = null, enabled = enabled)
     }
 }

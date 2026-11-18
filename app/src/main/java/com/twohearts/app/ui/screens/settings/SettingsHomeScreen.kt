@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.components.ThTopBar
+import com.twohearts.app.ui.components.ThIcons
 import com.twohearts.app.ui.navigation.RoutePath
 
 /**
@@ -45,15 +46,15 @@ fun SettingsHomeScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             // Account section
-            SettingsSection(title = "Account") {
+            SettingsSection(title = "Personal") {
                 SettingsMenuItem(
-                    icon = Icons.Default.Person,
+                    icon = ThIcons.Person,
                     title = "Profile",
                     subtitle = "Edit your name and photo",
                     onClick = { onNavigate(RoutePath.APP_SETTINGS_PROFILE) }
                 )
                 SettingsMenuItem(
-                    icon = Icons.Default.FavoriteBorder,
+                    icon = ThIcons.Heart,
                     title = "Relationship",
                     subtitle = "Edit partner name and start date",
                     onClick = { onNavigate(RoutePath.APP_SETTINGS_RELATIONSHIP) }
@@ -63,19 +64,19 @@ fun SettingsHomeScreen(
             // Preferences section
             SettingsSection(title = "Preferences") {
                 SettingsMenuItem(
-                    icon = Icons.Default.Palette,
+                    icon = ThIcons.Palette,
                     title = "Appearance",
                     subtitle = "Theme, text size, and motion",
                     onClick = { onNavigate(RoutePath.APP_SETTINGS_APPEARANCE) }
                 )
                 SettingsMenuItem(
-                    icon = Icons.Default.Notifications,
+                    icon = ThIcons.Bell,
                     title = "Notifications",
                     subtitle = "Manage notification settings",
                     onClick = { onNavigate(RoutePath.APP_SETTINGS_NOTIFICATIONS) }
                 )
                 SettingsMenuItem(
-                    icon = Icons.Default.Lock,
+                    icon = ThIcons.Lock,
                     title = "Security",
                     subtitle = "App lock and PIN management",
                     onClick = { onNavigate(RoutePath.APP_SETTINGS_SECURITY) }
@@ -85,18 +86,27 @@ fun SettingsHomeScreen(
             // Data section
             SettingsSection(title = "Data") {
                 SettingsMenuItem(
-                    icon = Icons.Default.Storage,
+                    icon = ThIcons.Storage,
                     title = "Storage",
                     subtitle = "Storage usage, cache, and reset",
                     onClick = { onNavigate(RoutePath.APP_SETTINGS_STORAGE) }
                 )
                 SettingsMenuItem(
-                    icon = Icons.Default.FileUpload,
-                    title = "Import",
-                    subtitle = "Import notes and reminders",
+                    icon = ThIcons.File,
+                    title = "Import and export",
+                    subtitle = "Move notes and reminders",
                     onClick = { onNavigate(RoutePath.APP_SETTINGS_IMPORT) }
                 )
             }
+            SettingsSection(title = "App information") {
+                SettingsMenuItem(
+                    icon = ThIcons.Info,
+                    title = "About TwoHearts",
+                    subtitle = "Version, privacy, and credits",
+                    onClick = { onNavigate(RoutePath.APP_ABOUT) },
+                )
+            }
+            Spacer(Modifier.height(20.dp))
         }
     }
 }
@@ -155,7 +165,7 @@ fun SettingsMenuItem(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = title,
+            contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(24.dp)
         )

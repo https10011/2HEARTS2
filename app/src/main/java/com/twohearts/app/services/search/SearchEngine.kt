@@ -44,6 +44,15 @@ class SearchEngine {
         return rank(results)
     }
 
+    fun searchRecords(query: String, records: List<SearchResult>): List<SearchResult> {
+        val normalized = normalize(query)
+        if (normalized.isBlank()) return emptyList()
+        return rank(records.mapNotNull { record ->
+            val score = maxOf(calculateScore(record.title, normalized), calculateScore(record.subtitle, normalized))
+            record.copy(score = score).takeIf { score > 0 }
+        }).take(100)
+    }
+
     /**
      * Normalize a search query.
      * Matches legacy normalization exactly.

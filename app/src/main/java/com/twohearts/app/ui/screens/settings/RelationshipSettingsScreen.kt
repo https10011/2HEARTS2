@@ -3,88 +3,48 @@ package com.twohearts.app.ui.screens.settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.Header
-import com.twohearts.app.ui.components.Input
-import com.twohearts.app.ui.components.ThButton
-import com.twohearts.app.ui.components.ButtonVariant
+import com.twohearts.app.data.entity.CoupleRelationship
+import com.twohearts.app.data.entity.Profile
+import com.twohearts.app.ui.components.*
+import java.time.LocalDate
 
-/**
- * RelationshipSettingsScreen — edit relationship info.
- *
- * Matches legacy RelationshipSettingsScreen with:
- * - Partner name editing
- * - Start date editing
- * - Save button
- */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RelationshipSettingsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    partner: Profile? = null,
+    relationship: CoupleRelationship? = null,
+    saving: Boolean = false,
+    error: String? = null,
+    onSave: (String, String) -> Unit = { _, _ -> },
 ) {
-    var partnerName by remember { mutableStateOf("") }
-    var startDate by remember { mutableStateOf("") }
+    var name by rememberSaveable(partner?.id) { mutableStateOf(partner?.name.orEmpty()) }
+    var startDate by rememberSaveable(relationship?.id) { mutableStateOf(relationship?.startDate.orEmpty()) }
+    val validDate = runCatching { !LocalDate.parse(startDate).isAfter(LocalDate.now()) }.getOrDefault(false)
 
-    Scaffold(
-        topBar = {
-            Header(
-                title = "Relationship",
-                onBack = onBack
-            )
-        }
-    ) { paddingValues ->
+    Scaffold(topBar = { Header(title = "Relationship", onBack = onBack) }) { insets ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            Text(
-                text = "Our Relationship",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Text(
-                text = "Edit your partner's name and when your relationship started.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-            )
-
-            // Partner name
+            ProfileAvatar(name, partner?.photoRef, size = 64)
             Input(
-                value = partnerName,
-                onValueChange = { partnerName = it },
-                label = "Partner's Name",
-                placeholder = "Enter partner's name",
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Start date
-            Input(
-                value = startDate,
-                onValueChange = { startDate = it },
-                label = "Relationship Start Date",
-                placeholder = "yyyy-mm-dd",
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Save button
-            ThButton(
-                onClick = {
-                    // TODO: Save relationship via RelationshipService
-                    onBack()
-                },
+                value = name, onValueChange = { name = it }, label = "Your Special Someone",
                 modifier = Modifier.fillMaxWidth(),
-                variant = ButtonVariant.PRIMARY,
-                text = "Save Relationship"
+            )
+            ThDatePicker(
+                value = startDate, onValueChange = { startDate = it }, label = "Relationship start date",
+                clearable = false, enabled = !saving,
+                error = if (startDate.isNotBlank() && !validDate) "Choose a date up to today." else null,
+            )
+            if (error != null) ThStatusBanner(StatusVariant.ERROR, error)
+            ThButton(
+                onClick = { onSave(name.trim(), startDate) },
+                full = true, enabled = name.isNotBlank() && validDate, loading = saving, text = "Save relationship",
             )
         }
     }

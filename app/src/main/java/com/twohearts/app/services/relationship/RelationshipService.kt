@@ -137,6 +137,12 @@ class RelationshipService(
         profileRepository.update(id, changes)
     }
 
+    suspend fun saveOwnerDetails(id: String, name: String, birthday: String?, photoRef: String?) {
+        val changes = mutableMapOf<String, Any?>("name" to name, "birthday" to birthday)
+        if (photoRef != null) changes["photoRef"] = photoRef
+        checkNotNull(profileRepository.update(id, changes))
+    }
+
     /**
      * Update partner profile.
      */

@@ -25,7 +25,15 @@ import com.twohearts.app.data.repository.NoteRepository
 import com.twohearts.app.data.repository.ReminderRepository
 import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.data.repository.generateId
+import com.twohearts.app.services.datamanagement.encodeTransferDocument
+import com.twohearts.app.services.datamanagement.readTransferDocument
+import com.twohearts.app.ui.components.StatusVariant
+import com.twohearts.app.ui.components.ThStatusBanner
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -49,6 +57,33 @@ fun ImportScreen(
     var importState by remember { mutableStateOf<ImportState>(ImportState.Idle) }
     var importPreview by remember { mutableStateOf<ImportPreview?>(null) }
     var selectedUri by remember { mutableStateOf<Uri?>(null) }
+    var exporting by remember { mutableStateOf(false) }
+    var transferStatus by remember { mutableStateOf<Pair<StatusVariant, String>?>(null) }
+    val exportPicker = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri != null) {
+            exporting = true
+            transferStatus = null
+            scope.launch {
+                try {
+                    val notes = noteRepository.observeAll().first()
+                    val reminders = reminderRepository.observeAll().first()
+                    withContext(Dispatchers.IO) {
+                        val json = encodeTransferDocument(notes, reminders)
+                        checkNotNull(context.contentResolver.openOutputStream(uri, "wt")).bufferedWriter().use {
+                            it.write(json)
+                        }
+                    }
+                    transferStatus = StatusVariant.SUCCESS to "Exported ${notes.size} notes and ${reminders.size} reminders."
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    transferStatus = StatusVariant.ERROR to "Couldn’t write the export. Choose another location and try again."
+                } finally {
+                    exporting = false
+                }
+            }
+        }
+    }
 
     val filePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -56,14 +91,16 @@ fun ImportScreen(
         uri?.let {
             selectedUri = it
             importState = ImportState.Loading
-            importPreview = parseImportFile(context, it)
-            importState = ImportState.Preview
+            scope.launch {
+                importPreview = withContext(Dispatchers.IO) { parseImportFile(context, it) }
+                importState = ImportState.Preview
+            }
         }
     }
 
     Scaffold(
         topBar = {
-            ThTopBar(title = "Import Data", onBack = onBack)
+            ThTopBar(title = "Import and export", onBack = onBack)
         }
     ) { paddingValues ->
         Column(
@@ -88,7 +125,7 @@ fun ImportScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Import your data",
+                        text = "Notes and reminders",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -97,18 +134,30 @@ fun ImportScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Import notes and reminders from a JSON file.\n\nSupported format: twohearts-import v1",
+                        text = "Move notes and reminders with a TwoHearts JSON file. Export files are readable by anyone with access to them.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    transferStatus?.let { (variant, message) -> ThStatusBanner(variant, message) }
+                    OutlinedButton(
+                        onClick = { exportPicker.launch("twohearts-notes-and-reminders.json") },
+                        enabled = !exporting,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(if (exporting) "Exporting…" else "Export notes and reminders")
+                    }
+
+                    Spacer(Modifier.height(12.dp))
 
                     Button(
                         onClick = {
                             filePicker.launch(arrayOf("application/json", "text/plain"))
                         },
+                        enabled = !exporting,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -238,16 +287,15 @@ fun ImportScreen(
                                 onClick = {
                                     importState = ImportState.Importing
                                     scope.launch {
-                                        val result = executeImport(
-                                            context,
-                                            selectedUri!!,
-                                            noteRepository,
-                                            reminderRepository
-                                        )
+                                        val result = withContext(Dispatchers.IO) {
+                                            executeImport(context, requireNotNull(selectedUri), noteRepository, reminderRepository)
+                                        }
                                         importState = if (result.success) {
                                             ImportState.Success(result)
                                         } else {
-                                            ImportState.Error(result.errors)
+                                            ImportState.Error(listOf(
+                                                "Imported ${result.notesImported} notes and ${result.remindersImported} reminders.",
+                                            ) + result.errors)
                                         }
                                     }
                                 },
@@ -419,10 +467,7 @@ data class ImportResult(
 private fun parseImportFile(context: android.content.Context, uri: Uri): ImportPreview? {
     return try {
         val inputStream = context.contentResolver.openInputStream(uri) ?: return null
-        val content = inputStream.bufferedReader().use { it.readText() }
-        inputStream.close()
-
-        val json = JSONObject(content)
+        val json = inputStream.bufferedReader().use(::readTransferDocument)
         val notes = json.optJSONArray("notes") ?: JSONArray()
         val reminders = json.optJSONArray("reminders") ?: JSONArray()
 
@@ -430,17 +475,18 @@ private fun parseImportFile(context: android.content.Context, uri: Uri): ImportP
 
         // Validate notes
         for (i in 0 until notes.length()) {
-            val note = notes.getJSONObject(i)
-            if (!note.has("title") || !note.has("content")) {
+            val note = notes.optJSONObject(i)
+            if (note == null || note.optString("title").isBlank() || note.optString("content").isBlank()) {
                 errors.add("Note ${i + 1}: missing title or content")
             }
         }
 
         // Validate reminders
         for (i in 0 until reminders.length()) {
-            val reminder = reminders.getJSONObject(i)
-            if (!reminder.has("title") || !reminder.has("scheduledDate")) {
-                errors.add("Reminder ${i + 1}: missing title or scheduledDate")
+            val reminder = reminders.optJSONObject(i)
+            if (reminder == null || reminder.optString("title").isBlank() ||
+                !validReminderDate(reminder.optString("scheduledDate"))) {
+                errors.add("Reminder ${i + 1}: missing title or invalid scheduled date")
             }
         }
 
@@ -462,10 +508,7 @@ private suspend fun executeImport(
 ): ImportResult {
     return try {
         val inputStream = context.contentResolver.openInputStream(uri) ?: throw Exception("Failed to open file")
-        val content = inputStream.bufferedReader().use { it.readText() }
-        inputStream.close()
-
-        val json = JSONObject(content)
+        val json = inputStream.bufferedReader().use(::readTransferDocument)
         val notes = json.optJSONArray("notes") ?: JSONArray()
         val reminders = json.optJSONArray("reminders") ?: JSONArray()
 
@@ -477,6 +520,9 @@ private suspend fun executeImport(
         for (i in 0 until notes.length()) {
             try {
                 val note = notes.getJSONObject(i)
+                require(note.getString("title").isNotBlank() && note.getString("content").isNotBlank()) {
+                    "Title and content are required."
+                }
                 noteRepository.create(
                     Note(
                         id = generateId(),
@@ -488,8 +534,10 @@ private suspend fun executeImport(
                     )
                 )
                 notesImported++
-            } catch (e: Exception) {
-                errors.add("Failed to import note ${i + 1}: ${e.message}")
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                errors.add("Couldn’t import note ${i + 1}.")
             }
         }
 
@@ -497,21 +545,27 @@ private suspend fun executeImport(
         for (i in 0 until reminders.length()) {
             try {
                 val reminder = reminders.getJSONObject(i)
+                require(reminder.getString("title").isNotBlank() && validReminderDate(reminder.getString("scheduledDate")))
                 reminderRepository.create(
                     Reminder(
                         id = generateId(),
                         title = reminder.getString("title"),
-                        description = reminder.optString("description", ""),
+                        description = reminder.optString("description", "").ifBlank { null },
                         scheduledDate = reminder.getString("scheduledDate"),
-                        scheduledTime = reminder.optString("scheduledTime", ""),
+                        scheduledTime = reminder.optString("scheduledTime", "").ifBlank { null },
                         recurrence = reminder.optString("recurrence", "none"),
+                        status = reminder.optString("status", "pending")
+                            .takeIf { it in listOf("pending", "completed", "missed") } ?: "pending",
+                        notificationEnabled = reminder.optBoolean("notificationEnabled", true),
                         createdAt = DateTimeHelper.nowUtc(),
                         updatedAt = DateTimeHelper.nowUtc()
                     )
                 )
                 remindersImported++
-            } catch (e: Exception) {
-                errors.add("Failed to import reminder ${i + 1}: ${e.message}")
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                errors.add("Couldn’t import reminder ${i + 1}.")
             }
         }
 
@@ -521,6 +575,8 @@ private suspend fun executeImport(
             remindersImported = remindersImported,
             errors = errors
         )
+    } catch (cancelled: CancellationException) {
+        throw cancelled
     } catch (e: Exception) {
         ImportResult(
             success = false,
@@ -530,3 +586,6 @@ private suspend fun executeImport(
         )
     }
 }
+
+private fun validReminderDate(value: String): Boolean =
+    runCatching { java.time.LocalDate.parse(value) }.isSuccess

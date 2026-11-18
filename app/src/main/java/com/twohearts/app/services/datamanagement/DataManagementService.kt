@@ -4,9 +4,8 @@ import android.content.Context
 import com.twohearts.app.data.database.DatabaseInitializer
 import com.twohearts.app.services.media.FileService
 import com.twohearts.app.services.media.MediaStorage
-import com.twohearts.app.services.security.AppLockService
+import android.app.ActivityManager
 import com.twohearts.app.services.logger.Logger
-import com.twohearts.app.data.settings.SettingsStorage as DataSettingsStorage
 import kotlinx.coroutines.flow.first
 
 /**
@@ -22,8 +21,6 @@ class DataManagementService(
     private val databaseInitializer: DatabaseInitializer,
     private val mediaStorage: MediaStorage,
     private val fileService: FileService,
-    private val appLockService: AppLockService,
-    private val settingsStorage: DataSettingsStorage
 ) {
 
     private val logger = Logger("DataManagement")
@@ -63,50 +60,12 @@ class DataManagementService(
         return CacheClearResult(orphanFilesRemoved = cleaned)
     }
 
-    /**
-     * Full reset — dangerous operation.
-     * Matches legacy full reset exactly.
-     */
-    suspend fun fullReset(): Boolean {
-        return try {
-            logger.warn("Starting full reset")
-
-            // Cancel notifications
-            // NotificationService.cancelAll() will be called by the caller
-
-            // Delete domain rows
-            val db = databaseInitializer.getDatabase()
-            db?.let {
-                // Delete in reverse dependency order
-                it.notificationCenterDao().let { dao ->
-                    dao.getAll().collect { entries ->
-                        entries.forEach { entry ->
-                            dao.softDelete(
-                                entry.id,
-                                com.twohearts.app.services.datetime.DateTimeHelper.nowUtc(),
-                                com.twohearts.app.services.datetime.DateTimeHelper.nowUtc()
-                            )
-                        }
-                    }
-                }
-                // ... continue with other entities
-            }
-
-            // Sweep media
-            mediaStorage.cleanupOrphans(emptySet())
-
-            // Remove PIN
-            appLockService.disable()
-
-            // Reset settings
-            settingsStorage.reset()
-
-            logger.info("Full reset completed")
-            true
-        } catch (e: Exception) {
-            logger.error("Full reset failed", e)
-            false
-        }
+    /** Android erases this package's app data and terminates its process. */
+    fun requestFullReset(): Boolean = try {
+        context.getSystemService(ActivityManager::class.java)?.clearApplicationUserData() == true
+    } catch (failure: SecurityException) {
+        logger.error("Android declined the app data reset", failure)
+        false
     }
 }
 

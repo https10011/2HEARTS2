@@ -2,17 +2,19 @@
 
 ## Current checkpoint
 
-- **Active work** — Phase 11 (Period experience). The owner confirmed that TwoHearts now runs on their TECNO Spark 10 Pro. The startup gate is clear.
+- **Active work** — Phase 12 remote gate. Phase 13 covers Yuki after the gate passes. The startup confirmation on the owner’s TECNO Spark 10 Pro applies to the earlier launch fix.
 - **Completed UI/UX phases at intake** — Phase 0 reconnaissance, Phase 1 visual language, Phase 2 shell and navigation, Phase 3 onboarding, and Phase 4 Home. Their implementation and reports are in the repository history.
 - **Completed since intake** — Phase 5 replaced the Us directory with a live relationship summary and feature previews. Phase 6 redesigned Memories and connected private photo/video selection, persistence, browsing, editing, and deletion. Phase 7 transformed Notes into a searchable, category-aware private writing experience. Phase 8 rebuilt Timeline around a continuous chronological story. [Phase 5 report](Phase-5/PHASE-5-US-RELATIONSHIP-HUB.md) · [Phase 6 report](Phase-6/PHASE-6-MEMORIES-EXPERIENCE.md) · [Phase 7 report](Phase-7/PHASE-7-NOTES-EXPERIENCE.md) · [Phase 8 report](Phase-8/PHASE-8-TIMELINE-EXPERIENCE.md)
 - **Completed since intake** — Phases 5–9 now cover Us, Memories, Notes, Timeline, Reminders, and Important Dates. Phase 9 adds reminder completion and notification control plus complete Important Date CRUD and recurrence ordering. [Phase 9 report](Phase-9/PHASE-9-REMINDERS-AND-IMPORTANT-DATES.md)
 - **Completed since intake** — Phases 5–10 now include Us, Memories, Notes, Timeline, Reminders, Important Dates, Places, and Mood. [Phase 10 report](Phase-10/PHASE-10-PLACES-AND-MOOD.md)
-- **Pending UI/UX phases** — Phase 11 through Phase 20 in the [master directive](MASTER-UI-UX-DIRECTIVE.md). Phase 11 covers the private period experience.
+- **Pending UI/UX phases** — Phase 13 through Phase 20 in the [master directive](MASTER-UI-UX-DIRECTIVE.md).
 - **Phase 7 remote checkpoint** — `ee23b153370d8534f43cd4d835111be528d152d1`. GitHub Actions run [44261918124](https://github.com/https10011/2HEARTS2/actions/runs/44261918124) passed its APK build, tests, and artifact upload.
 - **Phase 8 remote checkpoint** — `77ef7157fd37fe97cf7fdebff15402726fc6a5a7`. GitHub Actions run [44265458516](https://github.com/https10011/2HEARTS2/actions/runs/44265458516) passed its APK build, tests, and artifact upload.
 - **Phase 9 remote checkpoint** — `f23a4b21d2dbea5bad788b30ff5ce61dcfc54a91`. GitHub Actions run [44266837411](https://github.com/https10011/2HEARTS2/actions/runs/44266837411) passed its APK build, tests, and artifact upload.
-- **Latest verified remote checkpoint** — Phase 10, `41ab33dabead543aa93a6d0e975c82b2a4ab2399`. The 96 tests in each variant and the local debug build passed. GitHub Actions run [44304791227](https://github.com/https10011/2HEARTS2/actions/runs/44304791227) passed and produced [twohearts-debug-apk](https://github.com/https10011/2HEARTS2/actions/runs/44304791227/artifacts/14428725240). The Android 13 emulator installed the APK, then system process failures prevented launch validation.
-- **Phase 11 local status** — The calendar, history, logging, and Room-backed settings are implemented. The Compose review, 100 tests per variant, and the APK build passed. Verify the Phase 11 workflow before beginning Phase 12. [Phase 11 report](Phase-11/PHASE-11-PERIOD-EXPERIENCE.md)
+- **Phase 10 remote checkpoint** — `41ab33dabead543aa93a6d0e975c82b2a4ab2399`. The 96 tests in each variant and the local debug build passed. [GitHub Actions](https://github.com/https10011/2HEARTS2/actions/runs/44304791227) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44304791227/artifacts/14428725240)
+- **Latest verified remote checkpoint** — Phase 11, `690a82429ab8c95bd20f77e1704f66f57fa8fe8d`. Period logging, settings, calendar, and history passed 100 tests per variant and the APK build. [Phase 11 report](Phase-11/PHASE-11-PERIOD-EXPERIENCE.md) · [GitHub Actions](https://github.com/https10011/2HEARTS2/actions/runs/44306875311) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44306875311/artifacts/14427604682)
+- **Phase 12 local status** — Settings and utilities passed 105 tests per variant, the debug APK build, and Compose review. Verify the Phase 12 workflow before starting Yuki. [Phase 12 report](Phase-12/PHASE-12-SETTINGS-AND-UTILITIES.md)
+- **Runtime limitations** — The reused API 33 guest installed the APK and then lost Android’s activity service during repeated system process crashes. The fresh guest’s ADB connection stayed offline. Device launch and interactive validation for the new APKs are pending.
 
 ## Repository and startup audit
 

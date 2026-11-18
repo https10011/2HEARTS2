@@ -164,8 +164,6 @@ class MainActivity : ComponentActivity() {
                                 databaseInitializer = bootstrapService.databaseInitializer,
                                 mediaStorage = mediaStorage,
                                 fileService = fileService,
-                                appLockService = appLockService,
-                                settingsStorage = settingsStorage
                             )
                         }
 
