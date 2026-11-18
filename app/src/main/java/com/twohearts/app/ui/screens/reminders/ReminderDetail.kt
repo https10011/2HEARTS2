@@ -3,9 +3,6 @@ package com.twohearts.app.ui.screens.reminders
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -14,6 +11,8 @@ import com.twohearts.app.ui.components.ConfirmDialog
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.Reminder
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 
 /**
  * ReminderDetail — reminder detail screen.
@@ -29,7 +28,8 @@ fun ReminderDetail(
     reminder: Reminder,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onToggleCompleted: () -> Unit = {},
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -41,15 +41,8 @@ fun ReminderDetail(
                 actions = {
                     IconButton(onClick = onEdit) {
                         Icon(
-                            imageVector = Icons.Default.Edit,
+                            imageVector = ThIcons.Edit,
                             contentDescription = "Edit"
-                        )
-                    }
-                    IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
@@ -161,6 +154,9 @@ fun ReminderDetail(
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
                 )
             }
+            Spacer(Modifier.height(24.dp))
+            Button(onClick = onToggleCompleted, modifier = Modifier.fillMaxWidth()) { Icon(if (reminder.status == "completed") ThIcons.Repeat else ThIcons.CheckCircle, null); Spacer(Modifier.width(8.dp)); Text(if (reminder.status == "completed") "Mark as pending" else "Mark as complete") }
+            OutlinedButton(onClick = { showDeleteDialog = true }, colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Icon(ThIcons.Trash, null); Spacer(Modifier.width(8.dp)); Text("Delete reminder") }
         }
     }
 

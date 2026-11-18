@@ -180,14 +180,14 @@ class Phase0RenderHarness {
             )
         }
         render("18-reminder-detail") { ReminderDetail(Reminder(title = "Call Mum", description = "Sunday afternoon", scheduledDate = "2026-01-18", scheduledTime = "15:00", id = "r1", createdAt = now, updatedAt = now), {}, {}, {}) }
-        render("19-create-reminder") { CreateReminder(onSave = { _, _, _, _, _ -> }, onBack = {}) }
+        render("19-create-reminder") { CreateReminder(onSave = { _, _, _, _, _, _ -> }, onBack = {}) }
 
         render("20-important-dates") {
             ImportantDatesScreen(
                 listOf(
                     ImportantDate(title = "Our anniversary", date = "2024-05-04", recurrence = "yearly", id = "d1", createdAt = now, updatedAt = now),
                     ImportantDate(title = "Her birthday", date = "1996-03-11", recurrence = "yearly", id = "d2", createdAt = now, updatedAt = now)
-                ), {}, {}
+                ), onSaveDate = { _, _, _, _ -> }, onDeleteDate = {}, onBack = {}
             )
         }
 

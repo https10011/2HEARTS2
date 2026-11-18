@@ -371,7 +371,7 @@ fun AppRouter(
                             },
                             onBack = {
                                 navController.popBackStack()
-                            }
+                            },
                         )
                     } ?: Text("Loading...")
                 }
@@ -403,7 +403,7 @@ fun AppRouter(
                             },
                             onBack = {
                                 navController.popBackStack()
-                            }
+                            },
                         )
                     } ?: Text("Loading...")
                 }
@@ -643,6 +643,7 @@ fun AppRouter(
                 // Reminders
                 composable(RoutePath.APP_REMINDERS) {
                     val reminders by reminderRepository.observeAll().collectAsState(initial = emptyList())
+                    val scope = rememberCoroutineScope()
                     RemindersHome(
                         reminders = reminders,
                         onReminderClick = { reminderId ->
@@ -653,14 +654,17 @@ fun AppRouter(
                         },
                         onBack = {
                             navController.popBackStack()
-                        }
+                        },
+                        onToggleCompleted = { item -> scope.launch { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { reminderRepository.update(item.id, mapOf("status" to if (item.status == "completed") "pending" else "completed")) } } },
                     )
                 }
 
                 composable(RoutePath.APP_REMINDERS_ADD) {
+                    val scope = rememberCoroutineScope()
                     CreateReminder(
-                        onSave = { title, description, scheduledDate, scheduledTime, recurrence ->
-                            kotlinx.coroutines.runBlocking {
+                        onSave = { title, description, scheduledDate, scheduledTime, recurrence, notificationEnabled ->
+                            scope.launch {
+                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                                 reminderRepository.create(
                                     com.twohearts.app.data.entity.Reminder(
                                         title = title,
@@ -668,13 +672,15 @@ fun AppRouter(
                                         scheduledDate = scheduledDate,
                                         scheduledTime = scheduledTime,
                                         recurrence = recurrence,
+                                        notificationEnabled = notificationEnabled,
                                         id = generateId(),
                                         createdAt = DateTimeHelper.nowUtc(),
                                         updatedAt = DateTimeHelper.nowUtc()
                                     )
                                 )
+                                }
+                                navController.popBackStack()
                             }
-                            navController.popBackStack()
                         },
                         onBack = {
                             navController.popBackStack()
@@ -685,6 +691,7 @@ fun AppRouter(
                 composable("/app/reminders/{reminderId}") { backStackEntry ->
                     val reminderId = backStackEntry.arguments?.getString("reminderId") ?: return@composable
                     var reminder by remember { mutableStateOf<com.twohearts.app.data.entity.Reminder?>(null) }
+                    val scope = rememberCoroutineScope()
                     LaunchedEffect(reminderId) {
                         reminder = reminderRepository.getById(reminderId)
                     }
@@ -695,14 +702,15 @@ fun AppRouter(
                                 navController.navigate("/app/reminders/$reminderId/edit")
                             },
                             onDelete = {
-                                kotlinx.coroutines.runBlocking {
-                                    reminderRepository.softDelete(r.id)
+                                scope.launch {
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { reminderRepository.softDelete(r.id) }
+                                    navController.popBackStack()
                                 }
-                                navController.popBackStack()
                             },
                             onBack = {
                                 navController.popBackStack()
-                            }
+                            },
+                            onToggleCompleted = { scope.launch { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { reminderRepository.update(r.id, mapOf("status" to if (r.status == "completed") "pending" else "completed")) }; reminder = reminderRepository.getById(r.id) } },
                         )
                     } ?: Text("Loading...")
                 }
@@ -710,6 +718,7 @@ fun AppRouter(
                 composable("/app/reminders/{reminderId}/edit") { backStackEntry ->
                     val reminderId = backStackEntry.arguments?.getString("reminderId") ?: return@composable
                     var reminder by remember { mutableStateOf<com.twohearts.app.data.entity.Reminder?>(null) }
+                    val scope = rememberCoroutineScope()
                     LaunchedEffect(reminderId) {
                         reminder = reminderRepository.getById(reminderId)
                     }
@@ -721,17 +730,21 @@ fun AppRouter(
                             initialDate = r.scheduledDate ?: "",
                             initialTime = r.scheduledTime ?: "",
                             initialRecurrence = r.recurrence ?: "none",
-                            onSave = { title, description, scheduledDate, scheduledTime, recurrence ->
-                                kotlinx.coroutines.runBlocking {
+                            initialNotificationEnabled = r.notificationEnabled,
+                            onSave = { title, description, scheduledDate, scheduledTime, recurrence, notificationEnabled ->
+                                scope.launch {
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                                     reminderRepository.update(r.id, mapOf(
                                         "title" to title,
                                         "description" to description,
                                         "scheduledDate" to scheduledDate,
                                         "scheduledTime" to scheduledTime,
                                         "recurrence" to recurrence
+                                        ,"notificationEnabled" to notificationEnabled
                                     ))
+                                    }
+                                    navController.popBackStack()
                                 }
-                                navController.popBackStack()
                             },
                             onBack = {
                                 navController.popBackStack()
@@ -1285,11 +1298,16 @@ fun AppRouter(
                 // Important dates
                 composable(RoutePath.APP_IMPORTANT_DATES) {
                     val dates by importantDateRepository.observeAll().collectAsState(initial = emptyList())
+                    val scope = rememberCoroutineScope()
                     ImportantDatesScreen(
                         dates = dates,
-                        onAddDate = {
-                            // Will be implemented
+                        onSaveDate = { existing, title, date, recurrence ->
+                            scope.launch { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                if (existing == null) importantDateRepository.create(com.twohearts.app.data.entity.ImportantDate(title, date, recurrence, id = generateId(), createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc()))
+                                else importantDateRepository.update(existing.id, mapOf("title" to title, "date" to date, "recurrence" to recurrence))
+                            } }
                         },
+                        onDeleteDate = { item -> scope.launch { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { importantDateRepository.softDelete(item.id) } } },
                         onBack = {
                             navController.popBackStack()
                         }

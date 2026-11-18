@@ -27,9 +27,9 @@ class ReminderRepository(private val dao: ReminderDao) : BaseRepository<Reminder
         val existing = dao.getById(id) ?: return null
         val updated = existing.copy(
             title = changes["title"] as? String ?: existing.title,
-            description = changes["description"] as? String ?: existing.description,
+            description = if (changes.containsKey("description")) changes["description"] as? String else existing.description,
             scheduledDate = changes["scheduledDate"] as? String ?: existing.scheduledDate,
-            scheduledTime = changes["scheduledTime"] as? String ?: existing.scheduledTime,
+            scheduledTime = if (changes.containsKey("scheduledTime")) changes["scheduledTime"] as? String else existing.scheduledTime,
             recurrence = changes["recurrence"] as? String ?: existing.recurrence,
             status = changes["status"] as? String ?: existing.status,
             notificationEnabled = changes["notificationEnabled"] as? Boolean ?: existing.notificationEnabled,
