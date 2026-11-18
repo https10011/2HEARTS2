@@ -3,9 +3,6 @@ package com.twohearts.app.ui.screens.notes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -14,6 +11,10 @@ import com.twohearts.app.ui.components.ConfirmDialog
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.Note
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 
 /**
  * NoteDetail — note detail screen.
@@ -33,6 +34,7 @@ fun NoteDetail(
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     val category = NoteCategory.fromString(note.category)
+    val colors = LocalTwoHeartsColors.current
 
     Scaffold(
         topBar = {
@@ -42,15 +44,8 @@ fun NoteDetail(
                 actions = {
                     IconButton(onClick = onEdit) {
                         Icon(
-                            imageVector = Icons.Default.Edit,
+                            imageVector = ThIcons.Edit,
                             contentDescription = "Edit"
-                        )
-                    }
-                    IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
@@ -62,17 +57,17 @@ fun NoteDetail(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(horizontal = 24.dp, vertical = 20.dp)
         ) {
             // Category badge
             Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = MaterialTheme.shapes.small
+                color = colors.surfaceBlush,
+                shape = MaterialTheme.shapes.medium
             ) {
                 Text(
                     text = category.label,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = colors.roseDeep,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }
@@ -83,7 +78,8 @@ fun NoteDetail(
             Text(
                 text = note.title,
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.SemiBold,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -109,16 +105,21 @@ fun NoteDetail(
             Text(
                 text = note.content,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                fontFamily = FontFamily.Serif,
             )
+            Spacer(Modifier.height(36.dp))
+            OutlinedButton(onClick = { showDeleteDialog = true }, colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
+                Icon(ThIcons.Trash, null); Spacer(Modifier.width(8.dp)); Text("Delete note")
+            }
         }
     }
 
     // Delete confirmation dialog
     if (showDeleteDialog) {
         ConfirmDialog(
-            title = "Delete Note",
-            message = "Are you sure you want to delete this note?",
+            title = "Delete this note?",
+            message = "This note will be removed from TwoHearts. This cannot be undone.",
             confirmText = "Delete",
             onConfirm = {
                 showDeleteDialog = false

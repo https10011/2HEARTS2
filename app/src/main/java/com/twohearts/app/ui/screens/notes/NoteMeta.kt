@@ -1,20 +1,19 @@
 package com.twohearts.app.ui.screens.notes
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.twohearts.app.ui.components.ThIcons
 
 /**
  * NoteCategory — note categories matching legacy exactly.
  */
 enum class NoteCategory(val label: String, val icon: ImageVector) {
-    GENERAL("General", Icons.Default.Note),
-    SHARED("Shared", Icons.Default.People),
-    PRIVATE("Private", Icons.Default.Lock),
-    LOVE_LETTER("Love Letter", Icons.Default.Favorite),
-    GRATITUDE("Gratitude", Icons.Default.ThumbUp),
-    IDEA("Idea", Icons.Default.Lightbulb),
-    REMINDER("Reminder", Icons.Default.Alarm);
+    GENERAL("General", ThIcons.Note),
+    SHARED("Shared", ThIcons.People),
+    PRIVATE("Private", ThIcons.Lock),
+    LOVE_LETTER("Love Letter", ThIcons.HeartFilled),
+    GRATITUDE("Gratitude", ThIcons.ThumbUp),
+    IDEA("Idea", ThIcons.Star),
+    REMINDER("Reminder", ThIcons.Alarm);
 
     companion object {
         /**

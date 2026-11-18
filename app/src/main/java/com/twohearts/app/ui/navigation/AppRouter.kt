@@ -325,9 +325,11 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_NOTES_ADD) {
+                    val scope = rememberCoroutineScope()
                     NoteEditor(
                         onSave = { title, content, category ->
-                            kotlinx.coroutines.runBlocking {
+                            scope.launch {
+                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                                 noteRepository.create(
                                     com.twohearts.app.data.entity.Note(
                                         title = title,
@@ -338,8 +340,9 @@ fun AppRouter(
                                         updatedAt = DateTimeHelper.nowUtc()
                                     )
                                 )
+                                }
+                                navController.popBackStack()
                             }
-                            navController.popBackStack()
                         },
                         onBack = {
                             navController.popBackStack()
@@ -350,6 +353,7 @@ fun AppRouter(
                 composable("/app/notes/{noteId}") { backStackEntry ->
                     val noteId = backStackEntry.arguments?.getString("noteId") ?: return@composable
                     var note by remember { mutableStateOf<com.twohearts.app.data.entity.Note?>(null) }
+                    val scope = rememberCoroutineScope()
                     LaunchedEffect(noteId) {
                         note = noteRepository.getById(noteId)
                     }
@@ -360,10 +364,10 @@ fun AppRouter(
                                 navController.navigate("/app/notes/$noteId/edit")
                             },
                             onDelete = {
-                                kotlinx.coroutines.runBlocking {
-                                    noteRepository.softDelete(n.id)
+                                scope.launch {
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { noteRepository.softDelete(n.id) }
+                                    navController.popBackStack()
                                 }
-                                navController.popBackStack()
                             },
                             onBack = {
                                 navController.popBackStack()
@@ -375,6 +379,7 @@ fun AppRouter(
                 composable("/app/notes/{noteId}/edit") { backStackEntry ->
                     val noteId = backStackEntry.arguments?.getString("noteId") ?: return@composable
                     var note by remember { mutableStateOf<com.twohearts.app.data.entity.Note?>(null) }
+                    val scope = rememberCoroutineScope()
                     LaunchedEffect(noteId) {
                         note = noteRepository.getById(noteId)
                     }
@@ -385,14 +390,16 @@ fun AppRouter(
                             initialContent = n.content,
                             initialCategory = NoteCategory.fromString(n.category),
                             onSave = { title, content, category ->
-                                kotlinx.coroutines.runBlocking {
+                                scope.launch {
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                                     noteRepository.update(n.id, mapOf(
                                         "title" to title,
                                         "content" to content,
                                         "category" to category.name.lowercase()
                                     ))
+                                    }
+                                    navController.popBackStack()
                                 }
-                                navController.popBackStack()
                             },
                             onBack = {
                                 navController.popBackStack()

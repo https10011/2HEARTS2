@@ -111,7 +111,7 @@ object DateTimeHelper {
             val localDate = LocalDate.parse(date, dateFormatter)
             localDate.format(displayFormatter)
         } catch (e: Exception) {
-            date
+            parseTimestamp(date)?.toLocalDate()?.format(displayFormatter) ?: date
         }
     }
 
@@ -123,7 +123,7 @@ object DateTimeHelper {
             val localDate = LocalDate.parse(date, dateFormatter)
             localDate.format(shortDisplayFormatter)
         } catch (e: Exception) {
-            date
+            parseTimestamp(date)?.toLocalDate()?.format(shortDisplayFormatter) ?: date
         }
     }
 
