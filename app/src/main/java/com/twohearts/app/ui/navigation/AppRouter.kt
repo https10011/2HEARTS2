@@ -356,11 +356,11 @@ fun AppRouter(
 
                 composable("/app/notes/{noteId}") { backStackEntry ->
                     val noteId = backStackEntry.arguments?.getString("noteId") ?: return@composable
-                    var note by remember { mutableStateOf<com.twohearts.app.data.entity.Note?>(null) }
                     val scope = rememberCoroutineScope()
-                    LaunchedEffect(noteId) {
-                        note = noteRepository.getById(noteId)
+                    val lookup = rememberRecordLookup(noteId) {
+                        noteRepository.getById(noteId)
                     }
+                    val note = lookup.record
                     note?.let { n ->
                         NoteDetail(
                             note = n,
@@ -377,16 +377,16 @@ fun AppRouter(
                                 navController.popBackStack()
                             },
                         )
-                    } ?: Text("Loading...")
+                    } ?: RecordLookupScreen("Note", lookup) { navController.popBackStack() }
                 }
 
                 composable("/app/notes/{noteId}/edit") { backStackEntry ->
                     val noteId = backStackEntry.arguments?.getString("noteId") ?: return@composable
-                    var note by remember { mutableStateOf<com.twohearts.app.data.entity.Note?>(null) }
                     val scope = rememberCoroutineScope()
-                    LaunchedEffect(noteId) {
-                        note = noteRepository.getById(noteId)
+                    val lookup = rememberRecordLookup(noteId) {
+                        noteRepository.getById(noteId)
                     }
+                    val note = lookup.record
                     note?.let { n ->
                         NoteEditor(
                             noteId = n.id,
@@ -409,7 +409,7 @@ fun AppRouter(
                                 navController.popBackStack()
                             },
                         )
-                    } ?: Text("Loading...")
+                    } ?: RecordLookupScreen("Note", lookup) { navController.popBackStack() }
                 }
 
                 // Memories
@@ -473,19 +473,17 @@ fun AppRouter(
 
                 composable("/app/memories/{memoryId}") { backStackEntry ->
                     val memoryId = backStackEntry.arguments?.getString("memoryId") ?: return@composable
-                    var memory by remember { mutableStateOf<com.twohearts.app.data.entity.Memory?>(null) }
-                    var memoryMedia by remember { mutableStateOf<List<com.twohearts.app.data.entity.MediaAsset>>(emptyList()) }
                     val scope = rememberCoroutineScope()
-                    LaunchedEffect(memoryId) {
-                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                            memory = memoryRepository.getById(memoryId)
-                            memoryMedia = memoryRepository.getMedia(memoryId).mapNotNull { mediaAssetDao.getById(it.mediaAssetId) }
+                    val lookup = rememberRecordLookup(memoryId) {
+                        memoryRepository.getById(memoryId)?.let { saved ->
+                            saved to memoryRepository.getMedia(memoryId).mapNotNull { mediaAssetDao.getById(it.mediaAssetId) }
                         }
                     }
+                    val memory = lookup.record?.first
                     memory?.let { m ->
                         MemoryDetail(
                             memory = m,
-                            media = memoryMedia,
+                            media = lookup.record?.second.orEmpty(),
                             onEdit = {
                                 navController.navigate("/app/memories/$memoryId/edit")
                             },
@@ -501,18 +499,18 @@ fun AppRouter(
                                 navController.popBackStack()
                             }
                         )
-                    } ?: Text("Loading...")
+                    } ?: RecordLookupScreen("Memory", lookup) { navController.popBackStack() }
                 }
 
                 composable("/app/memories/{memoryId}/edit") { backStackEntry ->
                     val memoryId = backStackEntry.arguments?.getString("memoryId") ?: return@composable
-                    var memory by remember { mutableStateOf<com.twohearts.app.data.entity.Memory?>(null) }
                     val context = LocalContext.current
                     val scope = rememberCoroutineScope()
                     var saving by remember { mutableStateOf(false) }
-                    LaunchedEffect(memoryId) {
-                        memory = memoryRepository.getById(memoryId)
+                    val lookup = rememberRecordLookup(memoryId) {
+                        memoryRepository.getById(memoryId)
                     }
+                    val memory = lookup.record
                     memory?.let { m ->
                         AddMemory(
                             memoryId = m.id,
@@ -540,7 +538,7 @@ fun AppRouter(
                                 navController.popBackStack()
                             }
                         )
-                    } ?: Text("Loading...")
+                    } ?: RecordLookupScreen("Memory", lookup) { navController.popBackStack() }
                 }
 
                 // Timeline
@@ -588,11 +586,11 @@ fun AppRouter(
 
                 composable("/app/timeline/{eventId}") { backStackEntry ->
                     val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
-                    var event by remember { mutableStateOf<com.twohearts.app.data.entity.TimelineEvent?>(null) }
                     val scope = rememberCoroutineScope()
-                    LaunchedEffect(eventId) {
-                        event = timelineEventRepository.getById(eventId)
+                    val lookup = rememberRecordLookup(eventId) {
+                        timelineEventRepository.getById(eventId)
                     }
+                    val event = lookup.record
                     event?.let { e ->
                         EventDetail(
                             event = e,
@@ -609,16 +607,16 @@ fun AppRouter(
                                 navController.popBackStack()
                             }
                         )
-                    } ?: Text("Loading...")
+                    } ?: RecordLookupScreen("Timeline moment", lookup) { navController.popBackStack() }
                 }
 
                 composable("/app/timeline/{eventId}/edit") { backStackEntry ->
                     val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
-                    var event by remember { mutableStateOf<com.twohearts.app.data.entity.TimelineEvent?>(null) }
                     val scope = rememberCoroutineScope()
-                    LaunchedEffect(eventId) {
-                        event = timelineEventRepository.getById(eventId)
+                    val lookup = rememberRecordLookup(eventId) {
+                        timelineEventRepository.getById(eventId)
                     }
+                    val event = lookup.record
                     event?.let { e ->
                         AddEvent(
                             eventId = e.id,
@@ -641,7 +639,7 @@ fun AppRouter(
                                 navController.popBackStack()
                             }
                         )
-                    } ?: Text("Loading...")
+                    } ?: RecordLookupScreen("Timeline moment", lookup) { navController.popBackStack() }
                 }
 
                 // Reminders
@@ -694,11 +692,11 @@ fun AppRouter(
 
                 composable("/app/reminders/{reminderId}") { backStackEntry ->
                     val reminderId = backStackEntry.arguments?.getString("reminderId") ?: return@composable
-                    var reminder by remember { mutableStateOf<com.twohearts.app.data.entity.Reminder?>(null) }
                     val scope = rememberCoroutineScope()
-                    LaunchedEffect(reminderId) {
-                        reminder = reminderRepository.getById(reminderId)
+                    val lookup = rememberRecordLookup(reminderId) {
+                        reminderRepository.getById(reminderId)
                     }
+                    val reminder = lookup.record
                     reminder?.let { r ->
                         ReminderDetail(
                             reminder = r,
@@ -714,18 +712,18 @@ fun AppRouter(
                             onBack = {
                                 navController.popBackStack()
                             },
-                            onToggleCompleted = { scope.launch { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { reminderRepository.update(r.id, mapOf("status" to if (r.status == "completed") "pending" else "completed")) }; reminder = reminderRepository.getById(r.id) } },
+                            onToggleCompleted = { scope.launch { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { reminderRepository.update(r.id, mapOf("status" to if (r.status == "completed") "pending" else "completed")) }; lookup.refresh() } },
                         )
-                    } ?: Text("Loading...")
+                    } ?: RecordLookupScreen("Reminder", lookup) { navController.popBackStack() }
                 }
 
                 composable("/app/reminders/{reminderId}/edit") { backStackEntry ->
                     val reminderId = backStackEntry.arguments?.getString("reminderId") ?: return@composable
-                    var reminder by remember { mutableStateOf<com.twohearts.app.data.entity.Reminder?>(null) }
                     val scope = rememberCoroutineScope()
-                    LaunchedEffect(reminderId) {
-                        reminder = reminderRepository.getById(reminderId)
+                    val lookup = rememberRecordLookup(reminderId) {
+                        reminderRepository.getById(reminderId)
                     }
+                    val reminder = lookup.record
                     reminder?.let { r ->
                         CreateReminder(
                             reminderId = r.id,
@@ -754,7 +752,7 @@ fun AppRouter(
                                 navController.popBackStack()
                             }
                         )
-                    } ?: Text("Loading...")
+                    } ?: RecordLookupScreen("Reminder", lookup) { navController.popBackStack() }
                 }
 
                 // Places
@@ -809,17 +807,17 @@ fun AppRouter(
 
                 composable("/app/places/{placeId}") { backStackEntry ->
                     val placeId = backStackEntry.arguments?.getString("placeId") ?: return@composable
-                    var place by remember { mutableStateOf<com.twohearts.app.data.entity.Place?>(null) }
-                    var placeMedia by remember { mutableStateOf<com.twohearts.app.data.entity.MediaAsset?>(null) }
                     val scope = rememberCoroutineScope()
-                    LaunchedEffect(placeId) {
-                        place = placeRepository.getById(placeId)
-                        placeMedia = place?.photoRef?.let { mediaAssetDao.getById(it) }
+                    val lookup = rememberRecordLookup(placeId) {
+                        placeRepository.getById(placeId)?.let { saved ->
+                            saved to saved.photoRef?.let { mediaAssetDao.getById(it) }
+                        }
                     }
+                    val place = lookup.record?.first
                     place?.let { p ->
                         PlaceDetail(
                             place = p,
-                            media = placeMedia,
+                            media = lookup.record?.second,
                             onEdit = {
                                 navController.navigate("/app/places/$placeId/edit")
                             },
@@ -833,17 +831,17 @@ fun AppRouter(
                                 navController.popBackStack()
                             }
                         )
-                    } ?: Text("Loading...")
+                    } ?: RecordLookupScreen("Place", lookup) { navController.popBackStack() }
                 }
 
                 composable("/app/places/{placeId}/edit") { backStackEntry ->
                     val placeId = backStackEntry.arguments?.getString("placeId") ?: return@composable
-                    var place by remember { mutableStateOf<com.twohearts.app.data.entity.Place?>(null) }
                     val context = LocalContext.current
                     val scope = rememberCoroutineScope()
-                    LaunchedEffect(placeId) {
-                        place = placeRepository.getById(placeId)
+                    val lookup = rememberRecordLookup(placeId) {
+                        placeRepository.getById(placeId)
                     }
+                    val place = lookup.record
                     place?.let { p ->
                         CreatePlace(
                             placeId = p.id,
@@ -873,7 +871,7 @@ fun AppRouter(
                                 navController.popBackStack()
                             }
                         )
-                    } ?: Text("Loading...")
+                    } ?: RecordLookupScreen("Place", lookup) { navController.popBackStack() }
                 }
 
                 // Mood
@@ -938,11 +936,11 @@ fun AppRouter(
 
                 composable("/app/mood/{entryId}/edit") { backStackEntry ->
                     val entryId = backStackEntry.arguments?.getString("entryId") ?: return@composable
-                    var entry by remember { mutableStateOf<com.twohearts.app.data.entity.MoodEntry?>(null) }
                     val scope = rememberCoroutineScope()
-                    LaunchedEffect(entryId) {
-                        entry = moodEntryRepository.getById(entryId)
+                    val lookup = rememberRecordLookup(entryId) {
+                        moodEntryRepository.getById(entryId)
                     }
+                    val entry = lookup.record
                     entry?.let { e ->
                         MoodEntryScreen(
                             initialMood = e.moodValue,
@@ -963,7 +961,7 @@ fun AppRouter(
                                 navController.popBackStack()
                             }
                         )
-                    } ?: Text("Loading...")
+                    } ?: RecordLookupScreen("Mood entry", lookup) { navController.popBackStack() }
                 }
 
                 periodRoutes(navController, relationshipService, periodEntryRepository, periodSettingsRepository)

@@ -1,11 +1,10 @@
 package com.twohearts.app.ui.screens.security
 
+import com.twohearts.app.ui.components.ThIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -56,7 +55,7 @@ fun AppLockGate(
             ) {
                 // Lock Icon
                 Icon(
-                    imageVector = Icons.Default.Lock,
+                    imageVector = ThIcons.Lock,
                     contentDescription = "App Locked",
                     modifier = Modifier.size(72.dp),
                     tint = Color(0xFF6A1B2B) // Burgundy

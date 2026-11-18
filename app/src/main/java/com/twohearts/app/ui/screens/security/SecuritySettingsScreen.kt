@@ -1,13 +1,12 @@
 package com.twohearts.app.ui.screens.security
 
+import com.twohearts.app.ui.components.ThIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -109,7 +108,7 @@ fun SecuritySettingsScreen(
                             )
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Key,
+                                imageVector = ThIcons.Key,
                                 contentDescription = "Change PIN",
                                 modifier = Modifier.size(20.dp)
                             )
@@ -137,7 +136,7 @@ fun SecuritySettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Info,
+                            imageVector = ThIcons.Info,
                             contentDescription = "Info",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(20.dp)
@@ -191,7 +190,7 @@ fun SecuritySettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Warning,
+                            imageVector = ThIcons.Warning,
                             contentDescription = "Warning",
                             tint = Color(0xFFA33A2A), // Error red
                             modifier = Modifier.size(20.dp)

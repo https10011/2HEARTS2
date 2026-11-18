@@ -169,20 +169,15 @@ fun ConfirmDialog(
     modifier: Modifier = Modifier,
     dismissText: String = "Cancel",
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = title) },
-        text = { Text(text = message) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(text = confirmText)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = dismissText)
-            }
-        },
+    ThConfirmDialog(
+        open = true,
+        onClose = onDismiss,
+        label = title,
+        title = title,
+        description = message,
+        actionLabel = confirmText,
+        onAction = onConfirm,
+        dismissLabel = dismissText,
         modifier = modifier,
     )
 }

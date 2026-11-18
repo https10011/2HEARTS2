@@ -1,11 +1,10 @@
 package com.twohearts.app.ui.screens.vault
 
+import com.twohearts.app.ui.components.ThIcons
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -55,7 +54,7 @@ fun VaultLocked(
             ) {
                 // Lock Icon
                 Icon(
-                    imageVector = Icons.Default.Lock,
+                    imageVector = ThIcons.Lock,
                     contentDescription = "Vault Locked",
                     modifier = Modifier.size(64.dp),
                     tint = Color(0xFF6A1B2B) // Burgundy

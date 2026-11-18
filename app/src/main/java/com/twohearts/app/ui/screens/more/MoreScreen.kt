@@ -1,11 +1,10 @@
 package com.twohearts.app.ui.screens.more
 
+import com.twohearts.app.ui.components.ThIcons
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,21 +48,21 @@ fun MoreScreen(
         )
 
         MoreMenuItem(
-            icon = Icons.Default.Settings,
+            icon = ThIcons.Settings,
             title = "App Settings",
             subtitle = "Appearance, notifications, security",
             onClick = { onNavigate("/app/settings") }
         )
 
         MoreMenuItem(
-            icon = Icons.Default.Person,
+            icon = ThIcons.Person,
             title = "Profile Settings",
             subtitle = "Edit your profile and partner's",
             onClick = { onNavigate("/app/settings/profile") }
         )
 
         MoreMenuItem(
-            icon = Icons.Default.FavoriteBorder,
+            icon = ThIcons.Heart,
             title = "Relationship Settings",
             subtitle = "Edit relationship info",
             onClick = { onNavigate("/app/settings/relationship") }
@@ -80,21 +79,21 @@ fun MoreScreen(
         )
 
         MoreMenuItem(
-            icon = Icons.Default.Search,
+            icon = ThIcons.Search,
             title = "Search",
             subtitle = "Find notes, memories, and more",
             onClick = { onNavigate("/app/search") }
         )
 
         MoreMenuItem(
-            icon = Icons.Default.FileUpload,
+            icon = ThIcons.CloudUpload,
             title = "Import Data",
             subtitle = "Import notes and reminders",
             onClick = { onNavigate("/app/settings/import") }
         )
 
         MoreMenuItem(
-            icon = Icons.Default.Storage,
+            icon = ThIcons.Storage,
             title = "Storage",
             subtitle = "Manage app data and cache",
             onClick = { onNavigate("/app/settings/storage") }
@@ -111,7 +110,7 @@ fun MoreScreen(
         )
 
         MoreMenuItem(
-            icon = Icons.Default.Info,
+            icon = ThIcons.Info,
             title = "About TwoHearts",
             subtitle = "Version, credits, and more",
             onClick = { onNavigate("/app/about") }
@@ -161,7 +160,7 @@ fun MoreMenuItem(
         }
 
         Icon(
-            imageVector = Icons.Default.ChevronRight,
+            imageVector = ThIcons.ChevronRight,
             contentDescription = "Navigate",
             tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
         )

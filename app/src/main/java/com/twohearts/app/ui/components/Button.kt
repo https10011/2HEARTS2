@@ -90,7 +90,8 @@ fun ThButton(
         ButtonVariant.SECONDARY, ButtonVariant.GHOST -> Color.Transparent
     }
     val contentColor = when (variant) {
-        ButtonVariant.PRIMARY, ButtonVariant.DANGER -> Color.White
+        ButtonVariant.PRIMARY -> MaterialTheme.colorScheme.onPrimary
+        ButtonVariant.DANGER -> MaterialTheme.colorScheme.onError
         ButtonVariant.SECONDARY, ButtonVariant.GHOST -> MaterialTheme.colorScheme.primary
     }
     val border = when (variant) {

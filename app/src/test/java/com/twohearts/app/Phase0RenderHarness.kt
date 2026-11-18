@@ -74,6 +74,38 @@ class Phase0RenderHarness {
     private val now = "2026-01-15T10:00:00Z"
 
     @Test
+    @Config(qualifiers = "w320dp-h740dp-mdpi")
+    fun renderPhase14SharedStates() {
+        val missing = com.twohearts.app.ui.navigation.RecordLookup<String>()
+        val failed = com.twohearts.app.ui.navigation.RecordLookup<String>()
+        kotlinx.coroutines.runBlocking {
+            missing.read { null }
+            failed.read { error("Synthetic storage failure") }
+        }
+        render("p14-unavailable") {
+            com.twohearts.app.ui.navigation.RecordLookupScreen("Memory", missing) {}
+        }
+        render("p14-failed-large", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            com.twohearts.app.ui.navigation.RecordLookupScreen("Timeline moment", failed) {}
+        }
+        render("p14-header-actions", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            com.twohearts.app.ui.components.ThTopBar(
+                title = "Private note",
+                onBack = {},
+                role = com.twohearts.app.ui.navigation.ShellSurfaces.Role.DETAIL,
+                actions = {
+                    androidx.compose.material3.IconButton({}) {
+                        androidx.compose.material3.Icon(com.twohearts.app.ui.components.ThIcons.Edit, "Edit")
+                    }
+                    androidx.compose.material3.IconButton({}) {
+                        androidx.compose.material3.Icon(com.twohearts.app.ui.components.ThIcons.Trash, "Delete")
+                    }
+                },
+            )
+        }
+    }
+
+    @Test
     @Config(qualifiers = "w360dp-h780dp-mdpi")
     fun renderPhase13Yuki() {
         val app = ApplicationProvider.getApplicationContext<Application>()

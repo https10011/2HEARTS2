@@ -1,10 +1,6 @@
 package com.twohearts.app.ui.screens.vault
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.VideoFile
-import androidx.compose.material.icons.filled.Note
-import androidx.compose.material.icons.filled.InsertDriveFile
+import com.twohearts.app.ui.components.ThIcons
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -20,25 +16,25 @@ enum class VaultContentType(
 ) {
     PHOTO(
         displayName = "Photo",
-        icon = Icons.Default.Image,
+        icon = ThIcons.Image,
         color = Color(0xFF6A1B2B), // Burgundy
         mimeTypePrefix = "image/"
     ),
     VIDEO(
         displayName = "Video",
-        icon = Icons.Default.VideoFile,
+        icon = ThIcons.VideoFile,
         color = Color(0xFF4F7A5A), // Green
         mimeTypePrefix = "video/"
     ),
     NOTE(
         displayName = "Note",
-        icon = Icons.Default.Note,
+        icon = ThIcons.Note,
         color = Color(0xFFB07A1E), // Amber
         mimeTypePrefix = "text/"
     ),
     FILE(
         displayName = "File",
-        icon = Icons.Default.InsertDriveFile,
+        icon = ThIcons.File,
         color = Color(0xFF2B2420), // Charcoal
         mimeTypePrefix = "application/"
     );

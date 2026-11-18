@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Badge
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -140,13 +143,16 @@ fun ThHeader(
             )
             if (titleBadge != null) {
                 Spacer(modifier = Modifier.width(TwoHeartsTokens.Spacing.space2))
-                Badge(containerColor = MaterialTheme.colorScheme.primary) {
+                Badge(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ) {
                     Text(text = titleBadge)
                 }
             }
         }
 
-        HeaderSlot(slot = right)
+        HeaderSlot(slot = right, expandable = true)
     }
 }
 
@@ -159,14 +165,18 @@ fun ThHeader(
  * width, which is why titles drifted off-centre.
  */
 @Composable
-private fun HeaderSlot(slot: (@Composable () -> Unit)?) {
+private fun HeaderSlot(slot: (@Composable () -> Unit)?, expandable: Boolean = false) {
+    val minimum = TwoHeartsTokens.Dimensions.touchTargetMin
     Row(
-        modifier = Modifier.width(TwoHeartsTokens.Dimensions.touchTargetMin),
+        modifier = if (expandable && slot != null) Modifier.widthIn(min = minimum, max = 128.dp)
+        else Modifier.width(minimum),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (slot != null) {
-            slot()
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+                slot()
+            }
         } else {
             Spacer(modifier = Modifier.size(TwoHeartsTokens.Dimensions.touchTargetMin))
         }

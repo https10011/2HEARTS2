@@ -1,5 +1,6 @@
 package com.twohearts.app.ui.screens.vault
 
+import com.twohearts.app.ui.components.ThIcons
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -9,8 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -136,7 +135,7 @@ fun AddVaultContent(
                         )
                     ) {
                         Icon(
-                            imageVector = Icons.Default.AttachFile,
+                            imageVector = ThIcons.Attach,
                             contentDescription = "Select File",
                             modifier = Modifier.size(20.dp)
                         )
@@ -204,7 +203,7 @@ fun AddVaultContent(
                 enabled = title.isNotBlank() && selectedType != null
             ) {
                 Icon(
-                    imageVector = Icons.Default.Lock,
+                    imageVector = ThIcons.Lock,
                     contentDescription = "Add to Vault",
                     modifier = Modifier.size(20.dp)
                 )

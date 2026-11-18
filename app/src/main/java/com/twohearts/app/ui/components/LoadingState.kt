@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.TwoHeartsTokens
+import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
 
 /**
  * ThLoadingState — loading spinner with caption matching legacy LoadingState.tsx.
@@ -32,9 +34,11 @@ fun ThLoadingState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.primary,
-        )
+        if (LocalTwoHeartsMotion.current.reduced) {
+            Icon(ThIcons.Clock, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        } else {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
 
         Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space3))
 

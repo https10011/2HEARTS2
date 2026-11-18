@@ -13,8 +13,6 @@ import com.twohearts.app.data.repository.PeriodSettingsRepository
 import com.twohearts.app.data.repository.generateId
 import com.twohearts.app.data.repository.nowUtc
 import com.twohearts.app.services.relationship.RelationshipService
-import com.twohearts.app.ui.components.ThEmptyState
-import com.twohearts.app.ui.components.ThLoadingState
 import com.twohearts.app.ui.screens.period.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -103,25 +101,19 @@ internal fun NavGraphBuilder.periodRoutes(
 
     composable("${RoutePath.APP_PERIOD}/{entryId}/edit") { route ->
         val id = route.arguments?.getString("entryId") ?: return@composable
-        var entry by remember(id) { mutableStateOf<PeriodEntry?>(null) }
-        var loaded by remember(id) { mutableStateOf(false) }
-        LaunchedEffect(id) {
+        val lookup = rememberRecordLookup(id) {
             val ownerId = relationship.getOwner()?.id
-            entry = entries.getById(id)?.takeIf { it.profileId == ownerId || it.profileId == "owner" }
-            loaded = true
+            entries.getById(id)?.takeIf { it.profileId == ownerId || it.profileId == "owner" }
         }
-        val selected = entry
-        when {
-            selected != null -> PeriodEntryForm(selected, back, entries) { start, end, flow, note ->
+        val selected = lookup.record
+        if (selected != null) {
+            PeriodEntryForm(selected, back, entries) { start, end, flow, note ->
                 checkNotNull(entries.update(id, mapOf(
                     "startDate" to start, "endDate" to end, "flowLevel" to flow, "note" to note,
                 )))
             }
-            loaded -> ThEmptyState(
-                title = "Entry unavailable", description = "It may have been removed.",
-                actionLabel = "Back", onAction = back,
-            )
-            else -> ThLoadingState(label = "Loading entry")
+        } else {
+            RecordLookupScreen("Period entry", lookup, back)
         }
     }
 }

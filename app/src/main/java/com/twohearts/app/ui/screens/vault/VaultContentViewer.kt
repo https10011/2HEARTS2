@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -115,7 +113,7 @@ fun VaultContentViewer(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Image,
+                                    imageVector = ThIcons.Image,
                                     contentDescription = "Photo",
                                     modifier = Modifier.size(64.dp),
                                     tint = Color(0xFF6A1B2B)
@@ -150,7 +148,7 @@ fun VaultContentViewer(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.PlayCircle,
+                                    imageVector = ThIcons.Play,
                                     contentDescription = "Play Video",
                                     modifier = Modifier.size(64.dp),
                                     tint = Color(0xFF6A1B2B)
@@ -199,7 +197,7 @@ fun VaultContentViewer(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Icon(
-                                imageVector = Icons.Default.InsertDriveFile,
+                                imageVector = ThIcons.File,
                                 contentDescription = "File",
                                 modifier = Modifier.size(48.dp),
                                 tint = contentType.color
