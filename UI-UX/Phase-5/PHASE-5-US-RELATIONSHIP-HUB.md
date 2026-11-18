@@ -12,7 +12,7 @@ The visual pass checked the empty and populated states with standard text, lower
 
 ## Verification
 
-- `./gradlew :app:testDebugUnitTest :app:assembleDebug` passed. All 87 tests passed.
+- `./gradlew :app:testDebugUnitTest :app:testReleaseUnitTest :app:assembleDebug` passed. All 87 tests passed in each variant. CI exercises both variants, so the Compose tests supply their host activity through Robolectric for each variant. The initial CI run exposed the debug-only host registration.
 - Phase 5 Compose tests opened the hub against Room, validated all seven existing feature destinations and the memory creation/detail routes, and verified that deleting the latest memory restored the first-memory action.
 - The owner confirmed the existing app launches on the TECNO Spark 10 Pro. This confirmation preceded the Phase 5 build.
 - Installed the Phase 5 APK over the existing Android 13 emulator data. An input timeout occurred during the first cold start under software emulation. The retry reached Home, opened Us with the persisted profiles and anniversary, entered Important Dates, and returned to Us with Android Back. The successful navigation produced no TwoHearts fatal entry in the crash buffer. [Android 13 screenshot](evidence/us-api33.png)

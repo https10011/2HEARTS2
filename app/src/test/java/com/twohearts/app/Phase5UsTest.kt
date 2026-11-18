@@ -3,8 +3,9 @@ package com.twohearts.app
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -30,9 +31,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import org.robolectric.android.controller.ActivityController
 import java.io.File
 import java.time.LocalDate
 
@@ -40,8 +43,9 @@ import java.time.LocalDate
 @Config(sdk = [34], qualifiers = "w411dp-h891dp-xxhdpi")
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class Phase5UsTest {
-    @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule val compose = createEmptyComposeRule()
 
+    private lateinit var controller: ActivityController<ComponentActivity>
     private lateinit var database: TwoHeartsDatabase
     private var destination: String? = null
     private val today = LocalDate.now()
@@ -49,11 +53,13 @@ class Phase5UsTest {
 
     @After
     fun closeDatabase() {
+        if (::controller.isInitialized) controller.pause().stop().destroy()
         if (::database.isInitialized) database.close()
     }
 
     private fun prepare(longContent: Boolean = false) {
-        database = Room.inMemoryDatabaseBuilder(compose.activity, TwoHeartsDatabase::class.java).build()
+        controller = Robolectric.buildActivity(ComponentActivity::class.java).setup()
+        database = Room.inMemoryDatabaseBuilder(controller.get(), TwoHeartsDatabase::class.java).build()
         relationship = RelationshipService(
             ProfileRepository(database.profileDao()),
             CoupleRelationshipRepository(database.coupleRelationshipDao()),
@@ -110,7 +116,7 @@ class Phase5UsTest {
     }
 
     private fun open(dark: Boolean = false, scale: TextScalingLevel = TextScalingLevel.DEFAULT) {
-        compose.setContent {
+        controller.get().setContent {
             TwoHeartsTheme(darkMode = dark, textScalingLevel = scale, reduceMotion = true) {
                 AppShell(RoutePath.APP_US, onNavigate = {}, onBack = {}, canNavigateBack = false) {
                     TestUsScreen(relationship, database) { destination = it }
@@ -127,7 +133,7 @@ class Phase5UsTest {
 
     private fun capture(name: String) {
         compose.runOnIdle {
-            val view = compose.activity.window.decorView
+            val view = controller.get().window.decorView
             val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
             try {
                 view.draw(Canvas(bitmap))
