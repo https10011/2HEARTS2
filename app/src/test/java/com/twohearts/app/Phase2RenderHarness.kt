@@ -144,7 +144,7 @@ class Phase2RenderHarness {
             )
         }
         render("p2-03-us", RoutePath.APP_US) {
-            com.twohearts.app.ui.screens.us.UsScreen(relationshipService(), {})
+            TestUsScreen(relationshipService())
         }
         render("p2-04-notifications", RoutePath.APP_NOTIFICATIONS) {
             NotificationCenterHarnessContent()
@@ -202,7 +202,7 @@ class Phase2RenderHarness {
             )
         }
         render("p2-22-us-dark", RoutePath.APP_US, dark = true) {
-            com.twohearts.app.ui.screens.us.UsScreen(relationshipService(), {})
+            TestUsScreen(relationshipService())
         }
         render("p2-23-more-dark", RoutePath.APP_MORE, dark = true) {
             com.twohearts.app.ui.screens.more.MoreScreen({})
@@ -301,7 +301,7 @@ class Phase2RenderHarness {
             TestHomeScreen()
         }
         render("p2-61-us-seeded", RoutePath.APP_US) {
-            com.twohearts.app.ui.screens.us.UsScreen(relationshipService(), {})
+            TestUsScreen(relationshipService())
         }
     }
 

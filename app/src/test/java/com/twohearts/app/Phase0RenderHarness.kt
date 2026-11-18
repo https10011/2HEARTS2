@@ -53,7 +53,6 @@ import com.twohearts.app.ui.screens.settings.SettingsHomeScreen
 import com.twohearts.app.ui.screens.timeline.AddEvent
 import com.twohearts.app.ui.screens.timeline.EventDetail
 import com.twohearts.app.ui.screens.timeline.TimelineHome
-import com.twohearts.app.ui.screens.us.UsScreen
 import com.twohearts.app.ui.screens.more.MoreScreen
 import com.twohearts.app.ui.screens.yuki.YukiScreen
 import com.twohearts.app.ui.screens.yuki.YukiViewModel
@@ -126,7 +125,7 @@ class Phase0RenderHarness {
     fun renderAll() {
         render("01-home") { TestHomeScreen() }
         render("01b-home-dark", dark = true) { TestHomeScreen() }
-        render("02-us") { UsScreen(relationshipService(), {}) }
+        render("02-us") { TestUsScreen(relationshipService()) }
         render("03-more") { MoreScreen({}) }
 
         render("04-notes-empty") { NotesHome(emptyList(), {}, {}, {}) }
@@ -342,7 +341,7 @@ class Phase0RenderHarness {
         render("67-home-seeded") {
             TestHomeScreen()
         }
-        render("68-us-seeded") { UsScreen(relationshipService(), {}) }
+        render("68-us-seeded") { TestUsScreen(relationshipService()) }
 
         // Vault
         render("69-vault-locked") {

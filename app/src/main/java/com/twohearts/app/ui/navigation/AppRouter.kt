@@ -249,6 +249,11 @@ fun AppRouter(
                 composable(RoutePath.APP_US) {
                     UsScreen(
                         relationshipService = relationshipService,
+                        importantDateRepository = importantDateRepository,
+                        memoryRepository = memoryRepository,
+                        timelineEventRepository = timelineEventRepository,
+                        placeRepository = placeRepository,
+                        moodEntryRepository = moodEntryRepository,
                         onNavigate = { route ->
                             navController.navigate(route)
                         }
