@@ -64,7 +64,8 @@ fun MoodHome(
     recentMoods: List<MoodEntry>,
     onAddMood: () -> Unit,
     onViewHistory: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onQuickMood: (MoodEntryData) -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -179,7 +180,7 @@ fun MoodHome(
                     items(MoodMeta.moods) { mood ->
                         MoodQuickButton(
                             mood = mood,
-                            onClick = { /* Will be implemented */ }
+                            onClick = { onQuickMood(mood) }
                         )
                     }
                 }

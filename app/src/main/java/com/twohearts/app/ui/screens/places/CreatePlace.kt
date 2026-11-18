@@ -8,6 +8,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.ui.components.Input
 
@@ -32,7 +38,7 @@ fun CreatePlace(
     initialCity: String = "",
     initialNotes: String = "",
     initialCategory: String = "general",
-    onSave: (name: String, address: String?, city: String?, notes: String?, category: String) -> Unit,
+    onSave: (name: String, address: String?, city: String?, notes: String?, category: String, photo: Uri?) -> Unit,
     onBack: () -> Unit
 ) {
     var name by remember { mutableStateOf(initialName) }
@@ -41,6 +47,8 @@ fun CreatePlace(
     var notes by remember { mutableStateOf(initialNotes) }
     var category by remember { mutableStateOf(initialCategory) }
     var showCategoryMenu by remember { mutableStateOf(false) }
+    var photo by remember { mutableStateOf<Uri?>(null) }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { photo = it }
 
     val isEditing = placeId != null
     val categoryOptions = listOf("general", "restaurant", "park", "home", "travel", "other")
@@ -59,7 +67,8 @@ fun CreatePlace(
                                     address.takeIf { it.isNotBlank() }?.trim(),
                                     city.takeIf { it.isNotBlank() }?.trim(),
                                     notes.takeIf { it.isNotBlank() }?.trim(),
-                                    category
+                                    category,
+                                    photo,
                                 )
                             }
                         }
@@ -77,7 +86,8 @@ fun CreatePlace(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Name input
@@ -151,6 +161,7 @@ fun CreatePlace(
 
             // Photo dropzone (placeholder)
             OutlinedCard(
+                onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
@@ -160,7 +171,7 @@ fun CreatePlace(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "📸 Add Photo",
+                        text = if (photo == null) "Add a photo from this place" else "Photo selected · Change",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )

@@ -201,7 +201,7 @@ class Phase0RenderHarness {
             )
         }
         render("23-place-detail") { PlaceDetail(Place(name = "The little cafe", city = "Lisbon", notes = "Where we had our first date.", category = "date", id = "pl1", createdAt = now, updatedAt = now), {}, {}, {}) }
-        render("24-create-place") { CreatePlace(onSave = { _, _, _, _, _ -> }, onBack = {}) }
+        render("24-create-place") { CreatePlace(onSave = { _, _, _, _, _, _ -> }, onBack = {}) }
 
         render("25-mood-home") {
             MoodHome(

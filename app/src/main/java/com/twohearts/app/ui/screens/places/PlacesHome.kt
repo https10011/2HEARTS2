@@ -3,8 +3,6 @@ package com.twohearts.app.ui.screens.places
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -12,6 +10,11 @@ import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.components.EmptyState
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.Place
+import com.twohearts.app.data.entity.MediaAsset
+import com.twohearts.app.ui.screens.memories.MemoryMediaFrame
+import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import androidx.compose.ui.Alignment
 
 /**
  * PlacesHome — places list screen.
@@ -27,7 +30,8 @@ fun PlacesHome(
     places: List<Place>,
     onPlaceClick: (String) -> Unit,
     onAddPlace: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    media: Map<String, MediaAsset> = emptyMap(),
 ) {
     var selectedCategory by remember { mutableStateOf<String?>(null) }
 
@@ -48,15 +52,12 @@ fun PlacesHome(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = onAddPlace,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add Place"
-                )
-            }
+                containerColor = LocalTwoHeartsColors.current.burgundy,
+                contentColor = LocalTwoHeartsColors.current.textOnAccent,
+                icon = { Icon(ThIcons.Add, null) }, text = { Text("Save a place") },
+            )
         }
     ) { paddingValues ->
         Column(
@@ -86,10 +87,12 @@ fun PlacesHome(
             }
 
             if (filteredPlaces.isEmpty()) {
-                EmptyState(
-                    title = "No Places Yet",
-                    message = "Add your first place to get started"
-                )
+                Column(Modifier.fillMaxSize().padding(36.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    Icon(ThIcons.MapPin, null, tint = LocalTwoHeartsColors.current.burgundy, modifier = Modifier.size(52.dp)); Spacer(Modifier.height(20.dp))
+                    Text("The places in your story", style = MaterialTheme.typography.headlineSmall)
+                    Spacer(Modifier.height(8.dp)); Text("Keep the café, park, home, or faraway corner that became part of us.", color = LocalTwoHeartsColors.current.textSecondary)
+                    Spacer(Modifier.height(24.dp)); Button(onClick = onAddPlace) { Text("Save your first place") }
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -100,6 +103,7 @@ fun PlacesHome(
                     items(filteredPlaces) { place ->
                         PlaceCard(
                             place = place,
+                            media = media[place.id],
                             onClick = { onPlaceClick(place.id) }
                         )
                     }
@@ -116,6 +120,7 @@ fun PlacesHome(
 fun PlaceCard(
     place: Place,
     onClick: () -> Unit,
+    media: MediaAsset? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -127,6 +132,8 @@ fun PlaceCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            MemoryMediaFrame(media, Modifier.fillMaxWidth().height(150.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             // Title
             Text(
                 text = place.name,

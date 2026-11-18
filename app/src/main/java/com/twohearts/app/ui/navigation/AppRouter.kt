@@ -756,8 +756,11 @@ fun AppRouter(
                 // Places
                 composable(RoutePath.APP_PLACES) {
                     val places by placeRepository.observeAll().collectAsState(initial = emptyList())
+                    var placeMedia by remember { mutableStateOf<Map<String, com.twohearts.app.data.entity.MediaAsset>>(emptyMap()) }
+                    LaunchedEffect(places) { placeMedia = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { places.mapNotNull { place -> place.photoRef?.let { mediaAssetDao.getById(it) }?.let { place.id to it } }.toMap() } }
                     PlacesHome(
                         places = places,
+                        media = placeMedia,
                         onPlaceClick = { placeId ->
                             navController.navigate("/app/places/$placeId")
                         },
@@ -771,23 +774,28 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_PLACES_ADD) {
+                    val context = LocalContext.current
+                    val scope = rememberCoroutineScope()
                     CreatePlace(
-                        onSave = { name, address, city, notes, category ->
-                            kotlinx.coroutines.runBlocking {
-                                placeRepository.create(
-                                    com.twohearts.app.data.entity.Place(
+                        onSave = { name, address, city, notes, category, photo ->
+                            scope.launch {
+                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                    val stored = photo?.let { uri -> context.contentResolver.getType(uri)?.let { mediaStorage.store(uri, it) } }
+                                    stored?.let { mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(it.filePath, it.mimeType, it.fileSize, it.width, it.height, id = it.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc())) }
+                                    placeRepository.create(com.twohearts.app.data.entity.Place(
                                         name = name,
                                         address = address,
                                         city = city,
                                         notes = notes,
                                         category = category,
+                                        photoRef = stored?.id,
                                         id = generateId(),
                                         createdAt = DateTimeHelper.nowUtc(),
                                         updatedAt = DateTimeHelper.nowUtc()
-                                    )
-                                )
+                                    ))
+                                }
+                                navController.popBackStack()
                             }
-                            navController.popBackStack()
                         },
                         onBack = {
                             navController.popBackStack()
@@ -798,20 +806,24 @@ fun AppRouter(
                 composable("/app/places/{placeId}") { backStackEntry ->
                     val placeId = backStackEntry.arguments?.getString("placeId") ?: return@composable
                     var place by remember { mutableStateOf<com.twohearts.app.data.entity.Place?>(null) }
+                    var placeMedia by remember { mutableStateOf<com.twohearts.app.data.entity.MediaAsset?>(null) }
+                    val scope = rememberCoroutineScope()
                     LaunchedEffect(placeId) {
                         place = placeRepository.getById(placeId)
+                        placeMedia = place?.photoRef?.let { mediaAssetDao.getById(it) }
                     }
                     place?.let { p ->
                         PlaceDetail(
                             place = p,
+                            media = placeMedia,
                             onEdit = {
                                 navController.navigate("/app/places/$placeId/edit")
                             },
                             onDelete = {
-                                kotlinx.coroutines.runBlocking {
-                                    placeRepository.softDelete(p.id)
+                                scope.launch {
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { placeRepository.softDelete(p.id) }
+                                    navController.popBackStack()
                                 }
-                                navController.popBackStack()
                             },
                             onBack = {
                                 navController.popBackStack()
@@ -823,6 +835,8 @@ fun AppRouter(
                 composable("/app/places/{placeId}/edit") { backStackEntry ->
                     val placeId = backStackEntry.arguments?.getString("placeId") ?: return@composable
                     var place by remember { mutableStateOf<com.twohearts.app.data.entity.Place?>(null) }
+                    val context = LocalContext.current
+                    val scope = rememberCoroutineScope()
                     LaunchedEffect(placeId) {
                         place = placeRepository.getById(placeId)
                     }
@@ -834,17 +848,22 @@ fun AppRouter(
                             initialCity = p.city ?: "",
                             initialNotes = p.notes ?: "",
                             initialCategory = p.category ?: "",
-                            onSave = { name, address, city, notes, category ->
-                                kotlinx.coroutines.runBlocking {
+                            onSave = { name, address, city, notes, category, photo ->
+                                scope.launch {
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                    val stored = photo?.let { uri -> context.contentResolver.getType(uri)?.let { mediaStorage.store(uri, it) } }
+                                    stored?.let { mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(it.filePath, it.mimeType, it.fileSize, it.width, it.height, id = it.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc())) }
                                     placeRepository.update(p.id, mapOf(
                                         "name" to name,
                                         "address" to address,
                                         "city" to city,
                                         "notes" to notes,
-                                        "category" to category
+                                        "category" to category,
+                                        "photoRef" to (stored?.id ?: p.photoRef),
                                     ))
+                                    }
+                                    navController.popBackStack()
                                 }
-                                navController.popBackStack()
                             },
                             onBack = {
                                 navController.popBackStack()
@@ -856,40 +875,46 @@ fun AppRouter(
                 // Mood
                 composable(RoutePath.APP_MOOD) {
                     val moods by moodEntryRepository.observeAll().collectAsState(initial = emptyList())
-                    val todayMood = moods.find { it.entryDate == DateTimeHelper.todayLocal() }
+                    val owner by relationshipService.observeOwner().collectAsState(initial = null)
+                    val today = DateTimeHelper.todayLocal()
+                    val todayMood = moods.firstOrNull { it.entryDate == today && it.profileId == owner?.id }
+                        ?: moods.firstOrNull { it.entryDate == today && it.profileId == "owner" }
+                    val scope = rememberCoroutineScope()
                     MoodHome(
                         todayMood = todayMood,
                         recentMoods = moods.take(7),
                         onAddMood = {
-                            navController.navigate(RoutePath.APP_MOOD_ADD)
+                            navController.navigate(todayMood?.let { "/app/mood/${android.net.Uri.encode(it.id)}/edit" }
+                                ?: RoutePath.APP_MOOD_ADD)
                         },
                         onViewHistory = {
                             navController.navigate(RoutePath.APP_MOOD_HISTORY)
                         },
                         onBack = {
                             navController.popBackStack()
-                        }
+                        },
+                        onQuickMood = { mood ->
+                            scope.launch {
+                                val profileId = relationshipService.getOwner()?.id ?: return@launch
+                                moodEntryRepository.saveOwnerCheckIn(
+                                    profileId, DateTimeHelper.todayLocal(), mood.value, mood.emoji, keepNote = true,
+                                )
+                            }
+                        },
                     )
                 }
 
                 composable(RoutePath.APP_MOOD_ADD) {
+                    val scope = rememberCoroutineScope()
                     MoodEntryScreen(
                         onSave = { moodValue, moodEmoji, note ->
-                            kotlinx.coroutines.runBlocking {
-                                moodEntryRepository.create(
-                                    com.twohearts.app.data.entity.MoodEntry(
-                                        moodValue = moodValue,
-                                        moodEmoji = moodEmoji,
-                                        note = note,
-                                        profileId = "owner", // Placeholder
-                                        entryDate = DateTimeHelper.todayLocal(),
-                                        id = generateId(),
-                                        createdAt = DateTimeHelper.nowUtc(),
-                                        updatedAt = DateTimeHelper.nowUtc()
-                                    )
+                            scope.launch {
+                                val profileId = relationshipService.getOwner()?.id ?: return@launch
+                                moodEntryRepository.saveOwnerCheckIn(
+                                    profileId, DateTimeHelper.todayLocal(), moodValue, moodEmoji, note,
                                 )
+                                navController.popBackStack()
                             }
-                            navController.popBackStack()
                         },
                         onBack = {
                             navController.popBackStack()
@@ -910,6 +935,7 @@ fun AppRouter(
                 composable("/app/mood/{entryId}/edit") { backStackEntry ->
                     val entryId = backStackEntry.arguments?.getString("entryId") ?: return@composable
                     var entry by remember { mutableStateOf<com.twohearts.app.data.entity.MoodEntry?>(null) }
+                    val scope = rememberCoroutineScope()
                     LaunchedEffect(entryId) {
                         entry = moodEntryRepository.getById(entryId)
                     }
@@ -918,14 +944,16 @@ fun AppRouter(
                             initialMood = e.moodValue,
                             initialNote = e.note ?: "",
                             onSave = { moodValue, moodEmoji, note ->
-                                kotlinx.coroutines.runBlocking {
+                                scope.launch {
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                                     moodEntryRepository.update(e.id, mapOf(
                                         "moodValue" to moodValue,
                                         "moodEmoji" to moodEmoji,
                                         "note" to note
                                     ))
+                                    }
+                                    navController.popBackStack()
                                 }
-                                navController.popBackStack()
                             },
                             onBack = {
                                 navController.popBackStack()

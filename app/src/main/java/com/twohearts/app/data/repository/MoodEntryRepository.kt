@@ -20,6 +20,21 @@ class MoodEntryRepository(private val dao: MoodEntryDao) : BaseRepository<MoodEn
 
     suspend fun getByDate(date: String): MoodEntry? = dao.getByDate(date)
 
+    suspend fun saveOwnerCheckIn(
+        profileId: String,
+        date: String,
+        value: String,
+        emoji: String,
+        note: String? = null,
+        keepNote: Boolean = false,
+    ) {
+        val now = nowUtc()
+        dao.saveOwnerCheckIn(
+            MoodEntry(value, emoji, note, profileId, date, generateId(), now, now),
+            keepNote,
+        )
+    }
+
     override suspend fun create(entity: MoodEntry): MoodEntry {
         dao.insert(entity)
         return entity
@@ -30,7 +45,7 @@ class MoodEntryRepository(private val dao: MoodEntryDao) : BaseRepository<MoodEn
         val updated = existing.copy(
             moodValue = changes["moodValue"] as? String ?: existing.moodValue,
             moodEmoji = changes["moodEmoji"] as? String ?: existing.moodEmoji,
-            note = changes["note"] as? String ?: existing.note,
+            note = if (changes.containsKey("note")) changes["note"] as? String else existing.note,
             updatedAt = nowUtc()
         )
         dao.update(updated)

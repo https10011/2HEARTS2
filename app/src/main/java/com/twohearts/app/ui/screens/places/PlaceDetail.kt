@@ -3,9 +3,6 @@ package com.twohearts.app.ui.screens.places
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +12,9 @@ import com.twohearts.app.ui.components.ConfirmDialog
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.Place
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.data.entity.MediaAsset
+import com.twohearts.app.ui.screens.memories.MemoryMediaFrame
+import com.twohearts.app.ui.components.ThIcons
 
 /**
  * PlaceDetail — place detail screen.
@@ -29,7 +29,8 @@ fun PlaceDetail(
     place: Place,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    media: MediaAsset? = null,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -41,15 +42,8 @@ fun PlaceDetail(
                 actions = {
                     IconButton(onClick = onEdit) {
                         Icon(
-                            imageVector = Icons.Default.Edit,
+                            imageVector = ThIcons.Edit,
                             contentDescription = "Edit"
-                        )
-                    }
-                    IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
@@ -64,22 +58,7 @@ fun PlaceDetail(
                 .padding(16.dp)
         ) {
             // Photo hero placeholder
-            OutlinedCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "📍 Place Photo",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
-                }
-            }
+            MemoryMediaFrame(media, Modifier.fillMaxWidth().height(240.dp))
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -165,6 +144,8 @@ fun PlaceDetail(
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
                 )
             }
+            Spacer(Modifier.height(28.dp))
+            OutlinedButton(onClick = { showDeleteDialog = true }, colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Icon(ThIcons.Trash, null); Spacer(Modifier.width(8.dp)); Text("Delete place") }
         }
     }
 

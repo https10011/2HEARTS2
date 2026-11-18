@@ -27,13 +27,13 @@ class PlaceRepository(private val dao: PlaceDao) : BaseRepository<Place> {
         val existing = dao.getById(id) ?: return null
         val updated = existing.copy(
             name = changes["name"] as? String ?: existing.name,
-            address = changes["address"] as? String ?: existing.address,
-            city = changes["city"] as? String ?: existing.city,
+            address = if (changes.containsKey("address")) changes["address"] as? String else existing.address,
+            city = if (changes.containsKey("city")) changes["city"] as? String else existing.city,
             state = changes["state"] as? String ?: existing.state,
             country = changes["country"] as? String ?: existing.country,
             latitude = changes["latitude"] as? Double ?: existing.latitude,
             longitude = changes["longitude"] as? Double ?: existing.longitude,
-            notes = changes["notes"] as? String ?: existing.notes,
+            notes = if (changes.containsKey("notes")) changes["notes"] as? String else existing.notes,
             category = changes["category"] as? String ?: existing.category,
             photoRef = changes["photoRef"] as? String ?: existing.photoRef,
             memoryId = changes["memoryId"] as? String ?: existing.memoryId,
