@@ -156,7 +156,7 @@ class Phase0RenderHarness {
             )
         }
         render("10-memory-detail") { MemoryDetail(Memory(title = "First trip together", caption = "The mountains were cold and perfect.", memoryDate = "2025-11-02", id = "m1", createdAt = now, updatedAt = now), {}, {}, {}) }
-        render("11-add-memory") { AddMemory(onSave = { _, _, _ -> }, onBack = {}) }
+        render("11-add-memory") { AddMemory(onSave = { _, _, _, _ -> }, onBack = {}) }
 
         render("12-timeline-empty") { TimelineHome(emptyList(), {}, {}, {}) }
         render("13-timeline-list") {

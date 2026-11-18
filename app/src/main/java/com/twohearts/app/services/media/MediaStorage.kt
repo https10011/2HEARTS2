@@ -32,18 +32,25 @@ class MediaStorage(private val context: Context) {
      * Store a media file and return the media asset ID.
      */
     fun store(uri: Uri, mimeType: String): MediaAssetInfo? {
+        if (!isValidMimeType(mimeType)) return null
         return try {
+            val declaredSize = context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length }
+            if (declaredSize != null && declaredSize >= 0 && !isValidFileSize(declaredSize, mimeType)) return null
             val inputStream = context.contentResolver.openInputStream(uri) ?: return null
             val fileId = UUID.randomUUID().toString()
             val extension = getExtensionFromMimeType(mimeType)
             val fileName = "$fileId.$extension"
             val file = File(mediaDir, fileName)
 
-            FileOutputStream(file).use { outputStream ->
-                inputStream.copyTo(outputStream)
+            inputStream.use { input ->
+                FileOutputStream(file).use { outputStream -> input.copyTo(outputStream) }
             }
 
             val fileSize = file.length()
+            if (!isValidFileSize(fileSize, mimeType)) {
+                file.delete()
+                return null
+            }
             val dimensions = if (mimeType.startsWith("image/")) {
                 getImageDimensions(file)
             } else {
@@ -98,7 +105,7 @@ class MediaStorage(private val context: Context) {
             Uri.fromFile(file)
         } else {
             // Try other extensions
-            val extensions = listOf("png", "jpeg", "mp4", "webm")
+            val extensions = listOf("png", "jpeg", "gif", "webp", "mp4", "webm")
             for (ext in extensions) {
                 val extFile = File(mediaDir, "$mediaRef.$ext")
                 if (extFile.exists()) {
@@ -113,7 +120,7 @@ class MediaStorage(private val context: Context) {
      * Delete a media file.
      */
     fun delete(mediaId: String): Boolean {
-        val extensions = listOf("jpg", "jpeg", "png", "mp4", "webm")
+        val extensions = listOf("jpg", "jpeg", "png", "gif", "webp", "mp4", "webm")
         for (ext in extensions) {
             val file = File(mediaDir, "$mediaId.$ext")
             if (file.exists()) {

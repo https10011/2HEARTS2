@@ -30,7 +30,7 @@ class MemoryRepository(
         val existing = dao.getById(id) ?: return null
         val updated = existing.copy(
             title = changes["title"] as? String ?: existing.title,
-            caption = changes["caption"] as? String ?: existing.caption,
+            caption = if (changes.containsKey("caption")) changes["caption"] as? String else existing.caption,
             memoryDate = changes["memoryDate"] as? String ?: existing.memoryDate,
             sortOrder = changes["sortOrder"] as? Int ?: existing.sortOrder,
             updatedAt = nowUtc()

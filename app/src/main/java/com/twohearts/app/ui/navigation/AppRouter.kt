@@ -80,6 +80,8 @@ import com.twohearts.app.data.repository.PeriodEntryRepository
 import com.twohearts.app.data.repository.ImportantDateRepository
 import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.data.repository.generateId
+import com.twohearts.app.data.dao.MediaAssetDao
+import com.twohearts.app.services.media.MediaStorage
 
 /**
  * AppRouter — main application router.
@@ -106,7 +108,9 @@ fun AppRouter(
     dataManagementService: DataManagementService,
     searchEngine: SearchEngine,
     notificationCenterRepository: NotificationCenterRepository,
-    settingsStorage: SettingsStorage
+    settingsStorage: SettingsStorage,
+    mediaAssetDao: MediaAssetDao,
+    mediaStorage: MediaStorage,
 ) {
     val navController = rememberNavController()
     val currentRoute by navController.currentBackStackEntryAsState()
@@ -400,8 +404,15 @@ fun AppRouter(
                 // Memories
                 composable(RoutePath.APP_MEMORIES) {
                     val memories by memoryRepository.observeAll().collectAsState(initial = emptyList())
+                    var memoryMedia by remember { mutableStateOf<Map<String, List<com.twohearts.app.data.entity.MediaAsset>>>(emptyMap()) }
+                    LaunchedEffect(memories) {
+                        memoryMedia = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            memories.associate { memory -> memory.id to memoryRepository.getMedia(memory.id).mapNotNull { mediaAssetDao.getById(it.mediaAssetId) } }
+                        }
+                    }
                     MemoriesHome(
                         memories = memories,
+                        media = memoryMedia,
                         onMemoryClick = { memoryId ->
                             navController.navigate("/app/memories/$memoryId")
                         },
@@ -415,21 +426,33 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_MEMORIES_ADD) {
+                    val context = LocalContext.current
+                    val scope = rememberCoroutineScope()
+                    var saving by remember { mutableStateOf(false) }
                     AddMemory(
-                        onSave = { title, caption, memoryDate ->
-                            kotlinx.coroutines.runBlocking {
-                                memoryRepository.create(
-                                    com.twohearts.app.data.entity.Memory(
+                        saving = saving,
+                        onSave = { title, caption, memoryDate, selectedMedia ->
+                            saving = true
+                            scope.launch {
+                                val memoryId = generateId()
+                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                    memoryRepository.create(com.twohearts.app.data.entity.Memory(
                                         title = title,
                                         caption = caption,
                                         memoryDate = memoryDate,
-                                        id = generateId(),
+                                        id = memoryId,
                                         createdAt = DateTimeHelper.nowUtc(),
                                         updatedAt = DateTimeHelper.nowUtc()
-                                    )
-                                )
+                                    ))
+                                    selectedMedia.forEachIndexed { index, uri ->
+                                        val mime = context.contentResolver.getType(uri) ?: return@forEachIndexed
+                                        val stored = mediaStorage.store(uri, mime) ?: return@forEachIndexed
+                                        mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(stored.filePath, stored.mimeType, stored.fileSize, stored.width, stored.height, id = stored.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc()))
+                                        memoryRepository.addMedia(memoryId, stored.id, index)
+                                    }
+                                }
+                                navController.popBackStack()
                             }
-                            navController.popBackStack()
                         },
                         onBack = {
                             navController.popBackStack()
@@ -440,20 +463,28 @@ fun AppRouter(
                 composable("/app/memories/{memoryId}") { backStackEntry ->
                     val memoryId = backStackEntry.arguments?.getString("memoryId") ?: return@composable
                     var memory by remember { mutableStateOf<com.twohearts.app.data.entity.Memory?>(null) }
+                    var memoryMedia by remember { mutableStateOf<List<com.twohearts.app.data.entity.MediaAsset>>(emptyList()) }
+                    val scope = rememberCoroutineScope()
                     LaunchedEffect(memoryId) {
-                        memory = memoryRepository.getById(memoryId)
+                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            memory = memoryRepository.getById(memoryId)
+                            memoryMedia = memoryRepository.getMedia(memoryId).mapNotNull { mediaAssetDao.getById(it.mediaAssetId) }
+                        }
                     }
                     memory?.let { m ->
                         MemoryDetail(
                             memory = m,
+                            media = memoryMedia,
                             onEdit = {
                                 navController.navigate("/app/memories/$memoryId/edit")
                             },
                             onDelete = {
-                                kotlinx.coroutines.runBlocking {
-                                    memoryRepository.softDelete(m.id)
+                                scope.launch {
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                        memoryRepository.softDelete(m.id)
+                                    }
+                                    navController.popBackStack()
                                 }
-                                navController.popBackStack()
                             },
                             onBack = {
                                 navController.popBackStack()
@@ -465,6 +496,9 @@ fun AppRouter(
                 composable("/app/memories/{memoryId}/edit") { backStackEntry ->
                     val memoryId = backStackEntry.arguments?.getString("memoryId") ?: return@composable
                     var memory by remember { mutableStateOf<com.twohearts.app.data.entity.Memory?>(null) }
+                    val context = LocalContext.current
+                    val scope = rememberCoroutineScope()
+                    var saving by remember { mutableStateOf(false) }
                     LaunchedEffect(memoryId) {
                         memory = memoryRepository.getById(memoryId)
                     }
@@ -474,15 +508,22 @@ fun AppRouter(
                             initialTitle = m.title,
                             initialCaption = m.caption ?: "",
                             initialDate = m.memoryDate,
-                            onSave = { title, caption, memoryDate ->
-                                kotlinx.coroutines.runBlocking {
-                                    memoryRepository.update(m.id, mapOf(
-                                        "title" to title,
-                                        "caption" to caption,
-                                        "memoryDate" to memoryDate
-                                    ))
+                            saving = saving,
+                            onSave = { title, caption, memoryDate, selectedMedia ->
+                                saving = true
+                                scope.launch {
+                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                        memoryRepository.update(m.id, mapOf("title" to title, "caption" to caption, "memoryDate" to memoryDate))
+                                        val offset = memoryRepository.getMedia(m.id).size
+                                        selectedMedia.forEachIndexed { index, uri ->
+                                            val mime = context.contentResolver.getType(uri) ?: return@forEachIndexed
+                                            val stored = mediaStorage.store(uri, mime) ?: return@forEachIndexed
+                                            mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(stored.filePath, stored.mimeType, stored.fileSize, stored.width, stored.height, id = stored.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc()))
+                                            memoryRepository.addMedia(m.id, stored.id, offset + index)
+                                        }
+                                    }
+                                    navController.popBackStack()
                                 }
-                                navController.popBackStack()
                             },
                             onBack = {
                                 navController.popBackStack()

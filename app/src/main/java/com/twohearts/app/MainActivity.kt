@@ -180,7 +180,9 @@ class MainActivity : ComponentActivity() {
                             dataManagementService = dataManagementService,
                             searchEngine = searchEngine,
                             notificationCenterRepository = notificationCenterRepository,
-                            settingsStorage = settingsStorage
+                            settingsStorage = settingsStorage,
+                            mediaAssetDao = bootstrapService.databaseInitializer.mediaAssetDao(),
+                            mediaStorage = mediaStorage,
                         )
                     } else {
                         // Loading state

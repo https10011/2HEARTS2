@@ -2,10 +2,11 @@
 
 ## Current checkpoint
 
-- **Active work** — Phase 6 (Memories). The owner confirmed that TwoHearts now runs on their TECNO Spark 10 Pro. The startup gate is clear.
+- **Active work** — Phase 7 (Notes). The owner confirmed that TwoHearts now runs on their TECNO Spark 10 Pro. The startup gate is clear.
 - **Completed UI/UX phases at intake** — Phase 0 reconnaissance, Phase 1 visual language, Phase 2 shell and navigation, Phase 3 onboarding, and Phase 4 Home. Their implementation and reports are in the repository history.
-- **Completed since intake** — Phase 5 replaced the Us directory with a live relationship summary and feature previews. All 87 local tests and the APK build passed. Compose and Android 13 emulator checks verified the hub and retained local data. [Phase 5 report](Phase-5/PHASE-5-US-RELATIONSHIP-HUB.md)
-- **Pending UI/UX phases** — Phase 6 through Phase 20 in the [master directive](MASTER-UI-UX-DIRECTIVE.md). Phase 6 starts with restoring the Memories media flow and redesigning browsing, creation, and detail.
+- **Completed since intake** — Phase 5 replaced the Us directory with a live relationship summary and feature previews. Phase 6 redesigned Memories and connected private photo/video selection, persistence, browsing, editing, and deletion. [Phase 5 report](Phase-5/PHASE-5-US-RELATIONSHIP-HUB.md) · [Phase 6 report](Phase-6/PHASE-6-MEMORIES-EXPERIENCE.md)
+- **Pending UI/UX phases** — Phase 7 through Phase 20 in the [master directive](MASTER-UI-UX-DIRECTIVE.md). Phase 7 begins with the Notes experience.
+- **Latest verified remote checkpoint** — `c62917feee770dc3196a8d65f93e2850fa8e6c69`. GitHub Actions run [44258870795](https://github.com/https10011/2HEARTS2/actions/runs/44258870795) passed its APK build, unit tests, and artifact upload. Phase 6 is locally verified and awaiting its own remote checkpoint.
 
 ## Repository and startup audit
 
