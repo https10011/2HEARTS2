@@ -1,334 +1,147 @@
 package com.twohearts.app.data.game
 
+import java.time.Duration
 import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
+import java.time.ZoneId
 
-// ---------------------------------------------------------------------------
-// Core need levels (0–100 scale)
-// ---------------------------------------------------------------------------
-
-/** How fed Yuki is. 100 = perfectly full, 0 = starving. */
-typealias NeedLevel = Int
-
-// ---------------------------------------------------------------------------
-// Mood system
-// ---------------------------------------------------------------------------
-
-enum class YukiMood(val label: String, val description: String, val emoji: String) {
-    HAPPY("happy", "Yuki is purring with joy!", "\uD83D\uDE0A"),
-    CONTENT("content", "Yuki looks content and relaxed.", "\uD83D\uDE0C"),
-    NEUTRAL("neutral", "Yuki is quietly observing.", "\uD83D\uDE10"),
-    HUNGRY("hungry", "Yuki's tummy is rumbling...", "\uD83C\uDF56"),
-    SLEEPY("sleepy", "Yuki's eyelids are getting heavy.", "\uD83D\uDE34"),
-    PLAYFUL("playful", "Yuki wants to play!", "\uD83D\uDC31"),
-    LOVED("loved", "Yuki is soaking up the affection!", "\uD83E\uDD70"),
-    SAD("sad", "Yuki needs some attention...", "\uD83D\uDE3F");
+enum class YukiMood(val label: String, val description: String) {
+    HAPPY("happy", "Purring happily"),
+    CONTENT("content", "Content and relaxed"),
+    NEUTRAL("neutral", "Quietly looking around"),
+    HUNGRY("hungry", "Ready for something to eat"),
+    SLEEPY("sleepy", "Ready for a little rest"),
+    PLAYFUL("playful", "In the mood for play"),
+    LOVED("loved", "Soaking up the affection"),
+    SAD("sad", "Would enjoy some company");
 
     companion object {
-        /**
-         * Maps a numeric mood score (0–100) to a mood name.
-         * Mirrors legacy resolveMood() exactly.
-         */
-        fun resolve(moodScore: Int): YukiMood = when {
-            moodScore >= 85 -> HAPPY
-            moodScore >= 70 -> CONTENT
-            moodScore >= 55 -> NEUTRAL
-            moodScore >= 40 -> NEUTRAL
-            moodScore >= 25 -> HUNGRY
+        fun resolve(score: Int): YukiMood = when {
+            score >= 85 -> HAPPY
+            score >= 70 -> CONTENT
+            score >= 55 -> NEUTRAL
             else -> SAD
         }
     }
 }
 
-// ---------------------------------------------------------------------------
-// Activity / action types
-// ---------------------------------------------------------------------------
-
 enum class YukiAction(val label: String) {
-    FEED("Feed"),
-    PET("Pet"),
-    PLAY("Play"),
-    CLEAN("Clean"),
-    SLEEP("Sleep")
+    FEED("Feed"), PET("Pet"), PLAY("Play"), CLEAN("Brush"), SLEEP("Nap"), DRINK("Water"), WAKE("Wake")
 }
 
-/** What Yuki is currently doing (visual + behavioral state). */
-enum class YukiActivity(val label: String) {
-    IDLE("idle"),
-    EATING("eating"),
-    BEING_PETTED("being-petted"),
-    PLAYING("playing"),
-    SLEEPING("sleeping"),
-    GROOMING("grooming"),
-    PURRING("purring")
+enum class YukiActivity(val label: String, val durationMs: Long) {
+    IDLE("At home", 0),
+    EATING("Having a meal", 2400),
+    DRINKING("Taking a drink", 2000),
+    BEING_PETTED("Enjoying a pet", 1700),
+    PLAYING("Playing", 3000),
+    SLEEPING("Taking a nap", 0),
+    GROOMING("Being brushed", 2300),
+    PURRING("Purring", 1500),
 }
 
-/**
- * Maps action to the activity it triggers.
- * Mirrors legacy actionToActivity() exactly.
- */
 fun YukiAction.toActivity(): YukiActivity = when (this) {
     YukiAction.FEED -> YukiActivity.EATING
     YukiAction.PET -> YukiActivity.BEING_PETTED
     YukiAction.PLAY -> YukiActivity.PLAYING
     YukiAction.CLEAN -> YukiActivity.GROOMING
     YukiAction.SLEEP -> YukiActivity.SLEEPING
+    YukiAction.DRINK -> YukiActivity.DRINKING
+    YukiAction.WAKE -> YukiActivity.IDLE
 }
 
-// ---------------------------------------------------------------------------
-// Accessory system
-// ---------------------------------------------------------------------------
+data class YukiAccessory(val id: String, val name: String, val visual: String)
 
-data class YukiAccessory(
-    val id: String,
-    val name: String,
-    /** Visual hint for rendering (emoji). */
-    val visual: String,
-    /** How it was unlocked. */
-    val source: AccessorySource
+val YUKI_ACCESSORIES = listOf(
+    YukiAccessory("none", "No accessory", ""),
+    YukiAccessory("bow-tie", "Bow tie", "🎀"),
+    YukiAccessory("bandana", "Bandana", "🧣"),
+    YukiAccessory("crown", "Crown", "👑"),
+    YukiAccessory("heart-collar", "Heart collar", "💖"),
+    YukiAccessory("star-badge", "Star badge", "⭐"),
 )
 
-enum class AccessorySource { DEFAULT, STREAK, LEVEL, INTERACTION }
+fun getAccessoryById(id: String?): YukiAccessory? = YUKI_ACCESSORIES.find { it.id == id }
 
-/** All available Yuki accessories. */
-val YUKI_ACCESSORIES: List<YukiAccessory> = listOf(
-    YukiAccessory("none", "Nothing", "", AccessorySource.DEFAULT),
-    YukiAccessory("bow-tie", "Bow Tie", "\uD83C\uDF80", AccessorySource.STREAK),
-    YukiAccessory("bandana", "Bandana", "\uD83E\uDDE3", AccessorySource.LEVEL),
-    YukiAccessory("crown", "Crown", "\uD83D\uDC51", AccessorySource.LEVEL),
-    YukiAccessory("heart-collar", "Heart Collar", "\uD83D\uDC96", AccessorySource.INTERACTION),
-    YukiAccessory("star-badge", "Star Badge", "\u2B50", AccessorySource.STREAK)
-)
-
-fun getAccessoryById(id: String?): YukiAccessory? =
-    if (id == null) null else YUKI_ACCESSORIES.find { it.id == id }
-
-// ---------------------------------------------------------------------------
-// Yuki state (the full persistent model)
-// ---------------------------------------------------------------------------
+enum class YukiToy(val label: String, val unlockLevel: Int, val energyCost: Int, val joy: Int) {
+    FEATHER("Feather wand", 1, 10, 19),
+    BALL("Rolling ball", 2, 18, 31),
+}
 
 data class YukiState(
-    /** Display name. */
     val name: String = "Yuki",
-
-    // Needs (0–100; higher = better)
-    val hunger: NeedLevel = 80,
-    val energy: NeedLevel = 90,
-    val happiness: NeedLevel = 85,
-    val cleanliness: NeedLevel = 90,
-
-    /** Derived mood score (0–100). Computed from needs. */
+    val hunger: Int = 80,
+    val energy: Int = 90,
+    val happiness: Int = 85,
+    val cleanliness: Int = 90,
     val moodScore: Int = 85,
-
-    /** Current visual/behavioral activity. */
     val activity: YukiActivity = YukiActivity.IDLE,
-
-    // Progression
     val level: Int = 1,
     val experience: Int = 0,
-    /** XP needed for next level. */
     val xpToNextLevel: Int = 100,
-
-    // Streak / daily engagement
     val streak: Int = 0,
-    /** ISO yyyy-MM-dd of last interaction. */
     val lastInteractionDate: String? = null,
-
-    // Stats
     val totalInteractions: Int = 0,
     val totalFeedings: Int = 0,
     val totalPets: Int = 0,
     val totalPlays: Int = 0,
-
-    // Customization
     val accessory: String? = null,
     val ownedAccessories: List<String> = listOf("none"),
-
-    // Timestamps
-    val createdAt: String = nowIso(),
-    val updatedAt: String = nowIso()
+    val createdAt: String = Instant.now().toString(),
+    val updatedAt: String = createdAt,
+    val activityStartedAt: String? = null,
+    val selectedToy: YukiToy = YukiToy.FEATHER,
 ) {
     companion object {
-        /** Create default Yuki state. Mirrors legacy createDefaultYukiState(). */
-        fun createDefault(name: String = "Yuki"): YukiState {
-            val now = nowIso()
-            return YukiState(
-                name = name,
-                hunger = 80,
-                energy = 90,
-                happiness = 85,
-                cleanliness = 90,
-                moodScore = 85,
-                activity = YukiActivity.IDLE,
-                level = 1,
-                experience = 0,
-                xpToNextLevel = 100,
-                streak = 0,
-                lastInteractionDate = null,
-                totalInteractions = 0,
-                totalFeedings = 0,
-                totalPets = 0,
-                totalPlays = 0,
-                accessory = null,
-                ownedAccessories = listOf("none"),
-                createdAt = now,
-                updatedAt = now
-            )
-        }
+        fun createDefault(name: String = "Yuki", now: Instant = Instant.now()): YukiState =
+            YukiState(name = name, createdAt = now.toString(), updatedAt = now.toString())
     }
 }
 
-// ---------------------------------------------------------------------------
-// Computed mood from needs
-// ---------------------------------------------------------------------------
+fun computeMoodScore(hunger: Int, energy: Int, happiness: Int, cleanliness: Int): Int =
+    (hunger * 0.25 + energy * 0.2 + happiness * 0.35 + cleanliness * 0.2).toInt().coerceIn(0, 100)
 
-/**
- * Compute Yuki's mood score from current needs.
- * Weighted average with happiness having slightly more influence.
- * Mirrors legacy computeMoodScore() exactly.
- */
-fun computeMoodScore(
-    hunger: NeedLevel,
-    energy: NeedLevel,
-    happiness: NeedLevel,
-    cleanliness: NeedLevel
-): Int {
-    val weighted = hunger * 0.25 + energy * 0.2 + happiness * 0.35 + cleanliness * 0.2
-    return weighted.toInt().coerceIn(0, 100)
+fun yukiMood(state: YukiState): YukiMood = when {
+    state.activity == YukiActivity.SLEEPING || state.energy < 30 -> YukiMood.SLEEPY
+    state.hunger < 40 -> YukiMood.HUNGRY
+    state.activity == YukiActivity.BEING_PETTED -> YukiMood.LOVED
+    state.activity == YukiActivity.PLAYING -> YukiMood.PLAYFUL
+    else -> YukiMood.resolve(state.moodScore)
 }
 
-// ---------------------------------------------------------------------------
-// XP / leveling
-// ---------------------------------------------------------------------------
+fun xpForLevel(level: Int): Int = 80 + level.coerceIn(1, 10_000) * 20
 
-/** XP required for level N → N+1. Mirrors legacy xpForLevel(). */
-fun xpForLevel(level: Int): Int = (80 + level * 20)
+private fun parseYukiTime(value: String?): Instant? =
+    value?.let { runCatching { Instant.parse(it) }.getOrNull() }
 
-/** Action XP rewards. */
-val ACTION_XP: Map<YukiAction, Int> = mapOf(
-    YukiAction.FEED to 15,
-    YukiAction.PET to 10,
-    YukiAction.PLAY to 20,
-    YukiAction.CLEAN to 8,
-    YukiAction.SLEEP to 5
-)
-
-/** Action need changes (positive = improvement). */
-data class NeedChanges(
-    val hunger: Int,
-    val energy: Int,
-    val happiness: Int,
-    val cleanliness: Int
-)
-
-val ACTION_NEED_CHANGES: Map<YukiAction, NeedChanges> = mapOf(
-    YukiAction.FEED to NeedChanges(hunger = 30, energy = 5, happiness = 10, cleanliness = 0),
-    YukiAction.PET to NeedChanges(hunger = 0, energy = 5, happiness = 25, cleanliness = 0),
-    YukiAction.PLAY to NeedChanges(hunger = -10, energy = -20, happiness = 30, cleanliness = -5),
-    YukiAction.CLEAN to NeedChanges(hunger = 0, energy = -5, happiness = 10, cleanliness = 35),
-    YukiAction.SLEEP to NeedChanges(hunger = -5, energy = 40, happiness = 5, cleanliness = 0)
-)
-
-// ---------------------------------------------------------------------------
-// Need decay (time-based)
-// ---------------------------------------------------------------------------
-
-/** How many hours before a full need cycle. */
-private const val DECAY_CYCLE_HOURS = 8
-
-/** Per-cycle decay amount. */
-private const val DECAY_AMOUNT = 15
-
-/**
- * Apply time-based decay to Yuki's needs based on hours since last update.
- * Returns the decayed needs (clamped 0–100).
- * Mirrors legacy applyTimeDecay() exactly.
- */
-fun applyTimeDecay(
-    state: YukiState,
-    now: Instant
-): YukiState {
-    val lastUpdate = try {
-        Instant.parse(state.updatedAt)
-    } catch (_: Exception) {
-        now.minusSeconds(0)
+fun applyTimeDecay(state: YukiState, now: Instant): YukiState {
+    val savedTime = parseYukiTime(state.updatedAt)
+    val last = savedTime?.takeUnless { it.isAfter(now) } ?: now
+    val elapsed = Duration.between(last, now).seconds.coerceIn(0, 72 * 3_600L)
+    val hours = (elapsed / 3_600).toInt()
+    val activityStart = parseYukiTime(state.activityStartedAt)?.takeUnless { it.isAfter(now) } ?: last
+    val sinceActivity = Duration.between(activityStart, now).seconds
+    val sleeping = state.activity == YukiActivity.SLEEPING
+    val hoursAsleep = if (sleeping) minOf(hours, 8, (sinceActivity / 3600).coerceAtMost(8).toInt()) else 0
+    val activity = when {
+        sleeping && sinceActivity < 8 * 3600 -> YukiActivity.SLEEPING
+        state.activity.durationMs > 0 && Duration.between(activityStart, now) < Duration.ofMillis(state.activity.durationMs) -> state.activity
+        else -> YukiActivity.IDLE
     }
-
-    val secondsElapsed = now.epochSecond - lastUpdate.epochSecond
-    val hoursElapsed = (secondsElapsed / 3600.0).coerceAtLeast(0.0)
-    val cycles = (hoursElapsed / DECAY_CYCLE_HOURS).toInt()
-
-    if (cycles <= 0) {
-        return state
+    val hunger = (state.hunger - hours * 3).coerceAtLeast(minOf(state.hunger, 24))
+    val energy = (state.energy + hours * 2 + hoursAsleep * 10).coerceAtMost(100)
+    val happiness = (state.happiness - hours / 3).coerceAtLeast(minOf(state.happiness, 45))
+    val cleanliness = (state.cleanliness - hours / 2).coerceAtLeast(minOf(state.cleanliness, 32))
+    val advancedTo = when {
+        savedTime != last || elapsed >= 72 * 3_600L -> now
+        else -> last.plusSeconds(hours.toLong() * 3600)
     }
-
-    // Hunger decays fastest, then energy, then cleanliness, happiness decays slowest
-    val hungerDecay = minOf(state.hunger, cycles * DECAY_AMOUNT)
-    val energyDecay = minOf(state.energy, cycles * (DECAY_AMOUNT * 0.8).toInt())
-    val cleanlinessDecay = minOf(state.cleanliness, cycles * (DECAY_AMOUNT * 0.6).toInt())
-    val happinessDecay = minOf(state.happiness, cycles * (DECAY_AMOUNT * 0.5).toInt())
-
     return state.copy(
-        hunger = (state.hunger - hungerDecay).coerceAtLeast(0),
-        energy = (state.energy - energyDecay).coerceAtLeast(0),
-        happiness = (state.happiness - happinessDecay).coerceAtLeast(0),
-        cleanliness = (state.cleanliness - cleanlinessDecay).coerceAtLeast(0)
+        hunger = hunger, energy = energy, happiness = happiness, cleanliness = cleanliness,
+        moodScore = computeMoodScore(hunger, energy, happiness, cleanliness),
+        activity = activity,
+        activityStartedAt = if (activity == YukiActivity.IDLE) null else activityStart.toString(),
+        updatedAt = advancedTo.toString(),
     )
 }
 
-// ---------------------------------------------------------------------------
-// Activity durations (for animation timing)
-// ---------------------------------------------------------------------------
-
-/** Duration of each activity animation in ms. */
-val ACTIVITY_DURATIONS: Map<YukiActivity, Long> = mapOf(
-    YukiActivity.IDLE to 0L,
-    YukiActivity.EATING to 2500L,
-    YukiActivity.BEING_PETTED to 2000L,
-    YukiActivity.PLAYING to 3000L,
-    YukiActivity.SLEEPING to 0L, // persistent until manually changed
-    YukiActivity.GROOMING to 2000L,
-    YukiActivity.PURRING to 0L
-)
-
-// ---------------------------------------------------------------------------
-// Speech lines
-// ---------------------------------------------------------------------------
-
-val ACTION_SPEECHES: Map<YukiAction, List<String>> = mapOf(
-    YukiAction.FEED to listOf("Nom nom nom!", "Purrr... delicious!", "My favorite!", "Yum!"),
-    YukiAction.PET to listOf("*purrrr*", "That feels nice!", "More please!", "Mrrrow~"),
-    YukiAction.PLAY to listOf("Zoomies!", "I got it!", "So fun!", "*pounces*"),
-    YukiAction.CLEAN to listOf("Squeaky clean!", "*shakes off*", "All fresh!", "Prrr~"),
-    YukiAction.SLEEP to listOf("Zzz...", "*curls up*", "So cozy...", "*yawn*")
-)
-
-val MOOD_SPEECHES: Map<YukiMood, List<String>> = mapOf(
-    YukiMood.HAPPY to listOf("I'm so happy!", "Life is good!", "I love you two!"),
-    YukiMood.CONTENT to listOf("*content purr*", "Everything is nice.", "Home sweet home."),
-    YukiMood.NEUTRAL to listOf("*stretches*", "Meow.", "*looks around*"),
-    YukiMood.HUNGRY to listOf("Feed me please!", "My tummy rumbles...", "Is it dinner time?"),
-    YukiMood.SLEEPY to listOf("*yawn*...", "So sleepy...", "Nap time?"),
-    YukiMood.PLAYFUL to listOf("Let's play!", "*bounces*", "I have so much energy!"),
-    YukiMood.LOVED to listOf("*purrrr*", "I feel so loved!", "*nuzzles*"),
-    YukiMood.SAD to listOf("Meow...", "*looks up sadly*", "I miss you...")
-)
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** ISO 8601 UTC timestamp. */
-fun nowIso(): String = Instant.now().atOffset(ZoneOffset.UTC)
-    .format(DateTimeFormatter.ISO_INSTANT)
-
-/** ISO date key (yyyy-MM-dd) in UTC. */
-fun toDateKey(instant: Instant): String {
-    val date = instant.atZone(ZoneOffset.UTC).toLocalDate()
-    return date.format(DateTimeFormatter.ISO_LOCAL_DATE)
-}
-
-/** Clamp an integer value. */
-fun clamp(value: Int, min: Int, max: Int): Int = value.coerceIn(min, max)
+internal fun interactionDate(now: Instant): String = now.atZone(ZoneId.systemDefault()).toLocalDate().toString()

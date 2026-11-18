@@ -1,415 +1,197 @@
 package com.twohearts.app.ui.screens.yuki
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twohearts.app.data.game.*
-import com.twohearts.app.ui.components.Header
-import com.twohearts.app.ui.theme.TwoHeartsTokens
+import com.twohearts.app.ui.components.*
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import kotlinx.coroutines.delay
 
-/**
- * YukiScreen — The main Yuki companion experience.
- *
- * When users tap "Yuki" in Home, they discover an orange cat living
- * inside TwoHearts. "Wait... we have a cat?"
- *
- * This screen manages:
- * - Initial state loading with time decay
- * - Action processing with visual feedback
- * - Level-up celebrations
- * - Streak display
- * - Accessory management
- * - Speech bubbles for Yuki's reactions
- * - Activity animation lifecycle
- *
- * Mirrors legacy YukiScreen.tsx + yuki.css exactly.
- */
 @Composable
-fun YukiScreen(
-    viewModel: YukiViewModel,
-    onBack: () -> Unit
-) {
-    val state by viewModel.state.collectAsState()
-    val speech by viewModel.speech.collectAsState()
-    val activeAction by viewModel.activeAction.collectAsState()
-    val isAnimating by viewModel.isAnimating.collectAsState()
-    val showLevelUp by viewModel.showLevelUp.collectAsState()
-    val levelUpLevel by viewModel.levelUpLevel.collectAsState()
-    val accessoryUnlocked by viewModel.accessoryUnlocked.collectAsState()
-    val initialized by viewModel.initialized.collectAsState()
+fun YukiScreen(viewModel: YukiViewModel, onBack: () -> Unit) {
+    val presentation by viewModel.presentation.collectAsStateWithLifecycle()
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val visible by lifecycle.currentStateFlow.collectAsState()
+    val active = visible.isAtLeast(Lifecycle.State.STARTED)
+    val state = presentation.state
 
-    // Initialize on first composition
-    LaunchedEffect(Unit) {
-        viewModel.initialize()
+    LaunchedEffect(active) {
+        if (active) {
+            viewModel.refresh()
+            while (true) {
+                delay(60_000)
+                viewModel.refresh()
+            }
+        }
+    }
+    LaunchedEffect(active, state?.activityStartedAt, state?.activity) {
+        val duration = state?.activity?.durationMs ?: 0
+        if (active && duration > 0) {
+            delay(duration)
+            viewModel.refresh()
+        }
     }
 
-    if (!initialized || state == null) {
-        Scaffold(
-            topBar = { Header(title = "Yuki", onBack = onBack) }
-        ) { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Loading Yuki...",
-                    color = TwoHeartsTokens.Color.textSecondary
+    if (state == null) {
+        Scaffold(topBar = { Header(title = "Yuki", onBack = onBack) }) { insets ->
+            if (presentation.failed) {
+                ThEmptyState(
+                    title = "Yuki’s save could not load",
+                    description = "Try opening the room again.",
+                    modifier = Modifier.padding(insets), actionLabel = "Try again", onAction = viewModel::refresh,
                 )
-            }
+            } else ThLoadingState(label = "Opening Yuki’s room", modifier = Modifier.padding(insets))
         }
-        return
-    }
-
-    val yukiState = state!!
-
-    Scaffold(
-        topBar = { Header(title = "Yuki", onBack = onBack) }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = TwoHeartsTokens.Spacing.space5)
-        ) {
-            // Accessory unlock notification
-            if (accessoryUnlocked != null) {
-                val accessory = getAccessoryById(accessoryUnlocked)
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = TwoHeartsTokens.Color.burgundy.copy(alpha = 0.1f)
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = TwoHeartsTokens.Spacing.space3)
-                ) {
-                    Text(
-                        text = "New accessory unlocked: ${accessory?.name ?: accessoryUnlocked}!",
-                        color = TwoHeartsTokens.Color.burgundy,
-                        fontSize = TwoHeartsTokens.Typography.sizeSm,
-                        modifier = Modifier.padding(TwoHeartsTokens.Spacing.space3)
-                    )
-                }
-            }
-
-            // Yuki's environment
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.Transparent
-                ),
-                shape = RoundedCornerShape(TwoHeartsTokens.Radius.xl),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color(0xFFF5C5A7).copy(alpha = 0.3f),
-                                    Color(0xFFFDF6F0).copy(alpha = 0.6f),
-                                    TwoHeartsTokens.Color.surface
-                                )
-                            )
-                        )
-                        .padding(vertical = TwoHeartsTokens.Spacing.space8)
-                        .padding(horizontal = TwoHeartsTokens.Spacing.space5),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space5)
-                ) {
-                    // Speech bubble
-                    if (speech != null) {
-                        SpeechBubble(text = speech!!)
-                    }
-
-                    // Character
-                    YukiCharacter(
-                        activity = activeAction?.toActivity() ?: yukiState.activity,
-                        mood = YukiMood.resolve(yukiState.moodScore),
-                        accessory = yukiState.accessory,
-                        showLevelUp = showLevelUp,
-                        levelUpLevel = levelUpLevel,
-                        modifier = Modifier.size(200.dp)
-                    )
-
-                    // Name and level
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space1)
-                    ) {
-                        Text(
-                            text = yukiState.name,
-                            fontSize = TwoHeartsTokens.Typography.size2xl,
-                            fontWeight = FontWeight.Bold,
-                            color = TwoHeartsTokens.Color.textPrimary
-                        )
-                        // Level pill
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space1),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .background(
-                                    brush = Brush.linearGradient(
-                                        colors = listOf(
-                                            Color(0xFFE8854A),
-                                            Color(0xFFF09858)
-                                        )
-                                    ),
-                                    shape = RoundedCornerShape(TwoHeartsTokens.Radius.pill)
-                                )
-                                .padding(horizontal = TwoHeartsTokens.Spacing.space3, vertical = TwoHeartsTokens.Spacing.space1)
-                        ) {
-                            Text(text = "\u2B50", fontSize = 10.sp, color = Color.White)
-                            Text(
-                                text = "Level ${yukiState.level}",
-                                fontSize = TwoHeartsTokens.Typography.sizeXs,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.White
-                            )
-                        }
-                    }
-
-                    // XP progress bar
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space1)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .width(200.dp)
-                                .height(4.dp)
-                                .background(TwoHeartsTokens.Color.divider, RoundedCornerShape(TwoHeartsTokens.Radius.pill))
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(fraction = (yukiState.experience.toFloat() / yukiState.xpToNextLevel).coerceIn(0f, 1f))
-                                    .background(
-                                        brush = Brush.horizontalGradient(
-                                            colors = listOf(Color(0xFFE8854A), Color(0xFFF5C563))
-                                        ),
-                                        shape = RoundedCornerShape(TwoHeartsTokens.Radius.pill)
-                                    )
-                            )
-                        }
-                        Text(
-                            text = "${yukiState.experience} / ${yukiState.xpToNextLevel} XP",
-                            fontSize = 10.sp,
-                            color = TwoHeartsTokens.Color.textSecondary
-                        )
-                    }
-
-                    // Needs bars
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space2),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        YukiNeedBar(label = "Hunger", value = yukiState.hunger, type = NeedType.HUNGER)
-                        YukiNeedBar(label = "Energy", value = yukiState.energy, type = NeedType.ENERGY)
-                        YukiNeedBar(label = "Happy", value = yukiState.happiness, type = NeedType.HAPPINESS)
-                        YukiNeedBar(label = "Clean", value = yukiState.cleanliness, type = NeedType.CLEAN)
-                    }
-
-                    // Stats row
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        StatItem(
-                            value = if (yukiState.streak > 0) "${TwoHeartsTokens.Color.textSecondary}${yukiState.streak}" else "${yukiState.streak}",
-                            label = "Streak",
-                            showFlame = yukiState.streak > 0
-                        )
-                        StatItem(
-                            value = "${yukiState.totalInteractions}",
-                            label = "Interactions"
-                        )
-                        StatItem(
-                            value = "${yukiState.level}",
-                            label = "Level"
-                        )
-                    }
-
-                    // Action bar
-                    YukiActions(
-                        onAction = { action -> viewModel.processAction(action) },
-                        disabled = isAnimating,
-                        activeAction = activeAction
-                    )
-                }
-            }
-
-            // Spacer before accessories
-            Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space3))
-
-            // Accessories row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space2),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                YUKI_ACCESSORIES
-                    .filter { yukiState.ownedAccessories.contains(it.id) }
-                    .forEach { acc ->
-                        val isSelected = (yukiState.accessory ?: "none") == acc.id
-                        AccessoryChip(
-                            accessory = acc,
-                            isSelected = isSelected,
-                            onClick = { viewModel.equipAccessory(acc.id) }
-                        )
-                    }
-            }
-
-            // Bottom spacing
-            Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space6))
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Sub-components
-// ---------------------------------------------------------------------------
-
-enum class NeedType { HUNGER, ENERGY, HAPPINESS, CLEAN }
-
-@Composable
-private fun YukiNeedBar(label: String, value: Int, type: NeedType) {
-    val isLow = value < 25
-
-    val fillColor = when {
-        isLow -> TwoHeartsTokens.Color.error
-        type == NeedType.HUNGER -> Color(0xFFE8854A)
-        type == NeedType.ENERGY -> Color(0xFF7BAF6E)
-        type == NeedType.HAPPINESS -> Color(0xFFD4745A)
-        type == NeedType.CLEAN -> Color(0xFF7EAFCF)
-        else -> TwoHeartsTokens.Color.divider
-    }
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = label,
-            fontSize = TwoHeartsTokens.Typography.sizeXs,
-            color = TwoHeartsTokens.Color.textSecondary,
-            modifier = Modifier.width(40.dp)
-        )
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(6.dp)
-                .background(TwoHeartsTokens.Color.divider, RoundedCornerShape(TwoHeartsTokens.Radius.pill))
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(fraction = (value / 100f).coerceIn(0f, 1f))
-                    .background(fillColor, RoundedCornerShape(TwoHeartsTokens.Radius.pill))
-            )
-        }
-        Text(
-            text = "$value",
-            fontSize = 10.sp,
-            color = TwoHeartsTokens.Color.textSecondary,
-            modifier = Modifier.width(30.dp).padding(start = TwoHeartsTokens.Spacing.space1)
+    } else {
+        YukiHub(
+            state, presentation.feedback, presentation.working, presentation.failed, active,
+            onBack, viewModel::processAction, viewModel::selectToy, viewModel::equipAccessory,
         )
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun StatItem(value: String, label: String, showFlame: Boolean = false) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (showFlame) {
-                Text(text = "\uD83D\uDD25", fontSize = 14.sp)
-            }
-            Text(
-                text = value.removePrefix("\uD83D\uDD25"),
-                fontSize = TwoHeartsTokens.Typography.sizeLg,
-                fontWeight = FontWeight.Bold,
-                color = TwoHeartsTokens.Color.textPrimary
-            )
-        }
-        Text(
-            text = label,
-            fontSize = 10.sp,
-            color = TwoHeartsTokens.Color.textSecondary,
-            letterSpacing = 0.6.sp
-        )
-    }
-}
-
-@Composable
-private fun SpeechBubble(text: String) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = TwoHeartsTokens.Color.surface
-        ),
-        shape = RoundedCornerShape(TwoHeartsTokens.Radius.md),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Text(
-            text = text,
-            fontSize = TwoHeartsTokens.Typography.sizeSm,
-            color = TwoHeartsTokens.Color.textPrimary,
-            modifier = Modifier.padding(
-                horizontal = TwoHeartsTokens.Spacing.space3,
-                vertical = TwoHeartsTokens.Spacing.space2
-            )
-        )
-    }
-}
-
-@Composable
-private fun AccessoryChip(
-    accessory: YukiAccessory,
-    isSelected: Boolean,
-    onClick: () -> Unit
+internal fun YukiHub(
+    state: YukiState,
+    feedback: String?,
+    working: Boolean,
+    failed: Boolean,
+    animate: Boolean,
+    onBack: () -> Unit,
+    onAction: (YukiAction) -> Unit,
+    onToy: (YukiToy) -> Unit,
+    onAccessory: (String) -> Unit,
 ) {
-    val bgColor = if (isSelected) TwoHeartsTokens.Color.blush else TwoHeartsTokens.Color.surface
-    val borderColor = if (isSelected) TwoHeartsTokens.Color.burgundyLight else TwoHeartsTokens.Color.border
-    val textColor = if (isSelected) TwoHeartsTokens.Color.textPrimary else TwoHeartsTokens.Color.textSecondary
+    var shelf by rememberSaveable { mutableStateOf(false) }
+    val colors = LocalTwoHeartsColors.current
+    val sleeping = state.activity == YukiActivity.SLEEPING
+    val busy = working || state.activity.durationMs > 0
+    val clothing = getAccessoryById(state.accessory)
+    val mood = if (state.activity == YukiActivity.IDLE) yukiMood(state).description else state.activity.label
 
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(TwoHeartsTokens.Radius.pill))
-            .background(bgColor)
-            .border(1.dp, borderColor, RoundedCornerShape(TwoHeartsTokens.Radius.pill))
-            .clickable { onClick() }
-            .padding(horizontal = TwoHeartsTokens.Spacing.space2, vertical = TwoHeartsTokens.Spacing.space1),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space1)
-    ) {
-        if (accessory.visual.isNotEmpty()) {
-            Text(text = accessory.visual, fontSize = 14.sp)
+    Scaffold(topBar = { Header(title = "Yuki’s room", onBack = onBack) }) { insets ->
+        Column(
+            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            YukiRoom(state, animate, onPet = if (busy || sleeping) null else { { onAction(YukiAction.PET) } })
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(state.name, style = MaterialTheme.typography.headlineMedium)
+                Text(mood, style = MaterialTheme.typography.titleMedium, color = colors.roseDeep)
+                if (clothing != null) Text("Wearing ${clothing.name.lowercase()}", color = colors.textSecondary)
+            }
+            if (failed) ThStatusBanner(StatusVariant.ERROR, "Couldn’t save this change. Try again.")
+            if (feedback != null) Text(
+                feedback, Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium,
+            )
+
+            YukiActions(sleeping, busy, onAction)
+            HorizontalDivider()
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                NeedLabel("Food", state.hunger, "Ready to eat", "Well fed")
+                NeedLabel("Energy", state.energy, "Tired", "Rested")
+                NeedLabel("Mood", state.happiness, "Quiet", "Cheerful")
+            }
+            TextButton(onClick = { shelf = true }) {
+                Icon(ThIcons.Star, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Toy basket and keepsakes")
+            }
         }
-        Text(
-            text = accessory.name,
-            fontSize = TwoHeartsTokens.Typography.sizeXs,
-            color = textColor
+    }
+    if (shelf) {
+        YukiShelf(
+            state = state, enabled = !busy, onToy = onToy, onAccessory = onAccessory,
+            onDismiss = { shelf = false },
         )
+    }
+}
+
+@Composable
+private fun NeedLabel(label: String, value: Int, low: String, high: String) {
+    Surface(shape = MaterialTheme.shapes.small, color = LocalTwoHeartsColors.current.surfaceWarm) {
+        Text(
+            "$label · ${if (value < 40) low else high}",
+            Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.labelMedium,
+        )
+    }
+}
+
+@Composable
+private fun YukiShelf(
+    state: YukiState,
+    enabled: Boolean,
+    onToy: (YukiToy) -> Unit,
+    onAccessory: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Yuki’s keepsakes") },
+        text = {
+            Column(
+                Modifier.heightIn(max = 480.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text("Companion level ${state.level}", style = MaterialTheme.typography.titleMedium)
+                LinearProgressIndicator(
+                    progress = { (state.experience.toFloat() / state.xpToNextLevel).coerceIn(0f, 1f) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                if (state.totalPets > 0) Text("You’ve petted Yuki ${state.totalPets} ${if (state.totalPets == 1) "time" else "times"}.")
+                Text("Choose a toy", style = MaterialTheme.typography.titleMedium)
+                Column(Modifier.selectableGroup()) {
+                    YukiToy.entries.forEach { toy ->
+                        val unlocked = toy.unlockLevel <= state.level
+                        ShelfChoice(
+                            if (unlocked) toy.label else "${toy.label} · Level ${toy.unlockLevel}",
+                            state.selectedToy == toy, enabled && unlocked,
+                        ) { onToy(toy) }
+                    }
+                }
+                Text("Accessories", style = MaterialTheme.typography.titleMedium)
+                Column(Modifier.selectableGroup()) {
+                    YUKI_ACCESSORIES.filter { it.id in state.ownedAccessories }.forEach { accessory ->
+                        ShelfChoice(
+                            if (accessory.visual.isBlank()) accessory.name else "${accessory.visual} ${accessory.name}",
+                            (state.accessory ?: "none") == accessory.id, enabled,
+                        ) { onAccessory(accessory.id) }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Done") } },
+    )
+}
+
+@Composable
+private fun ShelfChoice(label: String, selected: Boolean, enabled: Boolean, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 48.dp).selectable(
+            selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onClick,
+        ),
+        horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = selected, onClick = null, enabled = enabled)
+        Text(label, color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

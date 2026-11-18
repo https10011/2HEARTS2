@@ -2,6 +2,9 @@ package com.twohearts.app.ui.screens.home
 
 import android.content.Context
 import com.twohearts.app.data.game.YukiMood
+import com.twohearts.app.data.game.YukiActivity
+import com.twohearts.app.data.game.applyTimeDecay
+import com.twohearts.app.data.game.yukiMood
 import com.twohearts.app.services.game.YukiService
 
 /**
@@ -19,11 +22,10 @@ import com.twohearts.app.services.game.YukiService
  * the mood the engine already resolved to a short line for Home.
  */
 fun yukiPresenceFor(context: Context): YukiPresence {
-    val state = YukiService(context).loadYukiState()
-    val mood = YukiMood.resolve(state.moodScore)
+    val state = applyTimeDecay(YukiService(context).loadYukiState(), java.time.Instant.now())
     return YukiPresence(
         name = state.name,
-        statusLine = moodDescription(mood),
+        statusLine = if (state.activity == YukiActivity.SLEEPING) "Taking a nap" else moodDescription(yukiMood(state)),
         level = state.level,
     )
 }

@@ -8,9 +8,19 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+val packagedYukiAssets = layout.buildDirectory.dir("generated/yukiAssets")
+val packageYukiArt by tasks.registering(Sync::class) {
+    from(rootProject.file("Yuki Assets")) {
+        include("*.png")
+        into("yuki")
+    }
+    into(packagedYukiAssets)
+}
+
 android {
     namespace = "com.twohearts.app"
     compileSdk = 35
+    sourceSets["main"].assets.srcDir(packagedYukiAssets)
 
     defaultConfig {
         applicationId = "com.twohearts.app"
@@ -55,6 +65,8 @@ android {
         }
     }
 }
+
+tasks.named("preBuild") { dependsOn(packageYukiArt) }
 
 dependencies {
     // Jetpack Compose BOM

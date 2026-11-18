@@ -1,315 +1,193 @@
 package com.twohearts.app.services.game
 
 import android.content.Context
-import android.content.SharedPreferences
 import com.twohearts.app.data.game.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
 
 /**
- * YukiService — Manages Yuki's persistent state via SharedPreferences.
- *
- * Handles: save/load, time decay, action processing, leveling, streak tracking.
- * All operations are pure side-effects against SharedPreferences — no UI.
- *
- * Architecture: UI → YukiViewModel → YukiService → SharedPreferences.
- *
- * Mirrors legacy yukiService.ts exactly.
- * Uses org.json (Android built-in) — no external JSON library needed.
+ * Persists the original Yuki save key. New fields are optional when restoring older saves.
+ * Reads and writes for an active hub are serialized by its ViewModel.
  */
 class YukiService(context: Context) {
+    private val prefs = context.applicationContext.getSharedPreferences(STORAGE_KEY, Context.MODE_PRIVATE)
 
-    private val prefs: SharedPreferences =
-        context.getSharedPreferences(STORAGE_KEY, Context.MODE_PRIVATE)
-
-    // -------------------------------------------------------------------
-    // JSON Serialization (manual, using org.json)
-    // -------------------------------------------------------------------
-
-    private fun stateToJson(state: YukiState): String {
-        val json = JSONObject()
-        json.put("name", state.name)
-        json.put("hunger", state.hunger)
-        json.put("energy", state.energy)
-        json.put("happiness", state.happiness)
-        json.put("cleanliness", state.cleanliness)
-        json.put("moodScore", state.moodScore)
-        json.put("activity", state.activity.name)
-        json.put("level", state.level)
-        json.put("experience", state.experience)
-        json.put("xpToNextLevel", state.xpToNextLevel)
-        json.put("streak", state.streak)
-        json.put("lastInteractionDate", state.lastInteractionDate ?: JSONObject.NULL)
-        json.put("totalInteractions", state.totalInteractions)
-        json.put("totalFeedings", state.totalFeedings)
-        json.put("totalPets", state.totalPets)
-        json.put("totalPlays", state.totalPlays)
-        json.put("accessory", state.accessory ?: JSONObject.NULL)
-        val arr = JSONArray()
-        state.ownedAccessories.forEach { arr.put(it) }
-        json.put("ownedAccessories", arr)
-        json.put("createdAt", state.createdAt)
-        json.put("updatedAt", state.updatedAt)
-        return json.toString()
-    }
-
-    private fun jsonToState(raw: String): YukiState? {
-        return try {
-            val json = JSONObject(raw)
-            val ownedArr = json.optJSONArray("ownedAccessories") ?: JSONArray()
-            val ownedList = mutableListOf<String>()
-            for (i in 0 until ownedArr.length()) {
-                ownedList.add(ownedArr.getString(i))
+    fun loadYukiState(now: Instant = Instant.now()): YukiState {
+        val raw = runCatching { prefs.getString(JSON_KEY, null) }.getOrNull()
+            ?: return YukiState.createDefault(now = now)
+        val parsed = runCatching { JSONObject(raw) }.getOrNull()
+            ?: return YukiState.createDefault(now = now)
+        val hunger = parsed.optInt("hunger", 80).coerceIn(0, 100)
+        val energy = parsed.optInt("energy", 90).coerceIn(0, 100)
+        val happiness = parsed.optInt("happiness", 85).coerceIn(0, 100)
+        val cleanliness = parsed.optInt("cleanliness", 90).coerceIn(0, 100)
+        val level = parsed.optInt("level", 1).coerceIn(1, 10_000)
+        val nextXp = xpForLevel(level)
+        val savedAccessories = parsed.optJSONArray("ownedAccessories")
+        val owned = buildSet {
+            add("none")
+            if (savedAccessories != null) repeat(savedAccessories.length()) { index ->
+                val id = savedAccessories.optString(index)
+                if (getAccessoryById(id) != null) add(id)
             }
-            YukiState(
-                name = json.optString("name", "Yuki"),
-                hunger = json.optInt("hunger", 80),
-                energy = json.optInt("energy", 90),
-                happiness = json.optInt("happiness", 85),
-                cleanliness = json.optInt("cleanliness", 90),
-                moodScore = json.optInt("moodScore", 85),
-                activity = try {
-                    YukiActivity.valueOf(json.optString("activity", "IDLE"))
-                } catch (_: Exception) {
-                    YukiActivity.IDLE
-                },
-                level = json.optInt("level", 1),
-                experience = json.optInt("experience", 0),
-                xpToNextLevel = json.optInt("xpToNextLevel", 100),
-                streak = json.optInt("streak", 0),
-                lastInteractionDate = if (json.isNull("lastInteractionDate")) null
-                    else json.optString("lastInteractionDate"),
-                totalInteractions = json.optInt("totalInteractions", 0),
-                totalFeedings = json.optInt("totalFeedings", 0),
-                totalPets = json.optInt("totalPets", 0),
-                totalPlays = json.optInt("totalPlays", 0),
-                accessory = if (json.isNull("accessory")) null
-                    else json.optString("accessory"),
-                ownedAccessories = ownedList,
-                createdAt = json.optString("createdAt", ""),
-                updatedAt = json.optString("updatedAt", "")
-            )
-        } catch (_: Exception) {
-            null
-        }
-    }
-
-    // -------------------------------------------------------------------
-    // Load / Save
-    // -------------------------------------------------------------------
-
-    /** Load Yuki state from SharedPreferences. Returns default state on failure. */
-    fun loadYukiState(): YukiState {
-        val raw = prefs.getString(JSON_KEY, null) ?: return YukiState.createDefault()
-
-        val parsed = jsonToState(raw) ?: return YukiState.createDefault()
-
-        // Safe recovery: recompute mood from needs and validate ranges
-        val moodScore = computeMoodScore(
-            parsed.hunger, parsed.energy, parsed.happiness, parsed.cleanliness
-        )
-
-        return parsed.copy(
-            hunger = parsed.hunger.coerceIn(0, 100),
-            energy = parsed.energy.coerceIn(0, 100),
-            happiness = parsed.happiness.coerceIn(0, 100),
-            cleanliness = parsed.cleanliness.coerceIn(0, 100),
-            level = parsed.level.coerceAtLeast(1),
-            experience = parsed.experience.coerceAtLeast(0),
-            xpToNextLevel = parsed.xpToNextLevel.coerceAtLeast(1),
-            streak = parsed.streak.coerceAtLeast(0),
-            totalInteractions = parsed.totalInteractions.coerceAtLeast(0),
-            totalFeedings = parsed.totalFeedings.coerceAtLeast(0),
-            totalPets = parsed.totalPets.coerceAtLeast(0),
-            totalPlays = parsed.totalPlays.coerceAtLeast(0),
-            moodScore = moodScore
+        }.toList()
+        val toy = enumOrDefault(parsed.optString("selectedToy"), YukiToy.FEATHER)
+            .takeIf { it.unlockLevel <= level } ?: YukiToy.FEATHER
+        return YukiState(
+            name = parsed.optString("name", "Yuki").ifBlank { "Yuki" },
+            hunger = hunger, energy = energy, happiness = happiness, cleanliness = cleanliness,
+            moodScore = computeMoodScore(hunger, energy, happiness, cleanliness),
+            activity = enumOrDefault(parsed.optString("activity"), YukiActivity.IDLE),
+            level = level, experience = parsed.optInt("experience").coerceIn(0, nextXp - 1),
+            xpToNextLevel = nextXp, streak = parsed.optInt("streak").coerceAtLeast(0),
+            lastInteractionDate = parsed.optionalString("lastInteractionDate"),
+            totalInteractions = parsed.optInt("totalInteractions").coerceAtLeast(0),
+            totalFeedings = parsed.optInt("totalFeedings").coerceAtLeast(0),
+            totalPets = parsed.optInt("totalPets").coerceAtLeast(0),
+            totalPlays = parsed.optInt("totalPlays").coerceAtLeast(0),
+            accessory = parsed.optionalString("accessory")?.takeIf { it in owned && it != "none" },
+            ownedAccessories = owned,
+            createdAt = parsed.optString("createdAt", now.toString()),
+            updatedAt = parsed.optString("updatedAt", now.toString()),
+            activityStartedAt = parsed.optionalString("activityStartedAt"),
+            selectedToy = toy,
         )
     }
 
-    /** Save Yuki state to SharedPreferences. No-op on failure. */
     fun saveYukiState(state: YukiState) {
-        try {
-            prefs.edit()
-                .putString(JSON_KEY, stateToJson(state))
-                .apply()
-        } catch (_: Exception) {
-            // SharedPreferences may be unavailable — silently ignore
+        val json = JSONObject().apply {
+            put("version", 2)
+            put("name", state.name)
+            put("hunger", state.hunger)
+            put("energy", state.energy)
+            put("happiness", state.happiness)
+            put("cleanliness", state.cleanliness)
+            put("moodScore", state.moodScore)
+            put("activity", state.activity.name)
+            put("activityStartedAt", state.activityStartedAt)
+            put("level", state.level)
+            put("experience", state.experience)
+            put("xpToNextLevel", state.xpToNextLevel)
+            put("streak", state.streak)
+            put("lastInteractionDate", state.lastInteractionDate)
+            put("totalInteractions", state.totalInteractions)
+            put("totalFeedings", state.totalFeedings)
+            put("totalPets", state.totalPets)
+            put("totalPlays", state.totalPlays)
+            put("accessory", state.accessory)
+            put("ownedAccessories", JSONArray(state.ownedAccessories))
+            put("selectedToy", state.selectedToy.name)
+            put("createdAt", state.createdAt)
+            put("updatedAt", state.updatedAt)
         }
+        check(prefs.edit().putString(JSON_KEY, json.toString()).commit()) { "Could not save Yuki" }
     }
 
-    // -------------------------------------------------------------------
-    // Time decay
-    // -------------------------------------------------------------------
-
-    /**
-     * Apply time-based decay and return the updated state.
-     * Call this when the user opens the Yuki screen.
-     */
     fun applyDecay(state: YukiState, now: Instant = Instant.now()): YukiState {
-        val decayed = applyTimeDecay(state, now)
-        val moodScore = computeMoodScore(
-            decayed.hunger, decayed.energy, decayed.happiness, decayed.cleanliness
-        )
-
-        // Reset activity to idle when applying decay (user is returning)
-        val newState = decayed.copy(
-            moodScore = moodScore,
-            activity = YukiActivity.IDLE,
-            updatedAt = nowIso()
-        )
-
-        saveYukiState(newState)
-        return newState
+        val advanced = applyTimeDecay(state, now)
+        // Temporary animation completion is derived from the persisted activity start.
+        if (advanced.updatedAt != state.updatedAt || state.activity == YukiActivity.SLEEPING && advanced.activity != state.activity) {
+            saveYukiState(advanced)
+        }
+        return advanced
     }
 
-    // -------------------------------------------------------------------
-    // Action processing
-    // -------------------------------------------------------------------
+    data class ActionResult(val state: YukiState, val message: String)
 
-    data class ActionResult(
-        val state: YukiState,
-        val xpGained: Int,
-        val leveledUp: Boolean,
-        val newMood: YukiMood,
-        val activity: YukiActivity,
-        val accessoryUnlocked: String?
-    )
-
-    /**
-     * Process a Yuki action (feed, pet, play, clean, sleep).
-     * Returns the updated state with all effects applied.
-     * Mirrors legacy processAction() exactly.
-     */
     fun processAction(state: YukiState, action: YukiAction, now: Instant = Instant.now()): ActionResult {
-        val changes = ACTION_NEED_CHANGES[action] ?: return ActionResult(
-            state, 0, false, YukiMood.NEUTRAL, YukiActivity.IDLE, null
-        )
-        val xpGain = ACTION_XP[action] ?: 0
-
-        // Apply need changes
-        val hunger = (state.hunger + changes.hunger).coerceIn(0, 100)
-        val energy = (state.energy + changes.energy).coerceIn(0, 100)
-        val happiness = (state.happiness + changes.happiness).coerceIn(0, 100)
-        val cleanliness = (state.cleanliness + changes.cleanliness).coerceIn(0, 100)
-
-        val moodScore = computeMoodScore(hunger, energy, happiness, cleanliness)
-        val newMood = YukiMood.resolve(moodScore)
-
-        // XP and leveling
-        var experience = state.experience + xpGain
-        var level = state.level
-        var xpToNextLevel = state.xpToNextLevel
-        var leveledUp = false
-
-        while (experience >= xpToNextLevel) {
-            experience -= xpToNextLevel
-            level++
-            xpToNextLevel = xpForLevel(level)
-            leveledUp = true
+        val current = applyTimeDecay(state, now)
+        if (current.activity == YukiActivity.SLEEPING && action != YukiAction.WAKE) {
+            return ActionResult(current, "Yuki is napping. Wake Yuki to interact.")
+        }
+        if (action == YukiAction.WAKE) {
+            val awake = current.copy(activity = YukiActivity.IDLE, activityStartedAt = null)
+            saveYukiState(awake)
+            return ActionResult(awake, "Yuki wakes and looks around.")
+        }
+        if (action == YukiAction.FEED && current.hunger >= 95) return ActionResult(current, "Yuki has had enough to eat.")
+        if (action == YukiAction.PLAY && current.energy < current.selectedToy.energyCost + 10) {
+            return ActionResult(current, "Yuki is ready for a rest.")
         }
 
-        // Streak tracking
-        val today = toDateKey(now)
-        var streak = state.streak
-        var lastInteractionDate = state.lastInteractionDate
-
-        if (lastInteractionDate != today) {
-            val yesterday = toDateKey(now.minusSeconds(24 * 3600))
-            streak = when {
-                lastInteractionDate == yesterday -> streak + 1
-                lastInteractionDate == null -> 1
-                else -> 1 // Streak broken
-            }
-            lastInteractionDate = today
+        val effects = when (action) {
+            YukiAction.FEED -> Effects(food = 30, joy = 8, xp = 15, message = "Yuki enjoys the meal.")
+            YukiAction.PET -> Effects(joy = 16, xp = 9, message = "Yuki leans into your hand.")
+            YukiAction.PLAY -> Effects(
+                food = -8, energy = -current.selectedToy.energyCost, joy = current.selectedToy.joy,
+                xp = 20, message = "Yuki chases the ${current.selectedToy.label.lowercase()}.",
+            )
+            YukiAction.CLEAN -> Effects(clean = 30, joy = 5, xp = 8, message = "Yuki settles into the brushing.")
+            YukiAction.SLEEP -> Effects(energy = 8, joy = 2, xp = 3, message = "Yuki curls up for a nap.")
+            YukiAction.DRINK -> Effects(energy = 4, joy = 3, xp = 0, message = "Yuki has a little drink.")
+            YukiAction.WAKE -> error("Handled before selecting effects")
         }
-
-        // Accessory unlocks
-        var accessoryUnlocked: String? = null
-        val ownedAccessories = state.ownedAccessories.toMutableList()
-
-        if (leveledUp && level >= 3 && !ownedAccessories.contains("bandana")) {
-            ownedAccessories.add("bandana")
-            accessoryUnlocked = "bandana"
-        }
-        if (leveledUp && level >= 5 && !ownedAccessories.contains("crown")) {
-            ownedAccessories.add("crown")
-            accessoryUnlocked = accessoryUnlocked ?: "crown"
-        }
-        if (streak >= 3 && !ownedAccessories.contains("bow-tie")) {
-            ownedAccessories.add("bow-tie")
-            accessoryUnlocked = accessoryUnlocked ?: "bow-tie"
-        }
-        if (streak >= 7 && !ownedAccessories.contains("star-badge")) {
-            ownedAccessories.add("star-badge")
-            accessoryUnlocked = accessoryUnlocked ?: "star-badge"
-        }
-        if (state.totalInteractions + 1 >= 50 && !ownedAccessories.contains("heart-collar")) {
-            ownedAccessories.add("heart-collar")
-            accessoryUnlocked = accessoryUnlocked ?: "heart-collar"
-        }
-
-        val activity = action.toActivity()
-
-        val updated = state.copy(
-            hunger = hunger,
-            energy = energy,
-            happiness = happiness,
-            cleanliness = cleanliness,
-            moodScore = moodScore,
-            activity = activity,
-            level = level,
-            experience = experience,
-            xpToNextLevel = xpToNextLevel,
-            streak = streak,
-            lastInteractionDate = lastInteractionDate,
-            totalInteractions = state.totalInteractions + 1,
-            totalFeedings = state.totalFeedings + if (action == YukiAction.FEED) 1 else 0,
-            totalPets = state.totalPets + if (action == YukiAction.PET) 1 else 0,
-            totalPlays = state.totalPlays + if (action == YukiAction.PLAY) 1 else 0,
-            ownedAccessories = ownedAccessories,
-            updatedAt = nowIso()
-        )
-
-        saveYukiState(updated)
-
-        return ActionResult(
-            state = updated,
-            xpGained = xpGain,
-            leveledUp = leveledUp,
-            newMood = newMood,
-            activity = activity,
-            accessoryUnlocked = accessoryUnlocked
-        )
-    }
-
-    // -------------------------------------------------------------------
-    // Accessory management
-    // -------------------------------------------------------------------
-
-    /** Equip an accessory. Returns updated state. */
-    fun equipAccessory(state: YukiState, accessoryId: String): YukiState {
-        val updated = state.copy(
-            accessory = if (accessoryId == "none") null else accessoryId,
-            updatedAt = nowIso()
+        val hunger = (current.hunger + effects.food).coerceIn(0, 100)
+        val energy = (current.energy + effects.energy).coerceIn(0, 100)
+        val happiness = (current.happiness + effects.joy).coerceIn(0, 100)
+        val cleanliness = (current.cleanliness + effects.clean).coerceIn(0, 100)
+        val xp = current.experience + effects.xp
+        val leveledUp = xp >= current.xpToNextLevel && current.level < 10_000
+        val level = current.level + if (leveledUp) 1 else 0
+        val total = current.totalInteractions.increment()
+        val owned = buildSet {
+            addAll(current.ownedAccessories)
+            if (total >= 6) add("bow-tie")
+            if (level >= 3) add("bandana")
+            if (level >= 5) add("crown")
+            if (total >= 30) add("star-badge")
+            if (total >= 50) add("heart-collar")
+        }.toList()
+        val updated = current.copy(
+            hunger = hunger, energy = energy, happiness = happiness, cleanliness = cleanliness,
+            moodScore = computeMoodScore(hunger, energy, happiness, cleanliness),
+            activity = action.toActivity(), activityStartedAt = now.toString(), updatedAt = now.toString(),
+            experience = if (leveledUp) xp - current.xpToNextLevel else xp.coerceAtMost(xpForLevel(level) - 1),
+            xpToNextLevel = xpForLevel(level), level = level,
+            totalInteractions = total, lastInteractionDate = interactionDate(now),
+            totalFeedings = if (action == YukiAction.FEED) current.totalFeedings.increment() else current.totalFeedings,
+            totalPets = if (action == YukiAction.PET) current.totalPets.increment() else current.totalPets,
+            totalPlays = if (action == YukiAction.PLAY) current.totalPlays.increment() else current.totalPlays,
+            ownedAccessories = owned,
         )
         saveYukiState(updated)
-        return updated
+        val newAccessory = (owned - current.ownedAccessories.toSet()).firstOrNull()?.let(::getAccessoryById)
+        val message = when {
+            newAccessory != null -> "${effects.message} ${newAccessory.name} unlocked."
+            leveledUp && level == YukiToy.BALL.unlockLevel -> "Level $level. Yuki has a new rolling ball."
+            leveledUp -> "${effects.message} Level $level reached."
+            else -> effects.message
+        }
+        return ActionResult(updated, message)
     }
 
-    // -------------------------------------------------------------------
-    // Reset
-    // -------------------------------------------------------------------
-
-    /** Reset Yuki to a brand new cat. */
-    fun resetYuki(name: String = "Yuki"): YukiState {
-        val state = YukiState.createDefault(name)
-        saveYukiState(state)
-        return state
+    fun equipAccessory(state: YukiState, id: String): YukiState {
+        if (id !in state.ownedAccessories || getAccessoryById(id) == null) return state
+        return state.copy(accessory = id.takeUnless { it == "none" }).also(::saveYukiState)
     }
+
+    fun selectToy(state: YukiState, toy: YukiToy): YukiState {
+        if (state.level < toy.unlockLevel) return state
+        return state.copy(selectedToy = toy).also(::saveYukiState)
+    }
+
+    fun resetYuki(name: String = "Yuki"): YukiState = YukiState.createDefault(name).also(::saveYukiState)
+
+    private data class Effects(
+        val food: Int = 0, val energy: Int = 0, val joy: Int = 0, val clean: Int = 0,
+        val xp: Int, val message: String,
+    )
 
     companion object {
         private const val STORAGE_KEY = "twohearts_yuki"
         private const val JSON_KEY = "yuki_state"
     }
 }
+
+private fun Int.increment(): Int = if (this == Int.MAX_VALUE) this else this + 1
+
+private fun JSONObject.optionalString(key: String): String? =
+    if (isNull(key)) null else optString(key).takeIf { it.isNotBlank() }
+
+private inline fun <reified T : Enum<T>> enumOrDefault(value: String, fallback: T): T =
+    enumValues<T>().firstOrNull { it.name == value } ?: fallback

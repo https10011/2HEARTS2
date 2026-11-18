@@ -75,6 +75,30 @@ class Phase0RenderHarness {
 
     @Test
     @Config(qualifiers = "w360dp-h780dp-mdpi")
+    fun renderPhase13Yuki() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val game = com.twohearts.app.data.game.YukiState.createDefault()
+        val states = listOf(
+            Triple("p13-room-idle", com.twohearts.app.data.game.YukiActivity.IDLE, com.twohearts.app.ui.screens.yuki.YukiPose.SIT),
+            Triple("p13-room-eating", com.twohearts.app.data.game.YukiActivity.EATING, com.twohearts.app.ui.screens.yuki.YukiPose.EAT),
+            Triple("p13-room-sleeping", com.twohearts.app.data.game.YukiActivity.SLEEPING, com.twohearts.app.ui.screens.yuki.YukiPose.SLEEP),
+            Triple("p13-room-playing", com.twohearts.app.data.game.YukiActivity.PLAYING, com.twohearts.app.ui.screens.yuki.YukiPose.PAW),
+        )
+        states.forEachIndexed { index, (name, activity, pose) ->
+            requireNotNull(com.twohearts.app.ui.screens.yuki.YukiArt.load(app, pose))
+            render(name, dark = index >= 2, scale = if (index >= 2) TextScalingLevel.EXTRA_LARGE else TextScalingLevel.DEFAULT) {
+                com.twohearts.app.ui.screens.yuki.YukiHub(
+                    state = game.copy(activity = activity),
+                    feedback = if (index == 1) "Yuki enjoys the meal." else null,
+                    working = false, failed = false, animate = false,
+                    onBack = {}, onAction = {}, onToy = {}, onAccessory = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h780dp-mdpi")
     fun renderPhase12Utilities() {
         val app = ApplicationProvider.getApplicationContext<Application>()
         val initializer = com.twohearts.app.data.database.DatabaseInitializer(app)
