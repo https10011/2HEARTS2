@@ -1,0 +1,71 @@
+Fresh Android 13 install and onboarding, 722ed47
+33
+Android/sdk_phone64_x86_64/emulator64_x86_64:13/TE1A.220922.034/10940250:userdebug/test-keys
+Physical size: 1080x1920
+Physical density: 420
+Performing Streamed Install
+Success
+Starting: Intent { cmp=com.twohearts.app/.MainActivity }
+Status: timeout
+LaunchState: UNKNOWN (-1)
+Activity: com.twohearts.app/.MainActivity
+WaitTime: 19101
+Complete
+11-18 01:30:15.866  2317  2317 I TH:Bootstrap: Starting bootstrap pipeline
+11-18 01:30:16.376  2317  2317 I TH:Bootstrap: Stage 1: Initializing database
+11-18 01:30:18.131  2317  2317 I TH:Bootstrap: Stage 2: Verifying schema version
+11-18 01:30:18.335  2317  2317 I TH:Bootstrap: Stage 3: Initializing device capabilities
+11-18 01:30:18.380  2317  2317 I TH:Bootstrap: Stage 4: Starting lifecycle service
+11-18 01:30:18.470  2317  2317 I TH:Bootstrap: Stage 5: Initializing notification service
+11-18 01:30:20.533  2317  2317 I TH:Bootstrap: Stage 6: Initializing app lock service
+11-18 01:30:36.453  2317  2317 I TH:Bootstrap: Stage 7: Application state services (placeholder)
+11-18 01:30:36.568  2317  2317 I TH:Bootstrap: Bootstrap pipeline completed successfully
+11-18 01:30:37.243  2317  2317 I TH:AppState: App state initialized
+11-18 01:30:39.306  2317  2317 I TH:AppState: App state initialized
+11-18 01:33:58.676  2317  2317 I TH:AppState: Onboarding stage updated: owner
+11-18 01:35:22.454  2317  2317 I TH:AppState: Onboarding stage updated: relationship
+11-18 01:36:56.642  2317  2317 I TH:AppState: Onboarding stage updated: owner
+11-18 01:37:38.030  2317  2317 I TH:AppState: Onboarding stage updated: relationship
+11-18 01:40:02.273  2317  2317 I TH:AppState: Onboarding stage updated: personalization
+11-18 01:40:09.972  2317  2317 I TH:AppState: Onboarding stage updated: app-lock
+11-18 01:40:32.727  2317  2317 I TH:AppState: Theme mode updated: system
+11-18 01:40:32.791  2317  2317 I TH:AppState: Text size updated: default
+11-18 01:40:32.909  2317  2317 I TH:AppState: Onboarding stage updated: complete
+11-18 01:40:33.874  2317  2317 I TH:AppState: Onboarded state updated: true
+
+Same-data comparison, same emulator and local debug signer
+Android SDK: 33
+
+Pre-fix 961c4e7 with the same app data
+Performing Streamed Install
+Success
+Starting: Intent { cmp=com.twohearts.app/.MainActivity }
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: FATAL EXCEPTION: main
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: Process: com.twohearts.app, PID: 4096
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: java.lang.IllegalStateException: There are multiple DataStores active for the same file: /data/user/0/com.twohearts.app/files/datastore/twohearts_settings.preferences_pb. You should either maintain your DataStore as a singleton or confirm that there is no two DataStore's active on the same file (by confirming that the scope is cancelled).
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: 	at androidx.datastore.core.okio.OkioStorage.createConnection(OkioStorage.kt:65)
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: 	at androidx.datastore.core.DataStoreImpl$storageConnectionDelegate$1.invoke(DataStoreImpl.kt:189)
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: 	at androidx.datastore.core.DataStoreImpl$storageConnectionDelegate$1.invoke(DataStoreImpl.kt:188)
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: 	at kotlin.SynchronizedLazyImpl.getValue(LazyJVM.kt:83)
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: 	at androidx.datastore.core.DataStoreImpl.getStorageConnection$datastore_core_release(DataStoreImpl.kt:191)
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: 	at androidx.datastore.core.DataStoreImpl$coordinator$2.invoke(DataStoreImpl.kt:192)
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: 	at androidx.datastore.core.DataStoreImpl$coordinator$2.invoke(DataStoreImpl.kt:192)
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: 	at kotlin.SynchronizedLazyImpl.getValue(LazyJVM.kt:83)
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: 	at androidx.datastore.core.DataStoreImpl.getCoordinator(DataStoreImpl.kt:192)
+11-18 01:41:51.252  4096  4096 E AndroidRuntime: 	at androidx.datastore.core.DataStoreImpl.readAndInitOrPropagateAndThrowFailure(DataStoreImpl.kt:272)
+Pre-fix app process exited
+
+Current 722ed47 reinstalled over the same data
+Performing Streamed Install
+Success
+Starting: Intent { cmp=com.twohearts.app/.MainActivity }
+Current app PID: 4176
+11-18 01:42:21.839  4176  4176 I TH:Bootstrap: Stage 6: Initializing app lock service
+11-18 01:42:24.426  4176  4176 I TH:Bootstrap: Bootstrap pipeline completed successfully
+11-18 01:42:24.499  4176  4176 I TH:AppState: App state initialized
+    topResumedActivity=ActivityRecord{bf98cce u0 com.twohearts.app/.MainActivity} t17}
+No TwoHearts fatal entry in the current-build crash buffer
+
+Home UI assertions, first launch and after reinstall
+07-first-home-api33: persisted profile names, 365-day relationship counter, anniversary, and Home visible
+08-returning-home-api33: persisted profile names, 365-day relationship counter, anniversary, and Home visible
