@@ -127,6 +127,11 @@ class MainActivity : ComponentActivity() {
                                 bootstrapService.databaseInitializer.periodEntryDao()
                             )
                         }
+                        val periodSettingsRepository = remember {
+                            com.twohearts.app.data.repository.PeriodSettingsRepository(
+                                bootstrapService.databaseInitializer.periodSettingsDao()
+                            )
+                        }
                         val importantDateRepository = remember {
                             com.twohearts.app.data.repository.ImportantDateRepository(
                                 bootstrapService.databaseInitializer.importantDateDao()
@@ -176,6 +181,7 @@ class MainActivity : ComponentActivity() {
                             placeRepository = placeRepository,
                             moodEntryRepository = moodEntryRepository,
                             periodEntryRepository = periodEntryRepository,
+                            periodSettingsRepository = periodSettingsRepository,
                             importantDateRepository = importantDateRepository,
                             dataManagementService = dataManagementService,
                             searchEngine = searchEngine,

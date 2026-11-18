@@ -12,6 +12,12 @@ class PeriodSettingsRepository(private val dao: PeriodSettingsDao) : BaseReposit
 
     fun observe(): Flow<PeriodSettings?> = dao.get()
 
+    suspend fun saveLengths(cycle: Int, period: Int) {
+        require(cycle in 1..365 && period in 1..minOf(cycle, 30))
+        val now = nowUtc()
+        dao.saveLengths(PeriodSettings(cycle, period, "cycle-settings", now, now))
+    }
+
     override suspend fun getAll(): List<PeriodSettings> = emptyList() // Use observe()
 
     override suspend fun getById(id: String): PeriodSettings? = dao.getById(id)

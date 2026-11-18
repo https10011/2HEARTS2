@@ -27,9 +27,9 @@ class PeriodEntryRepository(private val dao: PeriodEntryDao) : BaseRepository<Pe
         val existing = dao.getById(id) ?: return null
         val updated = existing.copy(
             startDate = changes["startDate"] as? String ?: existing.startDate,
-            endDate = changes["endDate"] as? String ?: existing.endDate,
+            endDate = if (changes.containsKey("endDate")) changes["endDate"] as? String else existing.endDate,
             flowLevel = changes["flowLevel"] as? String ?: existing.flowLevel,
-            note = changes["note"] as? String ?: existing.note,
+            note = if (changes.containsKey("note")) changes["note"] as? String else existing.note,
             updatedAt = nowUtc()
         )
         dao.update(updated)

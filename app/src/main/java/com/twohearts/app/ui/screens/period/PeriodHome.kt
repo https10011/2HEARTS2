@@ -3,28 +3,16 @@ package com.twohearts.app.ui.screens.period
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.PeriodEntry
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.ui.components.*
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import java.time.LocalDate
 
-/**
- * PeriodHome — period tracker home screen.
- *
- * matches legacy PeriodHome with:
- * - Cycle status card
- * - Log entry
- * - Calendar view link
- * - History link
- * - Settings link
- */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PeriodHome(
     latestEntry: PeriodEntry?,
@@ -32,175 +20,62 @@ fun PeriodHome(
     onViewCalendar: () -> Unit,
     onViewHistory: () -> Unit,
     onSettings: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    cycleLength: Int = 28,
+    onEditLatest: (() -> Unit)? = null,
+    today: LocalDate = LocalDate.now(),
 ) {
-    Scaffold(
-        topBar = {
-            Header(
-                title = "Period Tracker",
-                onBack = onBack
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onLogPeriod,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Log Period"
-                )
-            }
-        }
-    ) { paddingValues ->
+    val colors = LocalTwoHeartsColors.current
+    val start = periodDate(latestEntry?.startDate)
+    val end = periodDate(latestEntry?.endDate)
+    val estimate = nextPeriodEstimate(latestEntry, cycleLength, today)
+
+    Scaffold(topBar = { Header(title = "Period tracker", onBack = onBack) }) { insets ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            // Cycle status card
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+            Surface(shape = MaterialTheme.shapes.large, color = colors.surfaceWarm) {
+                Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Latest period", style = MaterialTheme.typography.labelLarge, color = colors.textSecondary)
                     Text(
-                        text = "Cycle Status",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        start?.let { DateTimeHelper.formatDisplay(it.toString()) } ?: "No dates logged yet",
+                        style = MaterialTheme.typography.headlineSmall,
                     )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    if (latestEntry != null) {
+                    if (start != null) {
                         Text(
-                            text = "Last period started",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            if (end == null) "End date missing" else "Ended ${DateTimeHelper.formatDisplay(end.toString())}",
+                            color = colors.textSecondary,
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = DateTimeHelper.formatDisplay(latestEntry.startDate),
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        if (latestEntry.endDate != null) {
-                            Text(
-                                text = "Duration: ${DateTimeHelper.daysBetween(latestEntry.startDate, latestEntry.endDate)} days",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
+                        if (onEditLatest != null) TextButton(onClick = onEditLatest) {
+                            Text(if (end == null) "Add end date" else "Edit latest entry")
                         }
-                    } else {
-                        Text(
-                            text = "No period logged yet",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
                     }
                 }
             }
-
-            // Quick actions
-            Text(
-                text = "Quick Actions",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Card(
-                onClick = onViewCalendar,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "📅",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "View Calendar",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = "→",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+            if (estimate != null) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Estimated next start", style = MaterialTheme.typography.titleMedium)
+                    Text(DateTimeHelper.formatDisplay(estimate.toString()), color = colors.textSecondary)
+                    Text("Based on your typical cycle length. Dates can vary.", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
                 }
             }
+            ThButton(onClick = onLogPeriod, full = true, text = "Log a period")
+            HorizontalDivider()
+            PeriodLink("Calendar", onViewCalendar)
+            PeriodLink("History", onViewHistory)
+            PeriodLink("Cycle settings", onSettings)
+            Text("Period data stays on this device.", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+        }
+    }
+}
 
-            Card(
-                onClick = onViewHistory,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "📊",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Cycle History",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = "→",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            Card(
-                onClick = onSettings,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "⚙️",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Settings",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = "→",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
+@Composable
+private fun PeriodLink(label: String, action: () -> Unit) {
+    Surface(onClick = action, shape = MaterialTheme.shapes.medium) {
+        Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 12.dp, vertical = 8.dp)) {
+            Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+            Icon(ThIcons.ChevronRight, contentDescription = null)
         }
     }
 }

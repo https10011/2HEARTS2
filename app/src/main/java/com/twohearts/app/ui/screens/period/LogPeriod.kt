@@ -1,27 +1,19 @@
 package com.twohearts.app.ui.screens.period
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.Header
-import com.twohearts.app.ui.components.Input
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.ui.components.*
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import java.time.LocalDate
 
-/**
- * LogPeriod — period logging screen.
- *
- * matches legacy LogPeriod with:
- * - Start date (required)
- * - End date (optional)
- * - Flow level selector
- * - Note input
- * - Save button
- */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LogPeriod(
     entryId: String? = null,
@@ -30,108 +22,72 @@ fun LogPeriod(
     initialFlowLevel: String = "medium",
     initialNote: String = "",
     onSave: (startDate: String, endDate: String?, flowLevel: String, note: String?) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onDelete: (() -> Unit)? = null,
+    saving: Boolean = false,
+    error: String? = null,
 ) {
-    var startDate by remember { mutableStateOf(initialStartDate) }
-    var endDate by remember { mutableStateOf(initialEndDate) }
-    var flowLevel by remember { mutableStateOf(initialFlowLevel) }
-    var note by remember { mutableStateOf(initialNote) }
-    var showFlowMenu by remember { mutableStateOf(false) }
+    var start by rememberSaveable(entryId) { mutableStateOf(initialStartDate) }
+    var end by rememberSaveable(entryId) { mutableStateOf(initialEndDate) }
+    var flow by rememberSaveable(entryId) { mutableStateOf(initialFlowLevel) }
+    var note by rememberSaveable(entryId) { mutableStateOf(initialNote) }
+    var confirming by rememberSaveable { mutableStateOf(false) }
+    val colors = LocalTwoHeartsColors.current
+    val valid = validPeriodDates(start, end, LocalDate.now())
 
-    val isEditing = entryId != null
-    val flowOptions = listOf("light", "medium", "heavy")
-
-    Scaffold(
-        topBar = {
-            Header(
-                title = if (isEditing) "Edit Period" else "Log Period",
-                onBack = onBack,
-                actions = {
-                    IconButton(
-                        onClick = {
-                            if (startDate.isNotBlank()) {
-                                onSave(
-                                    startDate,
-                                    endDate.takeIf { it.isNotBlank() },
-                                    flowLevel,
-                                    note.takeIf { it.isNotBlank() }?.trim()
-                                )
-                            }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Save"
-                        )
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
+    Scaffold(topBar = {
+        Header(title = if (entryId == null) "Log a period" else "Edit period", onBack = onBack)
+    }) { insets ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Start date
-            Input(
-                value = startDate,
-                onValueChange = { startDate = it },
-                label = "Start Date",
-                placeholder = "yyyy-mm-dd",
-                modifier = Modifier.fillMaxWidth()
+            ThDatePicker(
+                value = start, onValueChange = { start = it },
+                label = "Start date", clearable = false,
             )
-
-            // End date
-            Input(
-                value = endDate,
-                onValueChange = { endDate = it },
-                label = "End Date (optional)",
-                placeholder = "yyyy-mm-dd",
-                modifier = Modifier.fillMaxWidth()
+            ThDatePicker(
+                value = end, onValueChange = { end = it },
+                label = "End date (optional)", placeholder = "Choose when it ended",
             )
-
-            // Flow level
-            ExposedDropdownMenuBox(
-                expanded = showFlowMenu,
-                onExpandedChange = { showFlowMenu = it }
-            ) {
-                Input(
-                    value = flowLevel.replaceFirstChar { it.uppercase() },
-                    onValueChange = {},
-                    label = "Flow Level",
-                    readOnly = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                )
-
-                ExposedDropdownMenu(
-                    expanded = showFlowMenu,
-                    onDismissRequest = { showFlowMenu = false }
-                ) {
-                    flowOptions.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(option.replaceFirstChar { it.uppercase() }) },
-                            onClick = {
-                                flowLevel = option
-                                showFlowMenu = false
-                            }
+            if (!valid) {
+                Text("Enter a valid start and end in order, up to today.", color = colors.error)
+            }
+            Column {
+                Text("Flow", style = MaterialTheme.typography.labelLarge)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("light", "medium", "heavy").forEach { option ->
+                        FilterChip(
+                            selected = flow == option,
+                            onClick = { flow = option },
+                            label = { Text(option.replaceFirstChar { it.titlecase() }) },
                         )
                     }
                 }
             }
-
-            // Note
             Input(
-                value = note,
-                onValueChange = { note = it },
-                label = "Note (optional)",
-                placeholder = "Add a note...",
-                modifier = Modifier.fillMaxWidth()
+                value = note, onValueChange = { note = it }, modifier = Modifier.fillMaxWidth(),
+                label = "Private note (optional)", multiline = true,
             )
+            if (error != null) ThStatusBanner(StatusVariant.ERROR, error)
+            ThButton(
+                onClick = { onSave(start, end.ifBlank { null }, flow, note.trim().ifBlank { null }) },
+                enabled = valid, loading = saving, full = true, text = "Save period",
+            )
+            if (onDelete != null) {
+                TextButton(onClick = { confirming = true }, enabled = !saving) {
+                    Text("Delete entry", color = colors.error)
+                }
+            }
         }
+    }
+    if (confirming && onDelete != null) {
+        ConfirmDialog(
+            title = "Delete this period entry?",
+            message = "This will remove its dates and note from your history.",
+            confirmText = "Delete",
+            onConfirm = { confirming = false; onDelete() },
+            onDismiss = { confirming = false },
+        )
     }
 }

@@ -42,11 +42,6 @@ import com.twohearts.app.ui.screens.places.PlaceDetail
 import com.twohearts.app.ui.screens.mood.MoodHome
 import com.twohearts.app.ui.screens.mood.MoodEntryScreen
 import com.twohearts.app.ui.screens.mood.MoodHistory
-import com.twohearts.app.ui.screens.period.PeriodHome
-import com.twohearts.app.ui.screens.period.LogPeriod
-import com.twohearts.app.ui.screens.period.PeriodCalendarScreen
-import com.twohearts.app.ui.screens.period.PeriodHistoryScreen
-import com.twohearts.app.ui.screens.period.PeriodSettingsScreen
 import com.twohearts.app.ui.screens.importantdates.ImportantDatesScreen
 import com.twohearts.app.ui.screens.vault.*
 import com.twohearts.app.ui.screens.security.*
@@ -78,6 +73,7 @@ import com.twohearts.app.data.repository.PlaceRepository
 import com.twohearts.app.data.repository.MoodEntryRepository
 import com.twohearts.app.data.repository.PeriodEntryRepository
 import com.twohearts.app.data.repository.ImportantDateRepository
+import com.twohearts.app.data.repository.PeriodSettingsRepository
 import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.data.repository.generateId
 import com.twohearts.app.data.dao.MediaAssetDao
@@ -104,6 +100,7 @@ fun AppRouter(
     placeRepository: PlaceRepository,
     moodEntryRepository: MoodEntryRepository,
     periodEntryRepository: PeriodEntryRepository,
+    periodSettingsRepository: PeriodSettingsRepository,
     importantDateRepository: ImportantDateRepository,
     dataManagementService: DataManagementService,
     searchEngine: SearchEngine,
@@ -962,113 +959,7 @@ fun AppRouter(
                     } ?: Text("Loading...")
                 }
 
-                // Period
-                composable(RoutePath.APP_PERIOD) {
-                    val entries by periodEntryRepository.observeAll().collectAsState(initial = emptyList())
-                    val latestEntry = entries.firstOrNull()
-                    PeriodHome(
-                        latestEntry = latestEntry,
-                        onLogPeriod = {
-                            navController.navigate(RoutePath.APP_PERIOD_LOG)
-                        },
-                        onViewCalendar = {
-                            navController.navigate(RoutePath.APP_PERIOD_CALENDAR)
-                        },
-                        onViewHistory = {
-                            navController.navigate(RoutePath.APP_PERIOD_HISTORY)
-                        },
-                        onSettings = {
-                            navController.navigate(RoutePath.APP_PERIOD_SETTINGS)
-                        },
-                        onBack = {
-                            navController.popBackStack()
-                        }
-                    )
-                }
-
-                composable(RoutePath.APP_PERIOD_LOG) {
-                    LogPeriod(
-                        onSave = { startDate, endDate, flowLevel, note ->
-                            kotlinx.coroutines.runBlocking {
-                                periodEntryRepository.create(
-                                    com.twohearts.app.data.entity.PeriodEntry(
-                                        startDate = startDate,
-                                        endDate = endDate,
-                                        flowLevel = flowLevel,
-                                        note = note,
-                                        profileId = "owner", // Placeholder
-                                        id = generateId(),
-                                        createdAt = DateTimeHelper.nowUtc(),
-                                        updatedAt = DateTimeHelper.nowUtc()
-                                    )
-                                )
-                            }
-                            navController.popBackStack()
-                        },
-                        onBack = {
-                            navController.popBackStack()
-                        }
-                    )
-                }
-
-                composable(RoutePath.APP_PERIOD_CALENDAR) {
-                    val entries by periodEntryRepository.observeAll().collectAsState(initial = emptyList())
-                    PeriodCalendarScreen(
-                        entries = entries,
-                        onBack = {
-                            navController.popBackStack()
-                        }
-                    )
-                }
-
-                composable(RoutePath.APP_PERIOD_HISTORY) {
-                    val entries by periodEntryRepository.observeAll().collectAsState(initial = emptyList())
-                    PeriodHistoryScreen(
-                        entries = entries,
-                        onBack = {
-                            navController.popBackStack()
-                        }
-                    )
-                }
-
-                composable(RoutePath.APP_PERIOD_SETTINGS) {
-                    PeriodSettingsScreen(
-                        onBack = {
-                            navController.popBackStack()
-                        }
-                    )
-                }
-
-                composable("/app/period/{entryId}/edit") { backStackEntry ->
-                    val entryId = backStackEntry.arguments?.getString("entryId") ?: return@composable
-                    var entry by remember { mutableStateOf<com.twohearts.app.data.entity.PeriodEntry?>(null) }
-                    LaunchedEffect(entryId) {
-                        entry = periodEntryRepository.getById(entryId)
-                    }
-                    entry?.let { e ->
-                        LogPeriod(
-                            entryId = e.id,
-                            initialStartDate = e.startDate,
-                            initialEndDate = e.endDate ?: "",
-                            initialFlowLevel = e.flowLevel,
-                            initialNote = e.note ?: "",
-                            onSave = { startDate, endDate, flowLevel, note ->
-                                kotlinx.coroutines.runBlocking {
-                                    periodEntryRepository.update(e.id, mapOf(
-                                        "startDate" to startDate,
-                                        "endDate" to endDate,
-                                        "flowLevel" to flowLevel,
-                                        "note" to note
-                                    ))
-                                }
-                                navController.popBackStack()
-                            },
-                            onBack = {
-                                navController.popBackStack()
-                            }
-                        )
-                    } ?: Text("Loading...")
-                }
+                periodRoutes(navController, relationshipService, periodEntryRepository, periodSettingsRepository)
 
                 // Vault
                 composable(RoutePath.APP_VAULT) {

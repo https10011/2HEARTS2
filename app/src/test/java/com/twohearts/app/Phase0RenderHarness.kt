@@ -73,6 +73,32 @@ class Phase0RenderHarness {
     private val outDir: File = File("build/phase0-screens").apply { mkdirs() }
     private val now = "2026-01-15T10:00:00Z"
 
+    @Test
+    @Config(qualifiers = "w360dp-h780dp-mdpi")
+    fun renderPhase11Period() {
+        val today = java.time.LocalDate.of(2026, 11, 18)
+        val entry = com.twohearts.app.data.entity.PeriodEntry(
+            startDate = "2026-11-04", endDate = "2026-11-08", profileId = "self",
+            id = "test-period", createdAt = now, updatedAt = now,
+        )
+        render("p11-home-logged") { PeriodHome(entry, {}, {}, {}, {}, {}, today = today) }
+        render("p11-calendar-large", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            PeriodCalendarScreen(listOf(entry), {}, cycleLength = 21, today = today)
+        }
+        render("p11-history-large", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            PeriodHistoryScreen(listOf(entry), {}, onEdit = {})
+        }
+        render("p11-edit-large", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            LogPeriod(
+                entryId = entry.id, initialStartDate = entry.startDate, initialEndDate = entry.endDate.orEmpty(),
+                onSave = { _, _, _, _ -> }, onBack = {}, onDelete = {},
+            )
+        }
+        render("p11-settings-large", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            PeriodSettingsScreen({}, initialCycle = 31, initialLength = 6)
+        }
+    }
+
     private fun appState(): AppStateService {
         val app = ApplicationProvider.getApplicationContext<Application>()
         return AppStateService(SettingsStorage.getInstance(app))

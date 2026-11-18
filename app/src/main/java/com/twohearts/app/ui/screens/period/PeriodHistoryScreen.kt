@@ -25,7 +25,8 @@ import com.twohearts.app.services.datetime.DateTimeHelper
 @Composable
 fun PeriodHistoryScreen(
     entries: List<PeriodEntry>,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onEdit: ((PeriodEntry) -> Unit)? = null,
 ) {
     Scaffold(
         topBar = {
@@ -51,8 +52,8 @@ fun PeriodHistoryScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(entries) { entry ->
-                    PeriodHistoryItem(entry = entry)
+                items(entries, key = { it.id }) { entry ->
+                    PeriodHistoryItem(entry = entry, onEdit = onEdit?.let { { it(entry) } })
                 }
             }
         }
@@ -60,7 +61,7 @@ fun PeriodHistoryScreen(
 }
 
 @Composable
-private fun PeriodHistoryItem(entry: PeriodEntry) {
+private fun PeriodHistoryItem(entry: PeriodEntry, onEdit: (() -> Unit)?) {
     OutlinedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -70,37 +71,28 @@ private fun PeriodHistoryItem(entry: PeriodEntry) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Started: ${entry.startDate}",
+                text = DateTimeHelper.formatDisplay(entry.startDate),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
             if (entry.endDate != null) {
                 Text(
-                    text = "Ended: ${entry.endDate}",
+                    text = "Ended ${DateTimeHelper.formatDisplay(entry.endDate)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
+            } else {
+                Text("End date missing", style = MaterialTheme.typography.bodyMedium)
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Flow: ${entry.flowLevel}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Text(
-                    text = "Added: ${DateTimeHelper.formatDisplay(entry.createdAt)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
-            }
+            Text(
+                text = "Flow: ${entry.flowLevel}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
 
             if (entry.note != null && entry.note.isNotBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -110,6 +102,7 @@ private fun PeriodHistoryItem(entry: PeriodEntry) {
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
             }
+            if (onEdit != null) TextButton(onClick = onEdit) { Text("Edit entry") }
         }
     }
 }
