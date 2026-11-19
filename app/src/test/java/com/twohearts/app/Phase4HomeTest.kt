@@ -290,6 +290,25 @@ class Phase4HomeTest {
     // ─── Group 2: real data reaches Home through real repositories ─────────
 
     @Test
+    fun invalidAndFutureRelationshipDatesDoNotCreateAnAnniversaryOrDuration() {
+        val today = LocalDate.parse("2026-01-15")
+        for (date in listOf("", "2025-02-30", "2027-01-15")) {
+            val relationship = CoupleRelationship(
+                ownerId = "owner", partnerId = "partner", startDate = date,
+                id = "legacy", createdAt = now, updatedAt = now,
+            )
+            val data = buildHomeData(
+                owner = null, partner = null, relationship = relationship,
+                notes = emptyList(), reminders = emptyList(), memories = emptyList(), moods = emptyList(),
+                dates = emptyList(), today = today,
+            )
+            assertNull(data.daysTogether)
+            assertNull(data.daysUntilAnniversary)
+            assertNull(data.upcomingMoment)
+        }
+    }
+
+    @Test
     fun relationshipDataWrittenThroughRepositoriesIsReadBackForHome() = runBlocking {
         val owner: Profile
         val partner: Profile

@@ -95,7 +95,7 @@ fun buildHomeData(
     today: LocalDate,
     hour: Int = LocalTime.now().hour,
 ): HomeData {
-    val startDate = relationship?.startDate
+    val startDate = savedStartDate(relationship, today)
     return HomeData(
         owner = owner,
         partner = partner,
@@ -109,6 +109,12 @@ fun buildHomeData(
         todayMood = moods.firstOrNull { it.entryDate == today.toString() },
         hour = hour,
     )
+}
+
+private fun savedStartDate(relationship: CoupleRelationship?, today: LocalDate): String? {
+    val date = relationship?.startDate ?: return null
+    val parsed = runCatching { LocalDate.parse(date) }.getOrNull() ?: return null
+    return date.takeIf { parsed.year in 1..9999 && !parsed.isAfter(today) }
 }
 
 /**
@@ -141,7 +147,7 @@ fun upcomingMoment(
 
     // The anniversary uses the app's existing rule rather than a second
     // implementation, so Home and the reminder worker can never disagree.
-    relationship?.startDate?.let { startDate ->
+    savedStartDate(relationship, today)?.let { startDate ->
         val daysAway = DateTimeHelper.daysUntilAnniversary(startDate, today)
         candidates += UpcomingMoment(
             title = "Your anniversary",

@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- **Latest verified implementation commit** — `a8529f8468c3ff4afd9be4d46d3da8872fc5f739`. Git confirmed the couple photo checkpoint on `master`. Its Android workflow passed and published the APK. [Commit](https://github.com/https10011/2HEARTS2/commit/a8529f8468c3ff4afd9be4d46d3da8872fc5f739) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/44526243440) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44526243440/artifacts/14532355211)
+- **Latest verified implementation commit** — `4b5161a2704ce105b6ed101e08bcc4e43a76183a`. Git confirmed the onboarding and device-access checkpoint on `master`. The Android workflow passed and published the APK. [Commit](https://github.com/https10011/2HEARTS2/commit/4b5161a2704ce105b6ed101e08bcc4e43a76183a) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/44566311574) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44566311574/artifacts/14550704939)
 - **Stage 1 complete** — JDK 17 and SDK 35 reproduced the debug APK and both unit suites. Each variant passed 134 tests, and the native harnesses produced 149 renders. The report records the screen inventory, visual evidence, and emulator constraints.
 - **Stage 2 complete** — Fixed the Room migration for the optional profile photo column and registered the existing indexes in schema 14. Both unit-test variants passed 137 tests and CI packaged a verified APK. A same-signer Android 13 emulator update launched, migrated, and retained the test note. The transformed APK’s handset walkthrough remains pending. [Stage 2 report](Stage-2/REPORT.md)
 - **Stage 3 complete** — The palette and licensed bundled fonts rendered in both themes, including 360 dp at 200% effective font scale. Both unit suites passed 139 tests, and the APK and resources verified. The published stage workflow passed. [Stage 3 report](Stage-3/REPORT.md)
@@ -10,7 +10,8 @@
 - **Stage 5 complete with device visual validation pending** — The official mark now has a single adaptive foreground, density-specific fallback icons, and launch resources for light and dark. Both variants passed 146 tests, and CI packaged the APK. The Android 13 guest accepted the same-signer update and resumed the activity. Its System UI ANR blocked live screenshot verification. Compose, resource renders, and packaged mask simulations were inspected. [Stage 5 report](Stage-5/REPORT.md)
 - **Stage 6 complete** — Adopted Home, Us, Notes, and More after comparing native previews. Notifications remains accessible from Home, More, and system alerts. The shell preserves search, saved tabs, and source-aware Back. Both test variants passed 155 tests, the local APK verified, and CI published the APK. The TECNO keyboard and notification-entry walkthrough remains pending. [Stage 6 report](Stage-6/REPORT.md)
 - **Stage 7 complete** — Both profiles support local photo selection, cropping, replacement, and removal. The file-backed reopen and interrupted-write tests passed. Both suites ran 163 passing tests, native UI renders were inspected, and CI published the verified source's APK. Live picker checks remain part of release validation. [Stage 7 report](Stage-7/REPORT.md)
-- **Stage 8 local gates passed** — Onboarding supports both optional portraits and a skippable Device access step. Each full suite passed 170 tests, and the APK and six Compose renders were checked. Exact CI verification is pending. [Stage 8 report](Stage-8/REPORT.md)
+- **Stage 8 complete** — Onboarding supports both optional portraits and a skippable Device access step. Each full suite passed 170 tests, and the APK and six Compose renders were checked. CI published the APK for the exact commit. The permissions and picker walkthrough on the handset remains pending. [Stage 8 report](Stage-8/REPORT.md)
+- **Stage 9 local gates passed** — Home uses both local portraits, a large-type layout, and direct actions for saved records. Native renders were inspected, both suites passed 175 tests, and the local APK verified. Exact CI verification is pending. [Stage 9 report](Stage-9/REPORT.md)
 - **Signing and upgrade** — The two downloaded CI APKs have different debug signing certificates. The owner confirmed normal operation of the already installed app, which remains the working baseline. A same-signer local upgrade retained data in the guest. The published CI debug packages require a compatible signer to update an older installation in place.
 
 ## Intake checkpoint
@@ -20,7 +21,7 @@
 - **Build and tests** — The pre-transformation Actions run succeeded and listed a downloadable artifact. The Phase 20 report records 134 tests per variant and a successful local debug build. No fresh local transformation tests have run. [Actions run](https://github.com/https10011/2HEARTS2/actions/runs/44439439508) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44439439508/artifacts/14489748983) · [Phase 20 report](../UI-UX/Phase-20/PHASE-20-FINAL-CONSOLIDATION.md)
 - **Visual and runtime evidence** — The baseline review used prior Compose renders and the Phase 20 Android 13 emulator report. Fresh renders and signed-candidate verification remain pending.
 - **Environment** — Preflight found Java 21 and GitHub CLI. JDK 17, SDK 35, `adb`, and Android runtime setup are Stage 1 work. The host exposes no `/dev/kvm`.
-- **Next task** — Verify the Stage 8 Android workflow on the published SHA, then redesign the Home portrait composition. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
+- **Next task** — Verify the Stage 9 Android workflow for the published Home redesign, then continue with Stage 10 Us. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
 
 ## Stage status
 
@@ -33,8 +34,8 @@
 | 5. Branding and Android resources | Complete, live launcher and splash visuals pending release validation |
 | 6. Navigation and information architecture | Complete |
 | 7. Couple photo persistence | Complete |
-| 8. Onboarding and first-launch permissions | Local gates passed, pending remote verification |
-| 9. Home | Pending |
+| 8. Onboarding and first-launch permissions | Complete |
+| 9. Home | Local gates passed, pending remote verification |
 | 10. Us | Pending |
 | 11. Memories | Pending |
 | 12. Notes and Timeline | Pending |

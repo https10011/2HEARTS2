@@ -20,14 +20,16 @@ Reviewed the onboarding forms and route guard, AppStateService, the DataStore dr
 - Each full unit suite passed 170 tests with zero failures, errors, or skips. The debug APK passed v2 signing, alignment, archive integrity, and package metadata checks. It retains `com.twohearts.app` 1.0.0 (1), min API 26 and target API 35. The manifest declares notifications and the existing background-work permissions. Photo selection uses the picker with no broad media or storage grant. Local APK SHA-256 `6a262c8de9872cc6f51d1ce63dbbdd794e78131f2930eeeff3105a1c8f74f062`.
 - A live Photo Picker, notification grant and first-launch walkthrough on the TECNO handset remains part of release validation. The native tests exercise the flows with isolated data and controlled permission state.
 
+- Git verified `4b5161a2704ce105b6ed101e08bcc4e43a76183a` on `origin/master`. Its Android workflow passed and published the stage APK. [Commit](https://github.com/https10011/2HEARTS2/commit/4b5161a2704ce105b6ed101e08bcc4e43a76183a) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/44566311574) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44566311574/artifacts/14550704939)
+
 ## Completion checklist
 
 - [x] Record the starting commit, source reviewed, initial behavior, choices, and stage dependencies.
 - [x] Verify draft restoration, transaction rollback and retry, alert policy, Back and skip.
 - [x] Render the changed Compose screens, inspect the responsive states, and record device limits.
 - [x] Run both full test variants, verify the assembled APK, and review the final diff.
-- [ ] Commit, push, and verify the exact remote SHA and Android workflow.
-- [ ] Record the verified checkpoint and update the progress tracker.
+- [x] Commit, push, and verify the exact remote SHA and Android workflow.
+- [x] Record the verified checkpoint and update the progress tracker.
 
 ## Next stage
 
