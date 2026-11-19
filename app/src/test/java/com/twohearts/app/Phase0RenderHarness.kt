@@ -77,6 +77,19 @@ class Phase0RenderHarness {
     private val now = "2026-01-15T10:00:00Z"
 
     @Test
+    @Config(qualifiers = "w274dp-h488dp-mdpi")
+    fun renderPhase20EmptyNotesOnShortScreen() {
+        render("p20-short-notes", scale = TextScalingLevel.LARGE) {
+            com.twohearts.app.ui.navigation.AppShell(
+                currentRoute = com.twohearts.app.ui.navigation.RoutePath.APP_NOTES,
+                onNavigate = {}, onBack = {}, canNavigateBack = false,
+            ) {
+                NotesHome(emptyList(), onNoteClick = {}, onAddNote = {}, onBack = {})
+            }
+        }
+    }
+
+    @Test
     @Config(qualifiers = "w320dp-h740dp-mdpi")
     fun renderPhase18PrivacyFlows() {
         render("p18-lock", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
@@ -588,7 +601,7 @@ class Phase0RenderHarness {
 
         // Vault
         render("69-vault-locked") {
-            com.twohearts.app.ui.screens.vault.VaultLocked(onPinEntered = {}, onError = {})
+            com.twohearts.app.ui.screens.security.AppLockGate(onUnlock = { false })
         }
         render("70-vault-home") {
             com.twohearts.app.ui.screens.vault.VaultHome(

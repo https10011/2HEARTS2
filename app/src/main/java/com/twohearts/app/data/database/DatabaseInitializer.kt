@@ -17,6 +17,8 @@ import com.twohearts.app.data.dao.ProfileDao
 import com.twohearts.app.data.dao.ReminderDao
 import com.twohearts.app.data.dao.TimelineEventDao
 import com.twohearts.app.data.dao.VaultItemDao
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * DatabaseInitializer — handles database creation and verification.
@@ -33,6 +35,7 @@ class DatabaseInitializer(private val context: Context) {
      */
     suspend fun initialize(): TwoHeartsDatabase {
         val db = TwoHeartsDatabase.getDatabase(context)
+        withContext(Dispatchers.IO) { db.openHelper.writableDatabase }
         database = db
         return db
     }
@@ -41,10 +44,7 @@ class DatabaseInitializer(private val context: Context) {
      * Verify the schema version is correct.
      */
     suspend fun verifySchemaVersion(): Boolean {
-        val db = database ?: return false
-        // Room handles schema verification automatically
-        // This is a no-op placeholder for the legacy verification step
-        return true
+        return database?.isOpen == true
     }
 
     /**

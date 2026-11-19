@@ -1,6 +1,8 @@
 package com.twohearts.app.ui.screens.places
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -35,13 +37,12 @@ fun PlacesHome(
 ) {
     var selectedCategory by remember { mutableStateOf<String?>(null) }
 
-    val filteredPlaces = remember(places, selectedCategory) {
-        if (selectedCategory == null) places
-        else places.filter { it.category == selectedCategory }
-    }
-
     val categories = remember(places) {
-        places.map { it.category }.distinct().sorted()
+        places.map { it.category }.filter(String::isNotBlank).distinct().sorted()
+    }
+    val activeCategory = selectedCategory?.takeIf { it in categories }
+    val filteredPlaces = remember(places, activeCategory) {
+        if (activeCategory == null) places else places.filter { it.category == activeCategory }
     }
 
     Scaffold(
@@ -52,7 +53,7 @@ fun PlacesHome(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            if (places.isNotEmpty()) ExtendedFloatingActionButton(
                 onClick = onAddPlace,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -68,17 +69,17 @@ fun PlacesHome(
             // Category chips
             if (categories.isNotEmpty()) {
                 ScrollableTabRow(
-                    selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0),
+                    selectedTabIndex = categories.indexOf(activeCategory) + 1,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
                     Tab(
-                        selected = selectedCategory == null,
+                        selected = activeCategory == null,
                         onClick = { selectedCategory = null },
                         text = { Text("All") }
                     )
                     categories.forEach { category ->
                         Tab(
-                            selected = selectedCategory == category,
+                            selected = activeCategory == category,
                             onClick = { selectedCategory = category },
                             text = { Text(category.replaceFirstChar { it.uppercase() }) }
                         )
@@ -87,7 +88,7 @@ fun PlacesHome(
             }
 
             if (filteredPlaces.isEmpty()) {
-                Column(Modifier.fillMaxSize().padding(36.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 32.dp, vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                     Icon(ThIcons.MapPin, null, tint = LocalTwoHeartsColors.current.burgundy, modifier = Modifier.size(52.dp)); Spacer(Modifier.height(20.dp))
                     Text("The places in your story", style = MaterialTheme.typography.headlineSmall)
                     Spacer(Modifier.height(8.dp)); Text("Keep the café, park, home, or faraway corner that became part of us.", color = LocalTwoHeartsColors.current.textSecondary)
@@ -98,9 +99,10 @@ fun PlacesHome(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 88.dp),
                 ) {
-                    items(filteredPlaces) { place ->
+                    items(filteredPlaces, key = { it.id }) { place ->
                         PlaceCard(
                             place = place,
                             media = media[place.id],

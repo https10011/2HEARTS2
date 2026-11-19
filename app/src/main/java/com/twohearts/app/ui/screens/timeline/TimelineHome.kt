@@ -3,6 +3,8 @@ package com.twohearts.app.ui.screens.timeline
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -28,7 +30,7 @@ fun TimelineHome(events: List<TimelineEvent>, onEventClick: (String) -> Unit, on
     val ordered = events.sortedByDescending { runCatching { LocalDate.parse(it.eventDate) }.getOrNull() }
     Scaffold(
         topBar = { Header(title = "Our timeline", onBack = onBack) },
-        floatingActionButton = { ExtendedFloatingActionButton(onClick = onAddEvent, icon = { Icon(ThIcons.Add, null) }, text = { Text("Add a moment") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) },
+        floatingActionButton = { if (events.isNotEmpty()) ExtendedFloatingActionButton(onClick = onAddEvent, icon = { Icon(ThIcons.Add, null) }, text = { Text("Add a moment") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) },
     ) { padding ->
         if (events.isEmpty()) TimelineEmpty(onAddEvent, Modifier.padding(padding)) else LazyColumn(
             Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 104.dp),
@@ -48,7 +50,7 @@ fun TimelineHome(events: List<TimelineEvent>, onEventClick: (String) -> Unit, on
 @Composable
 private fun TimelineEmpty(onAdd: () -> Unit, modifier: Modifier) {
     val colors = LocalTwoHeartsColors.current
-    Column(modifier.fillMaxSize().padding(36.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 32.dp, vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Box(Modifier.size(88.dp).clip(CircleShape).background(colors.surfaceBlush), contentAlignment = Alignment.Center) { Icon(ThIcons.Timeline, null, tint = colors.burgundy, modifier = Modifier.size(40.dp)) }
         Spacer(Modifier.height(22.dp)); Text("Your story is waiting", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(8.dp)); Text("Begin with the moment that feels like the start, then add the chapters that followed.", color = colors.textSecondary)

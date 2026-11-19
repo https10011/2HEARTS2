@@ -122,7 +122,7 @@ class ReminderDeliveryWorker(context: Context, params: WorkerParameters) : Corou
                     createdAt = now.toString(), updatedAt = now.toString(),
                 )
                 val inserted = db.notificationCenterDao().insertIfAbsent(entry)
-                NotificationService(context, db.notificationRegistryDao()).initialize()
+                NotificationService(context).initialize()
                 if (inserted != -1L) {
                     val open = Intent(context, MainActivity::class.java).apply {
                         action = OPEN_ALERTS

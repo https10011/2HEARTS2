@@ -41,9 +41,9 @@ fun ImportantDatesScreen(
     val ordered = dates.sortedBy { nextOccurrence(it) }
     Scaffold(
         topBar = { Header(title = "Important dates", onBack = onBack) },
-        floatingActionButton = { ExtendedFloatingActionButton(onClick = { editing = null; showEditor = true }, icon = { Icon(ThIcons.Add, null) }, text = { Text("Add a date") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) },
+        floatingActionButton = { if (dates.isNotEmpty()) ExtendedFloatingActionButton(onClick = { editing = null; showEditor = true }, icon = { Icon(ThIcons.Add, null) }, text = { Text("Add a date") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) },
     ) { padding ->
-        if (dates.isEmpty()) Column(Modifier.fillMaxSize().padding(padding).padding(36.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        if (dates.isEmpty()) Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 32.dp, vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             Icon(ThIcons.Calendar, null, tint = colors.burgundy, modifier = Modifier.size(52.dp)); Spacer(Modifier.height(22.dp))
             Text("Keep the days that matter", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(8.dp)); Text("Anniversaries, birthdays, and the dates that belong to your story.", color = colors.textSecondary)

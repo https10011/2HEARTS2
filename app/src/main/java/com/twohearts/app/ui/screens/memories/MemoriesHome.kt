@@ -3,6 +3,8 @@ package com.twohearts.app.ui.screens.memories
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,7 +38,7 @@ fun MemoriesHome(
     Scaffold(
         topBar = { Header(title = "Memories", onBack = onBack) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = onAddMemory, icon = { Icon(ThIcons.Add, null) }, text = { Text("New memory") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
+            if (memories.isNotEmpty()) ExtendedFloatingActionButton(onClick = onAddMemory, icon = { Icon(ThIcons.Add, null) }, text = { Text("New memory") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
         },
     ) { padding ->
         if (memories.isEmpty()) MemoryEmptyState(onAddMemory, Modifier.padding(padding)) else LazyColumn(
@@ -59,7 +61,7 @@ fun MemoriesHome(
 @Composable
 private fun MemoryEmptyState(onAdd: () -> Unit, modifier: Modifier = Modifier) {
     val colors = LocalTwoHeartsColors.current
-    Column(modifier.fillMaxSize().padding(horizontal = 32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 32.dp, vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Box(Modifier.size(92.dp).clip(RoundedCornerShape(30.dp)).background(colors.surfaceBlush), contentAlignment = Alignment.Center) {
             Icon(ThIcons.PhotoLibrary, null, tint = colors.burgundy, modifier = Modifier.size(42.dp))
         }

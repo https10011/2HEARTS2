@@ -93,21 +93,15 @@ abstract class TwoHeartsDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: TwoHeartsDatabase? = null
 
-        fun getDatabase(context: Context): TwoHeartsDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    TwoHeartsDatabase::class.java,
-                    "twohearts.db"
-                )
-                    .addMigrations(*allMigrations)
-                    .fallbackToDestructiveMigration()
-                    .addCallback(DatabaseCallback())
-                    .build()
-                INSTANCE = instance
-                instance
-            }
+        fun getDatabase(context: Context): TwoHeartsDatabase = INSTANCE ?: synchronized(this) {
+            INSTANCE ?: buildDatabase(context, "twohearts.db").also { INSTANCE = it }
         }
+
+        internal fun buildDatabase(context: Context, name: String): TwoHeartsDatabase =
+            Room.databaseBuilder(context.applicationContext, TwoHeartsDatabase::class.java, name)
+                .addMigrations(*allMigrations)
+                .addCallback(DatabaseCallback())
+                .build()
 
         // Migration 001: initial — schema_migrations, media_assets
         val MIGRATION_1_2 = object : Migration(1, 2) {

@@ -2,6 +2,8 @@ package com.twohearts.app.ui.screens.notes
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -29,7 +31,7 @@ fun NotesHome(notes: List<Note>, onNoteClick: (String) -> Unit, onAddNote: () ->
     val colors = LocalTwoHeartsColors.current
     Scaffold(
         topBar = { Header(title = "Notes", onBack = onBack) },
-        floatingActionButton = { ExtendedFloatingActionButton(onClick = onAddNote, icon = { Icon(ThIcons.Edit, null) }, text = { Text("Write a note") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) },
+        floatingActionButton = { if (notes.isNotEmpty()) ExtendedFloatingActionButton(onClick = onAddNote, icon = { Icon(ThIcons.Edit, null) }, text = { Text("Write a note") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             if (notes.isNotEmpty()) {
@@ -59,11 +61,28 @@ internal fun filterNotes(notes: List<Note>, query: String, category: NoteCategor
 @Composable
 private fun NotesEmptyState(onAdd: () -> Unit) {
     val colors = LocalTwoHeartsColors.current
-    Column(Modifier.fillMaxSize().padding(36.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(ThIcons.Note, null, tint = colors.burgundy, modifier = Modifier.size(54.dp)); Spacer(Modifier.height(22.dp))
-        Text("A quiet place for your words", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp)); Text("Write a love letter, a thought to share, or something only you need to remember.", color = colors.textSecondary)
-        Spacer(Modifier.height(24.dp)); Button(onClick = onAdd) { Icon(ThIcons.Edit, null); Spacer(Modifier.width(8.dp)); Text("Write your first note") }
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val shortWindow = maxHeight < 360.dp
+        Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(
+                horizontal = if (shortWindow) 24.dp else 32.dp,
+                vertical = if (shortWindow) 12.dp else 20.dp,
+            ),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(ThIcons.Note, null, tint = colors.burgundy, modifier = Modifier.size(if (shortWindow) 40.dp else 54.dp))
+            Spacer(Modifier.height(if (shortWindow) 12.dp else 22.dp))
+            Text("A quiet place for your words", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(8.dp))
+            Text("Write a love letter, a thought to share, or something only you need to remember.", color = colors.textSecondary)
+            Spacer(Modifier.height(if (shortWindow) 16.dp else 24.dp))
+            Button(onClick = onAdd) {
+                Icon(ThIcons.Edit, null)
+                Spacer(Modifier.width(8.dp))
+                Text("Write your first note")
+            }
+        }
     }
 }
 

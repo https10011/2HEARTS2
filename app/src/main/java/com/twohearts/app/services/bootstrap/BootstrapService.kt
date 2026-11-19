@@ -33,8 +33,6 @@ class BootstrapService(private val context: Context) {
         private set
     lateinit var lifecycleService: LifecycleService
         private set
-    lateinit var notificationService: NotificationService
-        private set
     lateinit var appLockService: AppLockService
         private set
 
@@ -70,8 +68,7 @@ class BootstrapService(private val context: Context) {
 
             // Stage 5: notifications
             logger.info("Stage 5: Initializing notification service")
-            notificationService = NotificationService(context, databaseInitializer.notificationRegistryDao())
-            notificationService.initialize()
+            NotificationService(context).initialize()
 
             // Stage 6: app-lock
             logger.info("Stage 6: Initializing app lock service")
@@ -79,9 +76,6 @@ class BootstrapService(private val context: Context) {
             val applicationContext = context.applicationContext
             appLockService = AppLockService({ SecureStorage(applicationContext) }, settingsStorage, lifecycleService)
             appLockService.initialize()
-
-            // Stage 7: application-state (placeholder — will be implemented in later stages)
-            logger.info("Stage 7: Application state services (placeholder)")
 
             logger.info("Bootstrap pipeline completed successfully")
             true

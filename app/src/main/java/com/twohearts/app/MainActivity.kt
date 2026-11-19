@@ -2,6 +2,7 @@ package com.twohearts.app
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -11,13 +12,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.twohearts.app.ui.navigation.AppRouter
 import com.twohearts.app.ui.theme.TwoHeartsTheme
-import com.twohearts.app.ui.theme.TextScalingLevel
 import com.twohearts.app.ui.components.ThLoadingState
 import com.twohearts.app.ui.components.ThEmptyState
 import com.twohearts.app.services.bootstrap.BootstrapService
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
-import com.twohearts.app.services.security.AppLockService
 import com.twohearts.app.services.search.SearchEngine
 import com.twohearts.app.services.datamanagement.DataManagementService
 import com.twohearts.app.services.media.MediaStorage
@@ -31,9 +30,9 @@ import com.twohearts.app.services.notification.ReminderScheduler
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
@@ -138,11 +137,25 @@ class MainActivity : ComponentActivity() {
                         LaunchedEffect(reminderRepository) {
                             val flags = settingsStorage.settings.map { it.notificationsEnabled && it.remindersEnabled }
                                 .distinctUntilChanged()
-                            val scheduler = ReminderScheduler(applicationContext)
+                            val scheduler = try {
+                                withContext(Dispatchers.IO) { ReminderScheduler(applicationContext) }
+                            } catch (cancelled: CancellationException) {
+                                throw cancelled
+                            } catch (_: Exception) {
+                                Log.w("TwoHearts", "Reminder scheduling unavailable")
+                                return@LaunchedEffect
+                            }
                             reminderRepository.observeAll().combine(flags) { reminders, enabled -> reminders to enabled }
+                                .catch { Log.w("TwoHearts", "Could not read local reminder schedules") }
                                 .collect { (reminders, enabled) ->
                                     withContext(Dispatchers.IO) {
-                                        runCatching { scheduler.reconcile(reminders, enabled) }
+                                        try {
+                                            scheduler.reconcile(reminders, enabled)
+                                        } catch (cancelled: CancellationException) {
+                                            throw cancelled
+                                        } catch (_: Exception) {
+                                            Log.w("TwoHearts", "Could not refresh local reminder schedules")
+                                        }
                                     }
                                 }
                         }
