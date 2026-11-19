@@ -23,9 +23,8 @@ import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.ui.components.ThIcons
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
-import android.graphics.BitmapFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import androidx.compose.ui.platform.LocalDensity
+import com.twohearts.app.services.media.MediaThumbnails
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,14 +92,40 @@ private fun MemoryStoryCard(memory: Memory, media: List<MediaAsset>, featured: B
 @Composable
 fun MemoryMediaFrame(asset: MediaAsset?, modifier: Modifier = Modifier) {
     val colors = LocalTwoHeartsColors.current
-    val bitmap by produceState<android.graphics.Bitmap?>(null, asset?.filePath) {
-        value = if (asset?.mimeType?.startsWith("image/") == true) withContext(Dispatchers.IO) {
-            BitmapFactory.decodeFile(asset.filePath)
+    BoxWithConstraints(
+        modifier.clip(RoundedCornerShape(20.dp)).background(colors.surfaceWarm),
+        contentAlignment = Alignment.Center,
+    ) {
+        val density = LocalDensity.current
+        val edge = with(density) { MediaThumbnails.bucket(maxWidth.roundToPx(), maxHeight.roundToPx()) }
+        val isVideo = asset?.mimeType?.startsWith("video/") == true
+        val isPhoto = asset?.mimeType?.startsWith("image/") == true
+        val bitmap = if (asset != null && isPhoto) {
+            key(asset.filePath, asset.updatedAt, edge) {
+                val loaded by produceState(MediaThumbnails.cached(asset.filePath, asset.updatedAt, edge)) {
+                    value = MediaThumbnails.load(asset.filePath, asset.updatedAt, edge)
+                }
+                loaded
+            }
         } else null
-    }
-    Box(modifier.clip(RoundedCornerShape(20.dp)).background(colors.surfaceWarm), contentAlignment = Alignment.Center) {
-        if (bitmap != null) Image(bitmap!!.asImageBitmap(), contentDescription = "Memory photo", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-        else Icon(if (asset?.mimeType?.startsWith("video/") == true) ThIcons.Play else ThIcons.Image, null, tint = if (asset == null) colors.roseMuted else colors.burgundy, modifier = Modifier.size(52.dp))
-        if (asset != null) Text(if (asset.mimeType.startsWith("video/")) "Video" else "Photo", Modifier.align(Alignment.BottomStart).padding(14.dp), style = MaterialTheme.typography.labelMedium, color = colors.textSecondary)
+
+        if (bitmap != null) {
+            Image(
+                bitmap.asImageBitmap(), contentDescription = "Saved photo",
+                contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+            Icon(
+                if (isVideo) ThIcons.Play else ThIcons.Image, contentDescription = null,
+                tint = if (asset == null) colors.roseMuted else colors.burgundy,
+                modifier = Modifier.size(52.dp),
+            )
+            if (isVideo) {
+                Text(
+                    "Video", Modifier.align(Alignment.BottomStart).padding(14.dp),
+                    style = MaterialTheme.typography.labelMedium, color = colors.textSecondary,
+                )
+            }
+        }
     }
 }

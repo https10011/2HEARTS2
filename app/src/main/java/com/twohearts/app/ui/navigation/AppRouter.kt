@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.room.withTransaction
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
 import com.twohearts.app.ui.components.useToast
@@ -26,6 +28,7 @@ import com.twohearts.app.ui.onboarding.OnboardingFlow
 import com.twohearts.app.ui.onboarding.OnboardingGate
 import com.twohearts.app.ui.onboarding.shouldShowApp
 import com.twohearts.app.ui.screens.home.HomeScreen
+import com.twohearts.app.ui.screens.home.YukiPresence
 import com.twohearts.app.ui.screens.home.yukiPresenceFor
 import com.twohearts.app.ui.screens.us.UsScreen
 import com.twohearts.app.ui.screens.more.MoreScreen
@@ -235,9 +238,14 @@ fun AppRouter(
                     // persisted companion state; it is optional because a
                     // brand-new install has no Yuki record yet, and Home must
                     // not invent one.
-                    val context = LocalContext.current
-                    val yukiPresence = remember(context) {
-                        runCatching { yukiPresenceFor(context = context) }.getOrNull()
+                    val context = LocalContext.current.applicationContext
+                    val lifecycle by LocalLifecycleOwner.current.lifecycle.currentStateFlow.collectAsState()
+                    val yukiPresence by produceState<YukiPresence?>(null, context, lifecycle) {
+                        if (lifecycle == Lifecycle.State.RESUMED) {
+                            value = withContext(Dispatchers.IO) {
+                                runCatching { yukiPresenceFor(context) }.getOrNull()
+                            }
+                        }
                     }
                     HomeScreen(
                         relationshipService = relationshipService,
@@ -409,13 +417,9 @@ fun AppRouter(
 
                 // Memories
                 composable(RoutePath.APP_MEMORIES) {
-                    val memories by memoryRepository.observeAll().collectAsState(initial = emptyList())
-                    var memoryMedia by remember { mutableStateOf<Map<String, List<com.twohearts.app.data.entity.MediaAsset>>>(emptyMap()) }
-                    LaunchedEffect(memories) {
-                        memoryMedia = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                            memories.associate { memory -> memory.id to memoryRepository.getMedia(memory.id).mapNotNull { mediaAssetDao.getById(it.mediaAssetId) } }
-                        }
-                    }
+                    val memories by remember { memoryRepository.observeAll() }.collectAsStateWithLifecycle(emptyList())
+                    val attachments by remember { memoryRepository.observeAttachments() }.collectAsStateWithLifecycle(emptyList())
+                    val memoryMedia = remember(attachments) { attachments.groupBy({ it.memoryId }, { it.asset }) }
                     MemoriesHome(
                         memories = memories,
                         media = memoryMedia,
@@ -475,7 +479,7 @@ fun AppRouter(
                     val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(memoryId) {
                         memoryRepository.getById(memoryId)?.let { saved ->
-                            saved to memoryRepository.getMedia(memoryId).mapNotNull { mediaAssetDao.getById(it.mediaAssetId) }
+                            saved to memoryRepository.getAssets(memoryId)
                         }
                     }
                     val memory = lookup.record?.first
@@ -743,9 +747,9 @@ fun AppRouter(
 
                 // Places
                 composable(RoutePath.APP_PLACES) {
-                    val places by placeRepository.observeAll().collectAsState(initial = emptyList())
-                    var placeMedia by remember { mutableStateOf<Map<String, com.twohearts.app.data.entity.MediaAsset>>(emptyMap()) }
-                    LaunchedEffect(places) { placeMedia = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { places.mapNotNull { place -> place.photoRef?.let { mediaAssetDao.getById(it) }?.let { place.id to it } }.toMap() } }
+                    val places by remember { placeRepository.observeAll() }.collectAsStateWithLifecycle(emptyList())
+                    val attachments by remember { mediaAssetDao.observePlaceAttachments() }.collectAsStateWithLifecycle(emptyList())
+                    val placeMedia = remember(attachments) { attachments.associate { it.placeId to it.asset } }
                     PlacesHome(
                         places = places,
                         media = placeMedia,

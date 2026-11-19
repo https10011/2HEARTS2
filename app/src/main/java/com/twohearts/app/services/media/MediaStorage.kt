@@ -6,6 +6,9 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.UUID
 
 /**
@@ -33,6 +36,7 @@ class MediaStorage(private val context: Context) {
      */
     fun store(uri: Uri, mimeType: String): MediaAssetInfo? {
         if (!isValidMimeType(mimeType)) return null
+        var unfinished: File? = null
         return try {
             val declaredSize = context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length }
             if (declaredSize != null && declaredSize >= 0 && !isValidFileSize(declaredSize, mimeType)) return null
@@ -41,15 +45,10 @@ class MediaStorage(private val context: Context) {
             val extension = getExtensionFromMimeType(mimeType)
             val fileName = "$fileId.$extension"
             val file = File(mediaDir, fileName)
+            unfinished = file
 
-            inputStream.use { input ->
-                FileOutputStream(file).use { outputStream -> input.copyTo(outputStream) }
-            }
-
-            val fileSize = file.length()
-            if (!isValidFileSize(fileSize, mimeType)) {
-                file.delete()
-                return null
+            val fileSize = inputStream.use { input ->
+                FileOutputStream(file).use { output -> input.copyWithinLimit(output, maxSize(mimeType)) }
             }
             val dimensions = if (mimeType.startsWith("image/")) {
                 getImageDimensions(file)
@@ -64,9 +63,11 @@ class MediaStorage(private val context: Context) {
                 fileSize = fileSize,
                 width = dimensions?.first,
                 height = dimensions?.second
-            )
+            ).also { unfinished = null }
         } catch (e: Exception) {
             null
+        } finally {
+            unfinished?.delete()
         }
     }
 
@@ -178,14 +179,9 @@ class MediaStorage(private val context: Context) {
     /**
      * Validate file size.
      */
-    fun isValidFileSize(fileSize: Long, mimeType: String): Boolean {
-        val maxSize = if (mimeType.startsWith("video/")) {
-            MAX_VIDEO_SIZE
-        } else {
-            MAX_PHOTO_SIZE
-        }
-        return fileSize <= maxSize
-    }
+    fun isValidFileSize(fileSize: Long, mimeType: String): Boolean = fileSize <= maxSize(mimeType)
+
+    private fun maxSize(mimeType: String) = if (mimeType.startsWith("video/")) MAX_VIDEO_SIZE else MAX_PHOTO_SIZE
 
     /**
      * Get extension from MIME type.
@@ -224,6 +220,18 @@ class MediaStorage(private val context: Context) {
     companion object {
         const val MAX_PHOTO_SIZE = 25 * 1024 * 1024L // 25MB
         const val MAX_VIDEO_SIZE = 500 * 1024 * 1024L // 500MB
+    }
+}
+
+internal fun InputStream.copyWithinLimit(output: OutputStream, limit: Long): Long {
+    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+    var total = 0L
+    while (true) {
+        val count = read(buffer)
+        if (count < 0) return total
+        if (count > limit - total) throw IOException("Media exceeds the size limit")
+        output.write(buffer, 0, count)
+        total += count
     }
 }
 

@@ -64,4 +64,8 @@ class MemoryRepository(
     suspend fun getMedia(memoryId: String): List<MemoryMedia> {
         return memoryMediaDao.getByMemoryId(memoryId)
     }
+
+    fun observeAttachments() = memoryMediaDao.observeAttachments()
+
+    suspend fun getAssets(memoryId: String) = memoryMediaDao.getAssets(memoryId)
 }

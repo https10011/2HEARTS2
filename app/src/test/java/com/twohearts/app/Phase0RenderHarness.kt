@@ -7,6 +7,8 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -73,6 +75,41 @@ class Phase0RenderHarness {
 
     private val outDir: File = File("build/phase0-screens").apply { mkdirs() }
     private val now = "2026-01-15T10:00:00Z"
+
+    @Test
+    @Config(qualifiers = "w320dp-h740dp-mdpi")
+    fun renderPhase17BoundedPreview() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val source = File.createTempFile("preview", ".png", app.cacheDir)
+        try {
+            app.resources.openRawResource(com.twohearts.app.R.drawable.brand_logo).use { input ->
+                source.outputStream().use { input.copyTo(it) }
+            }
+            val asset = com.twohearts.app.data.entity.MediaAsset(
+                source.path, "image/png", source.length(), id = "test-preview",
+                createdAt = now, updatedAt = now,
+            )
+            kotlinx.coroutines.runBlocking {
+                requireNotNull(com.twohearts.app.services.media.MediaThumbnails.load(source.path, now, 512))
+            }
+            render("p17-cached-preview", dark = true) {
+                androidx.compose.foundation.layout.Column(
+                    Modifier.fillMaxSize().padding(20.dp),
+                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp),
+                ) {
+                    com.twohearts.app.ui.components.ThHeader("Media preview")
+                    com.twohearts.app.ui.screens.memories.MemoryMediaFrame(
+                        asset, Modifier.fillMaxWidth().height(200.dp),
+                    )
+                    com.twohearts.app.ui.screens.memories.MemoryMediaFrame(
+                        null, Modifier.fillMaxWidth().height(140.dp),
+                    )
+                }
+            }
+        } finally {
+            source.delete()
+        }
+    }
 
     @Test
     @Config(qualifiers = "w320dp-h740dp-mdpi")
