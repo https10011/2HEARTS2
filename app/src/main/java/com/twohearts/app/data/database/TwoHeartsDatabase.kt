@@ -41,12 +41,7 @@ import com.twohearts.app.data.entity.TimelineEvent
 import com.twohearts.app.data.entity.VaultItem
 
 /**
- * TwoHearts Room Database — matches legacy 13-migration schema exactly.
- *
- * Entity count: 17
- * Current schema version: 13
- *
- * All migrations match the legacy migration names and content.
+ * TwoHearts Room database and its supported native upgrade paths.
  */
 @Database(
     entities = [
@@ -68,7 +63,7 @@ import com.twohearts.app.data.entity.VaultItem
         NotificationCenterEntry::class,
         NotificationRegistry::class
     ],
-    version = 13,
+    version = 14,
     exportSchema = false
 )
 abstract class TwoHeartsDatabase : RoomDatabase() {
@@ -100,7 +95,6 @@ abstract class TwoHeartsDatabase : RoomDatabase() {
         internal fun buildDatabase(context: Context, name: String): TwoHeartsDatabase =
             Room.databaseBuilder(context.applicationContext, TwoHeartsDatabase::class.java, name)
                 .addMigrations(*allMigrations)
-                .addCallback(DatabaseCallback())
                 .build()
 
         // Migration 001: initial — schema_migrations, media_assets
@@ -389,15 +383,29 @@ abstract class TwoHeartsDatabase : RoomDatabase() {
             }
         }
 
-        // Migration 012: notification_center
         val MIGRATION_12_13 = object : Migration(12, 13) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // Profile photo — adds photo_ref column to profiles
-                // This is a no-op since photo_ref is already defined in the entity
+                val hasPhotoReference = db.query("PRAGMA table_info(profiles)").use { columns ->
+                    val name = columns.getColumnIndexOrThrow("name")
+                    while (columns.moveToNext()) {
+                        if (columns.getString(name) == "photo_ref") return@use true
+                    }
+                    false
+                }
+                if (!hasPhotoReference) {
+                    db.execSQL("ALTER TABLE profiles ADD COLUMN photo_ref TEXT")
+                }
             }
         }
 
-        /** All 13 migrations. */
+        val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_registry_owner_ref ON notification_registry(owner_ref)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS idx_memory_media_memory_id ON memory_media(memory_id)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS idx_memory_media_sort ON memory_media(memory_id, sort_order)")
+            }
+        }
+
         val allMigrations: Array<Migration> = arrayOf(
             MIGRATION_1_2,
             MIGRATION_2_3,
@@ -410,18 +418,8 @@ abstract class TwoHeartsDatabase : RoomDatabase() {
             MIGRATION_9_10,
             MIGRATION_10_11,
             MIGRATION_11_12,
-            MIGRATION_12_13
+            MIGRATION_12_13,
+            MIGRATION_13_14,
         )
-    }
-
-    /**
-     * Database callback for initial setup.
-     */
-    private class DatabaseCallback : Callback() {
-        override fun onCreate(db: SupportSQLiteDatabase) {
-            super.onCreate(db)
-            // Run initial migration
-            MIGRATION_1_2.migrate(db)
-        }
     }
 }

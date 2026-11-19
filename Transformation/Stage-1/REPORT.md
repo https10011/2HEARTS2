@@ -88,7 +88,7 @@ Both CI APKs passed `apksigner` verification. Their certificate subjects identif
 - [x] Render and inspect the native baseline in light and dark, narrow and standard sizes, and at the existing enlarged in-app scale. Record the additional Android font-scale and runtime coverage required later.
 - [x] Map production entry points and persistence boundaries. Existing tests cover the current save, failure, navigation, and data-retention paths. Stage 2 owns fresh runtime and version-upgrade checks.
 - [x] Record local results, evidence, limitations, and the next stage in the report and progress tracker.
-- [ ] Verify the published Stage 1 commit and its own successful CI run. Record both in the next progress update.
+- [x] Verify the published Stage 1 commit `08088016ba27acda8a672c459dc70700eb7a42e1` and its successful CI run, including artifact 14505482651. [Actions](https://github.com/https10011/2HEARTS2/actions/runs/44474694306) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44474694306/artifacts/14505482651)
 
 ## Next stage
 

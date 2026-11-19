@@ -2,13 +2,17 @@ package com.twohearts.app.data.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
  * NotificationRegistry entity — bridges domain identity to OS notification ID.
  * Matches legacy notification_registry table (migration 002).
  */
-@Entity(tableName = "notification_registry")
+@Entity(
+    tableName = "notification_registry",
+    indices = [Index(value = ["owner_ref"], name = "idx_notification_registry_owner_ref", unique = true)],
+)
 data class NotificationRegistry(
     @ColumnInfo(name = "owner_ref")
     val ownerRef: String, // Unique — one pending notification per logical event

@@ -2,6 +2,7 @@ package com.twohearts.app.data.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 
 /**
  * MemoryMedia entity — join table linking memories to media assets.
@@ -9,7 +10,11 @@ import androidx.room.Entity
  */
 @Entity(
     tableName = "memory_media",
-    primaryKeys = ["memory_id", "media_asset_id"]
+    primaryKeys = ["memory_id", "media_asset_id"],
+    indices = [
+        Index(value = ["memory_id"], name = "idx_memory_media_memory_id"),
+        Index(value = ["memory_id", "sort_order"], name = "idx_memory_media_sort"),
+    ],
 )
 data class MemoryMedia(
     @ColumnInfo(name = "memory_id")
