@@ -28,7 +28,7 @@ fun TimelineHome(events: List<TimelineEvent>, onEventClick: (String) -> Unit, on
     val ordered = events.sortedByDescending { runCatching { LocalDate.parse(it.eventDate) }.getOrNull() }
     Scaffold(
         topBar = { Header(title = "Our timeline", onBack = onBack) },
-        floatingActionButton = { ExtendedFloatingActionButton(onClick = onAddEvent, icon = { Icon(ThIcons.Add, null) }, text = { Text("Add a moment") }, containerColor = colors.burgundy, contentColor = colors.textOnAccent) },
+        floatingActionButton = { ExtendedFloatingActionButton(onClick = onAddEvent, icon = { Icon(ThIcons.Add, null) }, text = { Text("Add a moment") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) },
     ) { padding ->
         if (events.isEmpty()) TimelineEmpty(onAddEvent, Modifier.padding(padding)) else LazyColumn(
             Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 104.dp),

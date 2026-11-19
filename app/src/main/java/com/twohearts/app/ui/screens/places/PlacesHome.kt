@@ -54,8 +54,8 @@ fun PlacesHome(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onAddPlace,
-                containerColor = LocalTwoHeartsColors.current.burgundy,
-                contentColor = LocalTwoHeartsColors.current.textOnAccent,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 icon = { Icon(ThIcons.Add, null) }, text = { Text("Save a place") },
             )
         }

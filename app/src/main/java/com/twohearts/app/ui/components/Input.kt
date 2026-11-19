@@ -1,6 +1,8 @@
 package com.twohearts.app.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,8 +24,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -32,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
 import com.twohearts.app.ui.theme.TwoHeartsTokens
 
 /**
@@ -89,6 +95,8 @@ fun ThInput(
             focused -> MaterialTheme.colorScheme.primary
             else -> thColors.borderStrong
         },
+        animationSpec = if (LocalTwoHeartsMotion.current.reduced) snap()
+            else tween(TwoHeartsTokens.Duration.fast.toInt()),
         label = "th-input-border",
     )
     val borderWidth = if (focused || isError) {
@@ -103,77 +111,68 @@ fun ThInput(
         if (label.isNotEmpty()) {
             Text(
                 text = label,
+                modifier = Modifier.clearAndSetSemantics {},
                 style = MaterialTheme.typography.labelLarge,
                 color = if (isError) thColors.error else thColors.textSecondary,
             )
             Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.labelGap))
         }
 
-        Box(
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = fieldMinHeight)
-                .background(
-                    if (isEditable) MaterialTheme.colorScheme.surface else thColors.surfaceWarm,
-                    shape,
-                )
+                .background(if (isEditable) MaterialTheme.colorScheme.surface else thColors.surfaceWarm, shape)
                 .border(BorderStroke(borderWidth, borderColor), shape)
-                .padding(
-                    horizontal = TwoHeartsTokens.Spacing.space4,
-                    vertical = if (multiline) TwoHeartsTokens.Spacing.space3 else TwoHeartsTokens.Spacing.space2,
-                ),
-        ) {
-            if (value.isEmpty() && placeholder.isNotEmpty()) {
-                Text(
-                    text = placeholder,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = thColors.textTertiary,
-                    modifier = Modifier.align(androidx.compose.ui.Alignment.CenterStart),
-                )
-            }
-
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(
-                        if (multiline) androidx.compose.ui.Alignment.TopStart
-                        else androidx.compose.ui.Alignment.CenterStart
-                    )
-                    // Publishes the validation message to assistive technology
-                    // as a field error, so it is announced with the field
-                    // rather than only being read as loose text below it.
-                    .semantics {
-                        error?.let { error(it) }
-                    },
-                enabled = isEditable,
-                readOnly = readOnly,
-                singleLine = singleLine,
-                maxLines = maxLines,
-                textStyle = LocalTextStyle.current.merge(
-                    MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                visualTransformation = visualTransformation,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = keyboardType,
-                    imeAction = imeAction,
-                    capitalization = capitalization,
-                    // Autocorrect only where prose is expected. A masked PIN
-                    // field must never be touched by a spellchecker.
-                    autoCorrect = keyboardType == KeyboardType.Text,
-                ),
-                interactionSource = interactionSource,
-            )
-        }
+                .semantics {
+                    val accessibleLabel = label.ifBlank { placeholder }
+                    if (accessibleLabel.isNotBlank()) contentDescription = accessibleLabel
+                    error?.let { error(it) }
+                },
+            enabled = enabled,
+            readOnly = readOnly,
+            singleLine = singleLine,
+            maxLines = maxLines,
+            textStyle = LocalTextStyle.current.merge(
+                MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+            ),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            visualTransformation = visualTransformation,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyboardType,
+                imeAction = imeAction,
+                capitalization = capitalization,
+                autoCorrectEnabled = keyboardType == KeyboardType.Text,
+            ),
+            interactionSource = interactionSource,
+            decorationBox = { inner ->
+                Box(
+                    Modifier.fillMaxWidth().padding(
+                        horizontal = TwoHeartsTokens.Spacing.space4,
+                        vertical = if (multiline) TwoHeartsTokens.Spacing.space3 else TwoHeartsTokens.Spacing.space2,
+                    ),
+                    contentAlignment = if (multiline) Alignment.TopStart else Alignment.CenterStart,
+                ) {
+                    if (value.isEmpty() && placeholder.isNotEmpty()) {
+                        Text(
+                            placeholder,
+                            Modifier.clearAndSetSemantics {},
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = thColors.textTertiary,
+                        )
+                    }
+                    inner()
+                }
+            },
+        )
 
         if (error != null) {
             Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.labelGap))
             Text(
                 text = error,
+                modifier = Modifier.clearAndSetSemantics {},
                 style = MaterialTheme.typography.bodySmall,
                 color = thColors.error,
             )

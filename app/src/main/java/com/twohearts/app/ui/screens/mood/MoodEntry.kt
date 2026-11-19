@@ -2,16 +2,14 @@ package com.twohearts.app.ui.screens.mood
 
 import com.twohearts.app.ui.components.ThIcons
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.ui.components.Input
+import com.twohearts.app.ui.components.ThButton
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 
@@ -31,8 +29,12 @@ fun MoodEntryScreen(
     onSave: (moodValue: String, moodEmoji: String, note: String?) -> Unit,
     onBack: () -> Unit
 ) {
-    var selectedMood by remember { mutableStateOf(initialMood) }
-    var note by remember { mutableStateOf(initialNote) }
+    var selectedMood by rememberSaveable { mutableStateOf(initialMood) }
+    var note by rememberSaveable { mutableStateOf(initialNote) }
+    val selected = MoodMeta.getMood(selectedMood)
+    val save: () -> Unit = {
+        selected?.let { onSave(it.value, it.emoji, note.trim().ifEmpty { null }) }
+    }
 
     Scaffold(
         topBar = {
@@ -40,20 +42,7 @@ fun MoodEntryScreen(
                 title = "Log Mood",
                 onBack = onBack,
                 actions = {
-                    IconButton(
-                        onClick = {
-                            if (selectedMood.isNotBlank()) {
-                                val moodData = MoodMeta.getMood(selectedMood)
-                                if (moodData != null) {
-                                    onSave(
-                                        selectedMood,
-                                        moodData.emoji,
-                                        note.takeIf { it.isNotBlank() }?.trim()
-                                    )
-                                }
-                            }
-                        }
-                    ) {
+                    IconButton(onClick = save, enabled = selected != null) {
                         Icon(
                             imageVector = ThIcons.Check,
                             contentDescription = "Save"
@@ -78,20 +67,7 @@ fun MoodEntryScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.height(400.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(MoodMeta.moods) { mood ->
-                    MoodSelectCard(
-                        mood = mood,
-                        isSelected = selectedMood == mood.value,
-                        onClick = { selectedMood = mood.value }
-                    )
-                }
-            }
+            MoodChoices(selected = selectedMood, onSelect = { selectedMood = it.value })
 
             // Note input
             Input(
@@ -99,53 +75,10 @@ fun MoodEntryScreen(
                 onValueChange = { note = it },
                 label = "Add a note (optional)",
                 placeholder = "How was your day?",
+                multiline = true,
                 modifier = Modifier.fillMaxWidth()
             )
-        }
-    }
-}
-
-/**
- * MoodSelectCard — mood selection card.
- */
-@Composable
-fun MoodSelectCard(
-    mood: MoodEntryData,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surface
-            }
-        ),
-        modifier = modifier
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = mood.emoji,
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = mood.label,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (isSelected) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
-            )
+            ThButton(onClick = save, enabled = selected != null, full = true, text = "Save mood")
         }
     }
 }

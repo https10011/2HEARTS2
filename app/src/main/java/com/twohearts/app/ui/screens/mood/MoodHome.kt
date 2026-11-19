@@ -3,9 +3,6 @@ package com.twohearts.app.ui.screens.mood
 import com.twohearts.app.ui.components.ThIcons
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -76,7 +73,8 @@ fun MoodHome(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddMood,
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
                 Icon(
                     imageVector = ThIcons.Add,
@@ -90,7 +88,8 @@ fun MoodHome(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 96.dp),
         ) {
             // Today's mood card
             item {
@@ -163,26 +162,14 @@ fun MoodHome(
             // Quick mood selector
             item {
                 Text(
-                    text = "Quick Select",
+                    text = "Quick check-in",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(5),
-                    modifier = Modifier.height(120.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(MoodMeta.moods) { mood ->
-                        MoodQuickButton(
-                            mood = mood,
-                            onClick = { onQuickMood(mood) }
-                        )
-                    }
-                }
+                MoodChoices(selected = todayMood?.moodValue, onSelect = onQuickMood, compact = true)
             }
 
             // Recent moods
@@ -219,38 +206,6 @@ fun MoodHome(
                     }
                 }
             }
-        }
-    }
-}
-
-/**
- * MoodQuickButton — quick mood selection button.
- */
-@Composable
-fun MoodQuickButton(
-    mood: MoodEntryData,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = mood.emoji,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = mood.label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface
-            )
         }
     }
 }

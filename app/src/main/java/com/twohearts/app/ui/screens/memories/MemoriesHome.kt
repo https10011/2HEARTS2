@@ -37,7 +37,7 @@ fun MemoriesHome(
     Scaffold(
         topBar = { Header(title = "Memories", onBack = onBack) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = onAddMemory, icon = { Icon(ThIcons.Add, null) }, text = { Text("New memory") }, containerColor = colors.burgundy, contentColor = colors.textOnAccent)
+            ExtendedFloatingActionButton(onClick = onAddMemory, icon = { Icon(ThIcons.Add, null) }, text = { Text("New memory") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
         },
     ) { padding ->
         if (memories.isEmpty()) MemoryEmptyState(onAddMemory, Modifier.padding(padding)) else LazyColumn(

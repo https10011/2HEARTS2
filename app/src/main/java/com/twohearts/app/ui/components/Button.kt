@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -35,6 +36,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
@@ -113,6 +115,7 @@ fun ThButton(
         modifier = modifier
             .then(if (full) Modifier.fillMaxWidth() else Modifier)
             .heightIn(min = TwoHeartsTokens.Dimensions.touchTargetMin)
+            .widthIn(min = TwoHeartsTokens.Dimensions.touchTargetMin)
             .scale(pressScale)
             .clip(shape)
             .background(container, shape)
@@ -158,7 +161,7 @@ fun ThButton(
                 text = text,
                 style = MaterialTheme.typography.labelLarge,
                 color = effectiveContent,
-                maxLines = 2,
+                textAlign = TextAlign.Center,
             )
         }
     }
@@ -173,9 +176,8 @@ enum class ButtonVariant {
 
 /**
  * ThQuietButton — a borderless, low-emphasis text action used inline inside
- * cards and section headers ("See all", "Edit"). Kept separate from
- * [ThButton] so inline actions never inherit a 44dp minimum height and blow
- * out a row's rhythm.
+ * cards and section headers ("See all", "Edit"). It shares the minimum
+ * touch target with [ThButton] and uses a quieter appearance.
  */
 @Composable
 fun ThQuietButton(
@@ -190,6 +192,8 @@ fun ThQuietButton(
 
     Box(
         modifier = modifier
+            .heightIn(min = TwoHeartsTokens.Dimensions.touchTargetMin)
+            .widthIn(min = TwoHeartsTokens.Dimensions.touchTargetMin)
             .clip(RoundedCornerShape(TwoHeartsTokens.Radius.sm))
             .alpha(if (pressed) 0.6f else 1f)
             .clickable(
@@ -209,7 +213,7 @@ fun ThQuietButton(
             text = text,
             style = MaterialTheme.typography.labelLarge,
             color = if (enabled) contentColor else contentColor.copy(alpha = 0.45f),
-            maxLines = 1,
+            textAlign = TextAlign.Center,
         )
     }
 }

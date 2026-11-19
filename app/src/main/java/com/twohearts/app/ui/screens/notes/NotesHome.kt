@@ -29,7 +29,7 @@ fun NotesHome(notes: List<Note>, onNoteClick: (String) -> Unit, onAddNote: () ->
     val colors = LocalTwoHeartsColors.current
     Scaffold(
         topBar = { Header(title = "Notes", onBack = onBack) },
-        floatingActionButton = { ExtendedFloatingActionButton(onClick = onAddNote, icon = { Icon(ThIcons.Edit, null) }, text = { Text("Write a note") }, containerColor = colors.burgundy, contentColor = colors.textOnAccent) },
+        floatingActionButton = { ExtendedFloatingActionButton(onClick = onAddNote, icon = { Icon(ThIcons.Edit, null) }, text = { Text("Write a note") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
             if (notes.isNotEmpty()) {

@@ -3,35 +3,39 @@ package com.twohearts.app.ui.navigation
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,8 +46,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
@@ -124,28 +127,24 @@ fun BottomNav(
     currentRoute: String,
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier,
+    onBodyHeight: (Dp) -> Unit = {},
 ) {
     val items = NavConfig.bottomNavItems
     val thColors = LocalTwoHeartsColors.current
     val shape = RoundedCornerShape(TwoHeartsTokens.Radius.pill)
     val density = LocalDensity.current
 
-    // Width of one column, measured from the real bar rather than assumed, so
-    // the label strategy responds to the actual screen (411dp, the narrower
-    // 360dp Tecno target, or a large-text configuration) instead of being
-    // tuned for one device.
-    var columnWidth by remember { mutableStateOf(0.dp) }
-
     Box(
         modifier = modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(
-                horizontal = TwoHeartsTokens.Dimensions.bottomNavMargin,
+                horizontal = if (density.fontScale > 1.2f) TwoHeartsTokens.Spacing.space2
+                    else TwoHeartsTokens.Dimensions.bottomNavMargin,
                 vertical = TwoHeartsTokens.Spacing.space2,
             ),
     ) {
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
                 .thSoftShadow(shape, TwoHeartsTokens.Elevation.lift)
@@ -154,32 +153,26 @@ fun BottomNav(
                     BorderStroke(TwoHeartsTokens.Border.hairline, thColors.borderSubtle),
                     shape,
                 )
-                .onSizeChanged { size ->
-                    // Five equal columns share the bar's inner width (the row's
-                    // own horizontal padding already excluded).
-                    columnWidth = with(density) {
-                        ((size.width - TwoHeartsTokens.Spacing.space1.toPx() * 2) / 5).toDp()
-                    }
-                },
+                .onSizeChanged { size -> onBodyHeight(with(density) { size.height.toDp() }) },
         ) {
+            val rowWidth = maxWidth - TwoHeartsTokens.Spacing.space1 * 2
+            val centerWidth = if (density.fontScale > 1.2f) TwoHeartsTokens.Dimensions.touchTargetMin
+                else rowWidth / items.size
+            val columnWidth = (rowWidth - centerWidth) / (items.size - 1)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(TwoHeartsTokens.Dimensions.bottomNavHeight)
+                    .heightIn(min = TwoHeartsTokens.Dimensions.bottomNavHeight)
+                    .selectableGroup()
                     .padding(horizontal = TwoHeartsTokens.Spacing.space1),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 items.forEach { item ->
                     val isActive = currentRoute == item.route
-                    // Equal-width columns rather than `SpaceEvenly`.
-                    // `SpaceEvenly` sizes the gaps from the items' own widths,
-                    // so the wider centre button pulled the middle column off
-                    // centre — measured at ~3.5dp on a 360dp screen. Equal
-                    // weights make the five positions exact, give every
-                    // destination the same (generous) hit area, and make the
-                    // label fitting predictable.
+                    // Symmetric side columns keep Us centered. As text grows,
+                    // its short label can share spare width with its neighbors.
                     Box(
-                        modifier = Modifier.weight(1f),
+                        modifier = if (item.isCenter) Modifier.width(centerWidth) else Modifier.weight(1f),
                         contentAlignment = Alignment.Center,
                     ) {
                         if (item.isCenter) {
@@ -231,17 +224,17 @@ fun CenterBrandButton(
 
     val pressScale by animateFloatAsState(
         targetValue = if (pressed && !motion.reduced) 0.93f else 1f,
-        animationSpec = tween(TwoHeartsTokens.Duration.quick.toInt()),
+        animationSpec = if (motion.reduced) snap() else tween(TwoHeartsTokens.Duration.quick.toInt()),
         label = "brandPressScale",
     )
     val fieldColor by animateColorAsState(
-        targetValue = if (isActive) thColors.burgundy else thColors.burgundyLight,
-        animationSpec = tween(TwoHeartsTokens.Duration.quick.toInt()),
+        targetValue = if (isActive) TwoHeartsTokens.Color.burgundy600 else TwoHeartsTokens.Color.burgundy400,
+        animationSpec = if (motion.reduced) snap() else tween(TwoHeartsTokens.Duration.quick.toInt()),
         label = "brandField",
     )
     val ringWidth by animateDpAsState(
         targetValue = if (isActive) BrandRingWidth else 0.dp,
-        animationSpec = tween(TwoHeartsTokens.Duration.quick.toInt()),
+        animationSpec = if (motion.reduced) snap() else tween(TwoHeartsTokens.Duration.quick.toInt()),
         label = "brandRing",
     )
 
@@ -253,18 +246,16 @@ fun CenterBrandButton(
             // `widthIn(min = 44dp)` alone left the target at the circle's own
             // width. The circle inside stays deliberately small.
             .fillMaxWidth()
-            .semantics(mergeDescendants = true) {
-                contentDescription = accessibilityLabel
-                selected = isActive
-                role = Role.Tab
-            }
+            .heightIn(min = TwoHeartsTokens.Dimensions.touchTargetMin)
+            .semantics { contentDescription = accessibilityLabel }
             .clip(RoundedCornerShape(TwoHeartsTokens.Radius.md))
-            .clickable(
+            .selectable(
+                selected = isActive,
+                role = Role.Tab,
                 interactionSource = interactionSource,
-                indication = null,
+                indication = ripple(),
                 onClick = onClick,
             )
-            .padding(horizontal = TwoHeartsTokens.Spacing.space1)
             .scale(pressScale),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -284,7 +275,7 @@ fun CenterBrandButton(
             contentAlignment = Alignment.Center,
         ) {
             BrandLogo(
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(28.dp).clearAndSetSemantics {},
                 variant = BrandLogoVariant.MARK,
                 tone = BrandLogoTone.LIGHT,
             )
@@ -294,6 +285,7 @@ fun CenterBrandButton(
 
         Text(
             text = label,
+            modifier = Modifier.clearAndSetSemantics {},
             style = MaterialTheme.typography.labelMedium,
             color = if (isActive) thColors.burgundy else thColors.textSecondary,
             textAlign = TextAlign.Center,
@@ -343,7 +335,7 @@ fun NavItemView(
     // size — and the full label is still what assistive technology announces.
     val labelStyle = MaterialTheme.typography.labelMedium
     val availableForLabel = if (columnWidth > 0.dp) {
-        columnWidth - TwoHeartsTokens.Spacing.space1 * 2
+        columnWidth
     } else {
         Dp.Unspecified
     }
@@ -368,45 +360,44 @@ fun NavItemView(
     val tint = if (isActive) thColors.burgundy else thColors.textSecondary
     val capsule by animateColorAsState(
         targetValue = if (isActive) thColors.blush else Color.Transparent,
-        animationSpec = tween(TwoHeartsTokens.Duration.quick.toInt()),
+        animationSpec = if (motion.reduced) snap() else tween(TwoHeartsTokens.Duration.quick.toInt()),
         label = "navCapsule",
     )
     val iconTint by animateColorAsState(
         targetValue = tint,
-        animationSpec = tween(TwoHeartsTokens.Duration.quick.toInt()),
+        animationSpec = if (motion.reduced) snap() else tween(TwoHeartsTokens.Duration.quick.toInt()),
         label = "navIconTint",
     )
     val labelColor by animateColorAsState(
         targetValue = tint,
-        animationSpec = tween(TwoHeartsTokens.Duration.quick.toInt()),
+        animationSpec = if (motion.reduced) snap() else tween(TwoHeartsTokens.Duration.quick.toInt()),
         label = "navLabelColor",
     )
     val dotAlpha by animateFloatAsState(
         targetValue = if (isActive) 1f else 0f,
-        animationSpec = tween(TwoHeartsTokens.Duration.quick.toInt()),
+        animationSpec = if (motion.reduced) snap() else tween(TwoHeartsTokens.Duration.quick.toInt()),
         label = "navDot",
     )
     val pressScale by animateFloatAsState(
         targetValue = if (pressed && !motion.reduced) 0.94f else 1f,
-        animationSpec = tween(TwoHeartsTokens.Duration.fast.toInt().coerceAtLeast(1)),
+        animationSpec = if (motion.reduced) snap() else tween(TwoHeartsTokens.Duration.fast.toInt()),
         label = "navPressScale",
     )
 
     Column(
         modifier = modifier
-            .semantics(mergeDescendants = true) {
-                contentDescription = item.accessibilityLabel
-                selected = isActive
-                role = Role.Tab
-            }
+            .heightIn(min = TwoHeartsTokens.Dimensions.touchTargetMin)
+            .fillMaxWidth()
+            .semantics { contentDescription = item.accessibilityLabel }
             .clip(RoundedCornerShape(TwoHeartsTokens.Radius.md))
-            .clickable(
+            .selectable(
+                selected = isActive,
+                role = Role.Tab,
                 interactionSource = interactionSource,
-                indication = null,
+                indication = ripple(),
                 onClick = onClick,
             )
             .padding(
-                horizontal = TwoHeartsTokens.Spacing.space1,
                 vertical = TwoHeartsTokens.Spacing.space1,
             )
             .scale(pressScale),
@@ -443,10 +434,11 @@ fun NavItemView(
 
         Text(
             text = label,
+            modifier = Modifier.clearAndSetSemantics {},
             style = MaterialTheme.typography.labelMedium,
             color = labelColor,
             textAlign = TextAlign.Center,
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
     }

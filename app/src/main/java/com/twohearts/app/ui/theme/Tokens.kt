@@ -88,7 +88,7 @@ object TwoHeartsTokens {
          * the ones to use behind or for text.
          */
         val roseDeep = ComposeColor(0xFF9E4E60)
-        val goldInk = ComposeColor(0xFF8F6B26)
+        val goldInk = ComposeColor(0xFF896522)
         val sageInk = ComposeColor(0xFF5F7252)
 
         /** Restrained gold — decorative rules and relationship accents. */
@@ -297,8 +297,8 @@ object TwoHeartsTokens {
     // ─── Component Dimensions ────────────────────────────────────────
 
     object Dimensions {
-        /** Minimum comfortable touch target (WCAG 2.5.8 / Material). */
-        val touchTargetMin = 44.dp
+        /** Minimum Android touch target. */
+        val touchTargetMin = 48.dp
         val headerHeight = 56.dp
         /**
          * Minimum height of the bottom navigation *bar body*, excluding the

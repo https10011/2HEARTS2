@@ -55,8 +55,8 @@ fun RemindersHome(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onAddReminder,
-                containerColor = LocalTwoHeartsColors.current.burgundy,
-                contentColor = LocalTwoHeartsColors.current.textOnAccent,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 text = { Text("Add reminder") },
                 icon = { Icon(ThIcons.Add, contentDescription = null) },
             )

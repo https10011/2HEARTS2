@@ -87,7 +87,7 @@ fun ProfileAvatar(
             .clip(CircleShape)
             .background(
                 Brush.linearGradient(
-                    colors = listOf(thColors.burgundy, thColors.roseDeep)
+                    colors = listOf(TwoHeartsTokens.Color.burgundy600, TwoHeartsTokens.Color.burgundy400)
                 )
             )
             .border(

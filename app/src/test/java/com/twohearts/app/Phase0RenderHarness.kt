@@ -76,6 +76,34 @@ class Phase0RenderHarness {
 
     @Test
     @Config(qualifiers = "w320dp-h740dp-mdpi")
+    fun renderPhase16Accessibility() {
+        render("p16-mood-narrow", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            com.twohearts.app.ui.screens.mood.MoodEntryScreen(
+                initialMood = "grateful",
+                onSave = { _, _, _ -> }, onBack = {},
+            )
+        }
+        render("p16-navigation-narrow", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            val density = androidx.compose.ui.platform.LocalDensity.current
+            androidx.compose.runtime.CompositionLocalProvider(
+                androidx.compose.ui.platform.LocalDensity provides
+                    androidx.compose.ui.unit.Density(density.density, density.fontScale * 1.3f),
+            ) {
+                com.twohearts.app.ui.navigation.AppShell(
+                    currentRoute = com.twohearts.app.ui.navigation.RoutePath.APP_US,
+                    onNavigate = {}, onBack = {}, canNavigateBack = false,
+                ) {
+                    com.twohearts.app.ui.components.ThInput(
+                        value = "", onValueChange = {}, label = "Important date",
+                        placeholder = "yyyy-mm-dd", error = "Enter a valid date.",
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w320dp-h740dp-mdpi")
     fun renderPhase15Feedback() {
         render("p15-saved", scale = TextScalingLevel.EXTRA_LARGE) {
             androidx.compose.runtime.CompositionLocalProvider(
