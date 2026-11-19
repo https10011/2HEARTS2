@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.activity.compose.setContent
 import androidx.compose.ui.unit.dp
 import android.graphics.Bitmap
+import android.provider.Settings
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +38,11 @@ import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.ui.components.CardTone
 import com.twohearts.app.ui.components.StatusVariant
 import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThChoiceChip
+import com.twohearts.app.ui.components.ThInput
+import com.twohearts.app.ui.components.ThLoadingState
+import com.twohearts.app.ui.components.ThModal
+import com.twohearts.app.ui.components.ThSectionTabs
 import com.twohearts.app.ui.components.ThStatusBanner
 import com.twohearts.app.ui.components.ThSurfaceCard
 import com.twohearts.app.ui.screens.about.AboutScreen
@@ -75,6 +82,7 @@ import com.twohearts.app.ui.screens.yuki.YukiScreen
 import com.twohearts.app.ui.screens.yuki.YukiViewModel
 import com.twohearts.app.ui.theme.TwoHeartsTheme
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
 import com.twohearts.app.ui.theme.ThTextStyles
 import com.twohearts.app.ui.theme.TextScalingLevel
 import org.junit.Test
@@ -82,6 +90,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import org.robolectric.shadows.ShadowDialog
 import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
@@ -103,6 +112,42 @@ class Phase0RenderHarness {
     fun renderTransformationTypeAtTwoHundredPercent() {
         render("transformation-3-light-200", textSizeScale = 2f) { TransformationThemeReference(2f) }
         render("transformation-3-dark-200", dark = true, textSizeScale = 2f) { TransformationThemeReference(2f) }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h780dp-mdpi")
+    fun renderTransformationControlsAndSystemMotion() {
+        val resolver = ApplicationProvider.getApplicationContext<Application>().contentResolver
+        val setting = Settings.Global.ANIMATOR_DURATION_SCALE
+        val previous = Settings.Global.getFloat(resolver, setting, 1f)
+        try {
+            Settings.Global.putFloat(resolver, setting, 1f)
+            render("transformation-4-controls-light") {
+                check(!LocalTwoHeartsMotion.current.reduced)
+                TransformationControlsReference()
+            }
+            Settings.Global.putFloat(resolver, setting, 0f)
+            render("transformation-4-controls-dark", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+                check(LocalTwoHeartsMotion.current.reduced)
+                TransformationControlsReference()
+            }
+        } finally {
+            Settings.Global.putFloat(resolver, setting, previous)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp-mdpi")
+    fun renderTransformationModalSheet() {
+        render("transformation-4-modal", textSizeScale = 2f, captureDialog = true) {
+            TransformationControlsReference()
+            ThModal(open = true, onClose = {}, label = "Edit note") {
+                check(LocalDensity.current.fontScale == 2f)
+                Text("Edit note", style = MaterialTheme.typography.headlineSmall)
+                ThInput(value = "A letter to us", onValueChange = {}, label = "Title")
+                ThButton(onClick = {}, text = "Keep changes", full = true)
+            }
+        }
     }
 
     @Test
@@ -379,6 +424,7 @@ class Phase0RenderHarness {
         dark: Boolean = false,
         scale: TextScalingLevel = TextScalingLevel.DEFAULT,
         textSizeScale: Float = scale.scale,
+        captureDialog: Boolean = false,
         content: @Composable () -> Unit,
     ) {
         val controller = org.robolectric.Robolectric.buildActivity(androidx.activity.ComponentActivity::class.java).setup()
@@ -397,15 +443,18 @@ class Phase0RenderHarness {
         val metrics = activity.resources.displayMetrics
         val width = metrics.widthPixels
         val height = metrics.heightPixels
-        val view = activity.window.decorView
-        view.measure(
-            android.view.View.MeasureSpec.makeMeasureSpec(width, android.view.View.MeasureSpec.EXACTLY),
-            android.view.View.MeasureSpec.makeMeasureSpec(height, android.view.View.MeasureSpec.EXACTLY)
-        )
-        view.layout(0, 0, width, height)
-
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        view.draw(android.graphics.Canvas(bitmap))
+        val canvas = android.graphics.Canvas(bitmap)
+        fun draw(view: View) {
+            view.measure(
+                View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY),
+            )
+            view.layout(0, 0, width, height)
+            view.draw(canvas)
+        }
+        draw(activity.window.decorView)
+        if (captureDialog) draw(checkNotNull(ShadowDialog.getLatestDialog()?.window).decorView)
         File(outDir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         println("WROTE ${File(outDir, "$name.png").absolutePath} ${width}x$height")
         controller.pause().stop().destroy()
@@ -727,4 +776,21 @@ private fun checkContrast(role: String, foreground: Color, background: Color, mi
     val second = background.luminance()
     val ratio = (maxOf(first, second) + 0.05f) / (minOf(first, second) + 0.05f)
     check(ratio >= minimum) { "$role contrast was $ratio. Expected at least $minimum." }
+}
+
+@Composable
+private fun TransformationControlsReference() {
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("Notes", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
+        ThSectionTabs(labels = listOf("All notes", "Favorites"), selectedIndex = 0, onSelect = {})
+        ThChoiceChip(selected = true, onClick = {}, label = { Text("Shared") })
+        ThInput(value = "", onValueChange = {}, label = "Note title", error = "Enter a title for this note.")
+        ThButton(onClick = {}, text = "Save note", enabled = false, full = true)
+        ThButton(onClick = {}, text = "Saving note", loading = true, full = true)
+        ThStatusBanner(StatusVariant.SUCCESS, "Note saved.")
+        ThLoadingState(label = "Opening your notes…")
+    }
 }

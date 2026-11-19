@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -14,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.TwoHeartsTokens
 
 @Composable
 fun ThConfirmDialog(
@@ -32,9 +35,11 @@ fun ThConfirmDialog(
 ) {
     if (!open) return
     AlertDialog(
+        shape = RoundedCornerShape(TwoHeartsTokens.Radius.xl),
+        containerColor = LocalTwoHeartsColors.current.surfaceElevated,
         modifier = modifier.semantics { paneTitle = label },
         onDismissRequest = { if (!busy) onClose() },
-        title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+        title = { Text(title, style = MaterialTheme.typography.headlineSmall) },
         text = {
             Text(
                 description, Modifier.heightIn(max = 196.dp).verticalScroll(rememberScrollState()),

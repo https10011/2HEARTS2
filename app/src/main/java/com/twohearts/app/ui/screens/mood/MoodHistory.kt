@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.twohearts.app.ui.components.ThSectionTabs
 import com.twohearts.app.ui.components.EmptyState
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.MoodEntry
@@ -61,16 +62,7 @@ fun MoodHistory(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Tabs
-            TabRow(selectedTabIndex = selectedTab) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        text = { Text(title) }
-                    )
-                }
-            }
+            ThSectionTabs(labels = tabs, selectedIndex = selectedTab, onSelect = { selectedTab = it })
 
             if (filteredMoods.isEmpty()) {
                 EmptyState(

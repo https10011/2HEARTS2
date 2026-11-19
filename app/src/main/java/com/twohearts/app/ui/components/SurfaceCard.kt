@@ -15,11 +15,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
@@ -64,12 +68,12 @@ fun ThSurfaceCard(
     val thColors = LocalTwoHeartsColors.current
 
     val container = when (tone) {
-        CardTone.PLAIN -> MaterialTheme.colorScheme.surface
+        CardTone.PLAIN -> if (elevated) thColors.surfaceElevated else MaterialTheme.colorScheme.surface
         CardTone.WARM -> thColors.surfaceWarm
         CardTone.BLUSH -> thColors.surfaceBlush
         CardTone.GOLD -> thColors.goldBg
         CardTone.OUTLINE -> Color.Transparent
-        CardTone.BRAND -> thColors.burgundy
+        CardTone.BRAND -> thColors.primaryAction
     }
     val border = when (tone) {
         CardTone.PLAIN -> BorderStroke(TwoHeartsTokens.Border.hairline, thColors.borderSubtle)
@@ -89,14 +93,17 @@ fun ThSurfaceCard(
                     Modifier
                 }
             )
-            .background(container, shape)
+            .clip(shape)
+            .background(container)
             .then(if (border != null) Modifier.border(border, shape) else Modifier)
             .then(
-                if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+                if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier
             )
             .padding(contentPadding),
-        content = content,
-    )
+    ) {
+        val foreground = if (tone == CardTone.BRAND) thColors.onPrimaryAction else LocalContentColor.current
+        CompositionLocalProvider(LocalContentColor provides foreground) { content() }
+    }
 }
 
 /**

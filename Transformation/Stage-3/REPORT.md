@@ -33,7 +33,7 @@ The focused Robolectric/Compose tests passed. The reference rendered at 411 dp i
 - The full debug and release test variants each passed 139 tests with zero failures, errors, or skips. The production Home and Notes screens were also spot-checked after rendering with the bundled fonts.
 - The debug APK assembled and passed APK v2 signature, ZIP alignment, and archive integrity checks. Its SHA-256 is `b0218adb534b7b4fa854c99431a56d2e0579d0b0e0612734e10aae08ee125ef3`. The package contains all five font files and both license notices.
 - Android 13 startup and upgrade evidence is recorded in Stage 2. A handset has yet to run the new visual build. [Stage 2 runtime](../Stage-2/evidence/android-13-upgrade.txt)
-- The stage source checkpoint is the commit introducing this report and its evidence. Record its exact remote and workflow result before Stage 4.
+- The stage source checkpoint `9fea116bd2f72e3033221189ac0b4192011f8feb` was verified on `master`. GitHub Actions passed and published the APK. [Actions](https://github.com/https10011/2HEARTS2/actions/runs/44479597056) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44479597056/artifacts/14508027272)
 
 ## Completion checklist
 
@@ -42,7 +42,7 @@ The focused Robolectric/Compose tests passed. The reference rendered at 411 dp i
 - [x] Inspect the Compose reference in both themes, exercise 200% effective font scaling, and check contrast and overflow.
 - [x] Exercise the production theme and existing navigation and persistence suites.
 - [x] Document evidence and the remaining product-wide system font and physical-device checks.
-- [ ] Verify the exact stage commit and its successful CI run.
+- [x] Verify the exact stage commit and its successful CI run.
 
 ## Next stage
 

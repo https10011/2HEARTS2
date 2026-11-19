@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -79,6 +80,7 @@ fun ThButton(
 
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
+    val focused by interactionSource.collectIsFocusedAsState()
 
     // Press feedback: a small, quick settle. Decorative, so it collapses
     // to nothing when reduced motion is on.
@@ -89,28 +91,35 @@ fun ThButton(
     )
 
     val isInteractive = enabled && !loading
+    val disabled = !enabled && !loading
     val shape = RoundedCornerShape(TwoHeartsTokens.Radius.md)
 
-    val container = when (variant) {
-        ButtonVariant.PRIMARY -> thColors.primaryAction.takeOrElse { MaterialTheme.colorScheme.primary }
-        ButtonVariant.DANGER -> thColors.error
-        ButtonVariant.SECONDARY, ButtonVariant.GHOST -> Color.Transparent
+    val container = when {
+        disabled && (variant == ButtonVariant.PRIMARY || variant == ButtonVariant.DANGER) ->
+            thColors.surfaceWarm.takeOrElse { MaterialTheme.colorScheme.surfaceVariant }
+        variant == ButtonVariant.PRIMARY -> thColors.primaryAction.takeOrElse { MaterialTheme.colorScheme.primary }
+        variant == ButtonVariant.DANGER -> thColors.error
+        else -> Color.Transparent
     }
     val contentColor = when (variant) {
         ButtonVariant.PRIMARY -> thColors.onPrimaryAction.takeOrElse { MaterialTheme.colorScheme.onPrimary }
         ButtonVariant.DANGER -> MaterialTheme.colorScheme.onError
         ButtonVariant.SECONDARY, ButtonVariant.GHOST -> MaterialTheme.colorScheme.primary
     }
-    val border = when (variant) {
-        // The visible outline the old SECONDARY variant was missing.
-        ButtonVariant.SECONDARY -> BorderStroke(
+    val border = when {
+        isInteractive && focused -> BorderStroke(TwoHeartsTokens.Border.strong, contentColor)
+        variant == ButtonVariant.SECONDARY -> BorderStroke(
             TwoHeartsTokens.Border.hairline,
             if (isInteractive) thColors.borderStrong else thColors.borderSubtle,
         )
         else -> null
     }
 
-    val effectiveContent = contentColor.copy(alpha = if (isInteractive) 1f else 0.45f)
+    val effectiveContent = if (disabled) {
+        thColors.textTertiary.takeOrElse { MaterialTheme.colorScheme.onSurfaceVariant }
+    } else {
+        contentColor
+    }
 
     Box(
         modifier = modifier

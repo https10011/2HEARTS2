@@ -57,7 +57,7 @@ fun LogPeriod(
                 Text("Flow", style = MaterialTheme.typography.labelLarge)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf("light", "medium", "heavy").forEach { option ->
-                        FilterChip(
+                        ThChoiceChip(
                             selected = flow == option,
                             onClick = { flow = option },
                             label = { Text(option.replaceFirstChar { it.titlecase() }) },

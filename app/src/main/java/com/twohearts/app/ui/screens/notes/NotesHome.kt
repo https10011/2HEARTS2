@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.data.entity.Note
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.ui.components.ThChoiceChip
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.ui.components.ThIcons
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
@@ -37,8 +38,8 @@ fun NotesHome(notes: List<Note>, onNoteClick: (String) -> Unit, onAddNote: () ->
             if (notes.isNotEmpty()) {
                 OutlinedTextField(query, { query = it }, Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp), placeholder = { Text("Search your notes") }, leadingIcon = { Icon(ThIcons.Search, null) }, trailingIcon = if (query.isNotEmpty()) {{ IconButton({ query = "" }) { Icon(ThIcons.Clear, "Clear search") } }} else null, singleLine = true, shape = RoundedCornerShape(18.dp))
                 LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    item { FilterChip(category == null, { category = null }, { Text("All") }) }
-                    items(NoteCategory.entries) { item -> FilterChip(category == item, { category = item }, { Text(item.label) }, leadingIcon = { Icon(item.icon, null, Modifier.size(17.dp)) }) }
+                    item { ThChoiceChip(category == null, { category = null }, { Text("All") }) }
+                    items(NoteCategory.entries) { item -> ThChoiceChip(category == item, { category = item }, { Text(item.label) }, leadingIcon = { Icon(item.icon, null, Modifier.size(17.dp)) }) }
                 }
             }
             when {

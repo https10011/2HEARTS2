@@ -13,6 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.TwoHeartsTokens
 import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
@@ -30,6 +34,9 @@ fun ThLoadingState(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate
+            }
             .padding(TwoHeartsTokens.Spacing.space8),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -37,7 +44,10 @@ fun ThLoadingState(
         if (LocalTwoHeartsMotion.current.reduced) {
             Icon(ThIcons.Clock, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         } else {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            CircularProgressIndicator(
+                modifier = Modifier.clearAndSetSemantics {},
+                color = MaterialTheme.colorScheme.primary,
+            )
         }
 
         Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space3))

@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.twohearts.app.ui.components.ThSectionTabs
 import com.twohearts.app.ui.components.EmptyState
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.Place
@@ -66,25 +67,14 @@ fun PlacesHome(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Category chips
             if (categories.isNotEmpty()) {
-                ScrollableTabRow(
-                    selectedTabIndex = categories.indexOf(activeCategory) + 1,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Tab(
-                        selected = activeCategory == null,
-                        onClick = { selectedCategory = null },
-                        text = { Text("All") }
-                    )
-                    categories.forEach { category ->
-                        Tab(
-                            selected = activeCategory == category,
-                            onClick = { selectedCategory = category },
-                            text = { Text(category.replaceFirstChar { it.uppercase() }) }
-                        )
-                    }
-                }
+                ThSectionTabs(
+                    labels = listOf("All") + categories.map { it.replaceFirstChar(Char::uppercase) },
+                    selectedIndex = categories.indexOf(activeCategory) + 1,
+                    onSelect = { selectedCategory = categories.getOrNull(it - 1) },
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    scrollable = true,
+                )
             }
 
             if (filteredPlaces.isEmpty()) {

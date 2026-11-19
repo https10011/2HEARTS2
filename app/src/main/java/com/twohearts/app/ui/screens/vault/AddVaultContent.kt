@@ -36,7 +36,7 @@ fun AddVaultContent(
             Text("What would you like to keep?", style = MaterialTheme.typography.titleLarge)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 VaultContentType.entries.forEach { option ->
-                    FilterChip(
+                    ThChoiceChip(
                         selected = type == option,
                         onClick = {
                             if (type != option) attachment = null

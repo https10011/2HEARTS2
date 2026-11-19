@@ -1,15 +1,19 @@
 package com.twohearts.app.ui.components
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.TwoHeartsTokens
 
 /**
@@ -28,13 +32,22 @@ fun ThIconButton(
     enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    val interactions = remember { MutableInteractionSource() }
+    val focused by interactions.collectIsFocusedAsState()
+    val focusRing = if (enabled && focused) {
+        Modifier.border(TwoHeartsTokens.Border.strong, MaterialTheme.colorScheme.primary, CircleShape)
+    } else {
+        Modifier
+    }
     IconButton(
         onClick = onClick,
         modifier = modifier
             .size(TwoHeartsTokens.Dimensions.touchTargetMin)
             .clip(CircleShape)
+            .then(focusRing)
             .semantics { contentDescription = label },
         enabled = enabled,
+        interactionSource = interactions,
     ) {
         content()
     }

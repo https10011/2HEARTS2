@@ -1,6 +1,10 @@
 package com.twohearts.app.ui.theme
 
+import android.database.ContentObserver
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -9,7 +13,10 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -414,10 +421,11 @@ fun TwoHeartsTheme(
         density = currentDensity.density,
         fontScale = currentDensity.fontScale * textSizeScale
     )
+    val systemReducedMotion = systemMotionDisabled()
 
     CompositionLocalProvider(
         LocalTwoHeartsColors provides extendedColors,
-        LocalTwoHeartsMotion provides TwoHeartsMotion(reduced = reduceMotion),
+        LocalTwoHeartsMotion provides TwoHeartsMotion(reduced = reduceMotion || systemReducedMotion),
         LocalDensity provides scaledDensity
     ) {
         MaterialTheme(
@@ -427,6 +435,26 @@ fun TwoHeartsTheme(
             content = content
         )
     }
+}
+
+@Composable
+private fun systemMotionDisabled(): Boolean {
+    val resolver = LocalContext.current.contentResolver
+    val setting = Settings.Global.ANIMATOR_DURATION_SCALE
+    val disabled = remember(resolver) {
+        mutableStateOf(Settings.Global.getFloat(resolver, setting, 1f) == 0f)
+    }
+    DisposableEffect(resolver) {
+        val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
+            override fun onChange(selfChange: Boolean) {
+                disabled.value = Settings.Global.getFloat(resolver, setting, 1f) == 0f
+            }
+        }
+        resolver.registerContentObserver(Settings.Global.getUriFor(setting), false, observer)
+        disabled.value = Settings.Global.getFloat(resolver, setting, 1f) == 0f
+        onDispose { resolver.unregisterContentObserver(observer) }
+    }
+    return disabled.value
 }
 
 /**

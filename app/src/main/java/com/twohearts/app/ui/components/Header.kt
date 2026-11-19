@@ -99,7 +99,7 @@ fun ThHeader(
     // what this is. Keeping the second pair a step smaller preserves that
     // hierarchy instead of shouting every screen at the same volume.
     val titleStyle = when (role) {
-        ShellSurfaces.Role.ROOT -> MaterialTheme.typography.titleLarge
+        ShellSurfaces.Role.ROOT -> MaterialTheme.typography.headlineSmall
         ShellSurfaces.Role.DETAIL,
         ShellSurfaces.Role.MODAL -> MaterialTheme.typography.titleMedium
     }

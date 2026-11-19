@@ -113,7 +113,11 @@ fun ThInput(
                 text = label,
                 modifier = Modifier.clearAndSetSemantics {},
                 style = MaterialTheme.typography.labelLarge,
-                color = if (isError) thColors.error else thColors.textSecondary,
+                color = when {
+                    isError -> thColors.error
+                    focused -> MaterialTheme.colorScheme.primary
+                    else -> thColors.textSecondary
+                },
             )
             Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.labelGap))
         }
