@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="twohearts_launch_surface">#201720</color>
+    <color name="twohearts_launch_ink">#FFF8F3</color>
+    <bool name="twohearts_launch_light_bars">false</bool>
+</resources>

@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
@@ -36,6 +37,8 @@ import com.twohearts.app.data.settings.SettingsStorage
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.ui.components.CardTone
+import com.twohearts.app.ui.components.BrandLogo
+import com.twohearts.app.ui.components.BrandLogoVariant
 import com.twohearts.app.ui.components.StatusVariant
 import com.twohearts.app.ui.components.ThButton
 import com.twohearts.app.ui.components.ThChoiceChip
@@ -147,6 +150,28 @@ class Phase0RenderHarness {
                 ThInput(value = "A letter to us", onValueChange = {}, label = "Title")
                 ThButton(onClick = {}, text = "Keep changes", full = true)
             }
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h780dp-mdpi")
+    fun renderTransformationBranding() {
+        render("transformation-5-brand-light") { BrandReference() }
+        render("transformation-5-brand-dark", dark = true, textSizeScale = 2f) { BrandReference() }
+        render("transformation-5-onboarding-dark", dark = true, textSizeScale = 2f) {
+            com.twohearts.app.ui.onboarding.WelcomeScreen(onGetStarted = {})
+        }
+    }
+
+    @Composable
+    private fun BrandReference() {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(36.dp, Alignment.CenterVertically),
+        ) {
+            BrandLogo(size = 180)
+            BrandLogo(variant = BrandLogoVariant.MARK, size = 40)
         }
     }
 

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.TwoHearts" parent="Theme.TwoHearts.Base">
+        <item name="android:windowBackground">@color/twohearts_launch_surface</item>
+        <item name="android:windowSplashScreenBackground">@color/twohearts_launch_surface</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/twohearts_launch_mark</item>
+    </style>
+</resources>

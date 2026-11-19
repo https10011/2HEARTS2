@@ -1,130 +1,127 @@
 /**
- * TwoHearts — brand asset generation tool.
+ * Builds Android brand resources from the supplied logo and mark SVGs.
  *
- * Rasterizes the authoritative owner-supplied brand SVGs
- * (`app/src/main/assets/branding/twohearts-logo*.svg`) into Android
- * drawables. The official artwork is never redrawn, recoloured or
- * recreated — this only converts the existing SVG files into a form
- * Android can decode efficiently at runtime.
- *
- * Usage (from a directory with `playwright` installed):
- *   node tools/generate-brand-assets.mjs
- *
- * Requires the `chromium` browser binary. Set CHROME_PATH to override.
+ * Run npm ci in tools, then npm run generate-brand-assets. Set CHROME_PATH
+ * when Chromium is installed somewhere other than /usr/bin/chromium.
  */
 import { chromium } from 'playwright';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
-const ROOT = path.resolve(import.meta.dirname, '..');
-const SRC = path.join(ROOT, 'app/src/main/assets/branding');
-const OUT = path.join(ROOT, 'app/src/main/res/drawable-nodpi');
+const root = path.resolve(import.meta.dirname, '..');
+const source = path.join(root, 'app/src/main/assets/branding');
+const resources = path.join(root, 'app/src/main/res');
+const [logo, mark] = await Promise.all([
+  fs.readFile(path.join(source, 'twohearts-logo.svg'), 'utf8'),
+  fs.readFile(path.join(source, 'twohearts-logo-mark.svg'), 'utf8'),
+]);
 
-/**
- * Each entry renders an official SVG at an explicit pixel size. `height`
- * is derived from the SVG viewBox so the aspect ratio of the official
- * artwork is preserved exactly.
- *
- * nodpi is used because these are resolution-independent brand marks that
- * must render at the exact requested size regardless of device density.
- */
-const TARGETS = [
-  // Full logo lockup — viewBox 506.3152 x 433.8324
-  { svg: 'twohearts-logo.svg', png: 'brand_logo.png', width: 720 },
-  // Hearts-only mark — viewBox 306.7499 x 285
-  { svg: 'twohearts-logo-mark.svg', png: 'brand_logo_mark.png', width: 512 },
-  // Launcher foreground — official mark kept inside the adaptive-icon
-  // safe zone (72dp of 108dp => 66.7%). Adaptive-icon foregrounds must be
-  // square, so the canvas is forced square and the art centred.
-  { svg: 'twohearts-logo-mark.svg', png: 'ic_launcher_foreground.png', width: 576, square: true, safeZone: 0.667 },
-];
-
-const VIEWBOX = {
-  'twohearts-logo.svg': [506.3152, 433.8324],
-  'twohearts-logo-mark.svg': [306.7499, 285],
-};
-
-const chromePath = process.env.CHROME_PATH || '/usr/bin/chromium';
-const browser = await chromium.launch({ executablePath: chromePath, args: ['--no-sandbox'] });
-
-fs.mkdirSync(OUT, { recursive: true });
-
-/** Legacy launcher icon densities (ic_launcher_size in dp per bucket). */
-const LAUNCHER_DENSITIES = {
-  'mipmap-mdpi': 48,
-  'mipmap-hdpi': 72,
-  'mipmap-xhdpi': 96,
-  'mipmap-xxhdpi': 144,
-  'mipmap-xxxhdpi': 192,
-};
-
-/**
- * Renders the official mark on the brand burgundy field for the legacy
- * (pre-adaptive-icon) launcher buckets. This composes the supplied
- * artwork on a brand surface; it does not alter the artwork itself.
- */
-async function renderLegacyLauncher() {
-  const svg = fs.readFileSync(path.join(SRC, 'twohearts-logo-mark.svg'), 'utf8');
-  for (const [bucket, size] of Object.entries(LAUNCHER_DENSITIES)) {
-    const dir = path.join(ROOT, 'app/src/main/res', bucket);
-    fs.mkdirSync(dir, { recursive: true });
-    const inset = Math.round(size * 0.17);
-    for (const [name, radius] of [['ic_launcher.png', 0.22], ['ic_launcher_round.png', 0.5]]) {
-      const r = Math.round(size * radius);
-      const page = await browser.newPage({
-        viewport: { width: size, height: size },
-        deviceScaleFactor: 1,
-      });
-      await page.setContent(
-        `<html><head><style>
-           html,body{margin:0;padding:0;background:transparent}
-           .field{width:${size}px;height:${size}px;background:#6A1B2B;
-                  border-radius:${r}px;display:flex;align-items:center;
-                  justify-content:center;overflow:hidden}
-           .mark{width:${size - inset * 2}px}
-           svg{display:block;width:100%;height:auto}
-         </style></head><body>
-           <div class="field"><div class="mark">${svg}</div></div>
-         </body></html>`,
-        { waitUntil: 'load' }
-      );
-      await page.screenshot({ path: path.join(dir, name) });
-      await page.close();
+const browser = await chromium.launch({
+  executablePath: process.env.CHROME_PATH || '/usr/bin/chromium',
+  args: ['--no-sandbox'],
+});
+try {
+  const page = await browser.newPage();
+  const results = await page.evaluate(async ({ logo, mark }) => {
+    function canvas(width, height) {
+      const result = document.createElement('canvas');
+      result.width = width;
+      result.height = height;
+      return result;
     }
-    console.log(`${bucket}/ic_launcher(.round).png  ${size}x${size}`);
+
+    async function artwork(svg, width, height) {
+      const image = new Image();
+      image.src = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+      await image.decode();
+
+      const source = canvas(width, height);
+      const context = source.getContext('2d', { willReadFrequently: true });
+      context.drawImage(image, 0, 0, width, height);
+      const alpha = context.getImageData(0, 0, width, height).data;
+      let left = width;
+      let right = 0;
+      let top = height;
+      let bottom = 0;
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          if (alpha[(y * width + x) * 4 + 3] === 0) continue;
+          left = Math.min(left, x);
+          right = Math.max(right, x + 1);
+          top = Math.min(top, y);
+          bottom = Math.max(bottom, y + 1);
+        }
+      }
+
+      if (right <= left || bottom <= top) throw new Error('Logo rendered with no visible pixels');
+      const centerX = (left + right) / 2;
+      const centerY = (top + bottom) / 2;
+      let radius = 0;
+      for (let y = top; y < bottom; y++) {
+        for (let x = left; x < right; x++) {
+          if (alpha[(y * width + x) * 4 + 3] !== 0) {
+            radius = Math.max(radius, Math.hypot(x + 0.5 - centerX, y + 0.5 - centerY));
+          }
+        }
+      }
+      return { source, left, top, width: right - left, height: bottom - top, radius };
+    }
+
+    function output(source, width, height, scale, backgroundRadius = null) {
+      const result = canvas(width * 2, height * 2);
+      const context = result.getContext('2d');
+      context.scale(2, 2);
+      context.imageSmoothingQuality = 'high';
+      if (backgroundRadius !== null) {
+        context.beginPath();
+        context.roundRect(0, 0, width, height, backgroundRadius);
+        context.fillStyle = '#FAF2E7';
+        context.fill();
+      }
+
+      const artWidth = source.width * scale;
+      const artHeight = source.height * scale;
+      context.drawImage(
+        source.source, source.left, source.top, source.width, source.height,
+        (width - artWidth) / 2, (height - artHeight) / 2, artWidth, artHeight,
+      );
+
+      const downsampled = canvas(width, height);
+      const finalContext = downsampled.getContext('2d');
+      finalContext.imageSmoothingQuality = 'high';
+      finalContext.drawImage(result, 0, 0, width, height);
+      return downsampled.toDataURL('image/png').split(',')[1];
+    }
+
+    const lockup = await artwork(logo, 1520, 1302);
+    const hearts = await artwork(mark, 1228, 1141);
+    const assets = [
+      ['drawable-nodpi/brand_logo.png',
+        output(lockup, 720, 617, Math.min(672 / lockup.width, 569 / lockup.height))],
+      ['drawable-nodpi/brand_logo_mark.png',
+        output(hearts, 512, 476, Math.min(476 / hearts.width, 440 / hearts.height))],
+      // The 108 dp adaptive layer is masked around its central 66 dp safe region.
+      ['drawable-nodpi/ic_launcher_foreground.png', output(hearts, 576, 576, 576 * 30.5 / 108 / hearts.radius)],
+    ];
+
+    for (const [density, size] of [
+      ['mdpi', 48], ['hdpi', 72], ['xhdpi', 96], ['xxhdpi', 144], ['xxxhdpi', 192],
+    ]) {
+      const scale = size * 0.33 / hearts.radius;
+      assets.push(
+        [`mipmap-${density}/ic_launcher.png`, output(hearts, size, size, scale, size * 0.22)],
+        [`mipmap-${density}/ic_launcher_round.png`, output(hearts, size, size, scale, size / 2)],
+      );
+    }
+    return assets;
+  }, { logo, mark });
+
+  for (const [relativePath, image] of results) {
+    const target = path.join(resources, relativePath);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await fs.writeFile(target, Buffer.from(image, 'base64'));
+    console.log(relativePath);
   }
+} finally {
+  await browser.close();
 }
-
-for (const target of TARGETS) {
-  const [vbW, vbH] = VIEWBOX[target.svg];
-  const width = target.width;
-  const height = target.square ? width : Math.round((width * vbH) / vbW);
-  const svg = fs.readFileSync(path.join(SRC, target.svg), 'utf8');
-
-  const inner = target.safeZone
-    ? `<div style="width:${width}px;height:${height}px;display:flex;align-items:center;justify-content:center">
-         <div style="width:${Math.round(width * target.safeZone)}px">${svg}</div>
-       </div>`
-    : svg;
-
-  const page = await browser.newPage({
-    viewport: { width, height },
-    deviceScaleFactor: 1,
-  });
-  await page.setContent(
-    `<html><head><style>
-       html,body{margin:0;padding:0;background:transparent}
-       svg{display:block;width:100%;height:auto}
-     </style></head><body>${inner}</body></html>`,
-    { waitUntil: 'load' }
-  );
-  await page.screenshot({ path: path.join(OUT, target.png), omitBackground: true });
-  await page.close();
-  console.log(`${target.png}  ${width}x${height}  (from ${target.svg})`);
-}
-
-await renderLegacyLauncher();
-
-await browser.close();
-console.log(`\nWrote ${TARGETS.length} drawables to app/src/main/res/drawable-nodpi/`);
-console.log('Updated legacy launcher icons for 5 density buckets.');

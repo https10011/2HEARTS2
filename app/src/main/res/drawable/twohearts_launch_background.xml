@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/twohearts_launch_surface" />
+    <item
+        android:drawable="@drawable/twohearts_launch_mark"
+        android:gravity="center"
+        android:height="152dp"
+        android:width="152dp" />
+</layer-list>

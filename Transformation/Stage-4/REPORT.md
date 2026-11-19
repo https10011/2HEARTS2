@@ -18,7 +18,7 @@ Stage 3 published the app palette and bundled typography at `9fea116bd2f72e30332
 - Native interaction tests verify selected-tab semantics, touch activation, disabled and saving states, field focus, and sheet dismissal by the scrim. The scrim's measured spacer keeps its touch area outside the sheet. The release variant uses an explicit Robolectric activity fixture so it can exercise the same tests without the debug test manifest.
 - The light and dark Compose renders cover normal, disabled, saving, validation, loading and success states. The dark run turns Android animator duration off and verifies the static indicator and shared reduced-motion policy. Physical-device behavior remains part of release validation.
 - Both debug and release ran 143 tests with zero failures, errors, or skips. The debug APK built, verified its v2 signature, and passed archive and alignment checks. SHA-256 `c263493026f98a7cd870d0ab3b13d3a5a03ee89ca2dc394d637eb874f42ad33f`.
-- The stage source checkpoint is the commit adding this report. Verify its exact remote SHA and successful CI before the branding stage.
+- Git verified `6830edb71912566a1130d77754a8b9ba97499b39` on `origin/master`. Its Android workflow succeeded and published `twohearts-debug-apk`. [Commit](https://github.com/https10011/2HEARTS2/commit/6830edb71912566a1130d77754a8b9ba97499b39) · [Actions](https://github.com/https10011/2HEARTS2/actions/runs/44483455125) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44483455125/artifacts/14509971066)
 
 ## Completion checklist
 
@@ -27,7 +27,7 @@ Stage 3 published the app palette and bundled typography at `9fea116bd2f72e30332
 - [x] Render and inspect representative light, dark, reduced-motion, and enlarged component states.
 - [x] Verify selection, focus, touch, disabled and loading behavior, and the modal tap boundary through native Compose tests.
 - [x] Preserve existing route callbacks and data behavior and record the remaining device checks.
-- [ ] Verify the exact stage commit and CI.
+- [x] Verify the exact stage commit and CI.
 
 ## Next stage
 
