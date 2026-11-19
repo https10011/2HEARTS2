@@ -27,13 +27,15 @@ Reviewed Home's Compose entry point and derivation, profile avatar and thumbnail
 - Each full unit suite passed 175 tests with zero failures, errors, or skips. The debug APK passed v2 signing, alignment, and ZIP integrity checks. Package metadata remains `com.twohearts.app` 1.0.0 (1), min API 26 and target API 35. No broad photo-library or storage permission is declared. Local APK SHA-256 `e83f80650a43ab4dd93a34bd9fdf98939b2861dce2b465306995afde5ae022b4`.
 - The test photos were generated illustrations written to private files by the native harness. The handset walkthrough and installed-candidate verification remain release work.
 
+- Git verified `779e69d0c9d764f96dc45f347b8630f3bf9776ac` on `origin/master`. The Android workflow passed and published the Home stage APK. [Commit](https://github.com/https10011/2HEARTS2/commit/779e69d0c9d764f96dc45f347b8630f3bf9776ac) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/44570070046) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44570070046/artifacts/14554072238)
+
 ## Completion checklist
 
 - [x] Record the starting commit, source reviewed, initial behavior, decisions and stage dependencies.
 - [x] Verify locally stored and missing photos, invalid dates, persisted records, and navigation.
 - [x] Inspect native renders in both themes, narrow and standard layouts, and at 200% text.
 - [x] Pass both full test variants, verify the APK, and review the final diff.
-- [ ] Commit and push the stage. Verify the exact remote SHA, Android workflow, and progress tracker.
+- [x] Commit and push the stage. Verify the exact remote SHA, Android workflow, and progress tracker.
 
 ## Next stage
 

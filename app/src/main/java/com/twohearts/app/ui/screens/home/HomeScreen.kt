@@ -2,11 +2,9 @@ package com.twohearts.app.ui.screens.home
 
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -34,12 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.Hyphens
-import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -61,7 +55,7 @@ import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.ui.components.BrandLogo
 import com.twohearts.app.ui.components.BrandLogoVariant
 import com.twohearts.app.ui.components.CardTone
-import com.twohearts.app.ui.components.ProfileAvatar
+import com.twohearts.app.ui.components.CouplePortrait
 import com.twohearts.app.ui.components.ThEyebrow
 import com.twohearts.app.ui.components.ThIcons
 import com.twohearts.app.ui.components.ThIconButton
@@ -258,7 +252,13 @@ private fun HomeHero(data: HomeData, onNavigate: (String) -> Unit) {
             }
 
             Spacer(Modifier.height(TwoHeartsTokens.Spacing.space5))
-            CouplePortrait(data.owner, data.partner, onClick = { onNavigate(RoutePath.APP_US) })
+            CouplePortrait(
+                owner = data.owner,
+                partner = data.partner,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(TwoHeartsTokens.Radius.lg))
+                    .clickable(onClickLabel = "Open Us", role = Role.Button) { onNavigate(RoutePath.APP_US) },
+            )
             Spacer(Modifier.height(TwoHeartsTokens.Spacing.space4))
 
             val days = data.daysTogether
@@ -272,91 +272,6 @@ private fun HomeHero(data: HomeData, onNavigate: (String) -> Unit) {
             }
         }
     }
-}
-
-@Composable
-private fun CouplePortrait(owner: Profile?, partner: Profile?, onClick: () -> Unit) {
-    BoxWithConstraints(
-        modifier = Modifier
-            .widthIn(max = 460.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(TwoHeartsTokens.Radius.lg))
-            .clickable(onClickLabel = "Open Us", role = Role.Button, onClick = onClick)
-            .padding(vertical = TwoHeartsTokens.Spacing.space1),
-    ) {
-        val stackPortraits = maxWidth < 430.dp && LocalDensity.current.fontScale >= 1.5f
-        if (stackPortraits) {
-            Column(verticalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space3)) {
-                HomePortraitRow(owner, "You")
-                HorizontalDivider(color = LocalTwoHeartsColors.current.borderSubtle)
-                HomePortraitRow(partner, "Your special someone")
-            }
-        } else {
-            val portraitSize = (maxWidth * 0.31f).value.toInt().coerceIn(72, 112)
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-                HomePortraitColumn(owner, "You", portraitSize, Modifier.weight(1f))
-                Box(
-                    modifier = Modifier.width(32.dp).height((portraitSize + 10).dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        ThIcons.HeartFilled,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = LocalTwoHeartsColors.current.roseDeep,
-                    )
-                }
-                HomePortraitColumn(partner, "Your special someone", portraitSize, Modifier.weight(1f))
-            }
-        }
-    }
-}
-
-@Composable
-private fun HomePortraitColumn(profile: Profile?, fallback: String, size: Int, modifier: Modifier) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        HomePortraitAvatar(profile, size)
-        Spacer(Modifier.height(TwoHeartsTokens.Spacing.space3))
-        HomePortraitName(profile, fallback, Modifier.fillMaxWidth(), TextAlign.Center)
-    }
-}
-
-@Composable
-private fun HomePortraitRow(profile: Profile?, fallback: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space4),
-    ) {
-        HomePortraitAvatar(profile, size = 78)
-        HomePortraitName(profile, fallback, Modifier.weight(1f), TextAlign.Start)
-    }
-}
-
-@Composable
-private fun HomePortraitAvatar(profile: Profile?, size: Int) {
-    val colors = LocalTwoHeartsColors.current
-    Box(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface, CircleShape)
-            .border(TwoHeartsTokens.Border.hairline, colors.borderStrong, CircleShape)
-            .padding(5.dp),
-    ) {
-        ProfileAvatar(name = profile?.name.orEmpty(), photoUrl = profile?.photoRef, size = size)
-    }
-}
-
-@Composable
-private fun HomePortraitName(profile: Profile?, fallback: String, modifier: Modifier, textAlign: TextAlign) {
-    Text(
-        text = profile?.name.orEmpty().trim().ifEmpty { fallback },
-        modifier = modifier,
-        style = MaterialTheme.typography.displaySmall.copy(lineBreak = LineBreak.Heading, hyphens = Hyphens.Auto),
-        color = MaterialTheme.colorScheme.onBackground,
-        textAlign = textAlign,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis,
-    )
 }
 
 @Composable

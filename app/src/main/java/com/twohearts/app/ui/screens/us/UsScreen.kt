@@ -2,7 +2,6 @@ package com.twohearts.app.ui.screens.us
 
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -42,10 +43,15 @@ import com.twohearts.app.data.repository.TimelineEventRepository
 import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.ui.components.CardTone
-import com.twohearts.app.ui.components.ProfileAvatar
+import com.twohearts.app.ui.components.CouplePortrait
 import com.twohearts.app.ui.components.ThDivider
+import com.twohearts.app.ui.components.ThEyebrow
 import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.ThQuietButton
 import com.twohearts.app.ui.components.ThSurfaceCard
+import com.twohearts.app.ui.decorations.DecorationPosition
+import com.twohearts.app.ui.decorations.OnboardingArt
+import com.twohearts.app.ui.decorations.ThDecoration
 import com.twohearts.app.ui.navigation.RoutePath
 import com.twohearts.app.ui.navigation.ShellSearchAction
 import com.twohearts.app.ui.screens.home.UpcomingMoment
@@ -118,10 +124,13 @@ internal fun UsContent(
                 )
                 ShellSearchAction { onNavigate(RoutePath.APP_SEARCH) }
             }
-            RelationshipPortrait(owner, partner, highlights)
+            RelationshipMilestone(
+                owner, partner, highlights,
+                onEdit = { onNavigate(RoutePath.APP_SETTINGS_RELATIONSHIP) },
+            )
 
             Column(verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
-                HubHeading(if (highlights.nextDate == null) "Important dates" else "Coming up")
+                HubHeading("Important dates")
                 NextDate(highlights.nextDate) { onNavigate(RoutePath.APP_IMPORTANT_DATES) }
             }
 
@@ -142,7 +151,7 @@ internal fun UsContent(
                         tone = CardTone.WARM,
                         onClick = { onNavigate("${RoutePath.APP_MEMORIES}/${Uri.encode(memory.id)}") },
                     ) {
-                        Text("Latest memory", style = MaterialTheme.typography.labelLarge, color = colors.textSecondary)
+                        ThEyebrow(text = "Latest memory")
                         Text(
                             momentDateLabel(memory.memoryDate),
                             style = MaterialTheme.typography.bodySmall,
@@ -163,6 +172,16 @@ internal fun UsContent(
                                 modifier = Modifier.weight(1f),
                             )
                             Icon(ThIcons.ChevronRight, contentDescription = null, tint = colors.textSecondary)
+                        }
+                        memory.caption?.takeIf { it.isNotBlank() }?.let { caption ->
+                            Text(
+                                caption,
+                                modifier = Modifier.padding(top = spacing.space1, end = spacing.space6),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colors.textSecondary,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
                     }
                 }
@@ -218,81 +237,63 @@ internal fun UsContent(
 }
 
 @Composable
-private fun RelationshipPortrait(owner: Profile?, partner: Profile?, highlights: UsHighlights) {
+private fun RelationshipMilestone(
+    owner: Profile?,
+    partner: Profile?,
+    highlights: UsHighlights,
+    onEdit: () -> Unit,
+) {
     val spacing = TwoHeartsTokens.Spacing
     val colors = LocalTwoHeartsColors.current
-    ThSurfaceCard(tone = CardTone.BLUSH) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(spacing.space2),
-        ) {
-            Portrait(owner, "You", Modifier.weight(1f))
-            Icon(
-                ThIcons.Heart,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = spacing.space4),
-            )
-            Portrait(partner, "Your special someone", Modifier.weight(1f))
-        }
-        ThDivider(Modifier.padding(vertical = spacing.space4))
-        val days = highlights.daysTogether
-        val start = highlights.startDate
-        val title = when {
-            days == 1 -> "1 day together"
-            days != null -> "${formatDayCount(days)} days together"
-            start != null -> "Your story begins soon"
-            else -> "Relationship date"
-        }
-        Text(
-            title,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Text(
-            when {
-                start == null -> "Your shared date will appear here."
-                days == null -> "Begins ${DateTimeHelper.formatDisplay(start.toString())}"
-                else -> "Since ${DateTimeHelper.formatDisplay(start.toString())}"
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.textSecondary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(top = spacing.space1),
-        )
-    }
-}
-
-@Composable
-private fun Portrait(profile: Profile?, fallback: String, modifier: Modifier) {
-    val name = profile?.name?.takeIf(String::isNotBlank)
-    val colors = LocalTwoHeartsColors.current
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space2),
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(TwoHeartsTokens.Radius.xl))
+            .background(Brush.verticalGradient(listOf(colors.surfaceBlush, colors.surfaceWarm))),
     ) {
-        if (name != null) {
-            ProfileAvatar(name, profile.photoRef, size = 56)
-        } else {
-            Box(
-                Modifier.size(56.dp)
-                    .background(colors.surfaceWarm, CircleShape)
-                    .border(TwoHeartsTokens.Border.hairline, colors.borderSubtle, CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(ThIcons.Person, contentDescription = null, tint = colors.textSecondary)
+        ThDecoration(
+            art = OnboardingArt.ROSE_LILY_BLOOM,
+            position = DecorationPosition.TOP_END,
+            size = 128.dp,
+            alpha = 0.08f,
+            offsetX = 20.dp,
+            offsetY = (-6).dp,
+        )
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = spacing.space4, vertical = spacing.space5),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            CouplePortrait(owner, partner, maxAvatarSize = 88)
+            ThDivider(Modifier.padding(top = spacing.space3, bottom = spacing.space4))
+            val days = highlights.daysTogether
+            val start = highlights.startDate
+            Text(
+                when {
+                    days == 1 -> "1 day together"
+                    days != null -> "${formatDayCount(days)} days together"
+                    start != null -> "Your story begins soon"
+                    else -> "Relationship date"
+                },
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+            )
+            if (start == null && owner != null) {
+                ThQuietButton(onClick = onEdit, text = "Set your shared date")
+            } else {
+                Text(
+                    when {
+                        start == null -> "Your shared date will appear here."
+                        days == null -> "Begins ${DateTimeHelper.formatDisplay(start.toString())}"
+                        else -> "Since ${DateTimeHelper.formatDisplay(start.toString())}"
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.textSecondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = spacing.space1),
+                )
             }
         }
-        Text(
-            name ?: fallback,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
     }
 }
 
@@ -304,6 +305,7 @@ private fun NextDate(moment: UpcomingMoment?, onClick: () -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(spacing.space3), verticalAlignment = Alignment.CenterVertically) {
             Icon(ThIcons.Calendar, contentDescription = null, tint = colors.goldInk)
             Column(Modifier.weight(1f)) {
+                if (moment != null) ThEyebrow(text = "Coming up", color = colors.goldInk)
                 Text(
                     moment?.title ?: "Save an important date",
                     style = MaterialTheme.typography.titleMedium,
@@ -342,9 +344,12 @@ private fun HubRow(title: String, detail: String? = null, icon: ImageVector, onC
         horizontalArrangement = Arrangement.spacedBy(spacing.space3),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(40.dp).background(colors.surfaceBlush, CircleShape), contentAlignment = Alignment.Center) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        }
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(horizontal = spacing.space2).size(22.dp),
+        )
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
             if (detail != null) {

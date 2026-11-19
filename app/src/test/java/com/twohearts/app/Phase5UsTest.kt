@@ -15,6 +15,7 @@ import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getAllSemanticsNodes
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.twohearts.app.data.database.TwoHeartsDatabase
@@ -78,6 +79,7 @@ class Phase5UsTest {
                 "Timeline" to RoutePath.APP_TIMELINE,
                 "Places" to RoutePath.APP_PLACES,
                 "Mood" to RoutePath.APP_MOOD,
+                "Yuki" to RoutePath.APP_YUKI,
                 "Period tracker" to RoutePath.APP_PERIOD,
                 "Vault" to RoutePath.APP_VAULT,
             ).forEach { (label, route) -> assertDestination(nodes, label, route) }
@@ -93,7 +95,8 @@ class Phase5UsTest {
             render("populated", before) { nodes ->
                 assertTrue(nodes.node("Alex").boundsInRoot.height > 0)
                 assertTrue(nodes.node("Sam").boundsInRoot.height > 0)
-                nodes.node("The day we met")
+                assertDestination(nodes, "The day we met", RoutePath.APP_IMPORTANT_DATES)
+                nodes.node("A long walk and a slow sunset.")
                 nodes.node("1 memory saved")
                 nodes.node("Harbour café · 1 place saved")
                 nodes.node("Today · Calm")
@@ -142,6 +145,66 @@ class Phase5UsTest {
         }
     }
 
+    @Test
+    fun missingSharedDateLinksToRelationshipSettings() {
+        val empty = usHighlights(null, emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), today)
+        val owner = Profile(name = "Avery", role = "owner", id = "owner-1", createdAt = now, updatedAt = now)
+        render("transformation-10-date-setup", Story(owner, null, empty)) { nodes ->
+            assertDestination(nodes, "Set your shared date", RoutePath.APP_SETTINGS_RELATIONSHIP)
+            assertDestination(nodes, "Save an important date", RoutePath.APP_IMPORTANT_DATES)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp-mdpi")
+    fun shortViewportAtTwoHundredPercentKeepsBothPortraitNamesVisible() {
+        val ownerName = "Alexandria River Montgomery Bell"
+        val partnerName = "Samira Florence Del Rosario Bennett"
+        val db = makeDatabase()
+        val story = try {
+            runBlocking { seedStory(db, ownerName, partnerName) }
+        } finally {
+            db.close()
+        }
+        render("transformation-10-large-type", story, dark = true, fontScale = 2f) { nodes ->
+            val owner = nodes.node(ownerName)
+            val partner = nodes.node(partnerName)
+            assertTrue(owner.boundsInRoot.bottom <= partner.boundsInRoot.top)
+            for (name in listOf(owner, partner)) {
+                val bounds = name.boundsInRoot
+                assertTrue(bounds.width > 0f && bounds.height > 0f)
+                assertTrue(bounds.left >= 0f && bounds.right <= 360f && bounds.bottom < 575f)
+                val layouts = mutableListOf<TextLayoutResult>()
+                val layout = checkNotNull(name.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action)
+                assertTrue(layout(layouts))
+                assertFalse(layouts.single().hasVisualOverflow)
+            }
+            val search = nodes.single {
+                it.config.getOrNull(SemanticsProperties.ContentDescription)?.contains("Search all records") == true
+            }
+            assertTrue(checkNotNull(search.config.getOrNull(SemanticsActions.OnClick)?.action).invoke())
+            assertEquals(RoutePath.APP_SEARCH, destination)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w411dp-h1300dp-mdpi")
+    fun savedStoryAndPrivateEntriesRemainUsableInDarkTheme() {
+        val db = makeDatabase()
+        val story = try {
+            runBlocking { seedStory(db) }
+        } finally {
+            db.close()
+        }
+        render("transformation-10-dark-story", story, dark = true) { nodes ->
+            nodes.node("Harbour café · 1 place saved")
+            nodes.node("Today · Calm")
+            assertDestination(nodes, "Yuki", RoutePath.APP_YUKI)
+            assertDestination(nodes, "Period tracker", RoutePath.APP_PERIOD)
+            assertDestination(nodes, "Vault", RoutePath.APP_VAULT)
+        }
+    }
+
     private fun makeDatabase(): TwoHeartsDatabase {
         val app = ApplicationProvider.getApplicationContext<Application>()
         return Room.inMemoryDatabaseBuilder(app, TwoHeartsDatabase::class.java).build()
@@ -164,7 +227,10 @@ class Phase5UsTest {
             ),
         )
         db.memoryDao().insert(
-            Memory(title = title, memoryDate = today.minusDays(7).toString(), id = "coast", createdAt = now, updatedAt = now),
+            Memory(
+                title = title, caption = "A long walk and a slow sunset.", memoryDate = today.minusDays(7).toString(),
+                id = "coast", createdAt = now, updatedAt = now,
+            ),
         )
         db.timelineEventDao().insert(
             TimelineEvent(
@@ -199,13 +265,14 @@ class Phase5UsTest {
         story: Story,
         dark: Boolean = false,
         scale: TextScalingLevel = TextScalingLevel.DEFAULT,
+        fontScale: Float = scale.scale,
         assertions: (List<SemanticsNode>) -> Unit,
     ) {
         val controller = Robolectric.buildActivity(ComponentActivity::class.java).setup()
         try {
             val activity = controller.get()
             activity.setContent {
-                TwoHeartsTheme(darkMode = dark, textScalingLevel = scale, reduceMotion = true) {
+                TwoHeartsTheme(darkTheme = dark, textSizeScale = fontScale, reduceMotion = true) {
                     AppShell(RoutePath.APP_US, onNavigate = {}, onBack = {}, canNavigateBack = false) {
                         UsContent(story.owner, story.partner, story.highlights) { destination = it }
                     }
