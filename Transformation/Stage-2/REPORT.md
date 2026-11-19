@@ -26,11 +26,13 @@ The app keeps the same package ID and continues to use the process-wide Room and
 | Pre-fix reproduction | Two added Room fixtures failed on the native version 12 paths. The error identified `profiles` and `notification_registry` respectively. |
 | Debug and release | `./gradlew :app:testDebugUnitTest :app:testReleaseUnitTest :app:assembleDebug --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process` passed. Each variant ran 137 tests with zero failures, errors, or skips. |
 | Migration | The Room tests passed from version 12 with and without the photo column and from a version 13 database with its shipped index shape. They verify retained records, including the existing photo reference, note and notification where applicable. An unsupported version 15 database kept its original file and row. |
+| Early schema review | Replayed the declared native 1-to-14 SQL in SQLite. The resulting 17 tables, column types, nullability, primary keys, and explicit indexes matched the generated Room schema. |
 | Existing startup coverage | DataStore lifetime, persisted onboarding and app-lock state, deferred PIN verifier, and notification behavior regression tests passed. |
 | Visual | No composables changed. The native Compose suite rendered again, and the 274 × 488 dp Notes screen retained its visible creation action and navigation. [Stage 1 comparison](../Stage-1/evidence/records-and-utilities.jpg) |
 | Local APK | APK v2 signatures, ZIP alignment, and archive integrity passed. Candidate SHA-256 `64d434e2e4d37adac8ab2e5b04dd05f8e360e7979b1884e81afaf85d98ce2c21`. The local prior APK and candidate share certificate SHA-256 `422b889111ac2bbc0ef39a264bd07bf57550e82f96ca8adcbb1ef6c6b2da3e75`. |
-| Android runtime | The software guest initially reached Android system services. A retry using its partial userdata stayed offline and reported an ext4 resize error. A clean sparse userdata image is being used for the next check. Fresh candidate launch, same-signer reinstall with local data, and the TECNO handset walkthrough remain open. |
-| Remote | This report accompanies the tested Stage 2 migration commit. Its exact remote SHA and CI result will be recorded once the workflow finishes. |
+| Android runtime | The isolated Android 13 x86-64 guest installed the local Stage 1 APK and accepted the same-signer Stage 2 replacement. The first launch wait timed out while guest System UI reported ANRs. After a cold restart, TwoHearts completed bootstrap, its activity resumed, and Room reached schema 14 with the test note retained. The crash buffer had no TwoHearts entry. The returning Home, locked handset, and complete first-launch candidate walkthrough remain part of release validation. [Android upgrade evidence](evidence/android-13-upgrade.txt) |
+| Published APK | The Actions artifact downloaded and passed APK v2 signature, ZIP alignment, archive integrity, and package checks. APK SHA-256 `cb83199cb6214fe3a82c8095abd4cbae397447736fd11f394ca1d2a52a7d876a`. Certificate SHA-256 `83c962ff8bc2687b05463e591953240b0698aeec495210c055328caf26e2cce9`. |
+| Remote | Git verified `bd278225e2f54cbe6c2e83da71723ecbc0dcd353` on `master`. The Android workflow passed and published `twohearts-debug-apk`. [CI](https://github.com/https10011/2HEARTS2/actions/runs/44476385339) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44476385339/artifacts/14505789721) |
 
 The existing GitHub workflow generates per-run debug certificates. The confirmed certificate mismatch remains a release concern for in-place updates from a prior CI APK. Verify the installed APK's certificate and use a matching signing key or platform-supported lineage before claiming preserved handset upgrades. The owner's running installation and data are untouched.
 
@@ -39,10 +41,10 @@ The existing GitHub workflow generates per-run debug certificates. The confirmed
 - [x] Record starting commit, inspected files, two reproduced migration errors, and the implementation.
 - [x] Verify supported native Room upgrades, unsupported-schema retention, and existing startup suites.
 - [x] Run both unit-test suites, assemble the APK, inspect its package and signature, and review the native render baseline.
-- [ ] Capture candidate Android launch and retained-data runtime evidence where available.
-- [ ] Verify the exact published commit and successful CI before advancing.
+- [x] Verify on Android 13 that the same-signer update launches and retains test data. Record the guest System UI limitation and the remaining handset checks.
+- [x] Verify the exact published migration commit and the successful workflow.
 - [x] Record signing compatibility findings, limitations, and the next required work.
 
 ## Next stage
 
-Verify the Stage 2 remote and runtime results. Stage 3 then establishes the premium visual tokens, typography and contrast reference. The existing signed APK remains the owner's functional baseline.
+Stage 3 establishes the premium visual tokens, bundled typography and contrast reference. The owner’s working APK remains the handset baseline. Stage 22 repeats release validation on an identified candidate.

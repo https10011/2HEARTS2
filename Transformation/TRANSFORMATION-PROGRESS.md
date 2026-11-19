@@ -2,10 +2,10 @@
 
 ## Current checkpoint
 
-- **Latest verified transformation commit** — `08088016ba27acda8a672c459dc70700eb7a42e1`. GitHub and Git verified Stage 1 on `master`. Its existing workflow passed and published the debug APK. [Stage 1 report](Stage-1/REPORT.md) · [Commit](https://github.com/https10011/2HEARTS2/commit/08088016ba27acda8a672c459dc70700eb7a42e1) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/44474694306) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44474694306/artifacts/14505482651)
+- **Latest verified implementation commit** — `bd278225e2f54cbe6c2e83da71723ecbc0dcd353`. Git confirmed the Room migration commit on `master`. The Android workflow passed and published the debug APK. [Commit](https://github.com/https10011/2HEARTS2/commit/bd278225e2f54cbe6c2e83da71723ecbc0dcd353) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/44476385339) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44476385339/artifacts/14505789721)
 - **Stage 1 complete** — JDK 17 and SDK 35 reproduced the debug APK and both unit suites. Each variant passed 134 tests, and the native harnesses produced 149 renders. The report records the screen inventory, visual evidence, and emulator constraints.
-- **Stage 2 implementation verified locally** — Fixed the Room migration for the optional profile photo column and registered the existing indexes in schema 14. Both unit-test variants passed 137 tests and the APK built. The Android 13 runtime and Stage 2 remote CI checks remain open. [Stage 2 report](Stage-2/REPORT.md)
-- **Signing and upgrade** — The two downloaded CI APKs have different debug signing certificates. The owner confirmed normal operation of the already installed app, which remains the working baseline. Stage 2 checks matching-signature upgrades in isolation and documents what can update the installed APK.
+- **Stage 2 complete** — Fixed the Room migration for the optional profile photo column and registered the existing indexes in schema 14. Both unit-test variants passed 137 tests and CI packaged a verified APK. A same-signer Android 13 emulator update launched, migrated, and retained the test note. The transformed APK’s handset walkthrough remains pending. [Stage 2 report](Stage-2/REPORT.md)
+- **Signing and upgrade** — The two downloaded CI APKs have different debug signing certificates. The owner confirmed normal operation of the already installed app, which remains the working baseline. A same-signer local upgrade retained data in the guest. The published CI debug packages require a compatible signer to update an older installation in place.
 
 ## Intake checkpoint
 
@@ -14,15 +14,15 @@
 - **Build and tests** — The pre-transformation Actions run succeeded and listed a downloadable artifact. The Phase 20 report records 134 tests per variant and a successful local debug build. No fresh local transformation tests have run. [Actions run](https://github.com/https10011/2HEARTS2/actions/runs/44439439508) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44439439508/artifacts/14489748983) · [Phase 20 report](../UI-UX/Phase-20/PHASE-20-FINAL-CONSOLIDATION.md)
 - **Visual and runtime evidence** — The baseline review used prior Compose renders and the Phase 20 Android 13 emulator report. Fresh renders and signed-candidate verification remain pending.
 - **Environment** — Preflight found Java 21 and GitHub CLI. JDK 17, SDK 35, `adb`, and Android runtime setup are Stage 1 work. The host exposes no `/dev/kvm`.
-- **Next task** — Verify the Stage 2 commit and CI, and complete the available Android 13 startup and retained-data checks. Then begin Stage 3 visual identity and design tokens. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
+- **Next task** — Begin Stage 3 visual identity and design tokens. Verify palette roles, bundled typography, contrast and font scaling in a rendered Compose reference. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
 
 ## Stage status
 
 | Stage | Status |
 |---|---|
 | 1. Reproducible baseline | Complete |
-| 2. Startup, storage, and upgrade | Local tests and APK passed, runtime and CI open |
-| 3. Visual identity and design tokens | Pending |
+| 2. Startup, storage, and upgrade | Complete |
+| 3. Visual identity and design tokens | Pending, next |
 | 4. Components and motion | Pending |
 | 5. Branding and Android resources | Pending |
 | 6. Navigation and information architecture | Pending |

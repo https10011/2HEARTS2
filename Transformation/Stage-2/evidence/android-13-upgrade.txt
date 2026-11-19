@@ -1,0 +1,16 @@
+Android 13 x86-64 software guest, API 33
+Local APKs share the same verified debug certificate.
+Package manager accepted the v13-to-v14 update with adb shell pm install -r.
+I/TH:Bootstrap( 3333): Starting bootstrap pipeline
+I/TH:Bootstrap( 3333): Stage 1: Initializing database
+I/TH:Bootstrap( 3333): Stage 2: Verifying schema version
+I/TH:Bootstrap( 3333): Stage 3: Initializing device capabilities
+I/TH:Bootstrap( 3333): Stage 4: Starting lifecycle service
+I/TH:Bootstrap( 3333): Stage 5: Initializing notification service
+I/TH:Bootstrap( 3333): Stage 6: Initializing app lock service
+I/TH:Bootstrap( 3333): Bootstrap pipeline completed successfully
+I/TH:AppState( 3333): App state initialized
+MainActivity was the resumed activity after startup.
+The on-device Room database opened as schema 14 and retained the test-owned note written before installing the update.
+The crash buffer had no com.twohearts.app entry.
+The guest reported com.android.systemui ANRs. The first am start -W timed out and an early probe still saw schema 13. The later cold launch let app bootstrap finish.
