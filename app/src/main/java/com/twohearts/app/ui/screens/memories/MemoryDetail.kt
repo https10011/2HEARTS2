@@ -1,5 +1,6 @@
 package com.twohearts.app.ui.screens.memories
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -8,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.data.entity.MediaAsset
@@ -16,19 +18,29 @@ import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.ui.components.ConfirmDialog
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.VideoPreviewDialog
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MemoryDetail(memory: Memory, onEdit: () -> Unit, onDelete: () -> Unit, onBack: () -> Unit, media: List<MediaAsset> = emptyList()) {
     var confirmDelete by remember { mutableStateOf(false) }
+    var videoPath by remember { mutableStateOf<String?>(null) }
     val colors = LocalTwoHeartsColors.current
     Scaffold(topBar = { Header(title = "Memory", onBack = onBack, actions = {
         IconButton(onClick = onEdit) { Icon(ThIcons.Edit, "Edit memory") }
     }) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(bottom = 36.dp)) {
             if (media.isEmpty()) MemoryMediaFrame(null, Modifier.fillMaxWidth().height(260.dp)) else LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(media, key = { it.id }) { MemoryMediaFrame(it, Modifier.width(300.dp).height(260.dp)) }
+                items(media, key = { it.id }) { asset ->
+                    val modifier = Modifier.width(300.dp).height(260.dp)
+                    MemoryMediaFrame(
+                        asset,
+                        if (asset.mimeType.startsWith("video/")) modifier.clickable(
+                            onClickLabel = "Play video", role = Role.Button,
+                        ) { videoPath = asset.filePath } else modifier,
+                    )
+                }
             }
             Column(Modifier.padding(horizontal = 22.dp, vertical = 24.dp)) {
                 Text(DateTimeHelper.formatDisplay(memory.memoryDate).uppercase(), style = MaterialTheme.typography.labelLarge, color = colors.roseDeep)
@@ -43,4 +55,5 @@ fun MemoryDetail(memory: Memory, onEdit: () -> Unit, onDelete: () -> Unit, onBac
         }
     }
     if (confirmDelete) ConfirmDialog(title = "Delete this memory?", message = "The memory will be removed from your story. This cannot be undone.", confirmText = "Delete", onConfirm = { confirmDelete = false; onDelete() }, onDismiss = { confirmDelete = false })
+    videoPath?.let { VideoPreviewDialog(it) { videoPath = null } }
 }

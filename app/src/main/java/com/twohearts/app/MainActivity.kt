@@ -1,5 +1,6 @@
 package com.twohearts.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,6 +13,7 @@ import com.twohearts.app.ui.navigation.AppRouter
 import com.twohearts.app.ui.theme.TwoHeartsTheme
 import com.twohearts.app.ui.theme.TextScalingLevel
 import com.twohearts.app.ui.components.ThLoadingState
+import com.twohearts.app.ui.components.ThEmptyState
 import com.twohearts.app.services.bootstrap.BootstrapService
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
@@ -22,15 +24,29 @@ import com.twohearts.app.services.media.MediaStorage
 import com.twohearts.app.services.media.FileService
 import com.twohearts.app.data.repository.NotificationCenterRepository
 import com.twohearts.app.data.settings.SettingsStorage
+import com.twohearts.app.data.repository.VaultItemRepository
+import com.twohearts.app.services.media.VaultStorage
+import com.twohearts.app.services.notification.OPEN_ALERTS
+import com.twohearts.app.services.notification.ReminderScheduler
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
+    private lateinit var bootstrapService: BootstrapService
+    private var openAlerts by mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         // Initialize bootstrap service
-        val bootstrapService = BootstrapService(this)
+        bootstrapService = BootstrapService(this)
+        openAlerts = intent.action == OPEN_ALERTS
         // Created before setContent so the theme can observe persisted
         // appearance settings from the very first frame.
         val settingsStorage = SettingsStorage.getInstance(this)
@@ -56,14 +72,21 @@ class MainActivity : ComponentActivity() {
             }
 
             var isInitialized by remember { mutableStateOf(false) }
+            var startupFailed by remember { mutableStateOf(false) }
+            var startupAttempt by remember { mutableIntStateOf(0) }
 
             // Initialize services
-            LaunchedEffect(Unit) {
-                val success = bootstrapService.bootstrap()
-                if (success) {
-                    // Must run before the first frame reads the settings.
+            LaunchedEffect(startupAttempt) {
+                startupFailed = false
+                try {
+                    check(bootstrapService.bootstrap())
                     appStateService.initialize()
                     isInitialized = true
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    bootstrapService.stop()
+                    startupFailed = true
                 }
             }
 
@@ -112,6 +135,17 @@ class MainActivity : ComponentActivity() {
                                 bootstrapService.databaseInitializer.reminderDao()
                             )
                         }
+                        LaunchedEffect(reminderRepository) {
+                            val flags = settingsStorage.settings.map { it.notificationsEnabled && it.remindersEnabled }
+                                .distinctUntilChanged()
+                            val scheduler = ReminderScheduler(applicationContext)
+                            reminderRepository.observeAll().combine(flags) { reminders, enabled -> reminders to enabled }
+                                .collect { (reminders, enabled) ->
+                                    withContext(Dispatchers.IO) {
+                                        runCatching { scheduler.reconcile(reminders, enabled) }
+                                    }
+                                }
+                        }
                         val placeRepository = remember {
                             com.twohearts.app.data.repository.PlaceRepository(
                                 bootstrapService.databaseInitializer.placeDao()
@@ -138,11 +172,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // Initialize app state
-                        LaunchedEffect(Unit) {
-                            appStateService.initialize()
-                        }
-
                         // Create services required by AppRouter
                         val searchEngine = remember { SearchEngine() }
                         val notificationCenterRepository = remember {
@@ -151,12 +180,15 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // MediaStorage + FileService stubs (placeholder until full integration)
                         val fileService = remember {
                             FileService(this@MainActivity)
                         }
                         val mediaStorage = remember {
                             MediaStorage(this@MainActivity)
+                        }
+                        val vaultRepository = remember { VaultItemRepository(bootstrapService.databaseInitializer.vaultItemDao()) }
+                        val vaultStorage = remember {
+                            VaultStorage(applicationContext, checkNotNull(bootstrapService.databaseInitializer.getDatabase()), mediaStorage, vaultRepository)
                         }
                         val dataManagementService = remember {
                             DataManagementService(
@@ -187,6 +219,18 @@ class MainActivity : ComponentActivity() {
                             settingsStorage = settingsStorage,
                             mediaAssetDao = bootstrapService.databaseInitializer.mediaAssetDao(),
                             mediaStorage = mediaStorage,
+                            vaultRepository = vaultRepository,
+                            vaultStorage = vaultStorage,
+                            openAlerts = openAlerts,
+                            onAlertsOpened = { openAlerts = false; intent.action = null },
+                        )
+                    } else if (startupFailed) {
+                        ThEmptyState(
+                            title = "Couldn’t open TwoHearts",
+                            description = "Try starting the app again.",
+                            modifier = Modifier.fillMaxSize(),
+                            actionLabel = "Try again",
+                            onAction = { startupAttempt++ },
                         )
                     } else {
                         // Loading state
@@ -197,5 +241,16 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        openAlerts = intent.action == OPEN_ALERTS
+    }
+
+    override fun onDestroy() {
+        if (::bootstrapService.isInitialized) bootstrapService.stop()
+        super.onDestroy()
     }
 }

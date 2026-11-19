@@ -12,6 +12,7 @@ import com.twohearts.app.ui.components.EmptyState
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.Reminder
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.services.datetime.scheduledReminderDate
 import com.twohearts.app.ui.components.ThIcons
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 import java.time.LocalDate
@@ -39,7 +40,7 @@ fun RemindersHome(
 
     val filteredReminders = remember(reminders, selectedTab) {
         when (selectedTab) {
-            0 -> reminders.filter { it.status == "pending" }
+            0 -> reminders.filter { it.status == "pending" }.sortedBy { scheduledReminderDate(it) }
             1 -> reminders.filter { it.status == "completed" }
             else -> reminders
         }
@@ -89,10 +90,11 @@ fun RemindersHome(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 88.dp),
                 ) {
                     item { Text(if (selectedTab == 0) "Coming up" else "Held in mind", style = MaterialTheme.typography.headlineSmall); Text(if (selectedTab == 0) "Gentle nudges for the things that matter." else "The things you've already taken care of.", color = LocalTwoHeartsColors.current.textSecondary) }
-                    items(filteredReminders) { reminder ->
+                    items(filteredReminders, key = { it.id }) { reminder ->
                         ReminderCard(
                             reminder = reminder,
                             onClick = { onReminderClick(reminder.id) },
@@ -116,7 +118,8 @@ fun ReminderCard(
     modifier: Modifier = Modifier
 ) {
     val colors = LocalTwoHeartsColors.current
-    val overdue = runCatching { LocalDate.parse(reminder.scheduledDate).isBefore(LocalDate.now()) }.getOrDefault(false) && reminder.status == "pending"
+    val displayDate = scheduledReminderDate(reminder)
+    val overdue = runCatching { LocalDate.parse(displayDate).isBefore(LocalDate.now()) }.getOrDefault(false) && reminder.status == "pending"
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth()
@@ -149,7 +152,7 @@ fun ReminderCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = DateTimeHelper.formatShortDisplay(reminder.scheduledDate),
+                    text = DateTimeHelper.formatShortDisplay(displayDate),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (overdue) MaterialTheme.colorScheme.error else colors.roseDeep
                 )

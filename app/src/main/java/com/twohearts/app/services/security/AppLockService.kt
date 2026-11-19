@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -31,8 +33,6 @@ class AppLockService(
     private val _lockState = MutableStateFlow<AppLockState>(AppLockState.DISABLED)
     val lockState: StateFlow<AppLockState> = _lockState.asStateFlow()
 
-    private var isUnlocked = false
-
     /**
      * Initialize app lock service.
      * Cold start always locks when enabled.
@@ -41,7 +41,6 @@ class AppLockService(
         val settings = settingsStorage.settings.first()
         if (settings.appLockEnabled) {
             _lockState.value = AppLockState.LOCKED
-            isUnlocked = false
         } else {
             _lockState.value = AppLockState.DISABLED
         }
@@ -84,11 +83,14 @@ class AppLockService(
      * Create a new PIN.
      */
     suspend fun createPin(pin: String) {
-        val salt = PinHash.generateSalt()
-        val hash = PinHash.hash(pin, salt)
-        secureStorage.storePinMaterial(PinHash.encodeSalt(salt), hash)
-        settingsStorage.setAppLockEnabled(true)
-        _lockState.value = AppLockState.LOCKED
+        require(pin.length in 4..8 && pin.all(Char::isDigit))
+        withContext(Dispatchers.IO) {
+            val salt = PinHash.generateSalt()
+            val hash = PinHash.hash(pin, salt)
+            secureStorage.storePinMaterial(PinHash.encodeSalt(salt), hash)
+        }
+        if (!isEnabled()) settingsStorage.setAppLockEnabled(true)
+        _lockState.value = AppLockState.UNLOCKED
         notifyEnabled()
     }
 
@@ -107,7 +109,6 @@ class AppLockService(
      */
     fun unlock(pin: String): Boolean {
         if (verifyPin(pin)) {
-            isUnlocked = true
             _lockState.value = AppLockState.UNLOCKED
             notifyUnlocked()
             return true
@@ -119,7 +120,6 @@ class AppLockService(
      * Lock the app.
      */
     fun lock() {
-        isUnlocked = false
         _lockState.value = AppLockState.LOCKED
         notifyLocked()
     }
@@ -128,10 +128,9 @@ class AppLockService(
      * Disable app lock.
      */
     suspend fun disable() {
-        secureStorage.clearPin()
         settingsStorage.setAppLockEnabled(false)
         _lockState.value = AppLockState.DISABLED
-        isUnlocked = false
+        withContext(Dispatchers.IO) { secureStorage.clearPin() }
         notifyDisabled()
     }
 

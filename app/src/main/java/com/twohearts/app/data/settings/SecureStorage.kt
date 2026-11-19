@@ -33,10 +33,10 @@ class SecureStorage(private val context: Context) {
      * Store PIN hash material (salt + verifier).
      */
     fun storePinMaterial(salt: String, verifier: String) {
-        sharedPreferences.edit()
+        check(sharedPreferences.edit()
             .putString(KEY_PIN_SALT, salt)
             .putString(KEY_PIN_VERIFIER, verifier)
-            .apply()
+            .commit())
     }
 
     /**
@@ -65,10 +65,10 @@ class SecureStorage(private val context: Context) {
      * Clear PIN material.
      */
     fun clearPin() {
-        sharedPreferences.edit()
+        check(sharedPreferences.edit()
             .remove(KEY_PIN_SALT)
             .remove(KEY_PIN_VERIFIER)
-            .apply()
+            .commit())
     }
 
     /**

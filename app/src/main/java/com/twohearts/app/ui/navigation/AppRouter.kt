@@ -74,6 +74,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.twohearts.app.services.appstate.AppStateService
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.services.security.AppLockService
+import com.twohearts.app.services.security.AppLockState
+import com.twohearts.app.data.repository.VaultItemRepository
+import com.twohearts.app.services.media.VaultStorage
 import com.twohearts.app.data.repository.NoteRepository
 import com.twohearts.app.data.repository.MemoryRepository
 import com.twohearts.app.data.repository.TimelineEventRepository
@@ -98,7 +101,7 @@ import com.twohearts.app.services.media.MediaStorage
  * - Route transitions (fade + rise)
  */
 @Composable
-fun AppRouter(
+internal fun AppRouter(
     appStateService: AppStateService,
     relationshipService: RelationshipService,
     appLockService: AppLockService,
@@ -117,6 +120,10 @@ fun AppRouter(
     settingsStorage: SettingsStorage,
     mediaAssetDao: MediaAssetDao,
     mediaStorage: MediaStorage,
+    vaultRepository: VaultItemRepository,
+    vaultStorage: VaultStorage,
+    openAlerts: Boolean = false,
+    onAlertsOpened: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val currentRoute by navController.currentBackStackEntryAsState()
@@ -133,6 +140,7 @@ fun AppRouter(
     // Check if onboarding is complete
     val isOnboarded by appStateService.isOnboarded.collectAsState()
     val onboardingStage by appStateService.onboardingStage.collectAsState()
+    val lockState by appLockService.lockState.collectAsStateWithLifecycle()
 
     // Phase 3: the shell is eligible once the commit has persisted, but the
     // completion screen still has to be shown. `acknowledged` is seeded from
@@ -163,7 +171,15 @@ fun AppRouter(
                 onboardingAcknowledged = true
             }
         )
+    } else if (lockState == AppLockState.LOCKED) {
+        AppLockGate(onUnlock = { pin -> withContext(Dispatchers.IO) { appLockService.unlock(pin) } })
     } else {
+        LaunchedEffect(openAlerts) {
+            if (openAlerts) {
+                navController.navigate(RoutePath.APP_NOTIFICATIONS) { launchSingleTop = true }
+                onAlertsOpened()
+            }
+        }
         // App shell with navigation
         //
         // Phase 2: "can we go back" is derived from the actual back stack.
@@ -953,42 +969,50 @@ fun AppRouter(
 
                 // Vault
                 composable(RoutePath.APP_VAULT) {
-                    val vaultItems by remember { mutableStateOf(emptyList<com.twohearts.app.data.entity.VaultItem>()) }
-                    val isVaultLocked = appLockService.isLocked()
-                    
-                    VaultEntryRoute(
-                        isVaultLocked = isVaultLocked,
-                        vaultItems = vaultItems,
-                        onPinEntered = { pin ->
-                            appLockService.verifyPin(pin)
+                    val items by remember { vaultRepository.observeAll() }.collectAsStateWithLifecycle(emptyList())
+                    VaultHome(
+                        items = items,
+                        onItemClick = { item ->
+                            navController.navigate(RoutePath.APP_VAULT_CONTENT.replace(":contentId", android.net.Uri.encode(item.id)))
                         },
-                        onPinError = { error ->
-                            // Show error toast
-                        },
-                        onItemClicked = { item ->
-                            navController.navigate("/app/vault/${item.id}")
-                        },
-                        onAddClicked = {
-                            navController.navigate(RoutePath.APP_VAULT_ADD)
-                        }
+                        onAddClick = { navController.navigate(RoutePath.APP_VAULT_ADD) },
+                        onBack = { navController.popBackStack() },
                     )
                 }
 
                 composable(RoutePath.APP_VAULT_ADD) {
+                    val action = rememberRecordAction()
                     AddVaultContent(
-                        onBack = {
-                            navController.popBackStack()
+                        saving = action.running,
+                        onBack = { if (!action.running) navController.popBackStack() },
+                        onContentAdded = { title, type, payload ->
+                            action.run("Saved to Vault.", "Couldn’t save this vault item.", afterWrite = { navController.popBackStack() }) {
+                                vaultStorage.add(title, type.name.lowercase(), payload)
+                            }
                         },
-                        onContentAdded = { title, contentType, contentUri ->
-                            // Will be implemented with repository
-                            navController.popBackStack()
-                        }
                     )
                 }
 
-                composable(RoutePath.APP_VAULT_CONTENT) {
-                    // Placeholder - will be implemented with item loading
-                    Text("Vault Content Viewer")
+                composable(RoutePath.APP_VAULT_CONTENT.replace(":contentId", "{contentId}")) { route ->
+                    val id = route.arguments?.getString("contentId") ?: return@composable
+                    val lookup = rememberRecordLookup(id) {
+                        vaultRepository.getById(id)?.let { it to it.mediaRef?.let { ref -> mediaAssetDao.getById(ref) } }
+                    }
+                    val action = rememberRecordAction()
+                    val item = lookup.record
+                    if (item != null) {
+                        VaultContentViewer(
+                            item = item.first,
+                            asset = item.second,
+                            onBack = { if (!action.running) navController.popBackStack() },
+                            onDelete = {
+                                action.run("Vault item deleted.", "Couldn’t delete this vault item.", afterWrite = { navController.popBackStack() }) {
+                                    vaultRepository.softDelete(it.id)
+                                }
+                            },
+                            onExport = { uri -> vaultStorage.export(checkNotNull(item.second), uri) },
+                        )
+                    } else RecordLookupScreen("Vault item", lookup) { navController.popBackStack() }
                 }
 
                 // Yuki
@@ -1240,28 +1264,19 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_SETTINGS_SECURITY) {
-                    val isAppLockEnabled = appLockService.isEnabled()
-                    
-                    val scope = rememberCoroutineScope()
+                    val securityState by appLockService.lockState.collectAsStateWithLifecycle()
                     SecuritySettingsScreen(
-                        isAppLockEnabled = isAppLockEnabled,
-                        onAppLockToggle = { enabled ->
-                            scope.launch {
-                                if (enabled) {
-                                    // Will prompt for PIN setup
-                                } else {
-                                    appLockService.disable()
-                                }
-                            }
+                        isAppLockEnabled = securityState != AppLockState.DISABLED,
+                        onCreatePin = appLockService::createPin,
+                        onChangePin = { old, new ->
+                            withContext(Dispatchers.IO) { appLockService.changePin(old, new) }
                         },
-                        onChangePin = { oldPin, newPin ->
-                            scope.launch {
-                                appLockService.changePin(oldPin, newPin)
-                            }
+                        onDisableLock = { pin ->
+                            val verified = withContext(Dispatchers.IO) { appLockService.verifyPin(pin) }
+                            if (verified) appLockService.disable()
+                            verified
                         },
-                        onBack = {
-                            navController.popBackStack()
-                        }
+                        onBack = { navController.popBackStack() },
                     )
                 }
 

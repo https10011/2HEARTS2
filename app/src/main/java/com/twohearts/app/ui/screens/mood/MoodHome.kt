@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.components.EmptyState
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.MoodEntry
+import com.twohearts.app.services.datetime.DateTimeHelper
 
 /**
  * MoodEntryData — mood entry display data.
@@ -175,7 +176,7 @@ fun MoodHome(
             // Recent moods
             item {
                 Text(
-                    text = "Recent",
+                    text = "Mood history",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -193,7 +194,7 @@ fun MoodHome(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "View History",
+                            text = "View history",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.weight(1f)
@@ -204,6 +205,20 @@ fun MoodHome(
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
+                }
+            }
+            items(recentMoods.take(3), key = { it.id }) { entry ->
+                val mood = MoodMeta.getMood(entry.moodValue)
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(mood?.label ?: entry.moodValue, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        DateTimeHelper.formatShortDisplay(entry.entryDate),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall,
+                    )
                 }
             }
         }

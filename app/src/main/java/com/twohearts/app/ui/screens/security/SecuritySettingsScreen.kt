@@ -1,336 +1,155 @@
 package com.twohearts.app.ui.screens.security
 
-import com.twohearts.app.ui.components.ThIcons
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.ThTopBar
+import com.twohearts.app.ui.components.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
-/**
- * Security settings screen - manage app lock and PIN.
- */
-@OptIn(ExperimentalMaterial3Api::class)
+private enum class PinAction(val title: String, val confirm: String) {
+    CREATE("Set an app PIN", "Enable lock"),
+    CHANGE("Change your PIN", "Save PIN"),
+    DISABLE("Turn off app lock?", "Turn off"),
+}
+
 @Composable
 fun SecuritySettingsScreen(
     isAppLockEnabled: Boolean,
-    onAppLockToggle: (Boolean) -> Unit,
-    onChangePin: (oldPin: String, newPin: String) -> Unit,
+    onCreatePin: suspend (String) -> Unit,
+    onChangePin: suspend (String, String) -> Boolean,
+    onDisableLock: suspend (String) -> Boolean,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    var showChangePinDialog by remember { mutableStateOf(false) }
-    var currentPin by remember { mutableStateOf("") }
-    var newPin by remember { mutableStateOf("") }
-    var confirmPin by remember { mutableStateOf("") }
-    var pinError by remember { mutableStateOf<String?>(null) }
-    
-    Scaffold(
-        topBar = {
-            ThTopBar(title = "Security Settings", onBack = onBack)
-        }
-    ) { paddingValues ->
+    var action by remember { mutableStateOf<PinAction?>(null) }
+    val feedback = useToast()
+    Scaffold(topBar = { ThTopBar(title = "Privacy and security", onBack = onBack) }) { padding ->
         Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+            modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // App Lock Section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 60.dp).toggleable(
+                    value = isAppLockEnabled, role = Role.Switch,
+                    onValueChange = { action = if (it) PinAction.CREATE else PinAction.DISABLE },
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "App Lock",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "Require PIN to open the app",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        
-                        Switch(
-                            checked = isAppLockEnabled,
-                            onCheckedChange = onAppLockToggle,
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = Color(0xFF6A1B2B) // Burgundy
-                            )
-                        )
-                    }
-                    
-                    if (isAppLockEnabled) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outlineVariant
-                        )
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        // Change PIN Button
-                        OutlinedButton(
-                            onClick = { showChangePinDialog = true },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = Color(0xFF6A1B2B)
-                            )
-                        ) {
-                            Icon(
-                                imageVector = ThIcons.Key,
-                                contentDescription = "Change PIN",
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Change PIN")
-                        }
-                    }
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("App lock", style = MaterialTheme.typography.titleMedium)
+                    Text("Ask for your PIN when reopening TwoHearts.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+                Switch(isAppLockEnabled, onCheckedChange = null)
             }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Security Info Section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            HorizontalDivider()
+            if (isAppLockEnabled) {
+                ThButton(
+                    { action = PinAction.CHANGE }, variant = ButtonVariant.SECONDARY,
+                    icon = ThIcons.Lock, text = "Change PIN",
                 )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = ThIcons.Info,
-                            contentDescription = "Info",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Security Information",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    SecurityInfoItem(
-                        title = "PIN Storage",
-                        description = "Your PIN is hashed with PBKDF2 (120k iterations) and stored in Android Keystore"
-                    )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    SecurityInfoItem(
-                        title = "Lock Behavior",
-                        description = "App locks automatically on cold start and after background timeout"
-                    )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    SecurityInfoItem(
-                        title = "Vault Access",
-                        description = "Vault uses the same PIN as app lock for seamless security"
-                    )
-                }
             }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Emergency Reset Section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = ThIcons.Warning,
-                            contentDescription = "Warning",
-                            tint = Color(0xFFA33A2A), // Error red
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Emergency Reset",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = Color(0xFFA33A2A)
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Text(
-                        text = "If you forget your PIN, you can reset the app from Settings > Storage > Reset App. This will delete all data.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                }
-            }
+            Text("Private Vault", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Vault items stay on this device. When app lock is enabled, your PIN protects access to them and the rest of TwoHearts.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
-    
-    // Change PIN Dialog
-    if (showChangePinDialog) {
-        AlertDialog(
-            onDismissRequest = { 
-                showChangePinDialog = false
-                currentPin = ""
-                newPin = ""
-                confirmPin = ""
-                pinError = null
-            },
-            title = { Text("Change PIN") },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = currentPin,
-                        onValueChange = { currentPin = it },
-                        label = { Text("Current PIN") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    OutlinedTextField(
-                        value = newPin,
-                        onValueChange = { newPin = it },
-                        label = { Text("New PIN") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    OutlinedTextField(
-                        value = confirmPin,
-                        onValueChange = { confirmPin = it },
-                        label = { Text("Confirm New PIN") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    
-                    if (pinError != null) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = pinError!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        when {
-                            newPin.length < 4 -> pinError = "PIN must be at least 4 digits"
-                            newPin != confirmPin -> pinError = "PINs do not match"
-                            else -> {
-                                onChangePin(currentPin, newPin)
-                                showChangePinDialog = false
-                                currentPin = ""
-                                newPin = ""
-                                confirmPin = ""
-                                pinError = null
-                            }
-                        }
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = Color(0xFF6A1B2B)
-                    )
-                ) {
-                    Text("Change PIN")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { 
-                    showChangePinDialog = false
-                    currentPin = ""
-                    newPin = ""
-                    confirmPin = ""
-                    pinError = null
-                }) {
-                    Text("Cancel")
-                }
+    action?.let { current ->
+        PinEditDialog(current, dismiss = { action = null }) { old, new ->
+            val success = when (current) {
+                PinAction.CREATE -> { onCreatePin(new); true }
+                PinAction.CHANGE -> onChangePin(old, new)
+                PinAction.DISABLE -> onDisableLock(old)
             }
-        )
+            if (success) {
+                feedback.success(when (current) {
+                    PinAction.CREATE -> "App lock enabled."
+                    PinAction.CHANGE -> "PIN changed."
+                    PinAction.DISABLE -> "App lock turned off."
+                })
+                action = null
+            }
+            success
+        }
     }
 }
 
 @Composable
-private fun SecurityInfoItem(
-    title: String,
-    description: String,
-    modifier: Modifier = Modifier
+private fun PinEditDialog(
+    action: PinAction,
+    dismiss: () -> Unit,
+    submit: suspend (String, String) -> Boolean,
 ) {
-    Column(modifier = modifier) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
+    val scope = rememberCoroutineScope()
+    var old by remember { mutableStateOf("") }
+    var new by remember { mutableStateOf("") }
+    var confirm by remember { mutableStateOf("") }
+    var running by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = { if (!running) dismiss() },
+        title = { Text(action.title) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (action != PinAction.CREATE) PinField("Current PIN", old, !running) { old = it }
+                if (action != PinAction.DISABLE) {
+                    Text("Choose 4 to 8 digits.", style = MaterialTheme.typography.bodyMedium)
+                    PinField("New PIN", new, !running) { new = it }
+                    PinField("Confirm new PIN", confirm, !running) { confirm = it }
+                }
+                error?.let { ThStatusBanner(StatusVariant.ERROR, it) }
+            }
+        },
+        confirmButton = {
+            ThButton(
+                onClick = {
+                    if (!running) {
+                        if (action != PinAction.DISABLE && new != confirm) {
+                            error = "The new PINs don’t match."
+                        } else {
+                            running = true
+                            error = null
+                            scope.launch {
+                                try {
+                                    if (!submit(old, new)) error = "The current PIN didn’t match."
+                                } catch (cancelled: CancellationException) {
+                                    throw cancelled
+                                } catch (_: Exception) {
+                                    error = "Couldn’t update app lock. Try again."
+                                } finally {
+                                    running = false
+                                }
+                            }
+                        }
+                    }
+                },
+                enabled = (action == PinAction.CREATE || old.length >= 4) &&
+                    (action == PinAction.DISABLE || new.length >= 4 && confirm.length >= 4),
+                loading = running, text = action.confirm,
+            )
+        },
+        dismissButton = { ThButton(dismiss, enabled = !running, text = "Cancel", variant = ButtonVariant.GHOST) },
+    )
+}
+
+@Composable
+private fun PinField(label: String, value: String, enabled: Boolean, onChange: (String) -> Unit) {
+    ThInput(
+        value, { onChange(it.filter(Char::isDigit).take(8)) },
+        label = label, enabled = enabled, keyboardType = KeyboardType.NumberPassword,
+        visualTransformation = PasswordVisualTransformation(),
+    )
 }

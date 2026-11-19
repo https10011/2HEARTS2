@@ -11,6 +11,7 @@ import com.twohearts.app.ui.components.ConfirmDialog
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.data.entity.Reminder
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.services.datetime.scheduledReminderDate
 import com.twohearts.app.ui.components.ThIcons
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 
@@ -107,7 +108,7 @@ fun ReminderDetail(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = DateTimeHelper.formatDisplay(reminder.scheduledDate),
+                text = DateTimeHelper.formatDisplay(scheduledReminderDate(reminder)),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -133,7 +134,11 @@ fun ReminderDetail(
 
             // Notification status
             Text(
-                text = if (reminder.notificationEnabled) "Notifications enabled" else "Notifications disabled",
+                text = when {
+                    !reminder.notificationEnabled -> "Notifications disabled"
+                    reminder.scheduledTime.isNullOrBlank() -> "Add a time to receive an alert"
+                    else -> "Notifications enabled for this reminder"
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
             )

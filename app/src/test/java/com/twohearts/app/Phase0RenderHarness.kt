@@ -78,6 +78,32 @@ class Phase0RenderHarness {
 
     @Test
     @Config(qualifiers = "w320dp-h740dp-mdpi")
+    fun renderPhase18PrivacyFlows() {
+        render("p18-lock", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            com.twohearts.app.ui.screens.security.AppLockGate(onUnlock = { false })
+        }
+        render("p18-lock-settings", scale = TextScalingLevel.EXTRA_LARGE) {
+            com.twohearts.app.ui.screens.security.SecuritySettingsScreen(
+                isAppLockEnabled = true, onCreatePin = {}, onChangePin = { _, _ -> true },
+                onDisableLock = { true }, onBack = {},
+            )
+        }
+        render("p18-vault-add", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            com.twohearts.app.ui.screens.vault.AddVaultContent({}, { _, _, _ -> })
+        }
+        render("p18-vault-note", scale = TextScalingLevel.EXTRA_LARGE) {
+            com.twohearts.app.ui.screens.vault.VaultContentViewer(
+                com.twohearts.app.data.entity.VaultItem(
+                    "A vault layout fixture", "note", "This sample exercises the private note viewer with wrapped text.",
+                    id = "vault-fixture", createdAt = now, updatedAt = now,
+                ),
+                onBack = {}, onDelete = {},
+            )
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w320dp-h740dp-mdpi")
     fun renderPhase17BoundedPreview() {
         val app = ApplicationProvider.getApplicationContext<Application>()
         val source = File.createTempFile("preview", ".png", app.cacheDir)

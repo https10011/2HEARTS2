@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.data.entity.ImportantDate
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.services.datetime.nextCalendarOccurrence
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.ui.components.ConfirmDialog
 import com.twohearts.app.ui.components.Input
@@ -150,8 +151,5 @@ private fun ImportantDateEditor(
 
 internal fun nextOccurrence(item: ImportantDate, today: LocalDate = LocalDate.now()): LocalDate {
     val original = runCatching { LocalDate.parse(item.date) }.getOrElse { return today }
-    if (item.recurrence == "none") return original
-    var next = when (item.recurrence) { "monthly" -> original.withYear(today.year).withMonth(today.monthValue).withDayOfMonth(original.dayOfMonth.coerceAtMost(today.lengthOfMonth())); else -> original.withYear(today.year) }
-    while (next.isBefore(today)) next = if (item.recurrence == "monthly") next.plusMonths(1) else next.plusYears(1)
-    return next
+    return nextCalendarOccurrence(original, item.recurrence, today) ?: original
 }

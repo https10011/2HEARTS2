@@ -1,8 +1,8 @@
 package com.twohearts.app.services.lifecycle
 
-import android.app.Application
-import android.os.Bundle
+import android.os.SystemClock
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import java.util.concurrent.CopyOnWriteArrayList
@@ -16,31 +16,34 @@ import java.util.concurrent.CopyOnWriteArrayList
  * - Lifecycle event listeners
  * - Background time tracking
  */
-class LifecycleService(application: Application) {
+class LifecycleService(
+    private val lifecycle: Lifecycle = ProcessLifecycleOwner.get().lifecycle,
+    private val elapsedRealtime: () -> Long = SystemClock::elapsedRealtime,
+) {
 
     private val listeners = CopyOnWriteArrayList<LifecycleListener>()
     private var lastBackgroundTime: Long = 0L
     private var isInBackground = false
 
-    /**
-     * Initialize lifecycle observation.
-     */
-    fun start() {
-        ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onStart(owner: LifecycleOwner) {
-                // App came to foreground
-                isInBackground = false
+    private val observer = object : DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) {
+            try {
                 notifyForeground()
+            } finally {
+                isInBackground = false
             }
+        }
 
-            override fun onStop(owner: LifecycleOwner) {
-                // App went to background
-                isInBackground = true
-                lastBackgroundTime = System.currentTimeMillis()
-                notifyBackground()
-            }
-        })
+        override fun onStop(owner: LifecycleOwner) {
+            isInBackground = true
+            lastBackgroundTime = elapsedRealtime()
+            notifyBackground()
+        }
     }
+
+    fun start() = lifecycle.addObserver(observer)
+
+    fun stop() = lifecycle.removeObserver(observer)
 
     /**
      * Check if app is currently in background.
@@ -52,7 +55,7 @@ class LifecycleService(application: Application) {
      */
     fun getBackgroundDuration(): Long {
         if (!isInBackground) return 0
-        return System.currentTimeMillis() - lastBackgroundTime
+        return elapsedRealtime() - lastBackgroundTime
     }
 
     /**
@@ -61,7 +64,7 @@ class LifecycleService(application: Application) {
     fun hasExceededTimeout(timeoutSeconds: Int): Boolean {
         val backgroundMs = getBackgroundDuration()
         val timeoutMs = timeoutSeconds * 1000L
-        return backgroundMs > timeoutMs
+        return isInBackground && backgroundMs >= timeoutMs
     }
 
     /**

@@ -36,6 +36,12 @@ class MediaStorage(private val context: Context) {
      */
     fun store(uri: Uri, mimeType: String): MediaAssetInfo? {
         if (!isValidMimeType(mimeType)) return null
+        return storeCopy(uri, mimeType)
+    }
+
+    internal fun storeDocument(uri: Uri, mimeType: String): MediaAssetInfo? = storeCopy(uri, mimeType)
+
+    private fun storeCopy(uri: Uri, mimeType: String): MediaAssetInfo? {
         var unfinished: File? = null
         return try {
             val declaredSize = context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length }

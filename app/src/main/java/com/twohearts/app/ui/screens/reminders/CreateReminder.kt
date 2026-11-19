@@ -161,7 +161,17 @@ fun CreateReminder(
                     }
                 }
             }
-            Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text("Notify me"); Text("TwoHearts will remind you on this device.", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary) }; Switch(notificationEnabled, { notificationEnabled = it }) }
+            Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("Notify me")
+                    Text(
+                        if (scheduledTime.isBlank()) "Add a time to receive an alert on this device."
+                        else "TwoHearts uses Android notifications for this reminder.",
+                        style = MaterialTheme.typography.bodySmall, color = colors.textSecondary,
+                    )
+                }
+                Switch(notificationEnabled, { notificationEnabled = it })
+            }
             if (attempted && title.isBlank()) Text("Give this reminder a title.", color = MaterialTheme.colorScheme.error)
             if (attempted && !validDate) Text("Use a valid date in yyyy-mm-dd format.", color = MaterialTheme.colorScheme.error)
             if (attempted && !validTime) Text("Use a 24-hour time such as 18:30.", color = MaterialTheme.colorScheme.error)

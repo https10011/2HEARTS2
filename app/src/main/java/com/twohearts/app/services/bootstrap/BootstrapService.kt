@@ -7,6 +7,7 @@ import com.twohearts.app.services.lifecycle.LifecycleService
 import com.twohearts.app.services.notification.NotificationService
 import com.twohearts.app.services.security.AppLockService
 import com.twohearts.app.services.logger.Logger
+import kotlinx.coroutines.CancellationException
 
 /**
  * BootstrapService — ordered initialization pipeline.
@@ -63,7 +64,7 @@ class BootstrapService(private val context: Context) {
 
             // Stage 4: lifecycle
             logger.info("Stage 4: Starting lifecycle service")
-            lifecycleService = LifecycleService(context.applicationContext as android.app.Application)
+            lifecycleService = LifecycleService()
             lifecycleService.start()
 
             // Stage 5: notifications
@@ -83,10 +84,16 @@ class BootstrapService(private val context: Context) {
 
             logger.info("Bootstrap pipeline completed successfully")
             true
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (e: Exception) {
             logger.error("Bootstrap pipeline failed", e)
             false
         }
+    }
+
+    fun stop() {
+        if (::lifecycleService.isInitialized) lifecycleService.stop()
     }
 
 // Access services via their property names directly:

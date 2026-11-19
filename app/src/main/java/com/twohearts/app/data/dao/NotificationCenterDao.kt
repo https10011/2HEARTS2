@@ -2,6 +2,7 @@ package com.twohearts.app.data.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.twohearts.app.data.entity.NotificationCenterEntry
@@ -27,6 +28,9 @@ interface NotificationCenterDao {
 
     @Insert
     suspend fun insert(entry: NotificationCenterEntry)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfAbsent(entry: NotificationCenterEntry): Long
 
     @Update
     suspend fun update(entry: NotificationCenterEntry)

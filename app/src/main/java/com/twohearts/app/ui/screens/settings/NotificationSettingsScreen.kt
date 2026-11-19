@@ -1,7 +1,11 @@
 package com.twohearts.app.ui.screens.settings
 
 import android.content.Intent
+import android.Manifest
+import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
@@ -31,6 +35,9 @@ fun NotificationSettingsScreen(settingsStorage: SettingsStorage, onBack: () -> U
     val owner = LocalLifecycleOwner.current
     val manager = remember(context) { NotificationManagerCompat.from(context) }
     var allowed by remember { mutableStateOf(manager.areNotificationsEnabled()) }
+    val requestPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        allowed = granted
+    }
     DisposableEffect(owner, manager) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) allowed = manager.areNotificationsEnabled()
@@ -55,7 +62,15 @@ fun NotificationSettingsScreen(settingsStorage: SettingsStorage, onBack: () -> U
                 checked = settings.remindersEnabled, enabled = settings.notificationsEnabled,
                 onChange = { enabled -> scope.launch { settingsStorage.setRemindersEnabled(enabled) } },
             )
-            if (!allowed) ThStatusBanner(StatusVariant.INFO, "Android notifications are off for TwoHearts.")
+            if (!allowed) {
+                ThStatusBanner(StatusVariant.INFO, "Android notifications are off for TwoHearts.")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ThButton(
+                        onClick = { requestPermission.launch(Manifest.permission.POST_NOTIFICATIONS) },
+                        text = "Allow Android alerts",
+                    )
+                }
+            }
             ThButton(
                 onClick = {
                     val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
