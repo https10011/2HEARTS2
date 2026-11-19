@@ -1,5 +1,7 @@
 package com.twohearts.app.ui.screens.yuki
 
+import android.os.Build
+import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -10,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
@@ -30,6 +33,17 @@ fun YukiScreen(viewModel: YukiViewModel, onBack: () -> Unit) {
     val visible by lifecycle.currentStateFlow.collectAsState()
     val active = visible.isAtLeast(Lifecycle.State.STARTED)
     val state = presentation.state
+    val view = LocalView.current
+    var lastLevel by remember { mutableStateOf(state?.level) }
+
+    LaunchedEffect(state?.level) {
+        val level = state?.level ?: return@LaunchedEffect
+        val previous = lastLevel
+        lastLevel = level
+        if (active && previous != null && level > previous && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+        }
+    }
 
     LaunchedEffect(active) {
         if (active) {

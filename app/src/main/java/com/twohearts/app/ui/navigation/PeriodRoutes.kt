@@ -14,6 +14,7 @@ import com.twohearts.app.data.repository.generateId
 import com.twohearts.app.data.repository.nowUtc
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.ui.screens.period.*
+import com.twohearts.app.ui.components.useToast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -67,6 +68,7 @@ internal fun NavGraphBuilder.periodRoutes(
     }
 
     composable(RoutePath.APP_PERIOD_SETTINGS) {
+        val feedback = useToast()
         val scope = rememberCoroutineScope()
         val saved by remember { settings.observe() }.collectAsStateWithLifecycle(initialValue = null)
         var saving by remember { mutableStateOf(false) }
@@ -85,6 +87,7 @@ internal fun NavGraphBuilder.periodRoutes(
                     scope.launch {
                         try {
                             settings.saveLengths(cycle, period)
+                            feedback.success("Cycle settings saved.")
                             back()
                         } catch (cancelled: CancellationException) {
                             throw cancelled
@@ -135,23 +138,25 @@ private fun PeriodEntryForm(
     repository: PeriodEntryRepository,
     save: suspend (String, String?, String, String?) -> Unit,
 ) {
+    val feedback = useToast()
     val scope = rememberCoroutineScope()
     var saving by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     BackHandler(saving) {}
 
-    fun submit(message: String, action: suspend () -> Unit) {
+    fun submit(success: String, failure: String, action: suspend () -> Unit) {
         if (saving) return
         saving = true
         error = null
         scope.launch {
             try {
                 action()
+                feedback.success(success)
                 back()
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                error = message
+                error = failure
             } finally {
                 saving = false
             }
@@ -166,9 +171,9 @@ private fun PeriodEntryForm(
         initialNote = entry?.note.orEmpty(),
         onBack = { if (!saving) back() },
         onSave = { start, end, flow, note ->
-            submit("Couldn’t save this entry. Try again.") { save(start, end, flow, note) }
+            submit("Period entry saved.", "Couldn’t save this entry. Try again.") { save(start, end, flow, note) }
         },
-        onDelete = entry?.let { { submit("Couldn’t delete this entry. Try again.") { repository.softDelete(it.id) } } },
+        onDelete = entry?.let { { submit("Period entry deleted.", "Couldn’t delete this entry. Try again.") { repository.softDelete(it.id) } } },
         saving = saving,
         error = error,
     )

@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.components.ToastProvider
+import com.twohearts.app.ui.components.ToastState
 
 /**
  * AppShell — the layout that wraps every in-app screen.
@@ -50,11 +52,12 @@ import com.twohearts.app.ui.components.ToastProvider
  *    consumed, which is the intended contract — see `ThScreen`).
  */
 @Composable
-fun AppShell(
+internal fun AppShell(
     currentRoute: String,
     onNavigate: (String) -> Unit,
     onBack: () -> Unit,
     canNavigateBack: Boolean,
+    feedback: ToastState = remember { ToastState() },
     content: @Composable (PaddingValues) -> Unit,
 ) {
     // Phase 2: only intercept back when there is somewhere to go back to.
@@ -74,7 +77,7 @@ fun AppShell(
     val showBottomNav = NavConfig.isPrimaryRoute(currentRoute)
     val bottomInset = ShellLayout.contentBottomInsetFor(currentRoute)
 
-    ToastProvider {
+    ToastProvider(state = feedback, bottomInset = bottomInset) {
         CompositionLocalProvider(LocalShellRoute provides currentRoute) {
             Box(
                 modifier = Modifier

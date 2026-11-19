@@ -12,6 +12,7 @@ import androidx.room.withTransaction
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
+import com.twohearts.app.ui.components.useToast
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -196,6 +197,7 @@ fun AppRouter(
                 navController.popBackStack()
             }
         ) { paddingValues ->
+            val feedback = useToast()
             NavHost(
                 navController = navController,
                 startDestination = RoutePath.APP_HOME,
@@ -329,11 +331,10 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_NOTES_ADD) {
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     NoteEditor(
                         onSave = { title, content, category ->
-                            scope.launch {
-                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            action.run("Note saved.", "Couldn’t save this note.", afterWrite = { navController.popBackStack() }) {
                                 noteRepository.create(
                                     com.twohearts.app.data.entity.Note(
                                         title = title,
@@ -344,19 +345,17 @@ fun AppRouter(
                                         updatedAt = DateTimeHelper.nowUtc()
                                     )
                                 )
-                                }
-                                navController.popBackStack()
                             }
                         },
                         onBack = {
-                            navController.popBackStack()
+                            if (!action.running) navController.popBackStack()
                         }
                     )
                 }
 
                 composable("/app/notes/{noteId}") { backStackEntry ->
                     val noteId = backStackEntry.arguments?.getString("noteId") ?: return@composable
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(noteId) {
                         noteRepository.getById(noteId)
                     }
@@ -365,16 +364,15 @@ fun AppRouter(
                         NoteDetail(
                             note = n,
                             onEdit = {
-                                navController.navigate("/app/notes/$noteId/edit")
+                                if (!action.running) navController.navigate("/app/notes/$noteId/edit")
                             },
                             onDelete = {
-                                scope.launch {
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { noteRepository.softDelete(n.id) }
-                                    navController.popBackStack()
+                                action.run("Note deleted.", "Couldn’t delete this note.", afterWrite = { navController.popBackStack() }) {
+                                    noteRepository.softDelete(n.id)
                                 }
                             },
                             onBack = {
-                                navController.popBackStack()
+                                if (!action.running) navController.popBackStack()
                             },
                         )
                     } ?: RecordLookupScreen("Note", lookup) { navController.popBackStack() }
@@ -382,7 +380,7 @@ fun AppRouter(
 
                 composable("/app/notes/{noteId}/edit") { backStackEntry ->
                     val noteId = backStackEntry.arguments?.getString("noteId") ?: return@composable
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(noteId) {
                         noteRepository.getById(noteId)
                     }
@@ -394,19 +392,16 @@ fun AppRouter(
                             initialContent = n.content,
                             initialCategory = NoteCategory.fromString(n.category),
                             onSave = { title, content, category ->
-                                scope.launch {
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                    noteRepository.update(n.id, mapOf(
+                                action.run("Note saved.", "Couldn’t save this note.", afterWrite = { navController.popBackStack() }) {
+                                    checkNotNull(noteRepository.update(n.id, mapOf(
                                         "title" to title,
                                         "content" to content,
                                         "category" to category.name.lowercase()
-                                    ))
-                                    }
-                                    navController.popBackStack()
+                                    )))
                                 }
                             },
                             onBack = {
-                                navController.popBackStack()
+                                if (!action.running) navController.popBackStack()
                             },
                         )
                     } ?: RecordLookupScreen("Note", lookup) { navController.popBackStack() }
@@ -438,42 +433,46 @@ fun AppRouter(
 
                 composable(RoutePath.APP_MEMORIES_ADD) {
                     val context = LocalContext.current
-                    val scope = rememberCoroutineScope()
-                    var saving by remember { mutableStateOf(false) }
+                    val action = rememberRecordAction()
                     AddMemory(
-                        saving = saving,
+                        saving = action.running,
                         onSave = { title, caption, memoryDate, selectedMedia ->
-                            saving = true
-                            scope.launch {
+                            var missingAttachment = false
+                            action.run(
+                                "Memory saved.", "Couldn’t save this memory.",
+                                afterWrite = { navController.popBackStack() },
+                                warning = { if (missingAttachment) "Memory saved. Some attachments couldn’t be added." else null },
+                            ) {
                                 val memoryId = generateId()
-                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                    memoryRepository.create(com.twohearts.app.data.entity.Memory(
-                                        title = title,
-                                        caption = caption,
-                                        memoryDate = memoryDate,
-                                        id = memoryId,
-                                        createdAt = DateTimeHelper.nowUtc(),
-                                        updatedAt = DateTimeHelper.nowUtc()
-                                    ))
-                                    selectedMedia.forEachIndexed { index, uri ->
-                                        val mime = context.contentResolver.getType(uri) ?: return@forEachIndexed
-                                        val stored = mediaStorage.store(uri, mime) ?: return@forEachIndexed
-                                        mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(stored.filePath, stored.mimeType, stored.fileSize, stored.width, stored.height, id = stored.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc()))
-                                        memoryRepository.addMedia(memoryId, stored.id, index)
+                                memoryRepository.create(com.twohearts.app.data.entity.Memory(
+                                    title = title,
+                                    caption = caption,
+                                    memoryDate = memoryDate,
+                                    id = memoryId,
+                                    createdAt = DateTimeHelper.nowUtc(),
+                                    updatedAt = DateTimeHelper.nowUtc()
+                                ))
+                                selectedMedia.forEachIndexed { index, uri ->
+                                    val mime = context.contentResolver.getType(uri)
+                                    val stored = mime?.let { mediaStorage.store(uri, it) }
+                                    if (stored == null) {
+                                        missingAttachment = true
+                                        return@forEachIndexed
                                     }
+                                    mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(stored.filePath, stored.mimeType, stored.fileSize, stored.width, stored.height, id = stored.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc()))
+                                    memoryRepository.addMedia(memoryId, stored.id, index)
                                 }
-                                navController.popBackStack()
                             }
                         },
                         onBack = {
-                            navController.popBackStack()
+                            if (!action.running) navController.popBackStack()
                         }
                     )
                 }
 
                 composable("/app/memories/{memoryId}") { backStackEntry ->
                     val memoryId = backStackEntry.arguments?.getString("memoryId") ?: return@composable
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(memoryId) {
                         memoryRepository.getById(memoryId)?.let { saved ->
                             saved to memoryRepository.getMedia(memoryId).mapNotNull { mediaAssetDao.getById(it.mediaAssetId) }
@@ -485,18 +484,15 @@ fun AppRouter(
                             memory = m,
                             media = lookup.record?.second.orEmpty(),
                             onEdit = {
-                                navController.navigate("/app/memories/$memoryId/edit")
+                                if (!action.running) navController.navigate("/app/memories/$memoryId/edit")
                             },
                             onDelete = {
-                                scope.launch {
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                        memoryRepository.softDelete(m.id)
-                                    }
-                                    navController.popBackStack()
+                                action.run("Memory deleted.", "Couldn’t delete this memory.", afterWrite = { navController.popBackStack() }) {
+                                    memoryRepository.softDelete(m.id)
                                 }
                             },
                             onBack = {
-                                navController.popBackStack()
+                                if (!action.running) navController.popBackStack()
                             }
                         )
                     } ?: RecordLookupScreen("Memory", lookup) { navController.popBackStack() }
@@ -505,8 +501,7 @@ fun AppRouter(
                 composable("/app/memories/{memoryId}/edit") { backStackEntry ->
                     val memoryId = backStackEntry.arguments?.getString("memoryId") ?: return@composable
                     val context = LocalContext.current
-                    val scope = rememberCoroutineScope()
-                    var saving by remember { mutableStateOf(false) }
+                    val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(memoryId) {
                         memoryRepository.getById(memoryId)
                     }
@@ -517,25 +512,30 @@ fun AppRouter(
                             initialTitle = m.title,
                             initialCaption = m.caption ?: "",
                             initialDate = m.memoryDate,
-                            saving = saving,
+                            saving = action.running,
                             onSave = { title, caption, memoryDate, selectedMedia ->
-                                saving = true
-                                scope.launch {
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                        memoryRepository.update(m.id, mapOf("title" to title, "caption" to caption, "memoryDate" to memoryDate))
-                                        val offset = memoryRepository.getMedia(m.id).size
-                                        selectedMedia.forEachIndexed { index, uri ->
-                                            val mime = context.contentResolver.getType(uri) ?: return@forEachIndexed
-                                            val stored = mediaStorage.store(uri, mime) ?: return@forEachIndexed
-                                            mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(stored.filePath, stored.mimeType, stored.fileSize, stored.width, stored.height, id = stored.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc()))
-                                            memoryRepository.addMedia(m.id, stored.id, offset + index)
+                                var missingAttachment = false
+                                action.run(
+                                    "Memory saved.", "Couldn’t save this memory.",
+                                    afterWrite = { navController.popBackStack() },
+                                    warning = { if (missingAttachment) "Memory saved. Some attachments couldn’t be added." else null },
+                                ) {
+                                    checkNotNull(memoryRepository.update(m.id, mapOf("title" to title, "caption" to caption, "memoryDate" to memoryDate)))
+                                    val offset = memoryRepository.getMedia(m.id).size
+                                    selectedMedia.forEachIndexed { index, uri ->
+                                        val mime = context.contentResolver.getType(uri)
+                                        val stored = mime?.let { mediaStorage.store(uri, it) }
+                                        if (stored == null) {
+                                            missingAttachment = true
+                                            return@forEachIndexed
                                         }
+                                        mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(stored.filePath, stored.mimeType, stored.fileSize, stored.width, stored.height, id = stored.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc()))
+                                        memoryRepository.addMedia(m.id, stored.id, offset + index)
                                     }
-                                    navController.popBackStack()
                                 }
                             },
                             onBack = {
-                                navController.popBackStack()
+                                if (!action.running) navController.popBackStack()
                             }
                         )
                     } ?: RecordLookupScreen("Memory", lookup) { navController.popBackStack() }
@@ -559,11 +559,10 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_TIMELINE_ADD) {
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     AddEvent(
                         onSave = { title, eventDate, description ->
-                            scope.launch {
-                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            action.run("Moment added to your timeline.", "Couldn’t save this moment.", afterWrite = { navController.popBackStack() }) {
                                 timelineEventRepository.create(
                                     com.twohearts.app.data.entity.TimelineEvent(
                                         title = title,
@@ -574,19 +573,17 @@ fun AppRouter(
                                         updatedAt = DateTimeHelper.nowUtc()
                                     )
                                 )
-                                }
-                                navController.popBackStack()
                             }
                         },
                         onBack = {
-                            navController.popBackStack()
+                            if (!action.running) navController.popBackStack()
                         }
                     )
                 }
 
                 composable("/app/timeline/{eventId}") { backStackEntry ->
                     val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(eventId) {
                         timelineEventRepository.getById(eventId)
                     }
@@ -595,16 +592,15 @@ fun AppRouter(
                         EventDetail(
                             event = e,
                             onEdit = {
-                                navController.navigate("/app/timeline/$eventId/edit")
+                                if (!action.running) navController.navigate("/app/timeline/$eventId/edit")
                             },
                             onDelete = {
-                                scope.launch {
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { timelineEventRepository.softDelete(e.id) }
-                                    navController.popBackStack()
+                                action.run("Moment deleted.", "Couldn’t delete this moment.", afterWrite = { navController.popBackStack() }) {
+                                    timelineEventRepository.softDelete(e.id)
                                 }
                             },
                             onBack = {
-                                navController.popBackStack()
+                                if (!action.running) navController.popBackStack()
                             }
                         )
                     } ?: RecordLookupScreen("Timeline moment", lookup) { navController.popBackStack() }
@@ -612,7 +608,7 @@ fun AppRouter(
 
                 composable("/app/timeline/{eventId}/edit") { backStackEntry ->
                     val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(eventId) {
                         timelineEventRepository.getById(eventId)
                     }
@@ -624,19 +620,16 @@ fun AppRouter(
                             initialDescription = e.description ?: "",
                             initialDate = e.eventDate,
                             onSave = { title, eventDate, description ->
-                                scope.launch {
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                    timelineEventRepository.update(e.id, mapOf(
+                                action.run("Moment saved.", "Couldn’t save this moment.", afterWrite = { navController.popBackStack() }) {
+                                    checkNotNull(timelineEventRepository.update(e.id, mapOf(
                                         "title" to title,
                                         "eventDate" to eventDate,
                                         "description" to description
-                                    ))
-                                    }
-                                    navController.popBackStack()
+                                    )))
                                 }
                             },
                             onBack = {
-                                navController.popBackStack()
+                                if (!action.running) navController.popBackStack()
                             }
                         )
                     } ?: RecordLookupScreen("Timeline moment", lookup) { navController.popBackStack() }
@@ -645,7 +638,7 @@ fun AppRouter(
                 // Reminders
                 composable(RoutePath.APP_REMINDERS) {
                     val reminders by reminderRepository.observeAll().collectAsState(initial = emptyList())
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     RemindersHome(
                         reminders = reminders,
                         onReminderClick = { reminderId ->
@@ -657,16 +650,15 @@ fun AppRouter(
                         onBack = {
                             navController.popBackStack()
                         },
-                        onToggleCompleted = { item -> scope.launch { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { reminderRepository.update(item.id, mapOf("status" to if (item.status == "completed") "pending" else "completed")) } } },
+                        onToggleCompleted = { action.toggleReminder(reminderRepository, it) },
                     )
                 }
 
                 composable(RoutePath.APP_REMINDERS_ADD) {
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     CreateReminder(
                         onSave = { title, description, scheduledDate, scheduledTime, recurrence, notificationEnabled ->
-                            scope.launch {
-                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                            action.run("Reminder saved.", "Couldn’t save this reminder.", afterWrite = { navController.popBackStack() }) {
                                 reminderRepository.create(
                                     com.twohearts.app.data.entity.Reminder(
                                         title = title,
@@ -680,19 +672,17 @@ fun AppRouter(
                                         updatedAt = DateTimeHelper.nowUtc()
                                     )
                                 )
-                                }
-                                navController.popBackStack()
                             }
                         },
                         onBack = {
-                            navController.popBackStack()
+                            if (!action.running) navController.popBackStack()
                         }
                     )
                 }
 
                 composable("/app/reminders/{reminderId}") { backStackEntry ->
                     val reminderId = backStackEntry.arguments?.getString("reminderId") ?: return@composable
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(reminderId) {
                         reminderRepository.getById(reminderId)
                     }
@@ -701,25 +691,24 @@ fun AppRouter(
                         ReminderDetail(
                             reminder = r,
                             onEdit = {
-                                navController.navigate("/app/reminders/$reminderId/edit")
+                                if (!action.running) navController.navigate("/app/reminders/$reminderId/edit")
                             },
                             onDelete = {
-                                scope.launch {
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { reminderRepository.softDelete(r.id) }
-                                    navController.popBackStack()
+                                action.run("Reminder deleted.", "Couldn’t delete this reminder.", afterWrite = { navController.popBackStack() }) {
+                                    reminderRepository.softDelete(r.id)
                                 }
                             },
                             onBack = {
-                                navController.popBackStack()
+                                if (!action.running) navController.popBackStack()
                             },
-                            onToggleCompleted = { scope.launch { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { reminderRepository.update(r.id, mapOf("status" to if (r.status == "completed") "pending" else "completed")) }; lookup.refresh() } },
+                            onToggleCompleted = { action.toggleReminder(reminderRepository, r, lookup::refresh) },
                         )
                     } ?: RecordLookupScreen("Reminder", lookup) { navController.popBackStack() }
                 }
 
                 composable("/app/reminders/{reminderId}/edit") { backStackEntry ->
                     val reminderId = backStackEntry.arguments?.getString("reminderId") ?: return@composable
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(reminderId) {
                         reminderRepository.getById(reminderId)
                     }
@@ -734,22 +723,19 @@ fun AppRouter(
                             initialRecurrence = r.recurrence ?: "none",
                             initialNotificationEnabled = r.notificationEnabled,
                             onSave = { title, description, scheduledDate, scheduledTime, recurrence, notificationEnabled ->
-                                scope.launch {
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                    reminderRepository.update(r.id, mapOf(
+                                action.run("Reminder saved.", "Couldn’t save this reminder.", afterWrite = { navController.popBackStack() }) {
+                                    checkNotNull(reminderRepository.update(r.id, mapOf(
                                         "title" to title,
                                         "description" to description,
                                         "scheduledDate" to scheduledDate,
                                         "scheduledTime" to scheduledTime,
-                                        "recurrence" to recurrence
-                                        ,"notificationEnabled" to notificationEnabled
-                                    ))
-                                    }
-                                    navController.popBackStack()
+                                        "recurrence" to recurrence,
+                                        "notificationEnabled" to notificationEnabled,
+                                    )))
                                 }
                             },
                             onBack = {
-                                navController.popBackStack()
+                                if (!action.running) navController.popBackStack()
                             }
                         )
                     } ?: RecordLookupScreen("Reminder", lookup) { navController.popBackStack() }
@@ -777,37 +763,37 @@ fun AppRouter(
 
                 composable(RoutePath.APP_PLACES_ADD) {
                     val context = LocalContext.current
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     CreatePlace(
                         onSave = { name, address, city, notes, category, photo ->
-                            scope.launch {
-                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                    val stored = photo?.let { uri -> context.contentResolver.getType(uri)?.let { mediaStorage.store(uri, it) } }
-                                    stored?.let { mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(it.filePath, it.mimeType, it.fileSize, it.width, it.height, id = it.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc())) }
-                                    placeRepository.create(com.twohearts.app.data.entity.Place(
-                                        name = name,
-                                        address = address,
-                                        city = city,
-                                        notes = notes,
-                                        category = category,
-                                        photoRef = stored?.id,
-                                        id = generateId(),
-                                        createdAt = DateTimeHelper.nowUtc(),
-                                        updatedAt = DateTimeHelper.nowUtc()
-                                    ))
+                            action.run("Place saved.", "Couldn’t save this place or its photo.", afterWrite = { navController.popBackStack() }) {
+                                val stored = photo?.let { uri ->
+                                    val mime = checkNotNull(context.contentResolver.getType(uri))
+                                    checkNotNull(mediaStorage.store(uri, mime))
                                 }
-                                navController.popBackStack()
+                                stored?.let { mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(it.filePath, it.mimeType, it.fileSize, it.width, it.height, id = it.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc())) }
+                                placeRepository.create(com.twohearts.app.data.entity.Place(
+                                    name = name,
+                                    address = address,
+                                    city = city,
+                                    notes = notes,
+                                    category = category,
+                                    photoRef = stored?.id,
+                                    id = generateId(),
+                                    createdAt = DateTimeHelper.nowUtc(),
+                                    updatedAt = DateTimeHelper.nowUtc()
+                                ))
                             }
                         },
                         onBack = {
-                            navController.popBackStack()
+                            if (!action.running) navController.popBackStack()
                         }
                     )
                 }
 
                 composable("/app/places/{placeId}") { backStackEntry ->
                     val placeId = backStackEntry.arguments?.getString("placeId") ?: return@composable
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(placeId) {
                         placeRepository.getById(placeId)?.let { saved ->
                             saved to saved.photoRef?.let { mediaAssetDao.getById(it) }
@@ -819,16 +805,15 @@ fun AppRouter(
                             place = p,
                             media = lookup.record?.second,
                             onEdit = {
-                                navController.navigate("/app/places/$placeId/edit")
+                                if (!action.running) navController.navigate("/app/places/$placeId/edit")
                             },
                             onDelete = {
-                                scope.launch {
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { placeRepository.softDelete(p.id) }
-                                    navController.popBackStack()
+                                action.run("Place deleted.", "Couldn’t delete this place.", afterWrite = { navController.popBackStack() }) {
+                                    placeRepository.softDelete(p.id)
                                 }
                             },
                             onBack = {
-                                navController.popBackStack()
+                                if (!action.running) navController.popBackStack()
                             }
                         )
                     } ?: RecordLookupScreen("Place", lookup) { navController.popBackStack() }
@@ -837,7 +822,7 @@ fun AppRouter(
                 composable("/app/places/{placeId}/edit") { backStackEntry ->
                     val placeId = backStackEntry.arguments?.getString("placeId") ?: return@composable
                     val context = LocalContext.current
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(placeId) {
                         placeRepository.getById(placeId)
                     }
@@ -851,24 +836,24 @@ fun AppRouter(
                             initialNotes = p.notes ?: "",
                             initialCategory = p.category ?: "",
                             onSave = { name, address, city, notes, category, photo ->
-                                scope.launch {
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                    val stored = photo?.let { uri -> context.contentResolver.getType(uri)?.let { mediaStorage.store(uri, it) } }
+                                action.run("Place saved.", "Couldn’t save this place or its photo.", afterWrite = { navController.popBackStack() }) {
+                                    val stored = photo?.let { uri ->
+                                        val mime = checkNotNull(context.contentResolver.getType(uri))
+                                        checkNotNull(mediaStorage.store(uri, mime))
+                                    }
                                     stored?.let { mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(it.filePath, it.mimeType, it.fileSize, it.width, it.height, id = it.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc())) }
-                                    placeRepository.update(p.id, mapOf(
+                                    checkNotNull(placeRepository.update(p.id, mapOf(
                                         "name" to name,
                                         "address" to address,
                                         "city" to city,
                                         "notes" to notes,
                                         "category" to category,
                                         "photoRef" to (stored?.id ?: p.photoRef),
-                                    ))
-                                    }
-                                    navController.popBackStack()
+                                    )))
                                 }
                             },
                             onBack = {
-                                navController.popBackStack()
+                                if (!action.running) navController.popBackStack()
                             }
                         )
                     } ?: RecordLookupScreen("Place", lookup) { navController.popBackStack() }
@@ -881,7 +866,7 @@ fun AppRouter(
                     val today = DateTimeHelper.todayLocal()
                     val todayMood = moods.firstOrNull { it.entryDate == today && it.profileId == owner?.id }
                         ?: moods.firstOrNull { it.entryDate == today && it.profileId == "owner" }
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     MoodHome(
                         todayMood = todayMood,
                         recentMoods = moods.take(7),
@@ -896,8 +881,8 @@ fun AppRouter(
                             navController.popBackStack()
                         },
                         onQuickMood = { mood ->
-                            scope.launch {
-                                val profileId = relationshipService.getOwner()?.id ?: return@launch
+                            action.run("Mood logged.", "Couldn’t log your mood.") {
+                                val profileId = checkNotNull(relationshipService.getOwner()).id
                                 moodEntryRepository.saveOwnerCheckIn(
                                     profileId, DateTimeHelper.todayLocal(), mood.value, mood.emoji, keepNote = true,
                                 )
@@ -907,19 +892,18 @@ fun AppRouter(
                 }
 
                 composable(RoutePath.APP_MOOD_ADD) {
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     MoodEntryScreen(
                         onSave = { moodValue, moodEmoji, note ->
-                            scope.launch {
-                                val profileId = relationshipService.getOwner()?.id ?: return@launch
+                            action.run("Mood logged.", "Couldn’t log your mood.", afterWrite = { navController.popBackStack() }) {
+                                val profileId = checkNotNull(relationshipService.getOwner()).id
                                 moodEntryRepository.saveOwnerCheckIn(
                                     profileId, DateTimeHelper.todayLocal(), moodValue, moodEmoji, note,
                                 )
-                                navController.popBackStack()
                             }
                         },
                         onBack = {
-                            navController.popBackStack()
+                            if (!action.running) navController.popBackStack()
                         }
                     )
                 }
@@ -936,7 +920,7 @@ fun AppRouter(
 
                 composable("/app/mood/{entryId}/edit") { backStackEntry ->
                     val entryId = backStackEntry.arguments?.getString("entryId") ?: return@composable
-                    val scope = rememberCoroutineScope()
+                    val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(entryId) {
                         moodEntryRepository.getById(entryId)
                     }
@@ -946,19 +930,16 @@ fun AppRouter(
                             initialMood = e.moodValue,
                             initialNote = e.note ?: "",
                             onSave = { moodValue, moodEmoji, note ->
-                                scope.launch {
-                                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                    moodEntryRepository.update(e.id, mapOf(
+                                action.run("Mood saved.", "Couldn’t save this mood.", afterWrite = { navController.popBackStack() }) {
+                                    checkNotNull(moodEntryRepository.update(e.id, mapOf(
                                         "moodValue" to moodValue,
                                         "moodEmoji" to moodEmoji,
                                         "note" to note
-                                    ))
-                                    }
-                                    navController.popBackStack()
+                                    )))
                                 }
                             },
                             onBack = {
-                                navController.popBackStack()
+                                if (!action.running) navController.popBackStack()
                             }
                         )
                     } ?: RecordLookupScreen("Mood entry", lookup) { navController.popBackStack() }
@@ -1170,6 +1151,7 @@ fun AppRouter(
                                             }
                                             relationshipService.saveOwnerDetails(profile.id, name, birthday, stored?.id)
                                         }
+                                        feedback.success("Profile saved.")
                                         navController.popBackStack()
                                     } catch (cancelled: CancellationException) {
                                         throw cancelled
@@ -1220,6 +1202,7 @@ fun AppRouter(
                                             if (saved == null) relationshipService.createRelationship(owner.id, partnerId, date)
                                             else relationshipService.updateRelationship(saved.id, date)
                                         }
+                                        feedback.success("Relationship saved.")
                                         navController.popBackStack()
                                     } catch (cancelled: CancellationException) {
                                         throw cancelled
@@ -1308,22 +1291,39 @@ fun AppRouter(
                 // Important dates
                 composable(RoutePath.APP_IMPORTANT_DATES) {
                     val dates by importantDateRepository.observeAll().collectAsState(initial = emptyList())
-                    val scope = rememberCoroutineScope()
                     ImportantDatesScreen(
                         dates = dates,
                         onSaveDate = { existing, title, date, recurrence ->
-                            scope.launch { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                if (existing == null) importantDateRepository.create(com.twohearts.app.data.entity.ImportantDate(title, date, recurrence, id = generateId(), createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc()))
-                                else importantDateRepository.update(existing.id, mapOf("title" to title, "date" to date, "recurrence" to recurrence))
-                            } }
+                            if (existing == null) {
+                                val now = DateTimeHelper.nowUtc()
+                                importantDateRepository.create(com.twohearts.app.data.entity.ImportantDate(
+                                    title, date, recurrence, id = generateId(), createdAt = now, updatedAt = now,
+                                ))
+                            } else {
+                                checkNotNull(importantDateRepository.update(
+                                    existing.id, mapOf("title" to title, "date" to date, "recurrence" to recurrence),
+                                ))
+                            }
                         },
-                        onDeleteDate = { item -> scope.launch { kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { importantDateRepository.softDelete(item.id) } } },
-                        onBack = {
-                            navController.popBackStack()
-                        }
+                        onDeleteDate = { item -> importantDateRepository.softDelete(item.id) },
+                        onBack = { navController.popBackStack() },
                     )
                 }
             }
         }
+    }
+}
+
+private fun RecordAction.toggleReminder(
+    repository: ReminderRepository,
+    reminder: com.twohearts.app.data.entity.Reminder,
+    refresh: () -> Unit = {},
+) {
+    val completing = reminder.status != "completed"
+    run(
+        if (completing) "Reminder completed." else "Reminder marked as pending.",
+        "Couldn’t change this reminder.", afterWrite = refresh,
+    ) {
+        checkNotNull(repository.update(reminder.id, mapOf("status" to if (completing) "completed" else "pending")))
     }
 }

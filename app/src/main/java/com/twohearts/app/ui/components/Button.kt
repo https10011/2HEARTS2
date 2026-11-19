@@ -1,6 +1,8 @@
 package com.twohearts.app.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -78,6 +81,7 @@ fun ThButton(
     // to nothing when reduced motion is on.
     val pressScale by animateFloatAsState(
         targetValue = if (pressed && !motion.reduced) 0.975f else 1f,
+        animationSpec = if (motion.reduced) snap() else tween(TwoHeartsTokens.Duration.fast.toInt()),
         label = "th-button-press",
     )
 
@@ -115,7 +119,7 @@ fun ThButton(
             .then(if (border != null) Modifier.border(border, shape) else Modifier)
             .clickable(
                 interactionSource = interactionSource,
-                indication = null,
+                indication = ripple(color = contentColor),
                 enabled = isInteractive,
                 role = Role.Button,
                 onClick = onClick,
@@ -130,7 +134,10 @@ fun ThButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
-            if (loading) {
+            if (loading && motion.reduced) {
+                Icon(ThIcons.Clock, contentDescription = null, tint = effectiveContent, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(TwoHeartsTokens.Spacing.space2))
+            } else if (loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(18.dp),
                     color = effectiveContent,

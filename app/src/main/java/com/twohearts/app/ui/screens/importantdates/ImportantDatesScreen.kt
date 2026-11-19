@@ -1,6 +1,8 @@
 package com.twohearts.app.ui.screens.importantdates
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,15 +19,20 @@ import com.twohearts.app.ui.components.Header
 import com.twohearts.app.ui.components.ConfirmDialog
 import com.twohearts.app.ui.components.Input
 import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.StatusVariant
+import com.twohearts.app.ui.components.ThStatusBanner
+import com.twohearts.app.ui.components.useToast
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImportantDatesScreen(
-    dates: List<ImportantDate>, onSaveDate: (ImportantDate?, String, String, String) -> Unit,
-    onDeleteDate: (ImportantDate) -> Unit, onBack: () -> Unit,
+    dates: List<ImportantDate>, onSaveDate: suspend (ImportantDate?, String, String, String) -> Unit,
+    onDeleteDate: suspend (ImportantDate) -> Unit, onBack: () -> Unit,
 ) {
     var editing by remember { mutableStateOf<ImportantDate?>(null) }
     var showEditor by remember { mutableStateOf(false) }
@@ -63,31 +70,82 @@ fun ImportantDatesScreen(
             }
         }
     }
-    if (showEditor) ImportantDateEditor(editing, onDismiss = { showEditor = false }, onSave = { title, date, recurrence -> onSaveDate(editing, title, date, recurrence); showEditor = false }, onDelete = editing?.let { item -> ({ onDeleteDate(item); showEditor = false }) })
+    if (showEditor) {
+        val item = editing
+        ImportantDateEditor(
+            item = item,
+            onDismiss = { showEditor = false },
+            onSave = { title, date, recurrence -> onSaveDate(item, title, date, recurrence) },
+            onDelete = if (item == null) null else { { onDeleteDate(item) } },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ImportantDateEditor(item: ImportantDate?, onDismiss: () -> Unit, onSave: (String, String, String) -> Unit, onDelete: (() -> Unit)?) {
+private fun ImportantDateEditor(
+    item: ImportantDate?,
+    onDismiss: () -> Unit,
+    onSave: suspend (String, String, String) -> Unit,
+    onDelete: (suspend () -> Unit)?,
+) {
     var title by remember(item) { mutableStateOf(item?.title.orEmpty()) }
     var date by remember(item) { mutableStateOf(item?.date ?: DateTimeHelper.todayLocal()) }
     var recurrence by remember(item) { mutableStateOf(item?.recurrence ?: "yearly") }
     var menu by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
+    var saving by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    val feedback = useToast()
     val valid = title.isNotBlank() && runCatching { LocalDate.parse(date) }.isSuccess
+    val dismiss = { if (!saving) onDismiss() }
+
+    fun submit(success: String, failure: String, write: suspend () -> Unit) {
+        if (saving) return
+        saving = true
+        error = null
+        scope.launch {
+            try {
+                write()
+                feedback.success(success)
+                onDismiss()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                error = failure
+            } finally {
+                saving = false
+            }
+        }
+    }
+
     if (confirmDelete && onDelete != null) {
         ConfirmDialog(
             title = "Delete this date?", message = "It will be removed from your important dates.",
-            confirmText = "Delete", onConfirm = onDelete, onDismiss = { confirmDelete = false },
+            confirmText = "Delete",
+            onConfirm = {
+                confirmDelete = false
+                submit("Important date deleted.", "Couldn’t delete this date.", onDelete)
+            },
+            onDismiss = { confirmDelete = false },
         )
-    } else AlertDialog(onDismissRequest = onDismiss, title = { Text(if (item == null) "Add an important date" else "Edit important date") }, text = {
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    } else AlertDialog(onDismissRequest = dismiss, title = { Text(if (item == null) "Add an important date" else "Edit important date") }, text = {
+        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            error?.let { ThStatusBanner(StatusVariant.ERROR, it) }
             Input(title, { title = it }, Modifier.fillMaxWidth(), label = "What happened?", placeholder = "Our anniversary")
             Input(date, { date = it }, Modifier.fillMaxWidth(), label = "Date", placeholder = "yyyy-mm-dd")
             ExposedDropdownMenuBox(menu, { menu = it }) { OutlinedTextField(recurrence.replaceFirstChar(Char::uppercase), {}, readOnly = true, label = { Text("Repeats") }, modifier = Modifier.fillMaxWidth().menuAnchor()); ExposedDropdownMenu(menu, { menu = false }) { listOf("none", "yearly", "monthly").forEach { option -> DropdownMenuItem({ Text(option.replaceFirstChar(Char::uppercase)) }, { recurrence = option; menu = false }) } } }
-            if (onDelete != null) TextButton(onClick = { confirmDelete = true }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Icon(ThIcons.Trash, null); Spacer(Modifier.width(6.dp)); Text("Delete date") }
+            if (onDelete != null) TextButton(onClick = { confirmDelete = true }, enabled = !saving, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Icon(ThIcons.Trash, null); Spacer(Modifier.width(6.dp)); Text("Delete date") }
         }
-    }, confirmButton = { TextButton(onClick = { onSave(title.trim(), date, recurrence) }, enabled = valid) { Text("Save") } }, dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } })
+    }, confirmButton = {
+        TextButton(
+            onClick = {
+                submit("Important date saved.", "Couldn’t save this date.") { onSave(title.trim(), date, recurrence) }
+            },
+            enabled = valid && !saving,
+        ) { Text(if (saving) "Working…" else "Save") }
+    }, dismissButton = { TextButton(onClick = dismiss, enabled = !saving) { Text("Cancel") } })
 }
 
 internal fun nextOccurrence(item: ImportantDate, today: LocalDate = LocalDate.now()): LocalDate {

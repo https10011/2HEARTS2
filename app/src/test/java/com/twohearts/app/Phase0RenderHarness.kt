@@ -2,6 +2,7 @@ package com.twohearts.app
 
 import android.app.Application
 import androidx.activity.compose.setContent
+import androidx.compose.ui.unit.dp
 import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -72,6 +73,38 @@ class Phase0RenderHarness {
 
     private val outDir: File = File("build/phase0-screens").apply { mkdirs() }
     private val now = "2026-01-15T10:00:00Z"
+
+    @Test
+    @Config(qualifiers = "w320dp-h740dp-mdpi")
+    fun renderPhase15Feedback() {
+        render("p15-saved", scale = TextScalingLevel.EXTRA_LARGE) {
+            androidx.compose.runtime.CompositionLocalProvider(
+                com.twohearts.app.ui.theme.LocalTwoHeartsMotion provides
+                    com.twohearts.app.ui.theme.TwoHeartsMotion(reduced = true),
+            ) {
+                com.twohearts.app.ui.navigation.AppShell(
+                    currentRoute = com.twohearts.app.ui.navigation.RoutePath.APP_HOME,
+                    onNavigate = {}, onBack = {}, canNavigateBack = false,
+                    feedback = androidx.compose.runtime.remember {
+                        com.twohearts.app.ui.components.ToastState().apply { success("Memory saved.") }
+                    },
+                ) {}
+            }
+        }
+        render("p15-error", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
+            androidx.compose.runtime.CompositionLocalProvider(
+                com.twohearts.app.ui.theme.LocalTwoHeartsMotion provides
+                    com.twohearts.app.ui.theme.TwoHeartsMotion(reduced = true),
+            ) {
+                com.twohearts.app.ui.components.ToastProvider(
+                    state = androidx.compose.runtime.remember {
+                        com.twohearts.app.ui.components.ToastState().apply { error("Couldn’t save this note.") }
+                    },
+                    bottomInset = 0.dp,
+                ) {}
+            }
+        }
+    }
 
     @Test
     @Config(qualifiers = "w320dp-h740dp-mdpi")
