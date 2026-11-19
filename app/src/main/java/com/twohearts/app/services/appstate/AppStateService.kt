@@ -1,5 +1,6 @@
 package com.twohearts.app.services.appstate
 
+import com.twohearts.app.data.settings.OnboardingDraft
 import com.twohearts.app.data.settings.SettingsStorage
 import com.twohearts.app.services.logger.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -92,6 +93,19 @@ class AppStateService(private val settingsStorage: SettingsStorage) {
         settingsStorage.updateOnboardingStage(stage)
         _onboardingStage.value = stage
         logger.info("Onboarding stage updated: $stage")
+    }
+
+    suspend fun saveOnboardingStep(draft: OnboardingDraft, stage: String) {
+        settingsStorage.saveOnboardingStep(draft, stage)
+        _onboardingStage.value = stage
+    }
+
+    suspend fun finishOnboarding(draft: OnboardingDraft) {
+        settingsStorage.finishOnboarding(draft)
+        _themeMode.value = draft.themeMode
+        _textSize.value = draft.textSize
+        _onboardingStage.value = "complete"
+        _isOnboarded.value = true
     }
 
     /**

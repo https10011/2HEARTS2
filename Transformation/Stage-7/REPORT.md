@@ -20,7 +20,7 @@ Reviewed the owner and relationship settings, Home and Us avatar consumers, shar
 - The six focused native Android tests passed for provider grant revocation after staging, a rotated and repositioned crop, large and unreadable sources, both saved photo references and the relationship across a file-backed Room reopen, rollback with retry, and shared reference cleanup.
 - Inspected the saved owner photo in light mode, the partner fallback at 200% in dark mode, and the actual crop sheet at 360 × 640 dp and 200% in dark mode. The snapshot checks the existing avatar cache's render using pixels from the test-owned image. The crop and Cancel controls stay reachable. A physical Photo Picker and settings walkthrough remains part of release validation. [Native settings and crop renders](evidence/profile-photos-and-crop.jpg)
 - The full debug and release suites each completed 163 tests with zero failures, errors, or skips. The assembled debug APK passed v2 signature, alignment, archive, and package checks. It targets API 35, supports API 26 and newer, and declares no broad media or storage permissions. Local APK SHA-256 `8981fa84f139197ebc09a7ad948a5235c4df26ee1c5f2837e858bb4b2c67a952`.
-- The stage source checkpoint is the commit adding this report. Verify its remote SHA and existing Android workflow before advancing.
+- Git verified `a8529f8468c3ff4afd9be4d46d3da8872fc5f739` on `origin/master`. Its Android workflow passed and published the stage APK. [Commit](https://github.com/https10011/2HEARTS2/commit/a8529f8468c3ff4afd9be4d46d3da8872fc5f739) · [Actions](https://github.com/https10011/2HEARTS2/actions/runs/44526243440) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44526243440/artifacts/14532355211)
 
 ## Completion checklist
 
@@ -28,7 +28,7 @@ Reviewed the owner and relationship settings, Home and Us avatar consumers, shar
 - [x] Verify native picker-source fixtures, retained local data, and crop and removal behavior.
 - [x] Inspect native Compose renders and record visual evidence and device limits.
 - [x] Pass both full unit suites, assemble and inspect the APK, and review the final diff.
-- [ ] Commit the stage, push to `master`, and verify the exact SHA and Android workflow.
+- [x] Commit the stage, push to `master`, and verify the exact SHA and Android workflow.
 
 ## Next stage
 

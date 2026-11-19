@@ -106,6 +106,7 @@ internal fun ProfilePhotoEditor(
     current: ProfilePhotoChange,
     onChange: (ProfilePhotoChange) -> Unit,
     enabled: Boolean,
+    discardReplacedDraft: Boolean = true,
 ) {
     val context = LocalContext.current.applicationContext
     val staging = remember(context) { ProfilePhotoStaging(context) }
@@ -118,7 +119,7 @@ internal fun ProfilePhotoEditor(
 
     fun select(change: ProfilePhotoChange) {
         onChange(change)
-        if (staged != null && staged != (change as? ProfilePhotoChange.Replace)?.draftId) {
+        if (discardReplacedDraft && staged != null && staged != (change as? ProfilePhotoChange.Replace)?.draftId) {
             scope.launch { staging.discard(staged) }
         }
     }
@@ -186,7 +187,8 @@ internal fun ProfilePhotoEditor(
             }
         }
         val message = error ?: if (staged != null && displayedDraft == null) {
-            "The selected photo is no longer available. Choose it again or keep the saved photo."
+            if (savedRef == null) "The selected photo is unavailable. Choose another or continue without one."
+            else "The selected photo is unavailable. Choose another or keep the saved photo."
         } else null
         if (message != null) ThStatusBanner(StatusVariant.ERROR, message)
     }

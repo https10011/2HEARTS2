@@ -156,6 +156,23 @@ class SettingsStorage private constructor(private val context: Context) {
         }
     }
 
+    suspend fun saveOnboardingStep(draft: OnboardingDraft, stage: String) {
+        context.dataStore.edit { preferences ->
+            preferences[ONBOARDING_DRAFT] = draft.toJson()
+            preferences[ONBOARDING_STAGE] = stage
+        }
+    }
+
+    suspend fun finishOnboarding(draft: OnboardingDraft) {
+        context.dataStore.edit { preferences ->
+            preferences[THEME_MODE] = draft.themeMode
+            preferences[TEXT_SIZE] = draft.textSize
+            preferences[ONBOARDING_STAGE] = "complete"
+            preferences[ONBOARDED] = true
+            preferences.remove(ONBOARDING_DRAFT)
+        }
+    }
+
     /**
      * Reads the in-progress draft, or null when setup has not started or the
      * stored value is unreadable.

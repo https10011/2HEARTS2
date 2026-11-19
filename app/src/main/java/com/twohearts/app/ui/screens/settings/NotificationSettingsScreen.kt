@@ -1,11 +1,5 @@
 package com.twohearts.app.ui.screens.settings
 
-import android.content.Intent
-import android.Manifest
-import android.os.Build
-import android.provider.Settings
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
@@ -14,13 +8,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twohearts.app.data.settings.AppSettings
 import com.twohearts.app.data.settings.SettingsStorage
@@ -31,20 +20,7 @@ import kotlinx.coroutines.launch
 fun NotificationSettingsScreen(settingsStorage: SettingsStorage, onBack: () -> Unit) {
     val settings by settingsStorage.settings.collectAsStateWithLifecycle(initialValue = AppSettings())
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val owner = LocalLifecycleOwner.current
-    val manager = remember(context) { NotificationManagerCompat.from(context) }
-    var allowed by remember { mutableStateOf(manager.areNotificationsEnabled()) }
-    val requestPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        allowed = granted
-    }
-    DisposableEffect(owner, manager) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) allowed = manager.areNotificationsEnabled()
-        }
-        owner.lifecycle.addObserver(observer)
-        onDispose { owner.lifecycle.removeObserver(observer) }
-    }
+    val permission = rememberNotificationPermissionControl()
 
     Scaffold(topBar = { ThTopBar(title = "Notifications", onBack = onBack) }) { insets ->
         Column(
@@ -62,21 +38,17 @@ fun NotificationSettingsScreen(settingsStorage: SettingsStorage, onBack: () -> U
                 checked = settings.remindersEnabled, enabled = settings.notificationsEnabled,
                 onChange = { enabled -> scope.launch { settingsStorage.setRemindersEnabled(enabled) } },
             )
-            if (!allowed) {
+            if (permission.action != NotificationPermissionAction.ALLOWED) {
                 ThStatusBanner(StatusVariant.INFO, "Android notifications are off for TwoHearts.")
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (permission.action == NotificationPermissionAction.REQUEST) {
                     ThButton(
-                        onClick = { requestPermission.launch(Manifest.permission.POST_NOTIFICATIONS) },
+                        onClick = permission.request,
                         text = "Allow Android alerts",
                     )
                 }
             }
             ThButton(
-                onClick = {
-                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                        .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                    context.startActivity(intent)
-                },
+                onClick = permission.openSettings,
                 variant = ButtonVariant.SECONDARY, text = "Android notification settings",
             )
         }

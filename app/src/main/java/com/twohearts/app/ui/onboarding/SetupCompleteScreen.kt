@@ -91,6 +91,9 @@ fun SetupCompleteScreen(
     data: OnboardingData,
     onComplete: () -> Unit,
     modifier: Modifier = Modifier,
+    ownerPhotoRef: String? = null,
+    partnerPhotoRef: String? = null,
+    pinConfigured: Boolean = data.pin != null,
 ) {
     val thColors = LocalTwoHeartsColors.current
     val motion = LocalTwoHeartsMotion.current
@@ -179,6 +182,8 @@ fun SetupCompleteScreen(
                     SetupCompletePair(
                         ownerName = owner,
                         partnerName = partner,
+                        ownerPhotoRef = ownerPhotoRef,
+                        partnerPhotoRef = partnerPhotoRef,
                     )
 
                     Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space6))
@@ -204,7 +209,7 @@ fun SetupCompleteScreen(
 
                     Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space6))
 
-                    SetupSummaryCard(data = data)
+                    SetupSummaryCard(data = data, pinConfigured = pinConfigured)
 
                     Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space5))
 
@@ -239,6 +244,8 @@ fun SetupCompleteScreen(
 private fun SetupCompletePair(
     ownerName: String,
     partnerName: String,
+    ownerPhotoRef: String?,
+    partnerPhotoRef: String?,
     modifier: Modifier = Modifier,
 ) {
     val thColors = LocalTwoHeartsColors.current
@@ -249,7 +256,7 @@ private fun SetupCompletePair(
     ) {
         com.twohearts.app.ui.components.ProfileAvatar(
             name = ownerName,
-            photoUrl = null,
+            photoUrl = ownerPhotoRef,
             size = 76,
         )
 
@@ -272,7 +279,7 @@ private fun SetupCompletePair(
 
         com.twohearts.app.ui.components.ProfileAvatar(
             name = partnerName,
-            photoUrl = null,
+            photoUrl = partnerPhotoRef,
             size = 76,
         )
     }
@@ -288,6 +295,7 @@ private fun SetupCompletePair(
 @Composable
 private fun SetupSummaryCard(
     data: OnboardingData,
+    pinConfigured: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val thColors = LocalTwoHeartsColors.current
@@ -317,7 +325,7 @@ private fun SetupSummaryCard(
         )
         SummaryRow(
             label = "App lock",
-            value = if (data.pin != null) "On" else "Not set",
+            value = if (pinConfigured) "On" else "Not set",
         )
         SummaryRow(
             label = "Appearance",

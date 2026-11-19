@@ -1,13 +1,17 @@
 package com.twohearts.app.ui.onboarding
 
+import com.twohearts.app.data.settings.OnboardingDraft
+import java.time.LocalDate
+
 /**
  * OnboardingState — onboarding flow state management.
  *
- * Matches legacy onboarding stages exactly:
+ * Setup stages and stable keys used to resume a saved draft:
  * - fresh: First launch, show welcome
  * - owner: Profile setup (owner name + birthday)
  * - relationship: Relationship setup (partner name + start date)
  * - personalization: Theme + text size selection
+ * - capabilities: Optional alerts and explanation of Android access
  * - app-lock: Optional PIN setup
  * - complete: Setup complete, navigate to app
  */
@@ -16,8 +20,9 @@ enum class OnboardingStage(val order: Int) {
     OWNER(1),
     RELATIONSHIP(2),
     PERSONALIZATION(3),
-    APP_LOCK(4),
-    COMPLETE(5);
+    CAPABILITIES(4),
+    APP_LOCK(5),
+    COMPLETE(6);
 
     /**
      * Get the next stage in the flow.
@@ -49,7 +54,7 @@ enum class OnboardingStage(val order: Int) {
          *
          * The welcome screen (`FRESH`) is the front door and the completion
          * screen (`COMPLETE`) is the exit, so neither is a numbered "step" —
-         * the progress indicator counts only the four setup steps between
+         * the progress indicator counts the setup steps between
          * them. Deriving this from the enum means adding a stage cannot
          * silently desync the indicator's denominator.
          */
@@ -80,6 +85,7 @@ enum class OnboardingStage(val order: Int) {
             OWNER -> "owner"
             RELATIONSHIP -> "relationship"
             PERSONALIZATION -> "personalization"
+            CAPABILITIES -> "capabilities"
             APP_LOCK -> "app-lock"
             COMPLETE -> "complete"
         }
@@ -111,6 +117,18 @@ fun shouldShowApp(
     OnboardingStage.fromStorageKey(stageKey) == OnboardingStage.COMPLETE &&
     acknowledged
 
+internal fun resumeOnboardingStage(stage: OnboardingStage, draft: OnboardingDraft): OnboardingStage = when {
+    stage.order > OnboardingStage.OWNER.order && !validSetupName(draft.ownerName) -> OnboardingStage.OWNER
+    stage.order > OnboardingStage.RELATIONSHIP.order &&
+        (!validSetupName(draft.partnerName) || !validRelationshipDay(draft.startDate)) -> OnboardingStage.RELATIONSHIP
+    else -> stage
+}
+
+private fun validSetupName(name: String) = name.trim().length in 1..50
+
+internal fun validRelationshipDay(value: String): Boolean =
+    runCatching { !LocalDate.parse(value).isAfter(LocalDate.now()) }.getOrDefault(false)
+
 /**
  * OnboardingData — data collected during onboarding.
  */
@@ -132,7 +150,10 @@ data class OnboardingData(
 
     // App lock
     val pin: String? = null,
-    val confirmPin: String? = null
+    val confirmPin: String? = null,
+
+    val ownerPhotoDraft: String? = null,
+    val partnerPhotoDraft: String? = null,
 ) {
     /**
      * Check if owner profile is valid.
@@ -147,7 +168,7 @@ data class OnboardingData(
     fun isRelationshipValid(): Boolean {
         return partnerName.isNotBlank() &&
                 partnerName.length in 1..50 &&
-                startDate.isNotBlank()
+                validRelationshipDay(startDate)
     }
 
     /**

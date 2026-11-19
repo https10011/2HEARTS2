@@ -56,7 +56,7 @@ class Phase3OnboardingTest {
         // Welcome is the front door and completion is the exit; neither is a
         // numbered step. Deriving the denominator keeps a new stage from
         // silently desyncing the indicator.
-        assertEquals(4, OnboardingStage.SETUP_STEP_COUNT)
+        assertEquals(5, OnboardingStage.SETUP_STEP_COUNT)
         assertEquals(OnboardingStage.APP_LOCK.order, OnboardingStage.LAST_SETUP_ORDER)
         assertFalse(OnboardingStage.FRESH.order in 1..OnboardingStage.SETUP_STEP_COUNT)
         assertFalse(OnboardingStage.COMPLETE.order in 1..OnboardingStage.SETUP_STEP_COUNT)

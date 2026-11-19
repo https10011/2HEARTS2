@@ -71,11 +71,12 @@ class RelationshipService(
     /**
      * Create owner profile.
      */
-    suspend fun createOwner(name: String, birthday: String?): Profile {
+    suspend fun createOwner(name: String, birthday: String?, photoRef: String? = null): Profile {
         val profile = Profile(
             name = name,
             birthday = birthday,
             role = "owner",
+            photoRef = photoRef,
             id = com.twohearts.app.data.repository.generateId(),
             createdAt = DateTimeHelper.nowUtc(),
             updatedAt = DateTimeHelper.nowUtc()

@@ -2,25 +2,24 @@ package com.twohearts.app.ui.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.ProfileAvatar
+import com.twohearts.app.services.media.ProfilePhotoChange
+import com.twohearts.app.ui.components.ProfilePhotoEditor
 import com.twohearts.app.ui.components.ThDatePicker
 import com.twohearts.app.ui.components.ThInput
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
@@ -61,9 +60,11 @@ fun ProfileSetupScreen(
     data: OnboardingData,
     onBack: () -> Unit,
     onNext: (OnboardingData) -> Unit,
+    saving: Boolean = false,
+    onPhotoDraftChanged: (String?) -> Unit = {},
 ) {
-    var name by remember { mutableStateOf(data.ownerName) }
-    var birthday by remember { mutableStateOf(data.ownerBirthday ?: "") }
+    var name by rememberSaveable { mutableStateOf(data.ownerName) }
+    var birthday by rememberSaveable { mutableStateOf(data.ownerBirthday ?: "") }
     var nameError by remember { mutableStateOf<String?>(null) }
 
     OnboardingLayout(
@@ -92,38 +93,18 @@ fun ProfileSetupScreen(
                 )
             )
         },
-        primaryEnabled = name.isNotBlank(),
+        primaryEnabled = name.isNotBlank() && !saving,
+        primaryLoading = saving,
     ) {
-        // Live preview: the avatar reflects the typed name immediately, so
-        // the step visibly builds something instead of just collecting input.
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            ProfileAvatar(
-                name = name,
-                photoUrl = null,
-                size = 72,
-            )
-            Spacer(modifier = Modifier.width(TwoHeartsTokens.Spacing.space4))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "You",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space1))
-                Text(
-                    text = if (name.isBlank()) {
-                        "Your first name is enough."
-                    } else {
-                        "Nice to meet you, ${name.trim()}."
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LocalTwoHeartsColors.current.textSecondary,
-                )
-            }
-        }
+        ProfilePhotoEditor(
+            name = name,
+            savedRef = null,
+            label = "Your profile photo",
+            current = data.ownerPhotoDraft?.let { ProfilePhotoChange.Replace(it) } ?: ProfilePhotoChange.Keep,
+            onChange = { onPhotoDraftChanged((it as? ProfilePhotoChange.Replace)?.draftId) },
+            enabled = !saving,
+            discardReplacedDraft = false,
+        )
 
         Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.sectionGap))
 

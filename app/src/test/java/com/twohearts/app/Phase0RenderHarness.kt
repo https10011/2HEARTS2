@@ -47,6 +47,8 @@ import com.twohearts.app.services.media.MediaThumbnails
 import com.twohearts.app.ui.components.CardTone
 import com.twohearts.app.ui.components.BrandLogo
 import com.twohearts.app.ui.components.BrandLogoVariant
+import com.twohearts.app.ui.components.NotificationPermissionAction
+import com.twohearts.app.ui.components.NotificationPermissionControl
 import com.twohearts.app.ui.components.ProfilePhotoCropSheet
 import com.twohearts.app.ui.components.StatusVariant
 import com.twohearts.app.ui.components.ThButton
@@ -60,6 +62,11 @@ import com.twohearts.app.ui.components.ThSurfaceCard
 import com.twohearts.app.ui.navigation.AppShell
 import com.twohearts.app.ui.navigation.LocalShellRoute
 import com.twohearts.app.ui.navigation.RoutePath
+import com.twohearts.app.ui.onboarding.CapabilitiesSetupScreen
+import com.twohearts.app.ui.onboarding.OnboardingData
+import com.twohearts.app.ui.onboarding.ProfileSetupScreen
+import com.twohearts.app.ui.onboarding.RelationshipSetupScreen
+import com.twohearts.app.ui.onboarding.WelcomeScreen
 import com.twohearts.app.ui.screens.about.AboutScreen
 import com.twohearts.app.ui.screens.importantdates.ImportantDatesScreen
 import com.twohearts.app.ui.screens.memories.MemoriesHome
@@ -229,6 +236,28 @@ class Phase0RenderHarness {
             }
         } finally {
             source.recycle()
+        }
+    }
+
+    @Test
+    fun renderTransformationOnboardingPhotosAndCapabilities() {
+        val data = OnboardingData(ownerName = "Alexandra", partnerName = "Avery", startDate = "2020-06-15")
+        render("transformation-8-owner") { ProfileSetupScreen(data, onBack = {}, onNext = {}) }
+        render("transformation-8-partner", dark = true) { RelationshipSetupScreen(data, onBack = {}, onNext = {}) }
+        render("transformation-8-capabilities") {
+            CapabilitiesSetupScreen(NotificationPermissionControl(NotificationPermissionAction.REQUEST, {}, {}), {}, {})
+        }
+        render("transformation-8-capabilities-allowed", dark = true) {
+            CapabilitiesSetupScreen(NotificationPermissionControl(NotificationPermissionAction.ALLOWED, {}, {}), {}, {})
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp-mdpi")
+    fun renderTransformationOnboardingAtTwoHundredPercent() {
+        render("transformation-8-welcome-200", dark = true, textSizeScale = 2f) { WelcomeScreen(onGetStarted = {}) }
+        render("transformation-8-capabilities-off-200", dark = true, textSizeScale = 2f) {
+            CapabilitiesSetupScreen(NotificationPermissionControl(NotificationPermissionAction.SETTINGS, {}, {}), {}, {})
         }
     }
 

@@ -8,8 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.twohearts.app.services.media.ProfilePhotoChange
+import com.twohearts.app.ui.components.ProfilePhotoEditor
 import com.twohearts.app.ui.components.ThDatePicker
 import com.twohearts.app.ui.components.ThInput
 import com.twohearts.app.ui.theme.TwoHeartsTokens
@@ -53,9 +56,11 @@ fun RelationshipSetupScreen(
     data: OnboardingData,
     onBack: () -> Unit,
     onNext: (OnboardingData) -> Unit,
+    saving: Boolean = false,
+    onPhotoDraftChanged: (String?) -> Unit = {},
 ) {
-    var partnerName by remember { mutableStateOf(data.partnerName) }
-    var startDate by remember { mutableStateOf(data.startDate) }
+    var partnerName by rememberSaveable { mutableStateOf(data.partnerName) }
+    var startDate by rememberSaveable { mutableStateOf(data.startDate) }
     var partnerNameError by remember { mutableStateOf<String?>(null) }
     var startDateError by remember { mutableStateOf<String?>(null) }
 
@@ -81,6 +86,10 @@ fun RelationshipSetupScreen(
                 startDateError = "Choose the day you'd like TwoHearts to count from."
                 return@OnboardingLayout
             }
+            if (!validRelationshipDay(startDate)) {
+                startDateError = "Choose a day up to today."
+                return@OnboardingLayout
+            }
             onNext(
                 data.copy(
                     partnerName = trimmed,
@@ -88,7 +97,8 @@ fun RelationshipSetupScreen(
                 )
             )
         },
-        primaryEnabled = partnerName.isNotBlank(),
+        primaryEnabled = partnerName.isNotBlank() && !saving,
+        primaryLoading = saving,
     ) {
         ThInput(
             value = partnerName,
@@ -100,6 +110,18 @@ fun RelationshipSetupScreen(
             placeholder = "Their name, or what you call them",
             error = partnerNameError,
             modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space5))
+
+        ProfilePhotoEditor(
+            name = partnerName,
+            savedRef = null,
+            label = "Your special someone’s profile photo",
+            current = data.partnerPhotoDraft?.let { ProfilePhotoChange.Replace(it) } ?: ProfilePhotoChange.Keep,
+            onChange = { onPhotoDraftChanged((it as? ProfilePhotoChange.Replace)?.draftId) },
+            enabled = !saving,
+            discardReplacedDraft = false,
         )
 
         Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space5))

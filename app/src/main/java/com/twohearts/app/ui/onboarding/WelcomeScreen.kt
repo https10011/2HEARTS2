@@ -170,11 +170,7 @@ fun WelcomeScreen(
 
                         Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space6))
 
-                        WelcomeArtCard()
-
-                        Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space6))
-
-                        ThOrnamentRule(label = "For two")
+                        WelcomeArtCard(Modifier.height((viewport * .31f).coerceIn(88.dp, 196.dp)))
 
                         Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space4))
 
@@ -201,6 +197,8 @@ fun WelcomeScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space3))
 
             ThButton(
                 onClick = onGetStarted,
@@ -246,7 +244,6 @@ private fun WelcomeArtCard(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(196.dp)
             .clip(shape)
             .background(thColors.surfaceWarm),
     ) {

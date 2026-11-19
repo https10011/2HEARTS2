@@ -71,6 +71,7 @@ fun AppLockSetupScreen(
     data: OnboardingData,
     onBack: () -> Unit,
     onNext: (OnboardingData) -> Unit,
+    saving: Boolean = false,
 ) {
     var pin by remember { mutableStateOf(data.pin ?: "") }
     var confirmPin by remember { mutableStateOf(data.confirmPin ?: "") }
@@ -85,7 +86,8 @@ fun AppLockSetupScreen(
             "you can still set one up later.",
         onBack = onBack,
         primaryLabel = "Set the PIN",
-        primaryEnabled = pin.isNotBlank() && confirmPin.isNotBlank(),
+        primaryEnabled = pin.isNotBlank() && confirmPin.isNotBlank() && !saving,
+        primaryLoading = saving,
         onPrimary = {
             val pinCheck = Validator.pin(pin)
             if (!pinCheck.ok) {
@@ -102,6 +104,7 @@ fun AppLockSetupScreen(
             TextThButton(
                 onClick = { onNext(data.copy(pin = null, confirmPin = null)) },
                 modifier = Modifier.fillMaxWidth(),
+                enabled = !saving,
             ) {
                 Text(
                     text = "Not now",

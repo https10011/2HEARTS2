@@ -15,17 +15,24 @@ internal class ProfilePhotoWriter(
     private val media: MediaStorage,
     private val staging: ProfilePhotoStaging,
 ) {
-    /** [edit] writes the profile and returns its previous photo reference if it was detached. */
+    /** [edit] writes a profile and returns the previous photo reference if it was detached. */
     suspend fun commit(change: ProfilePhotoChange, edit: suspend (replacementId: String?) -> String?) {
+        commit(listOf(change)) { replacements -> listOfNotNull(edit(replacements.single())) }
+    }
+
+    /** Copies each selected draft and supplies its replacement ID in the same order. */
+    suspend fun commit(changes: List<ProfilePhotoChange>, edit: suspend (List<String?>) -> List<String>) {
         val assets = database.mediaAssetDao()
-        var copied: MediaAssetInfo? = null
-        var detached: String? = null
+        val copied = mutableListOf<MediaAssetInfo>()
+        var detached = emptyList<String>()
         try {
             database.withTransaction {
-                if (change is ProfilePhotoChange.Replace) {
+                val replacements = changes.map { change ->
+                    if (change !is ProfilePhotoChange.Replace) return@map null
                     val cropped = staging.croppedUri(change.draftId) ?: throw IOException("Photo draft is missing")
-                    withContext(Dispatchers.IO) { copied = media.store(cropped, "image/jpeg") }
-                    val replacement = copied ?: throw IOException("Could not store photo")
+                    val replacement = withContext(Dispatchers.IO) {
+                        media.store(cropped, "image/jpeg")?.also { copied += it }
+                    } ?: throw IOException("Could not store photo")
                     val width = replacement.width
                     if (width == null || width !in 1..1024 || replacement.height != width) {
                         throw IOException("Photo draft must be a bounded square")
@@ -33,22 +40,23 @@ internal class ProfilePhotoWriter(
                     val now = DateTimeHelper.nowUtc()
                     assets.insert(MediaAsset(
                         filePath = replacement.filePath, mimeType = replacement.mimeType,
-                        fileSize = replacement.fileSize, width = replacement.width, height = replacement.height,
+                        fileSize = replacement.fileSize, width = width, height = replacement.height,
                         id = replacement.id, createdAt = now, updatedAt = now,
                     ))
+                    replacement.id
                 }
-                detached = edit(copied?.id)
+                detached = edit(replacements)
             }
         } finally {
             // Cancellation can arrive after SQLite commits. A reference check
             // also protects a photo shared by the second profile or a record.
             withContext(NonCancellable) {
-                for (id in listOfNotNull(copied?.id, detached).distinct()) {
+                for (id in (copied.map { it.id } + detached).distinct()) {
                     runCatching { removeIfUnreferenced(id) }
                 }
             }
         }
-        if (change is ProfilePhotoChange.Replace) staging.discard(change.draftId)
+        changes.filterIsInstance<ProfilePhotoChange.Replace>().forEach { staging.discard(it.draftId) }
     }
 
     private suspend fun removeIfUnreferenced(id: String) {

@@ -34,6 +34,9 @@ data class OnboardingDraft(
     val startDate: String = "",
     val themeMode: String = "system",
     val textSize: String = "default",
+    val ownerPhotoDraft: String? = null,
+    val partnerPhotoDraft: String? = null,
+    val notificationPrompted: Boolean = false,
 ) {
     /** Serialises to a single JSON object — one key, so writes are atomic. */
     fun toJson(): String = JSONObject().apply {
@@ -44,6 +47,9 @@ data class OnboardingDraft(
         put(KEY_START_DATE, startDate)
         put(KEY_THEME_MODE, themeMode)
         put(KEY_TEXT_SIZE, textSize)
+        put(KEY_OWNER_PHOTO, ownerPhotoDraft ?: JSONObject.NULL)
+        put(KEY_PARTNER_PHOTO, partnerPhotoDraft ?: JSONObject.NULL)
+        put(KEY_NOTIFICATION_PROMPTED, notificationPrompted)
     }.toString()
 
     companion object {
@@ -54,6 +60,9 @@ data class OnboardingDraft(
         private const val KEY_START_DATE = "startDate"
         private const val KEY_THEME_MODE = "themeMode"
         private const val KEY_TEXT_SIZE = "textSize"
+        private const val KEY_OWNER_PHOTO = "ownerPhotoDraft"
+        private const val KEY_PARTNER_PHOTO = "partnerPhotoDraft"
+        private const val KEY_NOTIFICATION_PROMPTED = "notificationPrompted"
 
         /**
          * Reads a stored draft, returning null when the value is absent,
@@ -75,6 +84,9 @@ data class OnboardingDraft(
                     startDate = obj.optString(KEY_START_DATE, ""),
                     themeMode = obj.optString(KEY_THEME_MODE, "system"),
                     textSize = obj.optString(KEY_TEXT_SIZE, "default"),
+                    ownerPhotoDraft = obj.optNullableString(KEY_OWNER_PHOTO),
+                    partnerPhotoDraft = obj.optNullableString(KEY_PARTNER_PHOTO),
+                    notificationPrompted = obj.optBoolean(KEY_NOTIFICATION_PROMPTED, false),
                 )
             } catch (_: Exception) {
                 null

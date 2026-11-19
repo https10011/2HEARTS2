@@ -21,64 +21,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.twohearts.app.data.database.TwoHeartsDatabase
 import com.twohearts.app.data.settings.OnboardingDraft
 import com.twohearts.app.data.settings.SettingsStorage
 import com.twohearts.app.services.appstate.AppStateService
+import com.twohearts.app.services.media.MediaStorage
+import com.twohearts.app.services.media.ProfilePhotoStaging
+import com.twohearts.app.services.media.ProfilePhotoWriter
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.services.security.AppLockService
+import com.twohearts.app.services.security.AppLockState
 import com.twohearts.app.ui.components.ThButton
 import com.twohearts.app.ui.components.ThModal
+import com.twohearts.app.ui.components.rememberNotificationPermissionControl
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
 import com.twohearts.app.ui.theme.TwoHeartsTokens
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-/**
- * OnboardingFlow — the ordered setup journey.
- *
- * ## What the migrated version did wrong
- *
- * The flow held the collected data in a `remember { mutableStateOf(...) }` and
- * persisted only the *stage*. Three consequences, all of them real defects:
- *
- *  1. **A restart mid-setup lost the person's input.** Stage survived in
- *     DataStore; names and dates did not. Reopening the app after a process
- *     death put them back on step 3 with an empty form.
- *  2. **`runBlocking` ran on the main thread** on every stage transition.
- *     Every Continue tap blocked the UI thread while DataStore wrote.
- *  3. **Failures were silent.** The final step created two profiles and a
- *     couple record with no error handling at all; a failing write left the
- *     person advanced to "complete" with no data, or wedged with no feedback.
- *
- * A fourth: the stage was advanced before the step's data was validated, so a
- * crash mid-step could persist a stage the data did not justify.
- *
- * ## What it does now
- *
- *  - **Answers are persisted at each step** as an [OnboardingDraft], so setup
- *    resumes exactly where it was left. The draft lives in DataStore rather
- *    than the domain database because the profiles and couple row are created
- *    in one commit at the end: there must be no half-built couple record to
- *    reconcile if setup is abandoned.
- *  - **Writes are suspending**, launched on a remembered scope instead of
- *    blocking the main thread.
- *  - **The final commit is guarded.** Profiles, couple row, appearance and PIN
- *    happen in one suspend block; `OnboardingStage.COMPLETE` is persisted only
- *    after every write returns, so "complete" states a fact rather than an
- *    intent. A failure surfaces as a retryable sheet and leaves the person on
- *    the step they were on.
- *  - **The PIN is never written to the draft.** It is a credential; DataStore
- *    Preferences is unencrypted, so the PIN lives only in the composition and
- *    goes straight to `AppLockService` at commit. See [OnboardingDraft].
- *  - **Transitions carry direction.** Advancing enters from the trailing edge
- *    and going back mirrors it; both collapse under reduce-motion.
- *
- * @param appStateService owns the stage and the appearance settings.
- * @param relationshipService creates the profiles and the couple record.
- * @param appLockService receives the PIN when one was chosen.
- * @param settingsStorage holds the draft.
- * @param onComplete called once the domain commit has succeeded.
- */
+/** Restores setup answers and saves each stage before allowing the next one. */
 @Composable
 fun OnboardingFlow(
     appStateService: AppStateService,
@@ -89,188 +54,136 @@ fun OnboardingFlow(
 ) {
     val scope = rememberCoroutineScope()
     val motion = LocalTwoHeartsMotion.current
-
-    val onboardingStage by appStateService.onboardingStage.collectAsState()
-    val currentStage = remember(onboardingStage) {
-        OnboardingStage.fromStorageKey(onboardingStage)
-    }
-
-    // The draft is loaded once, then owned here. `null` means "still loading",
-    // which gates the first frame so a returning person never sees an empty
-    // step flash before their saved answers appear.
+    val context = LocalContext.current.applicationContext
+    val stageKey by appStateService.onboardingStage.collectAsState()
+    val currentStage = OnboardingStage.fromStorageKey(stageKey)
     var draft by remember { mutableStateOf<OnboardingDraft?>(null) }
-    // The PIN is held separately from the draft precisely so it cannot be
-    // persisted alongside it. It is cleared when the lock step is passed.
-    var pin by remember { mutableStateOf<String?>(null) }
-    var committing by remember { mutableStateOf(false) }
-    var commitError by remember { mutableStateOf<String?>(null) }
+    var working by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var retry by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     LaunchedEffect(Unit) {
-        draft = settingsStorage.loadOnboardingDraft() ?: OnboardingDraft()
+        val restored = settingsStorage.loadOnboardingDraft() ?: OnboardingDraft()
+        // Older builds wrote the two completion flags separately. Recover the
+        // prior commit if the process stopped between those writes.
+        if (currentStage == OnboardingStage.COMPLETE && !appStateService.isOnboarded.value) {
+            val owner = relationshipService.getOwner()
+            val partner = relationshipService.getPartner()
+            val relationship = relationshipService.getRelationship()
+            if (owner != null && partner != null && relationship != null) {
+                val recovered = restored.copy(
+                    ownerName = owner.name, ownerBirthday = owner.birthday,
+                    partnerName = partner.name, partnerBirthday = partner.birthday,
+                    startDate = relationship.startDate, themeMode = appStateService.themeMode.value,
+                    textSize = appStateService.textSize.value,
+                )
+                draft = recovered
+                appStateService.finishOnboarding(recovered)
+            } else {
+                draft = restored
+                appStateService.saveOnboardingStep(restored, OnboardingStage.OWNER.storageKey)
+            }
+        } else {
+            val resumeStage = resumeOnboardingStage(currentStage, restored)
+            if (resumeStage != currentStage) appStateService.saveOnboardingStep(restored, resumeStage.storageKey)
+            draft = restored
+        }
     }
 
     val current = draft ?: return
 
-    /**
-     * Persists the step's answers and moves to [target].
-     *
-     * Order matters: the draft is written first, then the stage. A crash
-     * between the two leaves the earlier stage holding the *newer* answers,
-     * which is the safe direction — the person sees their input again rather
-     * than skipping past a step with nothing recorded.
-     */
-    fun advance(next: OnboardingDraft, target: OnboardingStage) {
-        draft = next
-        scope.launch {
-            settingsStorage.saveOnboardingDraft(next)
-            appStateService.updateOnboardingStage(target.storageKey)
-        }
-    }
-
-    /**
-     * The one place the domain is written.
-     *
-     * Everything setup collected lands here in a single suspend block, and the
-     * stage flips to COMPLETE only after every write has returned, so
-     * "complete" states a fact rather than an intent.
-     *
-     * It deliberately does **not** call [onComplete]. Persisting `COMPLETE`
-     * makes the shell eligible, but the person still has to be shown the
-     * completion screen that names what was created; the hand-off happens
-     * when they tap through it. Calling back here — as the first
-     * implementation did — swapped in the shell before the completion screen
-     * could ever render, so the celebration and summary were unreachable in
-     * the real app.
-     *
-     * The re-entrancy guard is set *before* the write is launched rather than
-     * inside it: two fast taps on the lock step (or on the retry sheet) would
-     * otherwise both pass the check and create a second owner, partner and
-     * couple row.
-     */
-    fun commit(final: OnboardingDraft, chosenPin: String?) {
-        if (committing) return
-        committing = true
-        commitError = null
+    fun write(message: String, action: suspend () -> Unit) {
+        if (working) return
+        working = true
+        error = null
+        retry = null
         scope.launch {
             try {
-                val owner = relationshipService.createOwner(
-                    name = final.ownerName,
-                    birthday = final.ownerBirthday,
-                )
-                val partner = relationshipService.createPartner(
-                    name = final.partnerName,
-                    birthday = final.partnerBirthday,
-                )
-                relationshipService.createRelationship(
-                    ownerId = owner.id,
-                    partnerId = partner.id,
-                    startDate = final.startDate,
-                )
-
-                appStateService.setThemeMode(final.themeMode)
-                appStateService.setTextSize(final.textSize)
-
-                chosenPin?.let { appLockService.createPin(it) }
-
-                settingsStorage.clearOnboardingDraft()
-                appStateService.updateOnboardingStage(OnboardingStage.COMPLETE.storageKey)
-                appStateService.setOnboarded(true)
-
-                committing = false
-            } catch (t: Throwable) {
-                // Recoverable: nothing has been marked complete, so the person
-                // can retry without re-entering anything.
-                committing = false
-                commitError = "TwoHearts couldn't finish saving just now. " +
-                    "Nothing is lost — try once more."
+                action()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                error = message
+                retry = { write(message, action) }
+            } finally {
+                working = false
             }
         }
     }
 
-    val handleNext: (OnboardingData) -> Unit = { next ->
-        when (currentStage) {
-            OnboardingStage.FRESH -> advance(OnboardingDraft(), OnboardingStage.OWNER)
+    fun advance(next: OnboardingDraft, target: OnboardingStage) {
+        write("Couldn’t save this setup step. Please try again.") {
+            appStateService.saveOnboardingStep(next, target.storageKey)
+            draft = next
+        }
+    }
 
+    fun saveDraft(next: OnboardingDraft) {
+        val previous = draft
+        write("Couldn’t save these choices. Please try again.") {
+            settingsStorage.saveOnboardingDraft(next)
+            draft = next
+            val keep = listOfNotNull(next.ownerPhotoDraft, next.partnerPhotoDraft)
+            val obsolete = listOfNotNull(previous?.ownerPhotoDraft, previous?.partnerPhotoDraft).toSet() - keep.toSet()
+            val staging = ProfilePhotoStaging(context)
+            obsolete.forEach { staging.discard(it) }
+        }
+    }
+
+    fun finish(final: OnboardingDraft, pin: String?) {
+        write("Couldn’t finish saving setup. You can try again from this step.") {
+            val db = TwoHeartsDatabase.getDatabase(context)
+            val staging = ProfilePhotoStaging(context)
+            val writer = ProfilePhotoWriter(db, MediaStorage(context), staging)
+            OnboardingDomainWriter(writer, staging, relationshipService).save(final)
+            if (pin != null) withContext(Dispatchers.IO) { appLockService.createPin(pin) }
+            appStateService.finishOnboarding(final)
+        }
+    }
+
+    fun next(stage: OnboardingStage, answers: OnboardingData) {
+        if (stage != currentStage || working) return
+        val latest = draft ?: return
+        when (stage) {
+            OnboardingStage.FRESH -> advance(latest, OnboardingStage.OWNER)
             OnboardingStage.OWNER -> advance(
-                current.copy(
-                    ownerName = next.ownerName,
-                    ownerBirthday = next.ownerBirthday,
-                ),
+                latest.copy(ownerName = answers.ownerName, ownerBirthday = answers.ownerBirthday),
                 OnboardingStage.RELATIONSHIP,
             )
-
             OnboardingStage.RELATIONSHIP -> advance(
-                current.copy(
-                    partnerName = next.partnerName,
-                    partnerBirthday = next.partnerBirthday,
-                    startDate = next.startDate,
-                ),
+                latest.copy(partnerName = answers.partnerName, partnerBirthday = answers.partnerBirthday, startDate = answers.startDate),
                 OnboardingStage.PERSONALIZATION,
             )
-
             OnboardingStage.PERSONALIZATION -> advance(
-                current.copy(
-                    themeMode = next.themeMode,
-                    textSize = next.textSize,
-                ),
-                OnboardingStage.APP_LOCK,
+                latest.copy(themeMode = answers.themeMode, textSize = answers.textSize),
+                OnboardingStage.CAPABILITIES,
             )
-
-            OnboardingStage.APP_LOCK -> {
-                pin = next.pin
-                commit(current, next.pin)
-            }
-
+            OnboardingStage.CAPABILITIES -> advance(latest, OnboardingStage.APP_LOCK)
+            OnboardingStage.APP_LOCK -> finish(latest, answers.pin)
             OnboardingStage.COMPLETE -> onComplete()
         }
     }
 
-    val handleBack: () -> Unit = {
-        currentStage.previous()?.let { previous ->
-            // Stepping back out of the lock step discards the typed PIN, so a
-            // half-entered code cannot be committed by a later fast tap.
-            if (currentStage == OnboardingStage.APP_LOCK) pin = null
-            scope.launch { appStateService.updateOnboardingStage(previous.storageKey) }
-        }
+    fun back(stage: OnboardingStage) {
+        if (stage != currentStage || working) return
+        val latest = draft ?: return
+        stage.previous()?.let { advance(latest, it) }
     }
 
-    // System back steps the flow, matching the header's back affordance.
-    //
-    // The migrated flow installed no handler at all, so the hardware/gesture
-    // back gesture fell through to the Activity default and left the app —
-    // mid-setup — from every step. It is bounded to the numbered steps: on the
-    // welcome screen there is nothing behind, and on the completion screen the
-    // domain has already been written, so going "back" there would re-open the
-    // lock step and let a second commit create duplicate profiles.
-    BackHandler(enabled = currentStage.order in 1..OnboardingStage.LAST_SETUP_ORDER) {
-        handleBack()
-    }
+    BackHandler(enabled = currentStage.order in 1..OnboardingStage.LAST_SETUP_ORDER) { back(currentStage) }
 
-    // Direction-aware transition: `forward` is true when the step order grows.
     var previousOrder by remember { mutableStateOf(currentStage.order) }
     val forward = currentStage.order >= previousOrder
     LaunchedEffect(currentStage) { previousOrder = currentStage.order }
-
     val duration = motion.decorative(TwoHeartsTokens.Duration.normal).toInt()
-    val enter = if (forward) {
-        slideInHorizontally(tween(duration)) { it / 10 } + fadeIn(tween(duration))
-    } else {
-        slideInHorizontally(tween(duration)) { -it / 10 } + fadeIn(tween(duration))
-    }
-    val exit = if (forward) {
-        slideOutHorizontally(tween(duration)) { -it / 10 } + fadeOut(tween(duration))
-    } else {
-        slideOutHorizontally(tween(duration)) { it / 10 } + fadeOut(tween(duration))
-    }
+    val enter = slideInHorizontally(tween(duration)) { if (forward) it / 10 else -it / 10 } + fadeIn(tween(duration))
+    val exit = slideOutHorizontally(tween(duration)) { if (forward) -it / 10 else it / 10 } + fadeOut(tween(duration))
 
     AnimatedContent(
         targetState = currentStage,
         transitionSpec = { enter togetherWith exit },
         label = "th-onboarding-step",
     ) { stage ->
-        // The steps still consume `OnboardingData` because that is the shape
-        // the domain services take at commit; the mapping happens in
-        // `handleNext`, so the PIN never reaches the persisted draft.
         val stepData = OnboardingData(
             ownerName = current.ownerName,
             ownerBirthday = current.ownerBirthday,
@@ -279,57 +192,62 @@ fun OnboardingFlow(
             startDate = current.startDate,
             themeMode = current.themeMode,
             textSize = current.textSize,
-            pin = pin,
+            ownerPhotoDraft = current.ownerPhotoDraft,
+            partnerPhotoDraft = current.partnerPhotoDraft,
         )
-
+        val onBack: () -> Unit = { back(stage) }
+        val onNext: (OnboardingData) -> Unit = { next(stage, it) }
         when (stage) {
-            OnboardingStage.FRESH -> WelcomeScreen(
-                onGetStarted = { handleNext(stepData) },
-            )
-
+            OnboardingStage.FRESH -> WelcomeScreen(onGetStarted = { onNext(stepData) })
             OnboardingStage.OWNER -> ProfileSetupScreen(
-                data = stepData,
-                onBack = handleBack,
-                onNext = handleNext,
+                data = stepData, onBack = onBack, onNext = onNext, saving = working,
+                onPhotoDraftChanged = { id ->
+                    if (stage == currentStage) draft?.let { saveDraft(it.copy(ownerPhotoDraft = id)) }
+                },
             )
-
             OnboardingStage.RELATIONSHIP -> RelationshipSetupScreen(
-                data = stepData,
-                onBack = handleBack,
-                onNext = handleNext,
+                data = stepData, onBack = onBack, onNext = onNext, saving = working,
+                onPhotoDraftChanged = { id ->
+                    if (stage == currentStage) draft?.let { saveDraft(it.copy(partnerPhotoDraft = id)) }
+                },
             )
-
             OnboardingStage.PERSONALIZATION -> PersonalizationSetupScreen(
-                data = stepData,
-                onBack = handleBack,
-                onNext = handleNext,
-                // Applied live through the same service the app already
-                // observes, so choosing "Dark" actually turns the app dark.
+                data = stepData, onBack = onBack, onNext = onNext,
                 onThemeChange = { scope.launch { appStateService.setThemeMode(it) } },
                 onTextSizeChange = { scope.launch { appStateService.setTextSize(it) } },
             )
-
-            OnboardingStage.APP_LOCK -> AppLockSetupScreen(
-                data = stepData,
-                onBack = handleBack,
-                onNext = handleNext,
-            )
-
-            OnboardingStage.COMPLETE -> SetupCompleteScreen(
-                data = stepData,
-                onComplete = onComplete,
-            )
+            OnboardingStage.CAPABILITIES -> {
+                val permissions = rememberNotificationPermissionControl(
+                    previouslyRequested = current.notificationPrompted,
+                    onRequested = { draft?.let { saveDraft(it.copy(notificationPrompted = true)) } },
+                )
+                CapabilitiesSetupScreen(permissions, onBack, onNext = { onNext(stepData) })
+            }
+            OnboardingStage.APP_LOCK -> AppLockSetupScreen(data = stepData, onBack = onBack, onNext = onNext, saving = working)
+            OnboardingStage.COMPLETE -> {
+                val owner by remember(relationshipService) { relationshipService.observeOwner() }.collectAsState(initial = null)
+                val partner by remember(relationshipService) { relationshipService.observePartner() }.collectAsState(initial = null)
+                val lockState by appLockService.lockState.collectAsState()
+                SetupCompleteScreen(
+                    data = stepData,
+                    onComplete = onComplete,
+                    ownerPhotoRef = owner?.photoRef,
+                    partnerPhotoRef = partner?.photoRef,
+                    pinConfigured = lockState != AppLockState.DISABLED,
+                )
+            }
         }
     }
 
-    // A commit failure is surfaced over the flow rather than replacing it,
-    // because the person retries from where they were.
-    commitError?.let { message ->
+    error?.let { message ->
         OnboardingCommitErrorSheet(
             message = message,
-            retrying = committing,
-            onRetry = { commit(current, pin) },
-            onDismiss = { commitError = null },
+            retrying = working,
+            onRetry = { retry?.invoke() },
+            onDismiss = {
+                error = null
+                retry = null
+            },
         )
     }
 }
