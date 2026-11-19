@@ -36,7 +36,7 @@ These are comparative navigation paths from the rendered interface. The analysis
 - Compared the route registrations against Stage 5. All 43 distinct non-game registrations in `AppRouter` remain present. The shared redirect function registers the same 11 legacy routes, and `PeriodRoutes` remains unchanged. The focused AndroidX navigation tests passed for all aliases, five encoded search result types, the saved tab entry, notification deduplication and source restoration, and the keyboard role rule.
 - The interaction fixture measures the actual Compose controls on an edge-to-edge window and activates the Home and More actions through semantics. Robolectric stalled on automatic idling and did not reliably deliver a synthetic platform keyboard event. The final fixture supplies the corresponding insets to independent shell renders and verifies the Notes tab disappears when the inset occupies the bottom edge. Both focused build variants passed. Live keyboard animation and notification-tap checks remain part of Android release validation.
 - Full debug and release unit suites each passed 155 tests with zero failures, errors, or skips. Gradle assembled the debug APK and Android tools verified its v2 signature, alignment, archive, and metadata. It remains `com.twohearts.app` version `1.0.0` (1) with min API 26 and target API 35. Local APK SHA-256 `4f728799147a7c27d7a1cb9f6bdff5eb129deefe845502714788c7c18a991db8`.
-- The stage source checkpoint is the commit adding this report. Verify its remote SHA and Android workflow before advancing.
+- Git verified `82997ddb77b3af17577087a939faa720777b2865` on `origin/master`. GitHub Actions completed successfully for that exact SHA and published the debug APK. [Commit](https://github.com/https10011/2HEARTS2/commit/82997ddb77b3af17577087a939faa720777b2865) · [Actions](https://github.com/https10011/2HEARTS2/actions/runs/44520656449) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44520656449/artifacts/14526819389)
 
 ## Verification checklist
 
@@ -44,7 +44,7 @@ These are comparative navigation paths from the rendered interface. The analysis
 - [x] Inspect the final native shell at standard and narrow widths and record the result.
 - [x] Verify search routing, the notification entry route, alias navigation, saved tabs, and simulated keyboard states.
 - [x] Run debug and release unit tests, assemble the APK, and verify compiled metadata and signing.
-- [ ] Review the diff, push the stage checkpoint, and confirm CI for the exact remote SHA.
+- [x] Review the diff, push the stage checkpoint, and confirm CI for the exact remote SHA.
 
 ## Next stage
 

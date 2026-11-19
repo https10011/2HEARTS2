@@ -86,11 +86,12 @@ class RelationshipService(
     /**
      * Create partner profile.
      */
-    suspend fun createPartner(name: String, birthday: String?): Profile {
+    suspend fun createPartner(name: String, birthday: String?, photoRef: String? = null): Profile {
         val profile = Profile(
             name = name,
             birthday = birthday,
             role = "partner",
+            photoRef = photoRef,
             id = com.twohearts.app.data.repository.generateId(),
             createdAt = DateTimeHelper.nowUtc(),
             updatedAt = DateTimeHelper.nowUtc()
@@ -137,10 +138,12 @@ class RelationshipService(
         profileRepository.update(id, changes)
     }
 
+    suspend fun saveProfileDetails(id: String, name: String, birthday: String?, photoRef: String?): Profile =
+        checkNotNull(profileRepository.update(id, mapOf("name" to name, "birthday" to birthday, "photoRef" to photoRef)))
+
     suspend fun saveOwnerDetails(id: String, name: String, birthday: String?, photoRef: String?) {
-        val changes = mutableMapOf<String, Any?>("name" to name, "birthday" to birthday)
-        if (photoRef != null) changes["photoRef"] = photoRef
-        checkNotNull(profileRepository.update(id, changes))
+        val current = checkNotNull(profileRepository.getById(id))
+        saveProfileDetails(id, name, birthday, photoRef ?: current.photoRef)
     }
 
     /**

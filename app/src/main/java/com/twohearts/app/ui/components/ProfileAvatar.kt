@@ -1,7 +1,6 @@
 package com.twohearts.app.ui.components
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,7 +13,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,16 +24,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 import com.twohearts.app.ui.theme.TwoHeartsTokens
 import com.twohearts.app.services.media.MediaStorage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-
-private val LocalMediaRef = Regex("[A-Za-z0-9_-]{1,80}")
+import com.twohearts.app.services.media.MediaThumbnails
+import com.twohearts.app.services.media.localMediaId
+import kotlinx.coroutines.CancellationException
 
 /**
  * ProfileAvatar — the shared avatar for the owner and partner.
@@ -60,30 +63,31 @@ fun ProfileAvatar(
     val thColors = LocalTwoHeartsColors.current
     val initial = name.trim().firstOrNull()?.uppercaseChar()?.toString() ?: ""
     val context = LocalContext.current.applicationContext
-    val bitmap by produceState<Bitmap?>(null, photoUrl, selectedPhoto) {
-        value = withContext(Dispatchers.IO) {
-            val uri = selectedPhoto ?: photoUrl?.takeIf(LocalMediaRef::matches)
-                ?.let { MediaStorage(context).resolveUrl(it) }
-            if (uri == null) null else runCatching {
-                val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-                context.contentResolver.openInputStream(uri)?.use {
-                    BitmapFactory.decodeStream(it, null, options)
+    val desiredEdge = with(LocalDensity.current) { (size.dp * 2).roundToPx() }.coerceAtMost(1024)
+    val maxEdge = MediaThumbnails.bucket(desiredEdge, desiredEdge)
+    val path = remember(context, photoUrl, selectedPhoto) {
+        val uri = selectedPhoto ?: photoUrl?.takeIf(localMediaId::matches)?.let { MediaStorage(context).resolveUrl(it) }
+        uri?.takeIf { it.scheme == "file" }?.path
+    }
+    val bitmap by key(path, maxEdge) {
+        val cached = path?.let { MediaThumbnails.cached(it, "", maxEdge, normalizeExif = true) }
+        produceState<Bitmap?>(cached) {
+            if (path != null && value == null) {
+                value = try {
+                    MediaThumbnails.load(path, "", maxEdge, normalizeExif = true)
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    null
                 }
-                options.inJustDecodeBounds = false
-                options.inSampleSize = 1
-                while (maxOf(options.outWidth, options.outHeight) / options.inSampleSize > 400) {
-                    options.inSampleSize *= 2
-                }
-                context.contentResolver.openInputStream(uri)?.use {
-                    BitmapFactory.decodeStream(it, null, options)
-                }
-            }.getOrNull()
+            }
         }
     }
 
     Box(
         modifier = modifier
             .size(size.dp)
+            .semantics { if (label != null) contentDescription = label }
             .clip(CircleShape)
             .background(
                 Brush.linearGradient(
@@ -99,7 +103,7 @@ fun ProfileAvatar(
     ) {
         val photo = bitmap
         if (photo != null) {
-            Image(photo.asImageBitmap(), label, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+            Image(photo.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         } else if (initial.isNotEmpty()) {
             Text(
                 text = initial,

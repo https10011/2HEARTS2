@@ -1,12 +1,14 @@
 package com.twohearts.app.services.datamanagement
 
 import android.content.Context
+import androidx.room.withTransaction
 import com.twohearts.app.data.database.DatabaseInitializer
 import com.twohearts.app.services.media.FileService
 import com.twohearts.app.services.media.MediaStorage
 import android.app.ActivityManager
 import com.twohearts.app.services.logger.Logger
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * DataManagementService — data management operations.
@@ -53,8 +55,10 @@ class DataManagementService(
      */
     suspend fun clearCache(): CacheClearResult {
         val db = databaseInitializer.getDatabase()
-        val knownMediaIds = db?.mediaAssetDao()?.getAll()?.first()?.map { it.id }?.toSet() ?: emptySet()
-        val cleaned = mediaStorage.cleanupOrphans(knownMediaIds)
+        val cleaned = db?.withTransaction {
+            val knownMediaIds = db.mediaAssetDao().retainedIds().toSet()
+            withContext(Dispatchers.IO) { mediaStorage.cleanupOrphans(knownMediaIds) }
+        } ?: 0
 
         logger.info("Cache cleared: $cleaned orphan files removed")
         return CacheClearResult(orphanFilesRemoved = cleaned)

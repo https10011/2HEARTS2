@@ -4,6 +4,10 @@ import android.app.Application
 import androidx.activity.compose.setContent
 import androidx.compose.ui.unit.dp
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color as AndroidColor
+import android.graphics.Paint
 import android.provider.Settings
 import android.view.View
 import androidx.compose.foundation.background
@@ -19,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -31,14 +36,18 @@ import com.twohearts.app.data.entity.Memory
 import com.twohearts.app.data.entity.MoodEntry
 import com.twohearts.app.data.entity.Note
 import com.twohearts.app.data.entity.Place
+import com.twohearts.app.data.entity.Profile
 import com.twohearts.app.data.entity.Reminder
 import com.twohearts.app.data.entity.TimelineEvent
 import com.twohearts.app.data.settings.SettingsStorage
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.services.appstate.AppStateService
+import com.twohearts.app.services.media.MediaStorage
+import com.twohearts.app.services.media.MediaThumbnails
 import com.twohearts.app.ui.components.CardTone
 import com.twohearts.app.ui.components.BrandLogo
 import com.twohearts.app.ui.components.BrandLogoVariant
+import com.twohearts.app.ui.components.ProfilePhotoCropSheet
 import com.twohearts.app.ui.components.StatusVariant
 import com.twohearts.app.ui.components.ThButton
 import com.twohearts.app.ui.components.ThChoiceChip
@@ -48,6 +57,9 @@ import com.twohearts.app.ui.components.ThModal
 import com.twohearts.app.ui.components.ThSectionTabs
 import com.twohearts.app.ui.components.ThStatusBanner
 import com.twohearts.app.ui.components.ThSurfaceCard
+import com.twohearts.app.ui.navigation.AppShell
+import com.twohearts.app.ui.navigation.LocalShellRoute
+import com.twohearts.app.ui.navigation.RoutePath
 import com.twohearts.app.ui.screens.about.AboutScreen
 import com.twohearts.app.ui.screens.importantdates.ImportantDatesScreen
 import com.twohearts.app.ui.screens.memories.MemoriesHome
@@ -95,6 +107,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowDialog
 import java.io.File
+import kotlinx.coroutines.runBlocking
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34], qualifiers = "w411dp-h891dp-xxhdpi")
@@ -160,6 +173,75 @@ class Phase0RenderHarness {
         render("transformation-5-brand-dark", dark = true, textSizeScale = 2f) { BrandReference() }
         render("transformation-5-onboarding-dark", dark = true, textSizeScale = 2f) {
             com.twohearts.app.ui.onboarding.WelcomeScreen(onGetStarted = {})
+        }
+    }
+
+    @Test
+    fun renderTransformationCouplePhotoSettings() {
+        val media = MediaStorage(ApplicationProvider.getApplicationContext<Application>())
+        val portrait = photoFixture()
+        val photo = try {
+            checkNotNull(media.storeBitmap(portrait))
+        } finally {
+            portrait.recycle()
+        }
+        try {
+            checkNotNull(runBlocking { MediaThumbnails.load(photo.filePath, "", 512, normalizeExif = true) })
+            val owner = Profile("Alexandra", "1991-02-03", "owner", photo.id, "owner-photo", now, now)
+            val partner = Profile("Avery", role = "partner", id = "partner-photo", createdAt = now, updatedAt = now)
+            render("transformation-7-owner") {
+                CompositionLocalProvider(LocalShellRoute provides RoutePath.APP_SETTINGS_PROFILE) {
+                    ProfileSettingsScreen({}, profile = owner)
+                }
+            }
+            val rendered = checkNotNull(BitmapFactory.decodeFile(File(outDir, "transformation-7-owner.png").path))
+            try {
+                val containsPhoto = (0 until rendered.height / 5 step 4).any { y ->
+                    (0 until rendered.width / 4 step 4).any { x ->
+                        val pixel = rendered.getPixel(x, y)
+                        AndroidColor.red(pixel) > 230 && AndroidColor.green(pixel) > 190 && AndroidColor.blue(pixel) < 190
+                    }
+                }
+                check(containsPhoto) { "The settings render must show the saved photo fixture" }
+            } finally {
+                rendered.recycle()
+            }
+            render("transformation-7-partner", dark = true, textSizeScale = 2f) {
+                AppShell(RoutePath.APP_SETTINGS_RELATIONSHIP, {}, {}, canNavigateBack = true) {
+                    RelationshipSettingsScreen({}, partner = partner)
+                }
+            }
+        } finally {
+            media.delete(photo.id)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp-mdpi")
+    fun renderTransformationCouplePhotoCropAtTwoHundredPercent() {
+        val source = photoFixture()
+        try {
+            render("transformation-7-crop", dark = true, textSizeScale = 2f, captureDialog = true) {
+                AppShell(RoutePath.APP_SETTINGS_RELATIONSHIP, {}, {}, canNavigateBack = true) {
+                    RelationshipSettingsScreen({})
+                    ProfilePhotoCropSheet(image = source, busy = false, onDismiss = {}, onApply = { _, _ -> })
+                }
+            }
+        } finally {
+            source.recycle()
+        }
+    }
+
+    private fun photoFixture(): Bitmap = Bitmap.createBitmap(640, 400, Bitmap.Config.ARGB_8888).also {
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        Canvas(it).apply {
+            drawColor(AndroidColor.rgb(0xE3, 0xB8, 0x93))
+            paint.color = AndroidColor.rgb(0x79, 0x42, 0x5D)
+            drawCircle(330f, 194f, 136f, paint)
+            paint.color = AndroidColor.rgb(0xFE, 0xE4, 0xA5)
+            drawCircle(367f, 150f, 62f, paint)
+            paint.color = AndroidColor.rgb(0x5C, 0x5E, 0x7B)
+            drawRect(0f, 308f, 640f, 400f, paint)
         }
     }
 

@@ -16,6 +16,9 @@ interface CoupleRelationshipDao {
     @Query("SELECT * FROM couple_relationship WHERE deleted_at IS NULL LIMIT 1")
     fun get(): Flow<CoupleRelationship?>
 
+    @Query("SELECT * FROM couple_relationship WHERE deleted_at IS NULL LIMIT 1")
+    suspend fun getCurrent(): CoupleRelationship?
+
     @Query("SELECT * FROM couple_relationship WHERE id = :id AND deleted_at IS NULL")
     suspend fun getById(id: String): CoupleRelationship?
 

@@ -16,10 +16,7 @@ class CoupleRelationshipRepository(private val dao: CoupleRelationshipDao) : Bas
 
     override suspend fun getById(id: String): CoupleRelationship? = dao.getById(id)
 
-    suspend fun get(): CoupleRelationship? {
-        // For non-reactive access, query directly
-        return null // Placeholder — use observe() for actual data
-    }
+    suspend fun get(): CoupleRelationship? = dao.getCurrent()
 
     override suspend fun create(entity: CoupleRelationship): CoupleRelationship {
         dao.insert(entity)

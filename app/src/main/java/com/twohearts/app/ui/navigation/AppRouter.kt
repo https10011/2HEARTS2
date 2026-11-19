@@ -90,6 +90,8 @@ import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.data.repository.generateId
 import com.twohearts.app.data.dao.MediaAssetDao
 import com.twohearts.app.services.media.MediaStorage
+import com.twohearts.app.services.media.ProfilePhotoStaging
+import com.twohearts.app.services.media.ProfilePhotoWriter
 
 /**
  * AppRouter — main application router.
@@ -1034,24 +1036,13 @@ internal fun AppRouter(
                                 error = null
                                 scope.launch {
                                     try {
-                                        val profile = checkNotNull(relationshipService.getOwner())
-                                        val stored = photo?.let { uri ->
-                                            withContext(Dispatchers.IO) {
-                                                val mime = context.contentResolver.getType(uri)
-                                                mime?.takeIf { it.startsWith("image/") }?.let { mediaStorage.store(uri, it) }
-                                            } ?: error("Could not read selected photo")
-                                        }
                                         val db = com.twohearts.app.data.database.TwoHeartsDatabase.getDatabase(context)
-                                        db.withTransaction {
-                                            if (stored != null) {
-                                                val now = DateTimeHelper.nowUtc()
-                                                mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(
-                                                    filePath = stored.filePath, mimeType = stored.mimeType,
-                                                    fileSize = stored.fileSize, width = stored.width, height = stored.height,
-                                                    id = stored.id, createdAt = now, updatedAt = now,
-                                                ))
-                                            }
-                                            relationshipService.saveOwnerDetails(profile.id, name, birthday, stored?.id)
+                                        val writer = ProfilePhotoWriter(db, mediaStorage, ProfilePhotoStaging(context))
+                                        writer.commit(photo) { replacement ->
+                                            val profile = checkNotNull(relationshipService.getOwner())
+                                            val ref = photo.reference(profile.photoRef, replacement)
+                                            relationshipService.saveProfileDetails(profile.id, name, birthday, ref)
+                                            profile.photoRef?.takeUnless { it == ref }
                                         }
                                         feedback.success("Profile saved.")
                                         navController.popBackStack()
@@ -1084,25 +1075,27 @@ internal fun AppRouter(
                         saving = saving,
                         error = error,
                         onBack = { if (!saving) navController.popBackStack() },
-                        onSave = { name, date ->
+                        onSave = { name, date, photo ->
                             if (!saving) {
                                 saving = true
                                 error = null
                                 scope.launch {
                                     try {
                                         val db = com.twohearts.app.data.database.TwoHeartsDatabase.getDatabase(context)
-                                        db.withTransaction {
+                                        val writer = ProfilePhotoWriter(db, mediaStorage, ProfilePhotoStaging(context))
+                                        writer.commit(photo) { replacement ->
                                             val owner = checkNotNull(relationshipService.getOwner())
-                                            val savedPartner = relationshipService.getPartner()
-                                            val partnerId = if (savedPartner == null) {
-                                                relationshipService.createPartner(name, null).id
+                                            val previous = relationshipService.getPartner()
+                                            val ref = photo.reference(previous?.photoRef, replacement)
+                                            val partner = if (previous == null) {
+                                                relationshipService.createPartner(name, null, ref)
                                             } else {
-                                                relationshipService.updatePartner(savedPartner.id, name, null)
-                                                savedPartner.id
+                                                relationshipService.saveProfileDetails(previous.id, name, previous.birthday, ref)
                                             }
                                             val saved = relationshipService.getRelationship()
-                                            if (saved == null) relationshipService.createRelationship(owner.id, partnerId, date)
+                                            if (saved == null) relationshipService.createRelationship(owner.id, partner.id, date)
                                             else relationshipService.updateRelationship(saved.id, date)
+                                            previous?.photoRef?.takeUnless { it == ref }
                                         }
                                         feedback.success("Relationship saved.")
                                         navController.popBackStack()

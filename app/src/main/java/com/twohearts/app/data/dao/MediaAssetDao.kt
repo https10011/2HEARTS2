@@ -29,6 +29,21 @@ interface MediaAssetDao {
     @Query("SELECT * FROM media_assets WHERE id = :id AND deleted_at IS NULL")
     suspend fun getById(id: String): MediaAsset?
 
+    @Query("""
+        SELECT id FROM media_assets WHERE deleted_at IS NULL
+        UNION SELECT photo_ref FROM profiles WHERE photo_ref IS NOT NULL
+        UNION SELECT photo_ref FROM places WHERE photo_ref IS NOT NULL
+        UNION SELECT media_asset_id FROM memory_media
+    """)
+    suspend fun retainedIds(): List<String>
+
+    @Query("""
+        SELECT EXISTS(SELECT 1 FROM profiles WHERE photo_ref = :id)
+            OR EXISTS(SELECT 1 FROM places WHERE photo_ref = :id)
+            OR EXISTS(SELECT 1 FROM memory_media WHERE media_asset_id = :id)
+    """)
+    suspend fun isReferenced(id: String): Boolean
+
     @Insert
     suspend fun insert(mediaAsset: MediaAsset)
 

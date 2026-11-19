@@ -33,7 +33,7 @@ class ProfileRepository(private val dao: ProfileDao) : BaseRepository<Profile> {
             name = changes["name"] as? String ?: existing.name,
             birthday = if (changes.containsKey("birthday")) changes["birthday"] as? String else existing.birthday,
             role = changes["role"] as? String ?: existing.role,
-            photoRef = changes["photoRef"] as? String ?: existing.photoRef,
+            photoRef = if (changes.containsKey("photoRef")) changes["photoRef"] as? String else existing.photoRef,
             updatedAt = nowUtc()
         )
         dao.update(updated)

@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 
 /** Small, process-wide cache for rendered previews. Original media remains untouched. */
 internal object MediaThumbnails {
-    private data class Key(val path: String, val revision: String, val maxEdge: Int)
+    private data class Key(val path: String, val revision: String, val maxEdge: Int, val normalizeExif: Boolean)
 
     private val maxCacheBytes = (Runtime.getRuntime().maxMemory() / 24)
         .coerceIn(3L * 1024 * 1024, 16L * 1024 * 1024).toInt()
@@ -21,13 +21,15 @@ internal object MediaThumbnails {
     @OptIn(ExperimentalCoroutinesApi::class)
     private val decoder = Dispatchers.IO.limitedParallelism(2)
 
-    fun cached(path: String, revision: String, maxEdge: Int): Bitmap? =
-        previews.get(Key(path, revision, maxEdge))
+    fun cached(path: String, revision: String, maxEdge: Int, normalizeExif: Boolean = false): Bitmap? =
+        previews.get(Key(path, revision, maxEdge, normalizeExif))
 
-    suspend fun load(path: String, revision: String, maxEdge: Int): Bitmap? {
-        val key = Key(path, revision, maxEdge)
+    suspend fun load(path: String, revision: String, maxEdge: Int, normalizeExif: Boolean = false): Bitmap? {
+        val key = Key(path, revision, maxEdge, normalizeExif)
         return previews.get(key) ?: withContext(decoder) {
-            previews.get(key) ?: decode(path, maxEdge)?.also { previews.put(key, it) }
+            previews.get(key) ?: (
+                if (normalizeExif) decodeProfileImage(File(path), maxEdge) else decode(path, maxEdge)
+            )?.also { previews.put(key, it) }
         }
     }
 
