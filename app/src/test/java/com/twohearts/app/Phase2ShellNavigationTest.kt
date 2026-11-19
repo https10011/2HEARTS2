@@ -21,13 +21,12 @@ class Phase2ShellNavigationTest {
     // ─── Navigation vocabulary ────────────────────────────────────────
 
     @Test
-    fun `bottom bar holds exactly the five primary areas`() {
+    fun `bottom bar holds Home Us Notes and More`() {
         val items = NavConfig.bottomNavItems
-        assertEquals(5, items.size)
+        assertEquals(4, items.size)
         assertEquals(
             listOf(
                 RoutePath.APP_HOME,
-                RoutePath.APP_NOTIFICATIONS,
                 RoutePath.APP_US,
                 RoutePath.APP_NOTES,
                 RoutePath.APP_MORE,
@@ -37,21 +36,19 @@ class Phase2ShellNavigationTest {
     }
 
     @Test
-    fun `exactly one destination is the centre brand position`() {
-        val centres = NavConfig.bottomNavItems.filter { it.isCenter }
-        assertEquals(1, centres.size)
-        assertEquals(RoutePath.APP_US, centres.single().route)
+    fun `Us retains the branded tab`() {
+        val branded = NavConfig.bottomNavItems.filter { it.isBrand }
+        assertEquals(1, branded.size)
+        assertEquals(RoutePath.APP_US, branded.single().route)
     }
 
     @Test
-    fun `every destination carries a distinct short label and icon`() {
+    fun `every tab carries a distinct label and icon`() {
         val items = NavConfig.bottomNavItems
-        // The short label exists so the bar can stay legible on a narrow
-        // screen without shrinking the type below a readable size.
         items.forEach { item ->
             assertTrue(
-                "missing short label for ${item.route}",
-                item.shortLabel.isNotBlank(),
+                "missing label for ${item.route}",
+                item.label.isNotBlank(),
             )
             assertTrue(
                 "missing accessibility label for ${item.route}",
@@ -59,9 +56,9 @@ class Phase2ShellNavigationTest {
             )
         }
         assertEquals(
-            "short labels must be distinct",
+            "labels must be distinct",
             items.size,
-            items.map { it.shortLabel }.distinct().size,
+            items.map { it.label }.distinct().size,
         )
         assertEquals(
             "glyphs must be distinct",
@@ -73,7 +70,7 @@ class Phase2ShellNavigationTest {
     // ─── Navigation role classification ───────────────────────────────
 
     @Test
-    fun `all five primary areas classify as root`() {
+    fun `all primary areas classify as root`() {
         NavConfig.bottomNavItems.forEach { item ->
             assertEquals(
                 "${item.route} should be ROOT",
@@ -177,15 +174,12 @@ class Phase2ShellNavigationTest {
     }
 
     @Test
-    fun `notifications is a primary area so it shows no back affordance`() {
-        // Regression guard: the migrated Notifications screen drew a back
-        // button while being a bottom-bar destination, so the bar and the
-        // arrow disagreed about where the user was.
+    fun `notifications retains its route as a detail with Back`() {
         assertEquals(
-            ShellSurfaces.Role.ROOT,
+            ShellSurfaces.Role.DETAIL,
             ShellSurfaces.roleOf(RoutePath.APP_NOTIFICATIONS),
         )
-        assertFalse(ShellSurfaces.showsBackAffordance(RoutePath.APP_NOTIFICATIONS))
+        assertTrue(ShellSurfaces.showsBackAffordance(RoutePath.APP_NOTIFICATIONS))
     }
 
     @Test

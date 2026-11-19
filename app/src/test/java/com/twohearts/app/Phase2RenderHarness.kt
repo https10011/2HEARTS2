@@ -23,6 +23,7 @@ import com.twohearts.app.ui.navigation.RoutePath
 import com.twohearts.app.ui.screens.home.HomeScreen
 import com.twohearts.app.ui.screens.memories.MemoriesHome
 import com.twohearts.app.ui.screens.memories.MemoryDetail
+import com.twohearts.app.ui.screens.more.MoreScreen
 import com.twohearts.app.ui.screens.notes.NotesHome
 import com.twohearts.app.ui.screens.settings.SettingsHomeScreen
 import com.twohearts.app.ui.theme.TextScalingLevel
@@ -82,24 +83,21 @@ class Phase2RenderHarness {
         route: String,
         dark: Boolean = false,
         scale: TextScalingLevel = TextScalingLevel.DEFAULT,
+        textSizeScale: Float = scale.scale,
         content: @Composable () -> Unit,
     ) {
         val controller = org.robolectric.Robolectric
             .buildActivity(androidx.activity.ComponentActivity::class.java).setup()
         val activity = controller.get()
         activity.setContent {
-            TwoHeartsTheme(darkMode = dark, textScalingLevel = scale) {
+            TwoHeartsTheme(darkTheme = dark, textSizeScale = textSizeScale) {
                 AppShell(
                     currentRoute = route,
                     onNavigate = {},
                     onBack = {},
                     canNavigateBack = false,
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background)
-                    ) { content() }
+                    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) { content() }
                 }
             }
         }
@@ -124,7 +122,26 @@ class Phase2RenderHarness {
         controller.pause().stop().destroy()
     }
 
-    /** Five primary areas, each rendered with itself selected. */
+    @Test
+    fun renderTransformationNavigation() {
+        render("transformation-6-home", RoutePath.APP_HOME) { TestHomeScreen() }
+        render("transformation-6-us", RoutePath.APP_US) { TestUsScreen(relationshipService()) }
+        render("transformation-6-more", RoutePath.APP_MORE) { MoreScreen({}) }
+        render("transformation-6-notifications", RoutePath.APP_NOTIFICATIONS) { NotificationCenterHarnessContent() }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h780dp-mdpi")
+    fun renderTransformationNavigationAtTwoHundredPercent() {
+        render("transformation-6-home-narrow", RoutePath.APP_HOME, dark = true, textSizeScale = 2f) {
+            TestHomeScreen()
+        }
+        render("transformation-6-notes-narrow", RoutePath.APP_NOTES, dark = true, textSizeScale = 2f) {
+            NotesHome(emptyList(), {}, {}, {}, onSearch = {})
+        }
+    }
+
+    /** Primary destinations and the Notifications detail screen. */
     @Test
     fun renderPrimaryAreas() {
         render("p2-01-home", RoutePath.APP_HOME) {

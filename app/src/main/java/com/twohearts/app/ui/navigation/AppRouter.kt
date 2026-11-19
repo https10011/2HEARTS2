@@ -176,7 +176,7 @@ internal fun AppRouter(
     } else {
         LaunchedEffect(openAlerts) {
             if (openAlerts) {
-                navController.navigate(RoutePath.APP_NOTIFICATIONS) { launchSingleTop = true }
+                navController.openNotifications()
                 onAlertsOpened()
             }
         }
@@ -192,24 +192,7 @@ internal fun AppRouter(
         AppShell(
             currentRoute = currentRoutePath,
             canNavigateBack = canNavigateBack,
-            onNavigate = { route ->
-                // Phase 2: a destination already showing is not re-pushed.
-                // Previously selecting the current area still ran the full
-                // navigate() dance (and its animation), which made the bar
-                // feel unresponsive — the screen appeared to reload for no
-                // reason.
-                if (route != currentRoutePath) {
-                    navController.navigate(route) {
-                        // Pop up to the start destination rather than letting
-                        // the stack grow with every area switch.
-                        popUpTo(RoutePath.APP_HOME) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            },
+            onNavigate = navController::selectPrimaryRoute,
             onBack = {
                 // Only reached while canNavigateBack is true, so this always
                 // has an effect.
@@ -321,16 +304,7 @@ internal fun AppRouter(
                         reminderRepository = reminderRepository,
                         placeRepository = placeRepository,
                         timelineEventRepository = timelineEventRepository,
-                        onResultClick = { type, id ->
-                            val encodedId = android.net.Uri.encode(id)
-                            when (type) {
-                                "note" -> navController.navigate("${RoutePath.APP_NOTES}/$encodedId")
-                                "memory" -> navController.navigate("${RoutePath.APP_MEMORIES}/$encodedId")
-                                "reminder" -> navController.navigate("${RoutePath.APP_REMINDERS}/$encodedId")
-                                "place" -> navController.navigate("${RoutePath.APP_PLACES}/$encodedId")
-                                "timeline" -> navController.navigate("${RoutePath.APP_TIMELINE}/$encodedId")
-                            }
-                        },
+                        onResultClick = navController::openSearchResult,
                         onBack = {
                             navController.popBackStack()
                         }
@@ -342,6 +316,7 @@ internal fun AppRouter(
                     val notes by noteRepository.observeAll().collectAsState(initial = emptyList())
                     NotesHome(
                         notes = notes,
+                        onSearch = { navController.navigate(RoutePath.APP_SEARCH) },
                         onNoteClick = { noteId ->
                             navController.navigate("/app/notes/$noteId")
                         },
@@ -1026,108 +1001,7 @@ internal fun AppRouter(
                     )
                 }
 
-                // Games — archived (Stage 12).
-                // Legacy games are preserved in Archive/Legacy-React-Vite-Capacitor/
-                // Yuki replaced games as the primary engagement feature.
-                // All game routes redirect to Yuki companion.
-                composable(RoutePath.APP_GAMES) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(RoutePath.APP_YUKI) {
-                            popUpTo(RoutePath.APP_HOME) { saveState = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-
-                composable(RoutePath.APP_GAMES_MEMORY_MATCH) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(RoutePath.APP_YUKI) {
-                            popUpTo(RoutePath.APP_HOME) { saveState = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-
-                composable(RoutePath.APP_GAMES_WORD_SCRAMBLE) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(RoutePath.APP_YUKI) {
-                            popUpTo(RoutePath.APP_HOME) { saveState = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-
-                composable(RoutePath.APP_GAMES_COUPLE_TRIVIA) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(RoutePath.APP_YUKI) {
-                            popUpTo(RoutePath.APP_HOME) { saveState = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-
-                composable(RoutePath.APP_GAMES_WHO_KNOWS) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(RoutePath.APP_YUKI) {
-                            popUpTo(RoutePath.APP_HOME) { saveState = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-
-                composable(RoutePath.APP_GAMES_WOULD_YOU_RATHER) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(RoutePath.APP_YUKI) {
-                            popUpTo(RoutePath.APP_HOME) { saveState = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-
-                composable(RoutePath.APP_GAMES_THIS_OR_THAT) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(RoutePath.APP_YUKI) {
-                            popUpTo(RoutePath.APP_HOME) { saveState = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-
-                composable(RoutePath.APP_GAMES_GUESS_MY_ANSWER) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(RoutePath.APP_YUKI) {
-                            popUpTo(RoutePath.APP_HOME) { saveState = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-
-                composable(RoutePath.APP_GAMES_CASUAL_TRIVIA) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(RoutePath.APP_YUKI) {
-                            popUpTo(RoutePath.APP_HOME) { saveState = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-
-                composable(RoutePath.APP_GAMES_RIDDLE_ROOM) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(RoutePath.APP_YUKI) {
-                            popUpTo(RoutePath.APP_HOME) { saveState = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }
-
-                composable(RoutePath.APP_GAMES_RESULTS) {
-                    LaunchedEffect(Unit) {
-                        navController.navigate(RoutePath.APP_YUKI) {
-                            popUpTo(RoutePath.APP_HOME) { saveState = true }
-                            launchSingleTop = true
-                        }
-                    }
-                }
+                legacyGameRedirects(navController)
 
                 // Settings
                 composable(RoutePath.APP_SETTINGS) {

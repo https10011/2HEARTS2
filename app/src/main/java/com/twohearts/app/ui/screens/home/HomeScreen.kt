@@ -56,6 +56,7 @@ import com.twohearts.app.ui.components.CardTone
 import com.twohearts.app.ui.components.ProfileAvatar
 import com.twohearts.app.ui.components.ThEyebrow
 import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.ThIconButton
 import com.twohearts.app.ui.components.ThQuietButton
 import com.twohearts.app.ui.components.ThSectionHeader
 import com.twohearts.app.ui.components.ThSurfaceCard
@@ -63,6 +64,7 @@ import com.twohearts.app.ui.decorations.DecorationPosition
 import com.twohearts.app.ui.decorations.OnboardingArt
 import com.twohearts.app.ui.decorations.ThDecoration
 import com.twohearts.app.ui.navigation.RoutePath
+import com.twohearts.app.ui.navigation.ShellSearchAction
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 import com.twohearts.app.ui.theme.ThTextStyles
 import com.twohearts.app.ui.theme.TwoHeartsTokens
@@ -96,8 +98,7 @@ import com.twohearts.app.ui.theme.TwoHeartsTokens
  *     them, each carrying its real next item rather than a bare count.
  *  4. **Recent memory** — the latest real memory, as a keepsake composition.
  *  5. **Today's mood** — the actual check-in, or an invitation to make one.
- *  6. **Yuki** — a compact character-led row, because Home is the only route
- *     into Yuki outside the archived game redirects.
+ *  6. **Yuki** — a compact companion preview and an entry to Yuki's room.
  *
  * Every value comes from a repository. Nothing is fabricated: an absent
  * memory, note, reminder, date or mood renders as an invitation, and the
@@ -281,7 +282,15 @@ private fun HomeHero(data: HomeData, onNavigate: (String) -> Unit) {
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            BrandLogo(variant = BrandLogoVariant.MARK, size = 40)
+            Box(Modifier.fillMaxWidth().height(TwoHeartsTokens.Dimensions.touchTargetMin)) {
+                BrandLogo(Modifier.align(Alignment.Center), variant = BrandLogoVariant.MARK, size = 40)
+                Row(Modifier.align(Alignment.CenterEnd)) {
+                    ThIconButton(onClick = { onNavigate(RoutePath.APP_NOTIFICATIONS) }, label = "Notifications") {
+                        Icon(ThIcons.Bell, contentDescription = null, tint = thColors.textSecondary)
+                    }
+                    ShellSearchAction { onNavigate(RoutePath.APP_SEARCH) }
+                }
+            }
 
             Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space4))
 
@@ -774,10 +783,7 @@ private fun MoodSection(mood: MoodEntry?, onNavigate: (String) -> Unit) {
 /**
  * Yuki's presence on Home.
  *
- * Yuki is a character, not a feature button, so this is a character-led row
- * that speaks in Yuki's own voice using real persisted mood and level. It
- * exists because Home is the only route into Yuki outside the archived game
- * redirects — removing it would strand the character.
+ * The preview uses Yuki's saved mood and level when they are available.
  */
 @Composable
 private fun YukiSection(presence: YukiPresence?, onNavigate: (String) -> Unit) {

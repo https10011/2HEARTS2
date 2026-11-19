@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
@@ -21,17 +22,28 @@ import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.ui.components.ThChoiceChip
 import com.twohearts.app.ui.components.Header
 import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.navigation.ShellSearchAction
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotesHome(notes: List<Note>, onNoteClick: (String) -> Unit, onAddNote: () -> Unit, onBack: () -> Unit) {
-    var query by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf<NoteCategory?>(null) }
+fun NotesHome(
+    notes: List<Note>,
+    onNoteClick: (String) -> Unit,
+    onAddNote: () -> Unit,
+    onBack: () -> Unit,
+    onSearch: (() -> Unit)? = null,
+) {
+    var query by rememberSaveable { mutableStateOf("") }
+    var category by rememberSaveable { mutableStateOf<NoteCategory?>(null) }
     val filtered = remember(notes, query, category) { filterNotes(notes, query, category) }
     val colors = LocalTwoHeartsColors.current
     Scaffold(
-        topBar = { Header(title = "Notes", onBack = onBack) },
+        topBar = {
+            Header(title = "Notes", onBack = onBack) {
+                if (onSearch != null) ShellSearchAction(onSearch)
+            }
+        },
         floatingActionButton = { if (notes.isNotEmpty()) ExtendedFloatingActionButton(onClick = onAddNote, icon = { Icon(ThIcons.Edit, null) }, text = { Text("Write a note") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {

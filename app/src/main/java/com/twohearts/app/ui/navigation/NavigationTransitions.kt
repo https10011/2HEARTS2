@@ -35,7 +35,7 @@ import com.twohearts.app.ui.theme.TwoHeartsTokens
  * The model now has three movement kinds, matching the three kinds of
  * movement the product actually has:
  *
- *  - [NavMotion.LATERAL] — a peer switch (the five top-level areas).
+ *  - [NavMotion.LATERAL] — a switch between peer destinations.
  *    A short cross-fade: same altitude, no direction implied.
  *  - [NavMotion.PUSH] — a step down into a detail, editor or modal surface.
  *    Content enters from the trailing edge and leaves toward it.

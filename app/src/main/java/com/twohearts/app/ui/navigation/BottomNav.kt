@@ -14,7 +14,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,12 +41,10 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -64,64 +60,12 @@ import com.twohearts.app.ui.theme.TwoHeartsTokens
 /** Glyph size inside the bar. Sits just under the 24dp optical minimum. */
 private val NavIconSize = 23.dp
 
-/**
- * Gap between a column's stacked parts.
- *
- * 1dp, not the 3dp first used here. The approved reference screens stack the
- * glyph and its caption almost directly on top of each other; a 3dp gap on
- * both sides of the selection dot pushed the bar taller than its content
- * needed and made the items read as three loose fragments rather than one
- * destination. The dot contributes 4dp of its own height, so the visual gap
- * between glyph and caption is still a comfortable ~5dp.
- */
 private val NavStackGap = 1.dp
 
 /** Thickness of the selected-state ring around the brand button. */
 private val BrandRingWidth = 2.dp
 
-/**
- * BottomNav — the floating TwoHearts navigation surface.
- *
- * ## What changed in Phase 2, and why
- *
- * The migrated bar was a 28dp-radius `Surface` with an 8dp Material shadow
- * holding five filled `Icons.Default` glyphs and a 60%-alpha label. It read
- * as a stock Material `NavigationBar` dropped inside a rounded box, and it
- * had four concrete defects that the Phase 0 and Phase 1 renders make
- * visible:
- *
- *  1. **The brand mark vanished when selected.** The centre button drew the
- *     burgundy artwork on a burgundy field. Sampling the rendered bar found
- *     only a few dozen distinct non-background pixels inside the button. The
- *     mark now always renders in the light tone, so it reads on the selected
- *     and unselected field alike.
- *  2. **The active state was colour-only.** Selected-ness was a tint change
- *     and nothing else, which fails the directive's rule that the selected
- *     state must not rely on colour alone and degrades in dark mode.
- *     Selection now carries four independent signals: a tonal capsule behind
- *     the glyph, a filled dot beneath the label, the glyph tint, and the
- *     label tint.
- *  3. **"Notifications" overflowed its column.** Five equal columns on a
- *     360dp screen leave roughly 62dp each, and the label needs more than
- *     that at the 12sp readability floor — so it rendered into its
- *     neighbours. The bar measures its own width and picks each item's full
- *     or short label accordingly (see [NavItem.shortLabel]). The full name is
- *     still what assistive technology announces.
- *  4. **The bar sat inside the system gesture area.** It applied no window
- *     insets of its own and relied on the `Scaffold`, which had already
- *     pushed the bottom inset into the *content* padding — leaving the pill
- *     about 9dp from the physical screen edge. The bar now owns
- *     `navigationBars` padding directly.
- *
- * Visually the bar is deliberately no longer one large pill: the directive
- * warns against "excessive pill geometry" and against "a giant rounded
- * rectangle containing five generic Material icons". It is a bar with a
- * pill's corner treatment, and the only pill *inside* it is the selected
- * item. One rounded shape stays meaningful instead of decorative.
- *
- * Depth is a hairline border plus the single warm shadow helper rather than
- * a Material elevation, so the bar reads as the same paper as the content.
- */
+/** Floating navigation surface with equal-width tabs above the system gesture area. */
 @Composable
 fun BottomNav(
     currentRoute: String,
@@ -144,7 +88,7 @@ fun BottomNav(
                 vertical = TwoHeartsTokens.Spacing.space2,
             ),
     ) {
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .thSoftShadow(shape, TwoHeartsTokens.Elevation.lift)
@@ -155,10 +99,6 @@ fun BottomNav(
                 )
                 .onSizeChanged { size -> onBodyHeight(with(density) { size.height.toDp() }) },
         ) {
-            val rowWidth = maxWidth - TwoHeartsTokens.Spacing.space1 * 2
-            val centerWidth = if (density.fontScale > 1.2f) TwoHeartsTokens.Dimensions.touchTargetMin
-                else rowWidth / items.size
-            val columnWidth = (rowWidth - centerWidth) / (items.size - 1)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -169,14 +109,12 @@ fun BottomNav(
             ) {
                 items.forEach { item ->
                     val isActive = currentRoute == item.route
-                    // Symmetric side columns keep Us centered. As text grows,
-                    // its short label can share spare width with its neighbors.
                     Box(
-                        modifier = if (item.isCenter) Modifier.width(centerWidth) else Modifier.weight(1f),
+                        modifier = Modifier.weight(1f),
                         contentAlignment = Alignment.Center,
                     ) {
-                        if (item.isCenter) {
-                            CenterBrandButton(
+                        if (item.isBrand) {
+                            BrandNavTab(
                                 label = item.label,
                                 accessibilityLabel = item.accessibilityLabel,
                                 isActive = isActive,
@@ -186,7 +124,6 @@ fun BottomNav(
                             NavItemView(
                                 item = item,
                                 isActive = isActive,
-                                columnWidth = columnWidth,
                                 onClick = { onNavigate(item.route) },
                             )
                         }
@@ -197,19 +134,9 @@ fun BottomNav(
     }
 }
 
-/**
- * CenterBrandButton — the relationship position.
- *
- * The one deliberately larger target in the bar (50dp, comfortably over the
- * 44dp minimum) because it opens the product's most meaningful destination.
- *
- * The mark is always drawn in the light tone: the burgundy artwork is
- * invisible against the burgundy selected field, which is exactly the defect
- * Phase 0 found. Selection is signalled by the field darkening *and* by a
- * blush ring, so it survives both dark mode and a colour-blind reading.
- */
+/** Relationship tab, using the official mark and a visible selected ring. */
 @Composable
-fun CenterBrandButton(
+fun BrandNavTab(
     onClick: () -> Unit,
     isActive: Boolean,
     modifier: Modifier = Modifier,
@@ -240,11 +167,6 @@ fun CenterBrandButton(
 
     Column(
         modifier = modifier
-            // Touch target spans the whole column, not just the circle. The
-            // column is ~66dp wide at 360dp, and the product's most important
-            // destination should be the easiest thing in the bar to hit —
-            // `widthIn(min = 44dp)` alone left the target at the circle's own
-            // width. The circle inside stays deliberately small.
             .fillMaxWidth()
             .heightIn(min = TwoHeartsTokens.Dimensions.touchTargetMin)
             .semantics { contentDescription = accessibilityLabel }
@@ -290,72 +212,24 @@ fun CenterBrandButton(
             color = if (isActive) thColors.burgundy else thColors.textSecondary,
             textAlign = TextAlign.Center,
             maxLines = 1,
-            // Ellipsis, not Clip. The centre column sits between two others
-            // and its label is a single short word, so overflow here is
-            // unlikely — but if a future label or a very large text setting
-            // did overflow, an ellipsis degrades honestly where a hard clip
-            // silently cuts a letter in half.
             overflow = TextOverflow.Ellipsis,
         )
     }
 }
 
-/**
- * NavItemView — one non-centre destination.
- *
- * The selected state uses three signals that survive greyscale and dark mode
- * (capsule, dot, tint) before colour is even considered, because this is the
- * app's most persistent surface and it is visible in every configuration.
- */
+/** A destination tab with a capsule and dot to show selection independently of color. */
 @Composable
 fun NavItemView(
     item: NavItem,
     isActive: Boolean,
-    columnWidth: Dp,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val thColors = LocalTwoHeartsColors.current
     val motion = LocalTwoHeartsMotion.current
-    val textMeasurer = rememberTextMeasurer()
-    val layoutDirection = LocalLayoutDirection.current
-    val density = LocalDensity.current
 
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
-
-    // Does the full label actually fit its column?
-    //
-    // This is measured, not guessed. The bar previously compared the column
-    // width against a hand-tuned 68dp threshold, which happened to work at
-    // Default text size on a 411dp screen and would silently start truncating
-    // at larger text sizes or on a narrower device. Measuring the real string
-    // against the real available width means the short label appears exactly
-    // when the long one would no longer fit, on any screen and at any text
-    // size — and the full label is still what assistive technology announces.
-    val labelStyle = MaterialTheme.typography.labelMedium
-    val availableForLabel = if (columnWidth > 0.dp) {
-        columnWidth
-    } else {
-        Dp.Unspecified
-    }
-    val fullLabelWidth = if (availableForLabel != Dp.Unspecified) {
-        with(density) {
-            textMeasurer.measure(
-                text = item.label,
-                style = labelStyle,
-                maxLines = 1,
-                layoutDirection = layoutDirection,
-            ).size.width.toDp()
-        }
-    } else {
-        0.dp
-    }
-    val label = if (availableForLabel == Dp.Unspecified || fullLabelWidth <= availableForLabel) {
-        item.label
-    } else {
-        item.shortLabel
-    }
 
     val tint = if (isActive) thColors.burgundy else thColors.textSecondary
     val capsule by animateColorAsState(
@@ -433,12 +307,12 @@ fun NavItemView(
         Spacer(modifier = Modifier.height(NavStackGap))
 
         Text(
-            text = label,
+            text = item.label,
             modifier = Modifier.clearAndSetSemantics {},
             style = MaterialTheme.typography.labelMedium,
             color = labelColor,
             textAlign = TextAlign.Center,
-            maxLines = 2,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
     }

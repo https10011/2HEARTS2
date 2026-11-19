@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -19,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.components.ToastProvider
 import com.twohearts.app.ui.components.ToastState
@@ -62,6 +64,7 @@ internal fun AppShell(
     onBack: () -> Unit,
     canNavigateBack: Boolean,
     feedback: ToastState = remember { ToastState() },
+    keyboardInsets: WindowInsets = WindowInsets.ime,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     // Phase 2: only intercept back when there is somewhere to go back to.
@@ -78,10 +81,14 @@ internal fun AppShell(
         }
     }
 
-    val showBottomNav = NavConfig.isPrimaryRoute(currentRoute)
+    val keyboardVisible = keyboardInsets.getBottom(LocalDensity.current) > 0
+    val showBottomNav = ShellLayout.showsBottomNav(currentRoute, keyboardVisible)
     var navBodyHeight by remember { mutableStateOf(TwoHeartsTokens.Dimensions.bottomNavHeight) }
-    val bottomInset = ShellLayout.contentBottomInsetFor(currentRoute) +
-        if (showBottomNav) (navBodyHeight - TwoHeartsTokens.Dimensions.bottomNavHeight).coerceAtLeast(0.dp) else 0.dp
+    val bottomInset = if (showBottomNav) {
+        ShellLayout.contentBottomInset + (navBodyHeight - TwoHeartsTokens.Dimensions.bottomNavHeight).coerceAtLeast(0.dp)
+    } else {
+        0.dp
+    }
 
     ToastProvider(state = feedback, bottomInset = bottomInset) {
         CompositionLocalProvider(LocalShellRoute provides currentRoute) {

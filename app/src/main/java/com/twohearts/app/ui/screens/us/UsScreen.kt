@@ -47,6 +47,7 @@ import com.twohearts.app.ui.components.ThDivider
 import com.twohearts.app.ui.components.ThIcons
 import com.twohearts.app.ui.components.ThSurfaceCard
 import com.twohearts.app.ui.navigation.RoutePath
+import com.twohearts.app.ui.navigation.ShellSearchAction
 import com.twohearts.app.ui.screens.home.UpcomingMoment
 import com.twohearts.app.ui.screens.home.countLabel
 import com.twohearts.app.ui.screens.home.formatDayCount
@@ -108,12 +109,15 @@ internal fun UsContent(
                 .padding(horizontal = spacing.screenGutter, vertical = spacing.space5),
             verticalArrangement = Arrangement.spacedBy(spacing.space6),
         ) {
-            Text(
-                "Us",
-                style = MaterialTheme.typography.displaySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.semantics { heading() },
-            )
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Us",
+                    style = MaterialTheme.typography.displaySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f).semantics { heading() },
+                )
+                ShellSearchAction { onNavigate(RoutePath.APP_SEARCH) }
+            }
             RelationshipPortrait(owner, partner, highlights)
 
             Column(verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
@@ -199,6 +203,8 @@ internal fun UsContent(
                     icon = ThIcons.Smile,
                     onClick = { onNavigate(RoutePath.APP_MOOD) },
                 )
+                ThDivider()
+                HubRow("Yuki", icon = ThIcons.Cat) { onNavigate(RoutePath.APP_YUKI) }
             }
 
             Column {

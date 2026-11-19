@@ -1,0 +1,29 @@
+2026-11-19 UTC
+Source 3acb3c54fc296424cc042b8916e8b917de98cbd6
+Local APK SHA-256 977bd93f74ce6329bf1ee6140c1e4a00bd59733f419ea088b9318bd7c26db7fb
+Guest Android API 33, x86-64 AOSP, software acceleration, 720 × 1280, override 280 dpi
+
+pm install -r -t /data/local/tmp/twohearts-stage5.apk
+Success
+
+cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME
+com.android.launcher3/.uioverrides.QuickstepLauncher
+
+am start -W -n com.twohearts.app/.MainActivity
+Status: ok
+Activity: com.twohearts.app/.MainActivity
+WaitTime: 4854
+Complete
+
+dumpsys activity activities
+ResumedActivity: ActivityRecord{4ab317c u0 com.twohearts.app/.MainActivity} t13
+
+pidof com.twohearts.app
+2178
+
+The crash buffer and exit-info had no TwoHearts entry. A later crash buffer
+showed an Android Bluetooth process abort. The emulator console framebuffer
+showed a System UI ANR over a black display. Launcher, application settings,
+and TwoHearts screen captures were black. A cold retry again returned
+Status: ok, with no focused window. This verifies installation and activity
+resumption. Confirmation of a drawn launcher or splash frame remains pending.

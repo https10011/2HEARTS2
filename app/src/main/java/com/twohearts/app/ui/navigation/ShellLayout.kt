@@ -48,4 +48,8 @@ object ShellLayout {
     /** Resolve the content inset for the current route. */
     fun contentBottomInsetFor(route: String): Dp =
         if (NavConfig.isPrimaryRoute(route)) contentBottomInset else contentBottomInsetWithoutNav
+
+    /** The keyboard takes over the bottom edge while a field is active. */
+    fun showsBottomNav(route: String, keyboardVisible: Boolean): Boolean =
+        NavConfig.isPrimaryRoute(route) && !keyboardVisible
 }

@@ -10,7 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.twohearts.app.ui.navigation.RoutePath
 
 /**
  * MoreScreen — utility links screen.
@@ -36,8 +39,24 @@ fun MoreScreen(
             text = "More",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 16.dp).semantics { heading() }
         )
+
+        MoreMenuItem(
+            icon = ThIcons.Search,
+            title = "Search",
+            subtitle = "Find notes, memories, and more",
+            onClick = { onNavigate(RoutePath.APP_SEARCH) },
+        )
+
+        MoreMenuItem(
+            icon = ThIcons.Bell,
+            title = "Notifications",
+            subtitle = "Reminders and important dates",
+            onClick = { onNavigate(RoutePath.APP_NOTIFICATIONS) },
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Settings section
         Text(
@@ -76,13 +95,6 @@ fun MoreScreen(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        MoreMenuItem(
-            icon = ThIcons.Search,
-            title = "Search",
-            subtitle = "Find notes, memories, and more",
-            onClick = { onNavigate("/app/search") }
         )
 
         MoreMenuItem(
@@ -138,7 +150,7 @@ fun MoreMenuItem(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = title,
+            contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(24.dp)
         )
@@ -161,7 +173,7 @@ fun MoreMenuItem(
 
         Icon(
             imageVector = ThIcons.ChevronRight,
-            contentDescription = "Navigate",
+            contentDescription = null,
             tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
         )
     }

@@ -3,51 +3,10 @@ package com.twohearts.app.ui.navigation
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.twohearts.app.ui.components.ThIcons
 
-/**
- * NavConfig — the ONE navigation vocabulary.
- *
- * Every destination that appears in a navigation surface is declared here
- * exactly once: which route it opens, what it is called, which glyph
- * represents it, and whether it is a *primary* (top-level) area.
- *
- * ## Phase 2 changes
- *
- *  - **Icons now come from [ThIcons].** The previous version used
- *    `Icons.Default.*`, which is Material 2 naming that resolves to the
- *    *filled* family. The canonical vocabulary is outlined for navigation,
- *    so the bottom bar was the one place in the app that contradicted the
- *    Phase 1 iconography rule (directive §22: avoid mixing icon families
- *    and inconsistent stroke weights). Only this file changed; the
- *    repository-wide `ThIcons` call-site migration stays deferred to
- *    Phase 14, as the Phase 1 report recorded.
- *
- *  - **Labels gained a short form.** A five-way split of a 360dp screen
- *    leaves each destination roughly 62dp of width, and "Notifications"
- *    needs more than that at the 12sp readability floor. The approved long
- *    label therefore cannot fit at any text size, so each item also
- *    declares a [NavItem.shortLabel] and
- *    [com.twohearts.app.ui.navigation.BottomNav] measures which one fits.
- *    The full name remains what assistive technology announces, so
- *    shortening the glyph label never loses the destination's real name.
- *
- *  - **`isPrimary` drives shell behaviour.** The bottom bar is shown on
- *    primary areas only. Detail, editor and modal surfaces are reached
- *    *through* those areas and hide the bar — the Android convention, and
- *    what the approved reference screens show.
- *
- * Routes are unchanged: route strings keep the legacy vocabulary so deep
- * links and bookmarks continue to work exactly as the migration contract
- * requires.
- */
+/** Display names, icons, and navigation roles for app destinations. */
 object NavConfig {
 
-    /**
-     * Bottom navigation destinations, in display order.
-     *
-     * The centre slot is the relationship itself — not a hub of features
-     * but the couple's own space, so it carries the official mark rather
-     * than a generic glyph.
-     */
+    /** The four peer destinations, with a branded entry for the relationship hub. */
     val bottomNavItems = listOf(
         NavItem(
             id = "home",
@@ -57,20 +16,12 @@ object NavConfig {
             isPrimary = true,
         ),
         NavItem(
-            id = "notifications",
-            route = RoutePath.APP_NOTIFICATIONS,
-            label = "Notifications",
-            shortLabel = "Alerts",
-            icon = ThIcons.Bell,
-            isPrimary = true,
-        ),
-        NavItem(
             id = "us",
             route = RoutePath.APP_US,
             label = "Us",
             accessibilityLabel = "Us — your relationship space",
             icon = ThIcons.HeartFilled,
-            isCenter = true,
+            isBrand = true,
             isPrimary = true,
         ),
         NavItem(
@@ -110,7 +61,6 @@ object NavConfig {
         RoutePath.APP_HOME to Destination("Home", ThIcons.Home),
         RoutePath.APP_US to Destination("Us", ThIcons.HeartFilled),
         RoutePath.APP_NOTES to Destination("Notes", ThIcons.Note),
-        RoutePath.APP_NOTIFICATIONS to Destination("Notifications", ThIcons.Bell),
         RoutePath.APP_MORE to Destination("More", ThIcons.More),
 
         // Relationship
@@ -129,6 +79,7 @@ object NavConfig {
         RoutePath.APP_YUKI to Destination("Yuki", ThIcons.Cat),
 
         // System
+        RoutePath.APP_NOTIFICATIONS to Destination("Notifications", ThIcons.Bell),
         RoutePath.APP_SEARCH to Destination("Search", ThIcons.Search),
 
         // Settings
@@ -154,22 +105,19 @@ object NavConfig {
  * @param route the route this destination opens.
  * @param label the full display name, and the accessible name unless
  *   [accessibilityLabel] overrides it.
- * @param shortLabel concise alternative used only when [label] cannot be
- *   rendered inside the destination's column. Never announced.
  * @param accessibilityLabel spoken name, when it should read differently
  *   from the visible text.
  * @param icon glyph from the canonical [ThIcons] vocabulary.
- * @param isCenter true for the single elevated brand position.
+ * @param isBrand true for the branded relationship tab.
  * @param isPrimary true for top-level areas where the bar is visible.
  */
 data class NavItem(
     val id: String,
     val route: String,
     val label: String,
-    val shortLabel: String = label,
     val accessibilityLabel: String = label,
     val icon: ImageVector,
-    val isCenter: Boolean = false,
+    val isBrand: Boolean = false,
     val isPrimary: Boolean = false,
 )
 

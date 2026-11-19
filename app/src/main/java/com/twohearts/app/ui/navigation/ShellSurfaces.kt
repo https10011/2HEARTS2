@@ -30,7 +30,7 @@ object ShellSurfaces {
 
     /** The navigation role a surface plays. */
     enum class Role {
-        /** A top-level area: one of the five primary destinations. */
+        /** A top-level area with its own tab. */
         ROOT,
 
         /** A read-only step down from a primary area (a "detail" page). */
