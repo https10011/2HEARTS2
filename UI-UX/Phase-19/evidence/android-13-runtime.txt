@@ -1,0 +1,15 @@
+Source commit: 477ed104f7745db6854bea9e79445ece85fa45e6
+Local APK SHA-256: a8d32ab446a5e7dc1488c758e8b572e82238c475f5b193a7cfb9580415f82c0c
+Device: isolated x86-64 Android 13 SDK emulator using software emulation
+
+Package install: Success
+First am start -W: Status: timeout. MainActivity remained top-resumed and bootstrap completed.
+ActivityManager exit record: reason=6 (ANR), input dispatch waited 5127 ms for FocusEvent(hasFocus=true).
+App main-thread snapshot: Runnable
+  androidx.compose.ui.semantics.SemanticsNode.getUnmergedConfig
+  androidx.compose.ui.platform.SemanticsUtils_androidKt.isVisible
+  androidx.compose.ui.platform.SemanticsUtils_androidKt.isImportantForAccessibility
+  androidx.compose.ui.platform.AndroidComposeViewAccessibilityDelegateCompat.populateAccessibilityNodeInfoProperties
+  android.view.AccessibilityInteractionController.findAccessibilityNodeInfoByAccessibilityIdUiThread
+
+Later am start -W: Status: ok. MainActivity returned to the foreground and rendered Home with the retained test profiles and relationship date. The Notes destination responded to a touch input on the bottom navigation.

@@ -1,6 +1,7 @@
 package com.twohearts.app.services.bootstrap
 
 import android.content.Context
+import com.twohearts.app.data.settings.SecureStorage
 import com.twohearts.app.data.database.DatabaseInitializer
 import com.twohearts.app.services.device.DeviceCapabilities
 import com.twohearts.app.services.lifecycle.LifecycleService
@@ -74,9 +75,9 @@ class BootstrapService(private val context: Context) {
 
             // Stage 6: app-lock
             logger.info("Stage 6: Initializing app lock service")
-            val secureStorage = com.twohearts.app.data.settings.SecureStorage(context)
             val settingsStorage = com.twohearts.app.data.settings.SettingsStorage.getInstance(context)
-            appLockService = AppLockService(secureStorage, settingsStorage, lifecycleService)
+            val applicationContext = context.applicationContext
+            appLockService = AppLockService({ SecureStorage(applicationContext) }, settingsStorage, lifecycleService)
             appLockService.initialize()
 
             // Stage 7: application-state (placeholder — will be implemented in later stages)

@@ -23,11 +23,12 @@ import java.util.concurrent.CopyOnWriteArrayList
  * - Lock state is MEMORY-ONLY (cold start always locks)
  */
 class AppLockService(
-    private val secureStorage: SecureStorage,
+    openSecureStorage: () -> SecureStorage,
     private val settingsStorage: SettingsStorage,
     private val lifecycleService: LifecycleService
 ) {
 
+    private val secureStorage by lazy(openSecureStorage)
     private val listeners = CopyOnWriteArrayList<AppLockListener>()
 
     private val _lockState = MutableStateFlow<AppLockState>(AppLockState.DISABLED)
