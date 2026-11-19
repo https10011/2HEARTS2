@@ -73,6 +73,8 @@ data class TwoHeartsColors(
     val textSecondary: Color,
     val textTertiary: Color,
     val textOnAccent: Color,
+    val primaryAction: Color,
+    val onPrimaryAction: Color,
     val borderSubtle: Color,
     val borderStrong: Color,
     val divider: Color,
@@ -148,6 +150,8 @@ val LocalTwoHeartsColors = staticCompositionLocalOf {
         textSecondary = Color.Unspecified,
         textTertiary = Color.Unspecified,
         textOnAccent = Color.Unspecified,
+        primaryAction = Color.Unspecified,
+        onPrimaryAction = Color.Unspecified,
         borderSubtle = Color.Unspecified,
         borderStrong = Color.Unspecified,
         divider = Color.Unspecified,
@@ -198,6 +202,8 @@ private val LightExtendedColors = TwoHeartsColors(
     textSecondary = TwoHeartsTokens.Color.textSecondary,
     textTertiary = TwoHeartsTokens.Color.textTertiary,
     textOnAccent = TwoHeartsTokens.Color.textOnAccent,
+    primaryAction = TwoHeartsTokens.Color.primaryAction,
+    onPrimaryAction = Color.White,
     borderSubtle = TwoHeartsTokens.Color.borderSubtle,
     borderStrong = TwoHeartsTokens.Color.borderStrong,
     divider = TwoHeartsTokens.Color.divider,
@@ -247,6 +253,8 @@ private val DarkExtendedColors = TwoHeartsColors(
     textSecondary = TwoHeartsTokens.Color.Dark.textSecondary,
     textTertiary = TwoHeartsTokens.Color.Dark.textTertiary,
     textOnAccent = TwoHeartsTokens.Color.Dark.textOnAccent,
+    primaryAction = TwoHeartsTokens.Color.Dark.primaryAction,
+    onPrimaryAction = Color.White,
     borderSubtle = TwoHeartsTokens.Color.Dark.borderSubtle,
     borderStrong = TwoHeartsTokens.Color.Dark.borderStrong,
     divider = TwoHeartsTokens.Color.Dark.divider,
@@ -263,7 +271,7 @@ private val DarkExtendedColors = TwoHeartsColors(
     inkBase = TwoHeartsTokens.Color.inkBase,
 )
 
-// Material 3 Light Color Scheme — matching legacy tokens exactly
+// Light Material roles use the native palette.
 private val LightColorScheme = lightColorScheme(
     primary = TwoHeartsTokens.Color.burgundy,
     onPrimary = Color.White,
@@ -291,7 +299,7 @@ private val LightColorScheme = lightColorScheme(
     outlineVariant = TwoHeartsTokens.Color.borderSubtle,
     inverseSurface = TwoHeartsTokens.Color.charcoal,
     inverseOnSurface = TwoHeartsTokens.Color.cream,
-    inversePrimary = TwoHeartsTokens.Color.burgundyLight,
+    inversePrimary = TwoHeartsTokens.Color.Dark.burgundy,
 
     /**
      * Phase 1 — the surface ladder. Anything left unset here falls back to
@@ -341,7 +349,7 @@ private val DarkColorScheme = darkColorScheme(
     outlineVariant = TwoHeartsTokens.Color.Dark.borderSubtle,
     inverseSurface = TwoHeartsTokens.Color.Dark.textPrimary,
     inverseOnSurface = TwoHeartsTokens.Color.Dark.bg,
-    inversePrimary = TwoHeartsTokens.Color.Dark.burgundy,
+    inversePrimary = TwoHeartsTokens.Color.burgundy,
 
     // Surface ladder — see the light scheme note.
     surfaceBright = TwoHeartsTokens.Color.Dark.surfaceElevated,
@@ -364,8 +372,6 @@ private val DarkColorScheme = darkColorScheme(
  * - Extended brand colors via LocalTwoHeartsColors
  * - Typography (TwoHeartsTypography)
  * - Text scaling (via Density multiplier)
- *
- * Follows legacy tokens.css exactly for all color values.
  *
  * @param darkTheme Whether to use dark theme
  * @param dynamicColor Whether to use Material You dynamic colors.
@@ -395,7 +401,12 @@ fun TwoHeartsTheme(
         else -> LightColorScheme
     }
 
-    val extendedColors = if (darkTheme) DarkExtendedColors else LightExtendedColors
+    val brandColors = if (darkTheme) DarkExtendedColors else LightExtendedColors
+    val extendedColors = if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        brandColors.copy(primaryAction = colorScheme.primary, onPrimaryAction = colorScheme.onPrimary)
+    } else {
+        brandColors
+    }
 
     // Apply text size scaling via Density
     val currentDensity = LocalDensity.current

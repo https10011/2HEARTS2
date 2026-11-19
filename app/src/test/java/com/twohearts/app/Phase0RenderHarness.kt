@@ -5,13 +5,22 @@ import androidx.activity.compose.setContent
 import androidx.compose.ui.unit.dp
 import android.graphics.Bitmap
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalDensity
 import androidx.test.core.app.ApplicationProvider
 import com.twohearts.app.data.entity.CoupleRelationship
 import com.twohearts.app.data.entity.ImportantDate
@@ -24,6 +33,11 @@ import com.twohearts.app.data.entity.TimelineEvent
 import com.twohearts.app.data.settings.SettingsStorage
 import com.twohearts.app.services.relationship.RelationshipService
 import com.twohearts.app.services.appstate.AppStateService
+import com.twohearts.app.ui.components.CardTone
+import com.twohearts.app.ui.components.StatusVariant
+import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThStatusBanner
+import com.twohearts.app.ui.components.ThSurfaceCard
 import com.twohearts.app.ui.screens.about.AboutScreen
 import com.twohearts.app.ui.screens.importantdates.ImportantDatesScreen
 import com.twohearts.app.ui.screens.memories.MemoriesHome
@@ -60,6 +74,8 @@ import com.twohearts.app.ui.screens.more.MoreScreen
 import com.twohearts.app.ui.screens.yuki.YukiScreen
 import com.twohearts.app.ui.screens.yuki.YukiViewModel
 import com.twohearts.app.ui.theme.TwoHeartsTheme
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.ThTextStyles
 import com.twohearts.app.ui.theme.TextScalingLevel
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -75,6 +91,19 @@ class Phase0RenderHarness {
 
     private val outDir: File = File("build/phase0-screens").apply { mkdirs() }
     private val now = "2026-01-15T10:00:00Z"
+
+    @Test
+    fun renderTransformationTypeAndColor() {
+        render("transformation-3-light") { TransformationThemeReference() }
+        render("transformation-3-dark", dark = true) { TransformationThemeReference() }
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h780dp-mdpi")
+    fun renderTransformationTypeAtTwoHundredPercent() {
+        render("transformation-3-light-200", textSizeScale = 2f) { TransformationThemeReference(2f) }
+        render("transformation-3-dark-200", dark = true, textSizeScale = 2f) { TransformationThemeReference(2f) }
+    }
 
     @Test
     @Config(qualifiers = "w274dp-h488dp-mdpi")
@@ -345,12 +374,17 @@ class Phase0RenderHarness {
         )
     }
 
-    private fun render(name: String, dark: Boolean = false, scale: TextScalingLevel = TextScalingLevel.DEFAULT,
-                       content: @Composable () -> Unit) {
+    private fun render(
+        name: String,
+        dark: Boolean = false,
+        scale: TextScalingLevel = TextScalingLevel.DEFAULT,
+        textSizeScale: Float = scale.scale,
+        content: @Composable () -> Unit,
+    ) {
         val controller = org.robolectric.Robolectric.buildActivity(androidx.activity.ComponentActivity::class.java).setup()
         val activity = controller.get()
         activity.setContent {
-            TwoHeartsTheme(darkMode = dark, textScalingLevel = scale) {
+            TwoHeartsTheme(darkTheme = dark, textSizeScale = textSizeScale) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -632,4 +666,65 @@ class Phase0RenderHarness {
         render("82-mood-target") { MoodHome(null, emptyList(), {}, {}, {}) }
         render("83-settings-target") { SettingsHomeScreen({}, {}) }
     }
+}
+
+@Composable
+private fun TransformationThemeReference(expectedScale: Float = 1f) {
+    val palette = LocalTwoHeartsColors.current
+    val scheme = MaterialTheme.colorScheme
+    val type = MaterialTheme.typography
+    check(LocalDensity.current.fontScale == expectedScale)
+
+    val surfaces = listOf(scheme.background, scheme.surface, palette.surfaceElevated, palette.surfaceWarm, palette.surfaceBlush)
+    for (surface in surfaces) {
+        checkContrast("Primary text", scheme.onSurface, surface, 4.5f)
+        checkContrast("Secondary text", palette.textSecondary, surface, 4.5f)
+        checkContrast("Tertiary text", palette.textTertiary, surface, 4.5f)
+        checkContrast("Focus indicator", scheme.primary, surface, 3f)
+        checkContrast("Interactive border", palette.borderStrong, surface, 3f)
+    }
+    checkContrast("Primary action label", palette.onPrimaryAction, palette.primaryAction, 4.5f)
+    checkContrast("Selected text", scheme.onPrimaryContainer, scheme.primaryContainer, 4.5f)
+    checkContrast("Inverse action", scheme.inversePrimary, scheme.inverseSurface, 4.5f)
+    checkContrast("Milestone", palette.goldInk, palette.goldBg, 4.5f)
+    checkContrast("Success", palette.success, palette.successBg, 4.5f)
+    checkContrast("Error", palette.error, palette.errorBg, 4.5f)
+    checkContrast("Warning", palette.warning, palette.warningBg, 4.5f)
+    checkContrast("Information", palette.info, palette.infoBg, 4.5f)
+
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text("Our story", style = ThTextStyles.eyebrow, color = palette.roseDeep)
+        Text(
+            "Élodie and Sam",
+            style = type.displayLarge,
+            color = scheme.onBackground,
+            onTextLayout = { check(!it.hasVisualOverflow) },
+        )
+        Text(
+            "A little space for the moments we want to remember.",
+            style = type.bodyLarge,
+            color = palette.textSecondary,
+            onTextLayout = { check(!it.hasVisualOverflow) },
+        )
+        ThSurfaceCard(tone = CardTone.GOLD, modifier = Modifier.fillMaxWidth()) {
+            Text("Together since", style = type.labelLarge, color = palette.goldInk)
+            Text("14 February 2023", style = type.headlineSmall, color = palette.goldInk)
+        }
+        ThSurfaceCard(tone = CardTone.BLUSH, modifier = Modifier.fillMaxWidth()) {
+            Text("A note for later", style = type.titleMedium, color = scheme.onSurface)
+            Text("Thank you for today.", style = ThTextStyles.reading, color = palette.textSecondary)
+        }
+        ThButton(onClick = {}, text = "Save note", full = true)
+        ThStatusBanner(StatusVariant.SUCCESS, "Note saved.")
+    }
+}
+
+private fun checkContrast(role: String, foreground: Color, background: Color, minimum: Float) {
+    val first = foreground.luminance()
+    val second = background.luminance()
+    val ratio = (maxOf(first, second) + 0.05f) / (minOf(first, second) + 0.05f)
+    check(ratio >= minimum) { "$role contrast was $ratio. Expected at least $minimum." }
 }

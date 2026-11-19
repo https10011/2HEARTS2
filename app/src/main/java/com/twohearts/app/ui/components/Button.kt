@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
@@ -91,12 +92,12 @@ fun ThButton(
     val shape = RoundedCornerShape(TwoHeartsTokens.Radius.md)
 
     val container = when (variant) {
-        ButtonVariant.PRIMARY -> MaterialTheme.colorScheme.primary
+        ButtonVariant.PRIMARY -> thColors.primaryAction.takeOrElse { MaterialTheme.colorScheme.primary }
         ButtonVariant.DANGER -> thColors.error
         ButtonVariant.SECONDARY, ButtonVariant.GHOST -> Color.Transparent
     }
     val contentColor = when (variant) {
-        ButtonVariant.PRIMARY -> MaterialTheme.colorScheme.onPrimary
+        ButtonVariant.PRIMARY -> thColors.onPrimaryAction.takeOrElse { MaterialTheme.colorScheme.onPrimary }
         ButtonVariant.DANGER -> MaterialTheme.colorScheme.onError
         ButtonVariant.SECONDARY, ButtonVariant.GHOST -> MaterialTheme.colorScheme.primary
     }
