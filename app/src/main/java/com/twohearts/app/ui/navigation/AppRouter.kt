@@ -1,5 +1,6 @@
 package com.twohearts.app.ui.navigation
 
+import android.net.Uri
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.Text
@@ -299,6 +300,7 @@ internal fun AppRouter(
                     NotificationCenterScreen(
                         notificationCenterRepository = notificationCenterRepository,
                         onOpenDestination = { navController.navigate(it) },
+                        onOpenSettings = { navController.navigate(RoutePath.APP_SETTINGS_NOTIFICATIONS) },
                         onBack = {
                             navController.popBackStack()
                         }
@@ -624,12 +626,12 @@ internal fun AppRouter(
 
                 // Reminders
                 composable(RoutePath.APP_REMINDERS) {
-                    val reminders by reminderRepository.observeAll().collectAsState(initial = emptyList())
+                    val reminders by remember { reminderRepository.observeAll() }.collectAsStateWithLifecycle(emptyList())
                     val action = rememberRecordAction()
                     RemindersHome(
                         reminders = reminders,
                         onReminderClick = { reminderId ->
-                            navController.navigate("/app/reminders/$reminderId")
+                            navController.navigate("${RoutePath.APP_REMINDERS}/${Uri.encode(reminderId)}")
                         },
                         onAddReminder = {
                             navController.navigate(RoutePath.APP_REMINDERS_ADD)
@@ -638,6 +640,8 @@ internal fun AppRouter(
                             navController.popBackStack()
                         },
                         onToggleCompleted = { action.toggleReminder(reminderRepository, it) },
+                        updating = action.running,
+                        errorMessage = action.errorMessage,
                     )
                 }
 
@@ -663,7 +667,9 @@ internal fun AppRouter(
                         },
                         onBack = {
                             if (!action.running) navController.popBackStack()
-                        }
+                        },
+                        saving = action.running,
+                        errorMessage = action.errorMessage,
                     )
                 }
 
@@ -678,7 +684,7 @@ internal fun AppRouter(
                         ReminderDetail(
                             reminder = r,
                             onEdit = {
-                                if (!action.running) navController.navigate("/app/reminders/$reminderId/edit")
+                                if (!action.running) navController.navigate("${RoutePath.APP_REMINDERS}/${Uri.encode(reminderId)}/edit")
                             },
                             onDelete = {
                                 action.run("Reminder deleted.", "Couldn’t delete this reminder.", afterWrite = { navController.popBackStack() }) {
@@ -689,6 +695,8 @@ internal fun AppRouter(
                                 if (!action.running) navController.popBackStack()
                             },
                             onToggleCompleted = { action.toggleReminder(reminderRepository, r, lookup::refresh) },
+                            updating = action.running,
+                            errorMessage = action.errorMessage,
                         )
                     } ?: RecordLookupScreen("Reminder", lookup) { navController.popBackStack() }
                 }
@@ -705,9 +713,9 @@ internal fun AppRouter(
                             reminderId = r.id,
                             initialTitle = r.title,
                             initialDescription = r.description ?: "",
-                            initialDate = r.scheduledDate ?: "",
+                            initialDate = r.scheduledDate,
                             initialTime = r.scheduledTime ?: "",
-                            initialRecurrence = r.recurrence ?: "none",
+                            initialRecurrence = r.recurrence,
                             initialNotificationEnabled = r.notificationEnabled,
                             onSave = { title, description, scheduledDate, scheduledTime, recurrence, notificationEnabled ->
                                 action.run("Reminder saved.", "Couldn’t save this reminder.", afterWrite = { navController.popBackStack() }) {
@@ -723,7 +731,9 @@ internal fun AppRouter(
                             },
                             onBack = {
                                 if (!action.running) navController.popBackStack()
-                            }
+                            },
+                            saving = action.running,
+                            errorMessage = action.errorMessage,
                         )
                     } ?: RecordLookupScreen("Reminder", lookup) { navController.popBackStack() }
                 }
@@ -1166,7 +1176,7 @@ internal fun AppRouter(
 
                 // Important dates
                 composable(RoutePath.APP_IMPORTANT_DATES) {
-                    val dates by importantDateRepository.observeAll().collectAsState(initial = emptyList())
+                    val dates by remember { importantDateRepository.observeAll() }.collectAsStateWithLifecycle(emptyList())
                     ImportantDatesScreen(
                         dates = dates,
                         onSaveDate = { existing, title, date, recurrence ->

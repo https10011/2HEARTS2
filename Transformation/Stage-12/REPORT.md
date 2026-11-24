@@ -33,7 +33,11 @@ Reviewed the six native Notes and Timeline screens, category metadata, Room repo
 - [x] Verify filtering, older categories, date group ordering, existing data and routes, CRUD and reopen.
 - [x] Inspect native screens and dialogs in both palettes, narrow and standard widths, and at 200% text.
 - [x] Pass both full unit variants, verify the debug APK, and review the staged diff.
-- [ ] Commit, push, verify exact remote CI and artifact, and update the progress tracker.
+- [x] Commit, push, verify exact remote CI and artifact, and update the progress tracker.
+
+## Remote verification
+
+GitHub confirmed `2bd93c06959e66e0440e9f2151c5c44e5c428198` on `master`. Build Android APK passed both unit suites and published `twohearts-debug-apk` for that SHA in run `45432768555`. Artifact ID `14939427600` was current at verification. [Commit](https://github.com/https10011/2HEARTS2/commit/2bd93c06959e66e0440e9f2151c5c44e5c428198) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45432768555) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45432768555/artifacts/14939427600)
 
 ## Next stage
 

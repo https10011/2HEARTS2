@@ -92,6 +92,15 @@ internal class NativeComposeScene(private val outDir: File) : AutoCloseable {
 
     fun dialogText(label: String) = hasText(dialogView(), label)
     fun activityText(label: String) = hasText(activityView, label)
+    fun scrollActivityBy(pixels: Float): Boolean {
+        layout(activityView)
+        val action = nodes(activityView).firstNotNullOfOrNull { it.config.getOrNull(SemanticsActions.ScrollBy)?.action }
+        val handled = action?.invoke(0f, pixels) == true
+        advanceFrames()
+        layout(activityView)
+        return handled
+    }
+
     fun activityError(message: String): Boolean = nodes(activityView).any {
         it.config.getOrNull(SemanticsProperties.Error) == message
     }
@@ -109,9 +118,13 @@ internal class NativeComposeScene(private val outDir: File) : AutoCloseable {
         return handled
     }
 
-    fun setText(label: String, text: String): Boolean {
-        layout(activityView)
-        val action = nodes(activityView).firstOrNull {
+    fun setText(label: String, text: String): Boolean = setText(activityView, label, text)
+
+    fun setDialogText(label: String, text: String): Boolean = setText(dialogView(), label, text)
+
+    private fun setText(view: View, label: String, text: String): Boolean {
+        layout(view)
+        val action = nodes(view).firstOrNull {
             it.config.getOrNull(SemanticsProperties.ContentDescription)?.contains(label) == true &&
                 it.config.getOrNull(SemanticsActions.SetText) != null
         }?.config?.getOrNull(SemanticsActions.SetText)?.action
@@ -122,7 +135,8 @@ internal class NativeComposeScene(private val outDir: File) : AutoCloseable {
     }
 
     private fun hasText(view: View, label: String): Boolean = nodes(view).any { node ->
-        node.config.getOrNull(SemanticsProperties.Text)?.any { it.text == label } == true
+        node.config.getOrNull(SemanticsProperties.Text)?.any { it.text == label } == true ||
+            node.config.getOrNull(SemanticsProperties.EditableText)?.text == label
     }
 
     private fun nodes(view: View) = checkNotNull(view.findViewOfType(ViewRootForTest::class.java))

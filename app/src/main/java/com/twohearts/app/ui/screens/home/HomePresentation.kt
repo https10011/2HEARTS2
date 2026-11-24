@@ -8,6 +8,8 @@ import com.twohearts.app.data.entity.Note
 import com.twohearts.app.data.entity.Profile
 import com.twohearts.app.data.entity.Reminder
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.services.datetime.nextCalendarOccurrence
+import com.twohearts.app.services.datetime.scheduledReminderDate
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -169,58 +171,7 @@ fun upcomingMoment(
  */
 fun nextOccurrence(dateKey: String, recurrence: String, today: LocalDate): LocalDate? {
     val parsed = runCatching { LocalDate.parse(dateKey) }.getOrNull() ?: return null
-    return when (recurrence) {
-        "daily" -> if (parsed.isBefore(today)) today else parsed
-        "weekly" -> advanceWeeks(parsed, today)
-        "monthly" -> advanceMonths(parsed, today)
-        "yearly" -> advanceYears(parsed, today)
-        else -> parsed.takeIf { !it.isBefore(today) }
-    }
-}
-
-private fun advanceWeeks(origin: LocalDate, today: LocalDate): LocalDate {
-    if (!origin.isBefore(today)) return origin
-    val gap = ChronoUnit.DAYS.between(origin, today)
-    return origin.plusDays(((gap + 6) / 7) * 7)
-}
-
-/**
- * Month arithmetic anchored on the origin's day-of-month.
- *
- * Stepping one month at a time from the previous result would let a 31st drift
- * permanently to the 28th after its first February. Re-deriving from the
- * origin's day each time avoids that: 31 January → 28 February → 31 March.
- */
-private fun advanceMonths(origin: LocalDate, today: LocalDate): LocalDate {
-    if (!origin.isBefore(today)) return origin
-    var monthsAhead = ChronoUnit.MONTHS.between(origin, today).toInt()
-    if (monthsAhead < 1) monthsAhead = 1
-    var candidate = origin.plusMonths(monthsAhead.toLong())
-    // plusMonths clamps, so a candidate can land before `today` only when the
-    // origin's day overflowed; step forward until it does not.
-    while (candidate.isBefore(today)) {
-        monthsAhead += 1
-        candidate = origin.plusMonths(monthsAhead.toLong())
-    }
-    return candidate
-}
-
-/**
- * Year arithmetic with the leap-day rule.
- *
- * A 29 February origin resolves to 28 February in a non-leap year, matching the
- * app's existing anniversary convention, rather than throwing.
- */
-private fun advanceYears(origin: LocalDate, today: LocalDate): LocalDate {
-    if (!origin.isBefore(today)) return origin
-    var yearsAhead = ChronoUnit.YEARS.between(origin, today).toInt()
-    if (yearsAhead < 1) yearsAhead = 1
-    var candidate = origin.plusYears(yearsAhead.toLong())
-    while (candidate.isBefore(today)) {
-        yearsAhead += 1
-        candidate = origin.plusYears(yearsAhead.toLong())
-    }
-    return candidate
+    return nextCalendarOccurrence(parsed, recurrence, today)
 }
 
 // ─── Copy ──────────────────────────────────────────────────────────────────
@@ -308,27 +259,21 @@ fun notesTileDetail(notes: List<Note>): String = when {
 
 /** The Reminders tile's supporting line — the next pending thing, or calm. */
 fun remindersTileDetail(reminders: List<Reminder>, today: LocalDate): String {
-    val next = nextPendingReminder(reminders, today)
-    return when {
-        next == null -> "Nothing scheduled"
-        next.scheduledDate == today.toString() -> "Today · ${next.title}"
-        else -> "${momentDateLabel(next.scheduledDate)} · ${next.title}"
-    }
+    val next = nextPendingReminder(reminders, today) ?: return "Nothing scheduled"
+    val date = scheduledReminderDate(next, today)
+    val label = if (date == today.toString()) "Today" else momentDateLabel(date)
+    return "$label · ${next.title}"
 }
 
-/**
- * The next reminder worth surfacing.
- *
- * The soonest pending reminder *on or after* today wins. Only when nothing is
- * ahead does it fall back to the least-overdue one, so an overdue item never
- * displaces today's. Comparing the repository's list in its own order would
- * pick whichever row came back first, which is why the selection is by date.
- */
+/** Prefer the next local occurrence, with a past reminder as a fallback. */
 fun nextPendingReminder(reminders: List<Reminder>, today: LocalDate): Reminder? {
     val pending = reminders.filter { it.status == "pending" }
-    val todayKey = today.toString()
-    val ahead = pending.filter { it.scheduledDate >= todayKey }
-    return ahead.minByOrNull { it.scheduledDate } ?: pending.minByOrNull { it.scheduledDate }
+        .mapNotNull { reminder ->
+            val date = runCatching { LocalDate.parse(scheduledReminderDate(reminder, today)) }.getOrNull()
+            date?.let { reminder to it }
+        }
+    val ahead = pending.filter { (_, date) -> !date.isBefore(today) }
+    return (ahead.minByOrNull { it.second } ?: pending.minByOrNull { it.second })?.first
 }
 
 /** Tile count copy: deliberately plain, never a fake statistic. */

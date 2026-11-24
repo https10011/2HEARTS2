@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- **Latest verified implementation commit** — `e30b345bc09f8ada7d2797614063fa47aa1410a3`. Git and CI verified the Memories checkpoint. [Commit](https://github.com/https10011/2HEARTS2/commit/e30b345bc09f8ada7d2797614063fa47aa1410a3) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45428206120) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45428206120/artifacts/14939205361)
+- **Latest verified implementation commit** — `2bd93c06959e66e0440e9f2151c5c44e5c428198`. Git and CI verified the Notes and Timeline checkpoint. [Commit](https://github.com/https10011/2HEARTS2/commit/2bd93c06959e66e0440e9f2151c5c44e5c428198) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45432768555) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45432768555/artifacts/14939427600)
 - **Stage 1 complete** — JDK 17 and SDK 35 reproduced the debug APK and both unit suites. Each variant passed 134 tests, and the native harnesses produced 149 renders. The report records the screen inventory, visual evidence, and emulator constraints.
 - **Stage 2 complete** — Fixed the Room migration for the optional profile photo column and registered the existing indexes in schema 14. Both unit-test variants passed 137 tests and CI packaged a verified APK. A same-signer Android 13 emulator update launched, migrated, and retained the test note. The transformed APK’s handset walkthrough remains pending. [Stage 2 report](Stage-2/REPORT.md)
 - **Stage 3 complete** — The palette and licensed bundled fonts rendered in both themes, including 360 dp at 200% effective font scale. Both unit suites passed 139 tests, and the APK and resources verified. The published stage workflow passed. [Stage 3 report](Stage-3/REPORT.md)
@@ -14,7 +14,8 @@
 - **Stage 9 complete** — Home uses both local portraits, a large-type layout, and direct actions for saved records. Native renders were inspected, both suites passed 175 tests, and the local APK verified. CI verified the exact commit and published the APK. [Stage 9 report](Stage-9/REPORT.md)
 - **Stage 10 complete** — Us shares the couple portrait treatment, shows the anniversary and real story previews, and keeps all features reachable. Both suites passed 178 tests, native renders were inspected, and the local APK verified. CI published the APK for the exact commit. [Stage 10 report](Stage-10/REPORT.md)
 - **Stage 11 complete** — Memories has an updated gallery, attachment editor and previews. The writer protects ordered local media through replacement, retry and reopen. Each suite passed 185 tests, native renders were inspected and the APK verified. CI published the APK for the exact commit. [Stage 11 report](Stage-11/REPORT.md)
-- **Stage 12 local gates passed** — Notes handles both saved category spellings. Timeline uses calendar month groups. Both readers and editors were refined and rendered, both suites passed 193 tests, and the local APK verified. Exact CI verification is pending. [Stage 12 report](Stage-12/REPORT.md)
+- **Stage 12 complete** — Notes handles both saved category spellings. Timeline uses calendar month groups. Both readers and editors were refined and rendered, both suites passed 193 tests, and the local APK verified. CI passed and published an APK for the exact commit. [Stage 12 report](Stage-12/REPORT.md)
+- **Stage 13 local gates passed** — Tasks, calendar dates, and delivered alerts have distinct native layouts. Both full suites passed 205 tests, including WorkManager queue changes and the Android notification shadow. Local APK and native evidence verified. Exact CI and the software guest smoke test are pending. [Stage 13 report](Stage-13/REPORT.md)
 - **Signing and upgrade** — The two downloaded CI APKs have different debug signing certificates. The owner confirmed normal operation of the already installed app, which remains the working baseline. A same-signer local upgrade retained data in the guest. The published CI debug packages require a compatible signer to update an older installation in place.
 
 ## Intake checkpoint
@@ -24,7 +25,7 @@
 - **Build and tests** — The pre-transformation Actions run succeeded and listed a downloadable artifact. The Phase 20 report records 134 tests per variant and a successful local debug build. No fresh local transformation tests have run. [Actions run](https://github.com/https10011/2HEARTS2/actions/runs/44439439508) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44439439508/artifacts/14489748983) · [Phase 20 report](../UI-UX/Phase-20/PHASE-20-FINAL-CONSOLIDATION.md)
 - **Visual and runtime evidence** — The baseline review used prior Compose renders and the Phase 20 Android 13 emulator report. Fresh renders and signed-candidate verification remain pending.
 - **Environment** — Preflight found Java 21 and GitHub CLI. JDK 17, SDK 35, `adb`, and Android runtime setup are Stage 1 work. The host exposes no `/dev/kvm`.
-- **Next task** — Verify the exact Stage 12 workflow and APK, then start Stage 13 Reminders, Important Dates and Notifications. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
+- **Next task** — Verify the Stage 13 workflow and APK on the exact master commit. Record the Android 13 software guest result and continue to Stage 14. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
 
 ## Stage status
 
@@ -41,8 +42,8 @@
 | 9. Home | Complete |
 | 10. Us | Complete |
 | 11. Memories | Complete |
-| 12. Notes and Timeline | Local gates passed, pending remote verification |
-| 13. Reminders, Important Dates, and Notifications | Pending |
+| 12. Notes and Timeline | Complete |
+| 13. Reminders, Important Dates, and Notifications | Local gates passed, pending remote verification |
 | 14. Places, Mood, and Period | Pending |
 | 15. Settings, Profile, Search, and utilities | Pending |
 | 16. App lock and Vault | Pending |
