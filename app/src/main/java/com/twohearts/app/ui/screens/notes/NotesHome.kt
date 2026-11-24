@@ -1,31 +1,49 @@
 package com.twohearts.app.ui.screens.notes
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.data.entity.Note
 import com.twohearts.app.services.datetime.DateTimeHelper
-import com.twohearts.app.ui.components.ThChoiceChip
-import com.twohearts.app.ui.components.Header
+import com.twohearts.app.ui.components.ButtonVariant
+import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThDivider
+import com.twohearts.app.ui.components.ThEmptyState
+import com.twohearts.app.ui.components.ThEyebrow
+import com.twohearts.app.ui.components.ThIconButton
 import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.ThInput
+import com.twohearts.app.ui.components.ThQuietButton
+import com.twohearts.app.ui.components.ThTopBar
 import com.twohearts.app.ui.navigation.ShellSearchAction
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.TwoHeartsTokens
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesHome(
     notes: List<Note>,
@@ -36,78 +54,101 @@ fun NotesHome(
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var category by rememberSaveable { mutableStateOf<NoteCategory?>(null) }
+    var filtering by rememberSaveable { mutableStateOf(false) }
     val filtered = remember(notes, query, category) { filterNotes(notes, query, category) }
     val colors = LocalTwoHeartsColors.current
+    val spacing = TwoHeartsTokens.Spacing
+    fun clearFilters() {
+        query = ""
+        category = null
+    }
+
     Scaffold(
         topBar = {
-            Header(title = "Notes", onBack = onBack) {
+            ThTopBar("Notes", onBack = onBack, actions = {
                 if (onSearch != null) ShellSearchAction(onSearch)
-            }
+                if (notes.isNotEmpty()) ThIconButton(onAddNote, label = "Write a note") {
+                    Icon(ThIcons.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                }
+            })
         },
-        floatingActionButton = { if (notes.isNotEmpty()) ExtendedFloatingActionButton(onClick = onAddNote, icon = { Icon(ThIcons.Edit, null) }, text = { Text("Write a note") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) },
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
-            if (notes.isNotEmpty()) {
-                OutlinedTextField(query, { query = it }, Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp), placeholder = { Text("Search your notes") }, leadingIcon = { Icon(ThIcons.Search, null) }, trailingIcon = if (query.isNotEmpty()) {{ IconButton({ query = "" }) { Icon(ThIcons.Clear, "Clear search") } }} else null, singleLine = true, shape = RoundedCornerShape(18.dp))
-                LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    item { ThChoiceChip(category == null, { category = null }, { Text("All") }) }
-                    items(NoteCategory.entries) { item -> ThChoiceChip(category == item, { category = item }, { Text(item.label) }, leadingIcon = { Icon(item.icon, null, Modifier.size(17.dp)) }) }
+        if (notes.isEmpty()) {
+            ThEmptyState(
+                title = "A quiet place for your words",
+                description = "Keep a letter, a shared thought, or something you want to remember.",
+                visual = { Icon(ThIcons.Note, null, Modifier.size(48.dp), tint = colors.roseDeep) },
+                actionLabel = "Write your first note", onAction = onAddNote,
+                modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()),
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentPadding = PaddingValues(horizontal = spacing.screenGutter, vertical = spacing.space4),
+            ) {
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
+                        ThInput(
+                            query, { query = it }, label = "Search your notes",
+                            placeholder = "Find a word or title",
+                        )
+                        ThButton(
+                            { filtering = true }, variant = ButtonVariant.SECONDARY, text = "Category · ${category?.label ?: "All notes"}",
+                            icon = ThIcons.ChevronRight, full = true,
+                        )
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                if (filtered.size == 1) "1 note" else "${filtered.size} notes",
+                                Modifier.weight(1f), style = MaterialTheme.typography.labelMedium,
+                                color = colors.textSecondary,
+                            )
+                            if (query.isNotEmpty() || category != null) ThQuietButton(::clearFilters, "Clear filters")
+                        }
+                        ThDivider()
+                    }
                 }
-            }
-            when {
-                notes.isEmpty() -> NotesEmptyState(onAddNote)
-                filtered.isEmpty() -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("No notes match this view", color = colors.textSecondary) }
-                else -> LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp, 14.dp, 20.dp, 104.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    item { Text("Words worth keeping", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold); Text("Private thoughts, shared moments, and little reminders.", color = colors.textSecondary) }
-                    items(filtered, key = { it.id }) { note -> NotePaper(note) { onNoteClick(note.id) } }
+                if (filtered.isEmpty()) {
+                    item {
+                        ThEmptyState(title = "No matching notes", description = "Try a different word or category.")
+                    }
+                }
+                items(filtered, key = { it.id }) { note ->
+                    NoteEntry(note) { onNoteClick(note.id) }
+                    ThDivider()
                 }
             }
         }
     }
+
+    NoteCategoryPicker(filtering, category, { filtering = false }, { category = it; filtering = false }, includeAll = true)
 }
 
-internal fun filterNotes(notes: List<Note>, query: String, category: NoteCategory?): List<Note> = notes.filter { note ->
-    (category == null || NoteCategory.fromString(note.category) == category) &&
-        (query.isBlank() || note.title.contains(query, true) || note.content.contains(query, true))
+internal fun filterNotes(notes: List<Note>, query: String, category: NoteCategory?): List<Note> {
+    val search = query.trim()
+    return notes.filter { note ->
+        (category == null || NoteCategory.fromString(note.category) == category) &&
+            (search.isEmpty() || note.title.contains(search, true) || note.content.contains(search, true))
+    }
 }
 
 @Composable
-private fun NotesEmptyState(onAdd: () -> Unit) {
+private fun NoteEntry(note: Note, onClick: () -> Unit) {
     val colors = LocalTwoHeartsColors.current
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val shortWindow = maxHeight < 360.dp
-        Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(
-                horizontal = if (shortWindow) 24.dp else 32.dp,
-                vertical = if (shortWindow) 12.dp else 20.dp,
-            ),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(ThIcons.Note, null, tint = colors.burgundy, modifier = Modifier.size(if (shortWindow) 40.dp else 54.dp))
-            Spacer(Modifier.height(if (shortWindow) 12.dp else 22.dp))
-            Text("A quiet place for your words", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.height(8.dp))
-            Text("Write a love letter, a thought to share, or something only you need to remember.", color = colors.textSecondary)
-            Spacer(Modifier.height(if (shortWindow) 16.dp else 24.dp))
-            Button(onClick = onAdd) {
-                Icon(ThIcons.Edit, null)
-                Spacer(Modifier.width(8.dp))
-                Text("Write your first note")
-            }
-        }
-    }
-}
-
-@Composable
-private fun NotePaper(note: Note, onClick: () -> Unit) {
+    val spacing = TwoHeartsTokens.Spacing
     val category = NoteCategory.fromString(note.category)
-    val colors = LocalTwoHeartsColors.current
-    Surface(Modifier.fillMaxWidth().clickable(onClick = onClick), shape = RoundedCornerShape(20.dp), color = if (category == NoteCategory.LOVE_LETTER) colors.surfaceBlush else colors.surfaceElevated, tonalElevation = 1.dp) {
-        Column(Modifier.padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) { Icon(category.icon, null, tint = colors.roseDeep, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text(category.label.uppercase(), style = MaterialTheme.typography.labelSmall, color = colors.roseDeep); Spacer(Modifier.weight(1f)); Text(DateTimeHelper.formatDisplay(note.updatedAt), style = MaterialTheme.typography.labelSmall, color = colors.textTertiary) }
-            Spacer(Modifier.height(12.dp)); Text(note.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Spacer(Modifier.height(8.dp)); Text(note.content, style = MaterialTheme.typography.bodyLarge, fontStyle = FontStyle.Italic, color = colors.textSecondary, maxLines = 4, overflow = TextOverflow.Ellipsis)
+    Row(
+        Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick).padding(vertical = spacing.space4),
+        horizontalArrangement = Arrangement.spacedBy(spacing.space3),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(category.icon, null, Modifier.size(22.dp), tint = colors.roseDeep)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.space1)) {
+            ThEyebrow("${category.label} · ${DateTimeHelper.formatDisplay(note.updatedAt)}")
+            Text(note.title, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 3, overflow = TextOverflow.Ellipsis)
+            Text(note.content.replace('\n', ' '), style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary,
+                maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
+        Icon(ThIcons.ChevronRight, null, Modifier.size(20.dp), tint = colors.textSecondary)
     }
 }

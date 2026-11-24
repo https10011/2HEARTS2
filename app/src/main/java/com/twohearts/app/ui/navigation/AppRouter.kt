@@ -323,7 +323,8 @@ internal fun AppRouter(
 
                 // Notes
                 composable(RoutePath.APP_NOTES) {
-                    val notes by noteRepository.observeAll().collectAsState(initial = emptyList())
+                    val notes by remember(noteRepository) { noteRepository.observeAll() }
+                        .collectAsStateWithLifecycle(initialValue = emptyList())
                     NotesHome(
                         notes = notes,
                         onSearch = { navController.navigate(RoutePath.APP_SEARCH) },
@@ -342,6 +343,8 @@ internal fun AppRouter(
                 composable(RoutePath.APP_NOTES_ADD) {
                     val action = rememberRecordAction()
                     NoteEditor(
+                        saving = action.running,
+                        errorMessage = action.errorMessage,
                         onSave = { title, content, category ->
                             action.run("Note saved.", "Couldn’t save this note.", afterWrite = { navController.popBackStack() }) {
                                 noteRepository.create(
@@ -371,6 +374,8 @@ internal fun AppRouter(
                     val note = lookup.record
                     note?.let { n ->
                         NoteDetail(
+                            deleting = action.running,
+                            errorMessage = action.errorMessage,
                             note = n,
                             onEdit = {
                                 if (!action.running) navController.navigate("/app/notes/$noteId/edit")
@@ -396,6 +401,8 @@ internal fun AppRouter(
                     val note = lookup.record
                     note?.let { n ->
                         NoteEditor(
+                            saving = action.running,
+                            errorMessage = action.errorMessage,
                             noteId = n.id,
                             initialTitle = n.title,
                             initialContent = n.content,
@@ -405,7 +412,7 @@ internal fun AppRouter(
                                     checkNotNull(noteRepository.update(n.id, mapOf(
                                         "title" to title,
                                         "content" to content,
-                                        "category" to category.name.lowercase()
+                                        "category" to if (category == NoteCategory.fromString(n.category)) n.category else category.name.lowercase()
                                     )))
                                 }
                             },
@@ -516,7 +523,8 @@ internal fun AppRouter(
 
                 // Timeline
                 composable(RoutePath.APP_TIMELINE) {
-                    val events by timelineEventRepository.observeAll().collectAsState(initial = emptyList())
+                    val events by remember(timelineEventRepository) { timelineEventRepository.observeAll() }
+                        .collectAsStateWithLifecycle(initialValue = emptyList())
                     TimelineHome(
                         events = events,
                         onEventClick = { eventId ->
@@ -534,6 +542,8 @@ internal fun AppRouter(
                 composable(RoutePath.APP_TIMELINE_ADD) {
                     val action = rememberRecordAction()
                     AddEvent(
+                        saving = action.running,
+                        errorMessage = action.errorMessage,
                         onSave = { title, eventDate, description ->
                             action.run("Moment added to your timeline.", "Couldn’t save this moment.", afterWrite = { navController.popBackStack() }) {
                                 timelineEventRepository.create(
@@ -563,6 +573,8 @@ internal fun AppRouter(
                     val event = lookup.record
                     event?.let { e ->
                         EventDetail(
+                            deleting = action.running,
+                            errorMessage = action.errorMessage,
                             event = e,
                             onEdit = {
                                 if (!action.running) navController.navigate("/app/timeline/$eventId/edit")
@@ -588,6 +600,8 @@ internal fun AppRouter(
                     val event = lookup.record
                     event?.let { e ->
                         AddEvent(
+                            saving = action.running,
+                            errorMessage = action.errorMessage,
                             eventId = e.id,
                             initialTitle = e.title,
                             initialDescription = e.description ?: "",

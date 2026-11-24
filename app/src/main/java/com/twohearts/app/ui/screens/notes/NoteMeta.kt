@@ -20,7 +20,8 @@ enum class NoteCategory(val label: String, val icon: ImageVector) {
          * Get category from string value.
          */
         fun fromString(value: String): NoteCategory {
-            return entries.find { it.name.lowercase() == value.lowercase() } ?: GENERAL
+            val stored = value.trim().replace('-', '_')
+            return entries.firstOrNull { it.name.equals(stored, ignoreCase = true) } ?: GENERAL
         }
     }
 }
