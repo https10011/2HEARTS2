@@ -1,133 +1,138 @@
 package com.twohearts.app.ui.screens.memories
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.foundation.Image
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.data.entity.MediaAsset
 import com.twohearts.app.data.entity.Memory
 import com.twohearts.app.services.datetime.DateTimeHelper
-import com.twohearts.app.ui.components.Header
+import com.twohearts.app.ui.components.CardTone
+import com.twohearts.app.ui.components.ThDivider
+import com.twohearts.app.ui.components.ThEmptyState
+import com.twohearts.app.ui.components.ThEyebrow
+import com.twohearts.app.ui.components.ThIconButton
 import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.ThSectionHeader
+import com.twohearts.app.ui.components.ThSurfaceCard
+import com.twohearts.app.ui.components.ThTopBar
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
-import androidx.compose.ui.platform.LocalDensity
-import com.twohearts.app.services.media.MediaThumbnails
+import com.twohearts.app.ui.theme.TwoHeartsTokens
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MemoriesHome(
-    memories: List<Memory>, onMemoryClick: (String) -> Unit, onAddMemory: () -> Unit, onBack: () -> Unit,
+    memories: List<Memory>,
+    onMemoryClick: (String) -> Unit,
+    onAddMemory: () -> Unit,
+    onBack: () -> Unit,
     media: Map<String, List<MediaAsset>> = emptyMap(),
 ) {
     val colors = LocalTwoHeartsColors.current
+    val spacing = TwoHeartsTokens.Spacing
     Scaffold(
-        topBar = { Header(title = "Memories", onBack = onBack) },
-        floatingActionButton = {
-            if (memories.isNotEmpty()) ExtendedFloatingActionButton(onClick = onAddMemory, icon = { Icon(ThIcons.Add, null) }, text = { Text("New memory") }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
-        },
-    ) { padding ->
-        if (memories.isEmpty()) MemoryEmptyState(onAddMemory, Modifier.padding(padding)) else LazyColumn(
-            Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 104.dp),
-            verticalArrangement = Arrangement.spacedBy(22.dp),
-        ) {
-            item {
-                Text("The moments that made us", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(6.dp))
-                Text("${memories.size} ${if (memories.size == 1) "memory" else "memories"}, kept privately on this device", color = colors.textSecondary)
-            }
-            itemsIndexed(memories, key = { _, item -> item.id }) { index, memory ->
-                MemoryStoryCard(memory, media[memory.id].orEmpty(), index == 0) { onMemoryClick(memory.id) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun MemoryEmptyState(onAdd: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = LocalTwoHeartsColors.current
-    Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 32.dp, vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Box(Modifier.size(92.dp).clip(RoundedCornerShape(30.dp)).background(colors.surfaceBlush), contentAlignment = Alignment.Center) {
-            Icon(ThIcons.PhotoLibrary, null, tint = colors.burgundy, modifier = Modifier.size(42.dp))
-        }
-        Spacer(Modifier.height(24.dp))
-        Text("Your story starts here", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
-        Text("Save a photo, a date, or a few words from a moment you want to keep.", color = colors.textSecondary, style = MaterialTheme.typography.bodyLarge)
-        Spacer(Modifier.height(24.dp))
-        Button(onClick = onAdd) { Icon(ThIcons.Add, null); Spacer(Modifier.width(8.dp)); Text("Save your first memory") }
-    }
-}
-
-@Composable
-private fun MemoryStoryCard(memory: Memory, media: List<MediaAsset>, featured: Boolean, onClick: () -> Unit) {
-    val colors = LocalTwoHeartsColors.current
-    Surface(Modifier.fillMaxWidth().clickable(onClick = onClick), shape = RoundedCornerShape(24.dp), color = if (featured) colors.surfaceBlush else colors.surfaceElevated, tonalElevation = if (featured) 2.dp else 0.dp) {
-        Column {
-            MemoryMediaFrame(media.firstOrNull(), Modifier.fillMaxWidth().height(if (featured) 220.dp else 160.dp))
-            Column(Modifier.padding(18.dp)) {
-                Text(DateTimeHelper.formatDisplay(memory.memoryDate).uppercase(), style = MaterialTheme.typography.labelMedium, color = colors.roseDeep)
-                Spacer(Modifier.height(7.dp))
-                Text(memory.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                memory.caption?.takeIf { it.isNotBlank() }?.let { Spacer(Modifier.height(8.dp)); Text(it, color = colors.textSecondary, maxLines = 3, overflow = TextOverflow.Ellipsis) }
-                if (media.size > 1) { Spacer(Modifier.height(10.dp)); Text("${media.size} photos and videos", style = MaterialTheme.typography.labelMedium, color = colors.textTertiary) }
-            }
-        }
-    }
-}
-
-@Composable
-fun MemoryMediaFrame(asset: MediaAsset?, modifier: Modifier = Modifier) {
-    val colors = LocalTwoHeartsColors.current
-    BoxWithConstraints(
-        modifier.clip(RoundedCornerShape(20.dp)).background(colors.surfaceWarm),
-        contentAlignment = Alignment.Center,
-    ) {
-        val density = LocalDensity.current
-        val edge = with(density) { MediaThumbnails.bucket(maxWidth.roundToPx(), maxHeight.roundToPx()) }
-        val isVideo = asset?.mimeType?.startsWith("video/") == true
-        val isPhoto = asset?.mimeType?.startsWith("image/") == true
-        val bitmap = if (asset != null && isPhoto) {
-            key(asset.filePath, asset.updatedAt, edge) {
-                val loaded by produceState(MediaThumbnails.cached(asset.filePath, asset.updatedAt, edge)) {
-                    value = MediaThumbnails.load(asset.filePath, asset.updatedAt, edge)
+        topBar = {
+            ThTopBar("Memories", onBack = onBack, actions = {
+                if (memories.isNotEmpty()) ThIconButton(onClick = onAddMemory, label = "New memory") {
+                    Icon(ThIcons.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 }
-                loaded
-            }
-        } else null
-
-        if (bitmap != null) {
-            Image(
-                bitmap.asImageBitmap(), contentDescription = "Saved photo",
-                contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize(),
+            })
+        },
+    ) { insets ->
+        val featured = memories.firstOrNull()
+        if (featured == null) {
+            ThEmptyState(
+                title = "Your story starts here",
+                description = "Save a photo, a date, or a few words from a moment you want to keep.",
+                modifier = Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()),
+                visual = { Icon(ThIcons.PhotoLibrary, null, Modifier.size(52.dp), tint = colors.roseDeep) },
+                actionLabel = "Save your first memory", onAction = onAddMemory,
             )
         } else {
-            Icon(
-                if (isVideo) ThIcons.Play else ThIcons.Image, contentDescription = null,
-                tint = if (asset == null) colors.roseMuted else colors.burgundy,
-                modifier = Modifier.size(52.dp),
-            )
-            if (isVideo) {
-                Text(
-                    "Video", Modifier.align(Alignment.BottomStart).padding(14.dp),
-                    style = MaterialTheme.typography.labelMedium, color = colors.textSecondary,
-                )
+            LazyColumn(
+                Modifier.fillMaxSize().padding(insets),
+                contentPadding = PaddingValues(horizontal = spacing.screenGutter, vertical = spacing.space4),
+            ) {
+                item(key = featured.id) {
+                    ThSurfaceCard(tone = CardTone.WARM, onClick = { onMemoryClick(featured.id) }) {
+                        Column(verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
+                            val attachments = media[featured.id].orEmpty()
+                            attachments.firstOrNull()?.let { asset ->
+                                MemoryMediaFrame(MemoryMediaSource(asset), Modifier.fillMaxWidth().height(188.dp))
+                            }
+                            ThEyebrow(DateTimeHelper.formatDisplay(featured.memoryDate))
+                            Text(
+                                featured.title, style = MaterialTheme.typography.displaySmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 3, overflow = TextOverflow.Ellipsis,
+                            )
+                            featured.caption?.takeIf(String::isNotBlank)?.let {
+                                Text(it, color = colors.textSecondary, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                            }
+                            if (attachments.isNotEmpty()) {
+                                Text(
+                                    attachmentCount(attachments.size), style = MaterialTheme.typography.labelMedium,
+                                    color = colors.textSecondary,
+                                )
+                            }
+                        }
+                    }
+                }
+                if (memories.size > 1) {
+                    item {
+                        ThSectionHeader("Earlier memories", modifier = Modifier.padding(top = spacing.space6))
+                    }
+                    items(memories.drop(1), key = { it.id }) { memory ->
+                        EarlierMemory(memory, media[memory.id].orEmpty()) { onMemoryClick(memory.id) }
+                        ThDivider()
+                    }
+                }
             }
         }
     }
 }
+
+@Composable
+private fun EarlierMemory(memory: Memory, media: List<MediaAsset>, onClick: () -> Unit) {
+    val spacing = TwoHeartsTokens.Spacing
+    val colors = LocalTwoHeartsColors.current
+    Row(
+        Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick).padding(vertical = spacing.space3),
+        horizontalArrangement = Arrangement.spacedBy(spacing.space3),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        media.firstOrNull()?.let { asset -> MemoryMediaFrame(MemoryMediaSource(asset), Modifier.size(62.dp)) }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.tightGap)) {
+            Text(
+                DateTimeHelper.formatShortDisplay(memory.memoryDate),
+                style = MaterialTheme.typography.labelMedium, color = colors.textSecondary,
+            )
+            Text(
+                memory.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 3, overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Icon(ThIcons.ChevronRight, null, Modifier.size(20.dp), tint = colors.textSecondary)
+    }
+}
+
+internal fun attachmentCount(size: Int) = if (size == 1) "1 attachment" else "$size attachments"

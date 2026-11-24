@@ -27,13 +27,15 @@ Reviewed the production Us route, Compose screen and projection, Home portrait l
 - Each full test variant passed 178 tests with zero failures, errors, or skips. The assembled debug APK passed v2 signing, alignment, and archive integrity checks. It reports `com.twohearts.app` 1.0.0 (1), min API 26, target API 35, and the existing permission declarations. Local APK SHA-256 `5ebb7ffc668d1861ab13cf4ce84e998948f2e8d29cce2bdad9d1b43eafe05294`.
 - The UI checks used the Android API 34 native Compose harness. Installed-candidate and handset walkthroughs remain part of release validation.
 
+- Git verified `161fc6137ba06d099ce19679e2aa4c358f634989` on `origin/master`. The Android workflow passed and published the Us checkpoint. [Commit](https://github.com/https10011/2HEARTS2/commit/161fc6137ba06d099ce19679e2aa4c358f634989) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/44573198539) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44573198539/artifacts/14554014588)
+
 ## Completion checklist
 
 - [x] Record the starting checkpoint, source reviewed, initial findings, implementation and dependencies.
 - [x] Verify the saved and missing records, stream update, available routes, and private entry points.
 - [x] Render and inspect both themes, short and standard layouts, and 200% text.
 - [x] Run both full test variants, inspect the APK, and review the diff.
-- [ ] Commit, push, verify the exact SHA and CI artifact, and update the progress tracker.
+- [x] Commit, push, verify the exact SHA and CI artifact, and update the progress tracker.
 
 ## Next stage
 

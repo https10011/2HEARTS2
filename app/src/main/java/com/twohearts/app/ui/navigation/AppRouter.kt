@@ -90,6 +90,9 @@ import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.data.repository.generateId
 import com.twohearts.app.data.dao.MediaAssetDao
 import com.twohearts.app.services.media.MediaStorage
+import com.twohearts.app.data.database.TwoHeartsDatabase
+import com.twohearts.app.data.entity.Memory
+import com.twohearts.app.services.media.MemoryWriter
 import com.twohearts.app.services.media.ProfilePhotoStaging
 import com.twohearts.app.services.media.ProfilePhotoWriter
 
@@ -127,6 +130,11 @@ internal fun AppRouter(
     openAlerts: Boolean = false,
     onAlertsOpened: () -> Unit = {},
 ) {
+    val appContext = LocalContext.current.applicationContext
+    fun memoryWriter() = MemoryWriter(
+        TwoHeartsDatabase.getDatabase(appContext), memoryRepository, mediaStorage, appContext.contentResolver,
+    )
+
     val navController = rememberNavController()
     val currentRoute by navController.currentBackStackEntryAsState()
 
@@ -429,41 +437,25 @@ internal fun AppRouter(
                 }
 
                 composable(RoutePath.APP_MEMORIES_ADD) {
-                    val context = LocalContext.current
                     val action = rememberRecordAction()
                     AddMemory(
                         saving = action.running,
-                        onSave = { title, caption, memoryDate, selectedMedia ->
-                            var missingAttachment = false
+                        errorMessage = action.errorMessage,
+                        onSave = { title, caption, memoryDate, attachments ->
+                            val id = generateId()
                             action.run(
-                                "Memory saved.", "Couldn’t save this memory.",
+                                "Memory saved.", "Couldn’t save the memory. Check its attachments and try again.",
                                 afterWrite = { navController.popBackStack() },
-                                warning = { if (missingAttachment) "Memory saved. Some attachments couldn’t be added." else null },
                             ) {
-                                val memoryId = generateId()
-                                memoryRepository.create(com.twohearts.app.data.entity.Memory(
-                                    title = title,
-                                    caption = caption,
-                                    memoryDate = memoryDate,
-                                    id = memoryId,
-                                    createdAt = DateTimeHelper.nowUtc(),
-                                    updatedAt = DateTimeHelper.nowUtc()
-                                ))
-                                selectedMedia.forEachIndexed { index, uri ->
-                                    val mime = context.contentResolver.getType(uri)
-                                    val stored = mime?.let { mediaStorage.store(uri, it) }
-                                    if (stored == null) {
-                                        missingAttachment = true
-                                        return@forEachIndexed
-                                    }
-                                    mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(stored.filePath, stored.mimeType, stored.fileSize, stored.width, stored.height, id = stored.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc()))
-                                    memoryRepository.addMedia(memoryId, stored.id, index)
-                                }
+                                val now = DateTimeHelper.nowUtc()
+                                memoryWriter().save(
+                                    Memory(title = title, caption = caption, memoryDate = memoryDate,
+                                        id = id, createdAt = now, updatedAt = now),
+                                    original = null, originalAttachmentIds = emptyList(), attachments = attachments,
+                                )
                             }
                         },
-                        onBack = {
-                            if (!action.running) navController.popBackStack()
-                        }
+                        onBack = { if (!action.running) navController.popBackStack() },
                     )
                 }
 
@@ -471,69 +463,53 @@ internal fun AppRouter(
                     val memoryId = backStackEntry.arguments?.getString("memoryId") ?: return@composable
                     val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(memoryId) {
-                        memoryRepository.getById(memoryId)?.let { saved ->
-                            saved to memoryRepository.getAssets(memoryId)
-                        }
+                        memoryRepository.getById(memoryId)?.let { saved -> saved to memoryRepository.getAssets(memoryId) }
                     }
-                    val memory = lookup.record?.first
-                    memory?.let { m ->
+                    lookup.record?.let { (memory, assets) ->
                         MemoryDetail(
-                            memory = m,
-                            media = lookup.record?.second.orEmpty(),
-                            onEdit = {
-                                if (!action.running) navController.navigate("/app/memories/$memoryId/edit")
-                            },
+                            memory = memory,
+                            media = assets,
+                            deleting = action.running,
+                            errorMessage = action.errorMessage,
+                            onEdit = { if (!action.running) navController.navigate("/app/memories/${android.net.Uri.encode(memoryId)}/edit") },
                             onDelete = {
                                 action.run("Memory deleted.", "Couldn’t delete this memory.", afterWrite = { navController.popBackStack() }) {
-                                    memoryRepository.softDelete(m.id)
+                                    memoryWriter().delete(memory.id)
                                 }
                             },
-                            onBack = {
-                                if (!action.running) navController.popBackStack()
-                            }
+                            onBack = { if (!action.running) navController.popBackStack() },
                         )
                     } ?: RecordLookupScreen("Memory", lookup) { navController.popBackStack() }
                 }
 
                 composable("/app/memories/{memoryId}/edit") { backStackEntry ->
                     val memoryId = backStackEntry.arguments?.getString("memoryId") ?: return@composable
-                    val context = LocalContext.current
                     val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(memoryId) {
-                        memoryRepository.getById(memoryId)
+                        memoryRepository.getById(memoryId)?.let { saved -> saved to memoryRepository.getAssets(memoryId) }
                     }
-                    val memory = lookup.record
-                    memory?.let { m ->
+                    lookup.record?.let { loaded ->
+                        val (original, originalAssets) = remember(memoryId) { loaded }
                         AddMemory(
-                            memoryId = m.id,
-                            initialTitle = m.title,
-                            initialCaption = m.caption ?: "",
-                            initialDate = m.memoryDate,
+                            memoryId = original.id,
+                            initialTitle = original.title,
+                            initialCaption = original.caption.orEmpty(),
+                            initialDate = original.memoryDate,
+                            initialMedia = originalAssets,
                             saving = action.running,
-                            onSave = { title, caption, memoryDate, selectedMedia ->
-                                var missingAttachment = false
+                            errorMessage = action.errorMessage,
+                            onSave = { title, caption, memoryDate, attachments ->
                                 action.run(
-                                    "Memory saved.", "Couldn’t save this memory.",
+                                    "Memory saved.", "Couldn’t save the changes. Check the attachments and try again.",
                                     afterWrite = { navController.popBackStack() },
-                                    warning = { if (missingAttachment) "Memory saved. Some attachments couldn’t be added." else null },
                                 ) {
-                                    checkNotNull(memoryRepository.update(m.id, mapOf("title" to title, "caption" to caption, "memoryDate" to memoryDate)))
-                                    val offset = memoryRepository.getMedia(m.id).size
-                                    selectedMedia.forEachIndexed { index, uri ->
-                                        val mime = context.contentResolver.getType(uri)
-                                        val stored = mime?.let { mediaStorage.store(uri, it) }
-                                        if (stored == null) {
-                                            missingAttachment = true
-                                            return@forEachIndexed
-                                        }
-                                        mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(stored.filePath, stored.mimeType, stored.fileSize, stored.width, stored.height, id = stored.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc()))
-                                        memoryRepository.addMedia(m.id, stored.id, offset + index)
-                                    }
+                                    memoryWriter().save(
+                                        original.copy(title = title, caption = caption, memoryDate = memoryDate),
+                                        original, originalAssets.map { it.id }, attachments,
+                                    )
                                 }
                             },
-                            onBack = {
-                                if (!action.running) navController.popBackStack()
-                            }
+                            onBack = { if (!action.running) navController.popBackStack() },
                         )
                     } ?: RecordLookupScreen("Memory", lookup) { navController.popBackStack() }
                 }

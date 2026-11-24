@@ -25,6 +25,9 @@ internal class RecordAction(
     var running by mutableStateOf(false)
         private set
 
+    var errorMessage by mutableStateOf<String?>(null)
+        private set
+
     fun run(
         success: String,
         failure: String,
@@ -34,12 +37,14 @@ internal class RecordAction(
     ) {
         if (running) return
         running = true
+        errorMessage = null
         scope.launch {
             try {
                 withContext(worker) { write() }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
+                errorMessage = failure
                 feedback.error(failure)
                 return@launch
             } finally {

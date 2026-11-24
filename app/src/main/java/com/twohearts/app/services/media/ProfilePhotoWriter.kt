@@ -52,22 +52,22 @@ internal class ProfilePhotoWriter(
             // also protects a photo shared by the second profile or a record.
             withContext(NonCancellable) {
                 for (id in (copied.map { it.id } + detached).distinct()) {
-                    runCatching { removeIfUnreferenced(id) }
+                    runCatching { deleteUnreferencedMedia(database, media, id) }
                 }
             }
         }
         changes.filterIsInstance<ProfilePhotoChange.Replace>().forEach { staging.discard(it.draftId) }
     }
+}
 
-    private suspend fun removeIfUnreferenced(id: String) {
-        if (!localMediaId.matches(id)) return
-        val assets = database.mediaAssetDao()
-        database.withTransaction {
-            if (!assets.isReferenced(id)) {
-                val now = DateTimeHelper.nowUtc()
-                assets.softDelete(id, now, now)
-                withContext(Dispatchers.IO) { media.delete(id) }
-            }
+internal suspend fun deleteUnreferencedMedia(database: TwoHeartsDatabase, storage: MediaStorage, id: String) {
+    if (!localMediaId.matches(id)) return
+    val assets = database.mediaAssetDao()
+    database.withTransaction {
+        if (!assets.isReferenced(id)) {
+            val now = DateTimeHelper.nowUtc()
+            assets.softDelete(id, now, now)
+            withContext(Dispatchers.IO) { storage.delete(id) }
         }
     }
 }
