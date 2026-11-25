@@ -1,29 +1,49 @@
 package com.twohearts.app.ui.screens.places
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.ConfirmDialog
-import com.twohearts.app.ui.components.Header
+import com.twohearts.app.data.entity.MediaAsset
 import com.twohearts.app.data.entity.Place
 import com.twohearts.app.services.datetime.DateTimeHelper
-import com.twohearts.app.data.entity.MediaAsset
-import com.twohearts.app.ui.screens.memories.MemoryMediaFrame
+import com.twohearts.app.ui.components.ButtonVariant
+import com.twohearts.app.ui.components.ConfirmDialog
+import com.twohearts.app.ui.components.StatusVariant
+import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThDivider
+import com.twohearts.app.ui.components.ThEyebrow
+import com.twohearts.app.ui.components.ThIconButton
 import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.ThStatusBanner
+import com.twohearts.app.ui.components.ThTopBar
+import com.twohearts.app.ui.screens.memories.MemoryAttachmentPreview
+import com.twohearts.app.ui.screens.memories.MemoryMediaFrame
+import com.twohearts.app.ui.screens.memories.MemoryMediaSource
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.ThTextStyles
+import com.twohearts.app.ui.theme.TwoHeartsTokens
 
-/**
- * PlaceDetail — place detail screen.
- *
- * matches legacy PlaceDetail with:
- * - Photo hero + story cards
- * - Edit/delete actions
- */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaceDetail(
     place: Place,
@@ -31,135 +51,65 @@ fun PlaceDetail(
     onDelete: () -> Unit,
     onBack: () -> Unit,
     media: MediaAsset? = null,
+    deleting: Boolean = false,
+    errorMessage: String? = null,
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    var confirm by rememberSaveable(place.id) { mutableStateOf(false) }
+    var showPhoto by rememberSaveable(place.id) { mutableStateOf(false) }
+    val spacing = TwoHeartsTokens.Spacing
+    val colors = LocalTwoHeartsColors.current
+    val source = media?.let { MemoryMediaSource(it) }
+    val address = listOfNotNull(place.address, placeLocation(place)).filter(String::isNotBlank).joinToString("\n")
 
-    Scaffold(
-        topBar = {
-            Header(
-                title = "Place",
-                onBack = onBack,
-                actions = {
-                    IconButton(onClick = onEdit) {
-                        Icon(
-                            imageVector = ThIcons.Edit,
-                            contentDescription = "Edit"
-                        )
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
+    Scaffold(topBar = {
+        ThTopBar("Place", onBack = onBack, actions = {
+            ThIconButton(onEdit, label = "Edit place", enabled = !deleting) { Icon(ThIcons.Edit, null) }
+        })
+    }) { insets ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Photo hero placeholder
-            MemoryMediaFrame(media, Modifier.fillMaxWidth().height(240.dp))
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Title
-            Text(
-                text = place.name,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Category badge
-            Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                shape = MaterialTheme.shapes.small
+            Column(
+                Modifier.widthIn(max = 640.dp).fillMaxWidth().padding(horizontal = spacing.screenGutter, vertical = spacing.space5),
+                verticalArrangement = Arrangement.spacedBy(spacing.space4),
             ) {
+                Column(verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
+                    ThEyebrow(placeCategoryLabel(place.category), color = colors.roseDeep)
+                    Text(place.name, style = MaterialTheme.typography.displayMedium, modifier = Modifier.semantics { heading() })
+                    if (address.isNotEmpty()) Text(address, style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary)
+                }
+                if (source != null) {
+                    MemoryMediaFrame(
+                        source,
+                        Modifier.fillMaxWidth().aspectRatio(1.65f).clickable(onClickLabel = "View place photo") { showPhoto = true },
+                    )
+                } else if (place.photoRef != null) {
+                    ThStatusBanner(StatusVariant.INFO, "Saved photo is unavailable. You can replace it in Edit place.")
+                }
+                place.notes?.takeIf(String::isNotBlank)?.let { Text(it, style = ThTextStyles.reading, color = colors.textSecondary) }
+                ThDivider()
                 Text(
-                    text = place.category.replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    "Saved ${DateTimeHelper.formatDisplay(place.createdAt)}",
+                    style = MaterialTheme.typography.bodySmall, color = colors.textSecondary,
+                )
+                if (place.updatedAt != place.createdAt) {
+                    Text(
+                        "Updated ${DateTimeHelper.formatDisplay(place.updatedAt)}",
+                        style = MaterialTheme.typography.bodySmall, color = colors.textSecondary,
+                    )
+                }
+                errorMessage?.let { ThStatusBanner(StatusVariant.ERROR, it) }
+                ThButton(
+                    onClick = { confirm = true }, text = "Delete place", variant = ButtonVariant.DANGER,
+                    icon = ThIcons.Trash, loading = deleting,
                 )
             }
-
-            if (place.address != null || place.city != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Address",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = buildString {
-                        place.address?.let { append(it) }
-                        if (place.city != null) {
-                            if (isNotEmpty()) append("\n")
-                            append(place.city)
-                        }
-                        if (place.state != null) {
-                            if (isNotEmpty()) append(", ")
-                            append(place.state)
-                        }
-                        if (place.country != null) {
-                            if (isNotEmpty()) append(", ")
-                            append(place.country)
-                        }
-                    },
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-
-            if (place.notes != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Notes",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = place.notes,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Timestamps
-            Text(
-                text = "Added: ${DateTimeHelper.formatDisplay(place.createdAt)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-            )
-
-            if (place.updatedAt != place.createdAt) {
-                Text(
-                    text = "Updated: ${DateTimeHelper.formatDisplay(place.updatedAt)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-                )
-            }
-            Spacer(Modifier.height(28.dp))
-            OutlinedButton(onClick = { showDeleteDialog = true }, colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Icon(ThIcons.Trash, null); Spacer(Modifier.width(8.dp)); Text("Delete place") }
         }
     }
-
-    // Delete confirmation dialog
-    if (showDeleteDialog) {
-        ConfirmDialog(
-            title = "Delete Place",
-            message = "Are you sure you want to delete this place?",
-            confirmText = "Delete",
-            onConfirm = {
-                showDeleteDialog = false
-                onDelete()
-            },
-            onDismiss = { showDeleteDialog = false }
-        )
-    }
+    if (showPhoto && source != null) MemoryAttachmentPreview(source) { showPhoto = false }
+    if (confirm) ConfirmDialog(
+        title = "Delete this place?", message = "It will be removed from your saved places.", confirmText = "Delete",
+        onConfirm = { confirm = false; onDelete() }, onDismiss = { confirm = false },
+    )
 }

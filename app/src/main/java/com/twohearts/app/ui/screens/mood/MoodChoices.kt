@@ -22,10 +22,11 @@ internal fun MoodChoices(
     selected: String?,
     onSelect: (MoodEntryData) -> Unit,
     compact: Boolean = false,
+    enabled: Boolean = true,
 ) {
     val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val minChoiceWidth = (84 * fontScale).dp
+        val minChoiceWidth = (76 * fontScale).dp
         val columns = (maxWidth / minChoiceWidth).toInt()
             .coerceIn(1, if (compact) 4 else 2)
         Column(
@@ -39,7 +40,7 @@ internal fun MoodChoices(
                         Surface(
                             modifier = Modifier.weight(1f)
                                 .heightIn(min = TwoHeartsTokens.Dimensions.touchTargetMin)
-                                .selectable(chosen, role = Role.RadioButton, onClick = { onSelect(mood) }),
+                                .selectable(chosen, enabled = enabled, role = Role.RadioButton, onClick = { onSelect(mood) }),
                             shape = MaterialTheme.shapes.medium,
                             color = if (chosen) MaterialTheme.colorScheme.primaryContainer
                                 else MaterialTheme.colorScheme.surfaceContainer,

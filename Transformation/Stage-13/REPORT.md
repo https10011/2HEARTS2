@@ -20,7 +20,7 @@ The reminder list omitted saved missed items. The date list labeled invalid rest
 - Inspected API 34 native renders at 411 × 891, 360 × 740 and 320 × 618 dp in light and dark, with 200% text in the narrow cases. The reminder editor retains its Save action as the recurrence controls scroll. Long featured dates and explicit unread and denial labels wrap. Sampled label and action colors cleared 4.5:1 on their backgrounds. [Reminders](evidence/reminders.jpg) · [Reminder editor](evidence/reminder-editor.jpg) · [Important dates](evidence/important-dates.jpg) · [Notifications](evidence/notifications.jpg)
 - Both full unit variants passed 205 tests with zero failures, errors, or skips. The debug APK passed v2 signing, alignment, archive integrity, and manifest checks. It declares `com.twohearts.app` 1.0.0 (1), min API 26, target API 35, and a non-exported receiver for clock and time-zone changes. The local APK SHA-256 is `b7a39b180607dfc8c40f0d47fcbbc3f6840443d57ac6f5cbae86f42fb1461f4b`.
 - Scheduled delivery uses Android WorkManager, whose delivery time can vary with device power state. Legacy receipts suppress repeats at their original UTC instant. New receipts retain their local slot across a zone change.
-- No handset is connected. The Android 13 software guest ran earlier checkpoints with System UI limitations. A read-only Android 13 guest smoke test was started for this build. The handset delivery, timing, and power-management walkthrough remains part of release validation.
+- No handset is connected. The Android 13 software guest ran earlier checkpoints with System UI limitations. The first smoke attempt hit the emulator’s free-space check. A RAM-backed copy cleared the check and started the guest, but ADB stayed offline through the four-minute boot window. The candidate was never installed in that guest. Handset delivery, timing, and power-management checks remain part of release validation.
 
 ## Completion checklist
 
@@ -29,5 +29,10 @@ The reminder list omitted saved missed items. The date list labeled invalid rest
 - [x] Inspect the native screenshots in both palettes, standard and small sizes, and at 200% text.
 - [x] Verify recurrence, wall-clock and time-zone changes, legacy receipts, Android denial, local CRUD, reopen, notification routes, and missing or invalid records.
 - [x] Verify APK metadata and signing. Review the final diff.
-- [ ] Verify exact CI and artifact after pushing the checkpoint.
-- [ ] Record the verified result and continue to Stage 14 Places, Mood, and Period.
+- [x] Verify exact CI and artifact after pushing the checkpoint.
+- [x] Record the verified result and continue to Stage 14 Places, Mood, and Period.
+
+
+## Remote verification
+
+GitHub verified `e2f686a8bbccffe1ad804cb96e3a02d6d2d7c0be` as the exact `master` commit. Build Android APK run `45439128545` passed and published the current `twohearts-debug-apk` artifact `14940899716` for that SHA. [Commit](https://github.com/https10011/2HEARTS2/commit/e2f686a8bbccffe1ad804cb96e3a02d6d2d7c0be) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45439128545) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45439128545/artifacts/14940899716)

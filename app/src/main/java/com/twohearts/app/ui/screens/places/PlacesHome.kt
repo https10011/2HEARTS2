@@ -1,33 +1,47 @@
 package com.twohearts.app.ui.screens.places
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.ThSectionTabs
-import com.twohearts.app.ui.components.EmptyState
-import com.twohearts.app.ui.components.Header
-import com.twohearts.app.data.entity.Place
-import com.twohearts.app.data.entity.MediaAsset
-import com.twohearts.app.ui.screens.memories.MemoryMediaFrame
-import com.twohearts.app.ui.components.ThIcons
-import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.twohearts.app.data.entity.MediaAsset
+import com.twohearts.app.data.entity.Place
+import com.twohearts.app.ui.components.ButtonVariant
+import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThDivider
+import com.twohearts.app.ui.components.ThEmptyState
+import com.twohearts.app.ui.components.ThEyebrow
+import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.ThTopBar
+import com.twohearts.app.ui.screens.memories.MemoryMediaFrame
+import com.twohearts.app.ui.screens.memories.MemoryMediaSource
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.TwoHeartsTokens
 
-/**
- * PlacesHome — places list screen.
- *
- * Matches legacy PlacesHome with:
- * - Hero band + grid + category chips + search
- * - Empty state
- * - Add place FAB
- */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlacesHome(
     places: List<Place>,
@@ -36,143 +50,88 @@ fun PlacesHome(
     onBack: () -> Unit,
     media: Map<String, MediaAsset> = emptyMap(),
 ) {
-    var selectedCategory by remember { mutableStateOf<String?>(null) }
-
-    val categories = remember(places) {
-        places.map { it.category }.filter(String::isNotBlank).distinct().sorted()
-    }
-    val activeCategory = selectedCategory?.takeIf { it in categories }
-    val filteredPlaces = remember(places, activeCategory) {
-        if (activeCategory == null) places else places.filter { it.category == activeCategory }
-    }
+    var category by rememberSaveable { mutableStateOf<String?>(null) }
+    var showCategories by rememberSaveable { mutableStateOf(false) }
+    val categories = remember(places) { places.map { placeCategoryKey(it.category) }.distinct().sorted() }
+    val active = category?.takeIf { it in categories }
+    val visible = remember(places, active) { places.filter { active == null || placeCategoryKey(it.category) == active } }
+    val spacing = TwoHeartsTokens.Spacing
+    val colors = LocalTwoHeartsColors.current
 
     Scaffold(
-        topBar = {
-            Header(
-                title = "Places",
-                onBack = onBack
-            )
+        topBar = { ThTopBar("Places", onBack = onBack) },
+        bottomBar = {
+            Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background)) {
+                ThDivider()
+                ThButton(
+                    onClick = onAddPlace, text = "Save a place", icon = ThIcons.Add, full = true,
+                    modifier = Modifier.padding(horizontal = spacing.screenGutter, vertical = spacing.space2),
+                )
+            }
         },
-        floatingActionButton = {
-            if (places.isNotEmpty()) ExtendedFloatingActionButton(
-                onClick = onAddPlace,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                icon = { Icon(ThIcons.Add, null) }, text = { Text("Save a place") },
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+    ) { insets ->
+        LazyColumn(
+            Modifier.fillMaxSize().padding(insets),
+            contentPadding = PaddingValues(horizontal = spacing.screenGutter, vertical = spacing.space4),
+            verticalArrangement = Arrangement.spacedBy(spacing.space3),
         ) {
-            if (categories.isNotEmpty()) {
-                ThSectionTabs(
-                    labels = listOf("All") + categories.map { it.replaceFirstChar(Char::uppercase) },
-                    selectedIndex = categories.indexOf(activeCategory) + 1,
-                    onSelect = { selectedCategory = categories.getOrNull(it - 1) },
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    scrollable = true,
+            if (places.isEmpty()) item {
+                ThEmptyState(
+                    title = "Places in your story",
+                    description = "Keep the address, a photo, or a few words about why a place matters.",
+                    visual = { Icon(ThIcons.MapPin, null, tint = colors.roseDeep) },
                 )
-            }
-
-            if (filteredPlaces.isEmpty()) {
-                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 32.dp, vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                    Icon(ThIcons.MapPin, null, tint = LocalTwoHeartsColors.current.burgundy, modifier = Modifier.size(52.dp)); Spacer(Modifier.height(20.dp))
-                    Text("The places in your story", style = MaterialTheme.typography.headlineSmall)
-                    Spacer(Modifier.height(8.dp)); Text("Keep the café, park, home, or faraway corner that became part of us.", color = LocalTwoHeartsColors.current.textSecondary)
-                    Spacer(Modifier.height(24.dp)); Button(onClick = onAddPlace) { Text("Save your first place") }
-                }
             } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 88.dp),
+                item {
+                    ThButton(
+                        onClick = { showCategories = true }, variant = ButtonVariant.SECONDARY, icon = ThIcons.ChevronRight,
+                        text = active?.let { "Category · ${placeCategoryLabel(it)}" } ?: "Category · All places",
+                    )
+                }
+                itemsIndexed(visible, key = { _, place -> place.id }) { index, place ->
+                    val photo = media[place.id]?.takeIf { it.mimeType.startsWith("image/") }
+                    PlaceRow(place, photo, featured = index == 0 && photo != null) { onPlaceClick(place.id) }
+                    ThDivider()
+                }
+            }
+        }
+    }
+    PlaceCategorySheet(showCategories, active, listOf<String?>(null) + categories, { category = it }, { showCategories = false })
+}
+
+@Composable
+private fun PlaceRow(place: Place, photo: MediaAsset?, featured: Boolean, onClick: () -> Unit) {
+    val spacing = TwoHeartsTokens.Spacing
+    val colors = LocalTwoHeartsColors.current
+    Column(
+        Modifier.fillMaxWidth().clickable(onClickLabel = "Open place", onClick = onClick)
+            .padding(vertical = spacing.space2),
+        verticalArrangement = Arrangement.spacedBy(spacing.space3),
+    ) {
+        if (featured && photo != null) {
+            MemoryMediaFrame(MemoryMediaSource(photo), Modifier.fillMaxWidth().aspectRatio(1.9f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(spacing.space3), verticalAlignment = Alignment.Top) {
+            if (!featured) {
+                if (photo != null) MemoryMediaFrame(MemoryMediaSource(photo), Modifier.size(64.dp))
+                else Box(
+                    Modifier.size(48.dp).background(colors.surfaceWarm, MaterialTheme.shapes.medium),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    items(filteredPlaces, key = { it.id }) { place ->
-                        PlaceCard(
-                            place = place,
-                            media = media[place.id],
-                            onClick = { onPlaceClick(place.id) }
-                        )
-                    }
+                    Icon(ThIcons.MapPin, null, tint = colors.roseDeep)
+                }
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.space1)) {
+                ThEyebrow(placeCategoryLabel(place.category), color = colors.roseDeep)
+                Text(place.name, style = if (featured) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge)
+                placeLocation(place)?.let { Text(it, color = colors.textSecondary, style = MaterialTheme.typography.labelMedium) }
+                place.notes?.takeIf(String::isNotBlank)?.let {
+                    Text(it, maxLines = 2, overflow = TextOverflow.Ellipsis, color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
     }
 }
 
-/**
- * PlaceCard — place card for list display.
- */
-@Composable
-fun PlaceCard(
-    place: Place,
-    onClick: () -> Unit,
-    media: MediaAsset? = null,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            MemoryMediaFrame(media, Modifier.fillMaxWidth().height(150.dp))
-            Spacer(modifier = Modifier.height(12.dp))
-            // Title
-            Text(
-                text = place.name,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            if (place.address != null || place.city != null) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = buildString {
-                        place.address?.let { append(it) }
-                        if (place.city != null) {
-                            if (isNotEmpty()) append(", ")
-                            append(place.city)
-                        }
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    maxLines = 2
-                )
-            }
-
-            if (place.notes != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = place.notes.take(100),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    maxLines = 2
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Category badge
-            Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                shape = MaterialTheme.shapes.small
-            ) {
-                Text(
-                    text = place.category.replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
-        }
-    }
-}
+internal fun placeLocation(place: Place): String? =
+    listOfNotNull(place.city, place.state, place.country).filter(String::isNotBlank).joinToString(", ").ifBlank { null }

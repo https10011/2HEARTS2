@@ -5,6 +5,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
@@ -49,6 +50,7 @@ import com.twohearts.app.ui.screens.reminders.ReminderDetail
 import com.twohearts.app.ui.screens.places.PlacesHome
 import com.twohearts.app.ui.screens.places.CreatePlace
 import com.twohearts.app.ui.screens.places.PlaceDetail
+import com.twohearts.app.ui.screens.mood.belongsToOwner
 import com.twohearts.app.ui.screens.mood.MoodHome
 import com.twohearts.app.ui.screens.mood.MoodEntryScreen
 import com.twohearts.app.ui.screens.mood.MoodHistory
@@ -91,6 +93,7 @@ import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.data.repository.generateId
 import com.twohearts.app.data.dao.MediaAssetDao
 import com.twohearts.app.services.media.MediaStorage
+import com.twohearts.app.services.media.PlaceWriter
 import com.twohearts.app.data.database.TwoHeartsDatabase
 import com.twohearts.app.data.entity.Memory
 import com.twohearts.app.services.media.MemoryWriter
@@ -134,6 +137,10 @@ internal fun AppRouter(
     val appContext = LocalContext.current.applicationContext
     fun memoryWriter() = MemoryWriter(
         TwoHeartsDatabase.getDatabase(appContext), memoryRepository, mediaStorage, appContext.contentResolver,
+    )
+
+    fun placeWriter() = PlaceWriter(
+        TwoHeartsDatabase.getDatabase(appContext), placeRepository, mediaStorage, appContext.contentResolver,
     )
 
     val navController = rememberNavController()
@@ -746,49 +753,31 @@ internal fun AppRouter(
                     PlacesHome(
                         places = places,
                         media = placeMedia,
-                        onPlaceClick = { placeId ->
-                            navController.navigate("/app/places/$placeId")
-                        },
-                        onAddPlace = {
-                            navController.navigate(RoutePath.APP_PLACES_ADD)
-                        },
-                        onBack = {
-                            navController.popBackStack()
-                        }
+                        onPlaceClick = { id -> navController.navigate("${RoutePath.APP_PLACES}/${Uri.encode(id)}") },
+                        onAddPlace = { navController.navigate(RoutePath.APP_PLACES_ADD) },
+                        onBack = { navController.popBackStack() },
                     )
                 }
 
                 composable(RoutePath.APP_PLACES_ADD) {
-                    val context = LocalContext.current
                     val action = rememberRecordAction()
                     CreatePlace(
                         onSave = { name, address, city, notes, category, photo ->
                             action.run("Place saved.", "Couldn’t save this place or its photo.", afterWrite = { navController.popBackStack() }) {
-                                val stored = photo?.let { uri ->
-                                    val mime = checkNotNull(context.contentResolver.getType(uri))
-                                    checkNotNull(mediaStorage.store(uri, mime))
-                                }
-                                stored?.let { mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(it.filePath, it.mimeType, it.fileSize, it.width, it.height, id = it.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc())) }
-                                placeRepository.create(com.twohearts.app.data.entity.Place(
-                                    name = name,
-                                    address = address,
-                                    city = city,
-                                    notes = notes,
-                                    category = category,
-                                    photoRef = stored?.id,
-                                    id = generateId(),
-                                    createdAt = DateTimeHelper.nowUtc(),
-                                    updatedAt = DateTimeHelper.nowUtc()
-                                ))
+                                val now = DateTimeHelper.nowUtc()
+                                placeWriter().save(com.twohearts.app.data.entity.Place(
+                                    name = name, address = address, city = city,
+                                    notes = notes, category = category, id = generateId(), createdAt = now, updatedAt = now,
+                                ), original = null, photo = photo)
                             }
                         },
-                        onBack = {
-                            if (!action.running) navController.popBackStack()
-                        }
+                        onBack = { if (!action.running) navController.popBackStack() },
+                        saving = action.running,
+                        errorMessage = action.errorMessage,
                     )
                 }
 
-                composable("/app/places/{placeId}") { backStackEntry ->
+                composable("${RoutePath.APP_PLACES}/{placeId}") { backStackEntry ->
                     val placeId = backStackEntry.arguments?.getString("placeId") ?: return@composable
                     val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(placeId) {
@@ -796,87 +785,68 @@ internal fun AppRouter(
                             saved to saved.photoRef?.let { mediaAssetDao.getById(it) }
                         }
                     }
-                    val place = lookup.record?.first
-                    place?.let { p ->
+                    lookup.record?.let { (place, asset) ->
                         PlaceDetail(
-                            place = p,
-                            media = lookup.record?.second,
+                            place = place, media = asset,
                             onEdit = {
-                                if (!action.running) navController.navigate("/app/places/$placeId/edit")
+                                if (!action.running) navController.navigate("${RoutePath.APP_PLACES}/${Uri.encode(placeId)}/edit")
                             },
                             onDelete = {
                                 action.run("Place deleted.", "Couldn’t delete this place.", afterWrite = { navController.popBackStack() }) {
-                                    placeRepository.softDelete(p.id)
+                                    placeRepository.softDelete(place.id)
                                 }
                             },
-                            onBack = {
-                                if (!action.running) navController.popBackStack()
-                            }
+                            onBack = { if (!action.running) navController.popBackStack() },
+                            deleting = action.running,
+                            errorMessage = action.errorMessage,
                         )
                     } ?: RecordLookupScreen("Place", lookup) { navController.popBackStack() }
                 }
 
-                composable("/app/places/{placeId}/edit") { backStackEntry ->
+                composable("${RoutePath.APP_PLACES}/{placeId}/edit") { backStackEntry ->
                     val placeId = backStackEntry.arguments?.getString("placeId") ?: return@composable
-                    val context = LocalContext.current
                     val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(placeId) {
-                        placeRepository.getById(placeId)
+                        placeRepository.getById(placeId)?.let { saved ->
+                            saved to saved.photoRef?.let { mediaAssetDao.getById(it) }
+                        }
                     }
-                    val place = lookup.record
-                    place?.let { p ->
+                    lookup.record?.let { (place, asset) ->
                         CreatePlace(
-                            placeId = p.id,
-                            initialName = p.name,
-                            initialAddress = p.address ?: "",
-                            initialCity = p.city ?: "",
-                            initialNotes = p.notes ?: "",
-                            initialCategory = p.category ?: "",
+                            placeId = place.id, initialName = place.name, initialAddress = place.address.orEmpty(),
+                            initialCity = place.city.orEmpty(), initialNotes = place.notes.orEmpty(), initialCategory = place.category,
+                            initialMedia = asset, hasSavedPhoto = place.photoRef != null,
                             onSave = { name, address, city, notes, category, photo ->
                                 action.run("Place saved.", "Couldn’t save this place or its photo.", afterWrite = { navController.popBackStack() }) {
-                                    val stored = photo?.let { uri ->
-                                        val mime = checkNotNull(context.contentResolver.getType(uri))
-                                        checkNotNull(mediaStorage.store(uri, mime))
-                                    }
-                                    stored?.let { mediaAssetDao.insert(com.twohearts.app.data.entity.MediaAsset(it.filePath, it.mimeType, it.fileSize, it.width, it.height, id = it.id, createdAt = DateTimeHelper.nowUtc(), updatedAt = DateTimeHelper.nowUtc())) }
-                                    checkNotNull(placeRepository.update(p.id, mapOf(
-                                        "name" to name,
-                                        "address" to address,
-                                        "city" to city,
-                                        "notes" to notes,
-                                        "category" to category,
-                                        "photoRef" to (stored?.id ?: p.photoRef),
-                                    )))
+                                    placeWriter().save(place.copy(
+                                        name = name, address = address, city = city, notes = notes, category = category,
+                                    ), original = place, photo = photo)
                                 }
                             },
-                            onBack = {
-                                if (!action.running) navController.popBackStack()
-                            }
+                            onBack = { if (!action.running) navController.popBackStack() },
+                            saving = action.running,
+                            errorMessage = action.errorMessage,
                         )
                     } ?: RecordLookupScreen("Place", lookup) { navController.popBackStack() }
                 }
 
                 // Mood
                 composable(RoutePath.APP_MOOD) {
-                    val moods by moodEntryRepository.observeAll().collectAsState(initial = emptyList())
-                    val owner by relationshipService.observeOwner().collectAsState(initial = null)
+                    val moods by remember { moodEntryRepository.observeAll() }.collectAsStateWithLifecycle(emptyList())
+                    val owner by remember { relationshipService.observeOwner() }.collectAsStateWithLifecycle(initialValue = null)
                     val today = DateTimeHelper.todayLocal()
                     val todayMood = moods.firstOrNull { it.entryDate == today && it.profileId == owner?.id }
-                        ?: moods.firstOrNull { it.entryDate == today && it.profileId == "owner" }
+                        ?: moods.firstOrNull { it.entryDate == today && it.belongsToOwner(owner?.id) }
                     val action = rememberRecordAction()
                     MoodHome(
                         todayMood = todayMood,
-                        recentMoods = moods.take(7),
+                        recentMoods = moods.filter { it.belongsToOwner(owner?.id) },
                         onAddMood = {
-                            navController.navigate(todayMood?.let { "/app/mood/${android.net.Uri.encode(it.id)}/edit" }
+                            navController.navigate(todayMood?.let { "${RoutePath.APP_MOOD}/${Uri.encode(it.id)}/edit" }
                                 ?: RoutePath.APP_MOOD_ADD)
                         },
-                        onViewHistory = {
-                            navController.navigate(RoutePath.APP_MOOD_HISTORY)
-                        },
-                        onBack = {
-                            navController.popBackStack()
-                        },
+                        onViewHistory = { navController.navigate(RoutePath.APP_MOOD_HISTORY) },
+                        onBack = { navController.popBackStack() },
                         onQuickMood = { mood ->
                             action.run("Mood logged.", "Couldn’t log your mood.") {
                                 val profileId = checkNotNull(relationshipService.getOwner()).id
@@ -885,59 +855,64 @@ internal fun AppRouter(
                                 )
                             }
                         },
+                        updating = action.running,
+                        errorMessage = action.errorMessage,
                     )
                 }
 
                 composable(RoutePath.APP_MOOD_ADD) {
                     val action = rememberRecordAction()
+                    val day = rememberSaveable { DateTimeHelper.todayLocal() }
                     MoodEntryScreen(
+                        entryDate = day,
                         onSave = { moodValue, moodEmoji, note ->
                             action.run("Mood logged.", "Couldn’t log your mood.", afterWrite = { navController.popBackStack() }) {
                                 val profileId = checkNotNull(relationshipService.getOwner()).id
-                                moodEntryRepository.saveOwnerCheckIn(
-                                    profileId, DateTimeHelper.todayLocal(), moodValue, moodEmoji, note,
-                                )
+                                moodEntryRepository.saveOwnerCheckIn(profileId, day, moodValue, moodEmoji, note)
                             }
                         },
-                        onBack = {
-                            if (!action.running) navController.popBackStack()
-                        }
+                        onBack = { if (!action.running) navController.popBackStack() },
+                        saving = action.running,
+                        errorMessage = action.errorMessage,
                     )
                 }
 
                 composable(RoutePath.APP_MOOD_HISTORY) {
-                    val moods by moodEntryRepository.observeAll().collectAsState(initial = emptyList())
+                    val moods by remember { moodEntryRepository.observeAll() }.collectAsStateWithLifecycle(emptyList())
+                    val owner by remember { relationshipService.observeOwner() }.collectAsStateWithLifecycle(initialValue = null)
                     MoodHistory(
-                        moods = moods,
-                        onBack = {
-                            navController.popBackStack()
-                        }
+                        moods = moods, ownerId = owner?.id,
+                        onBack = { navController.popBackStack() },
+                        onEdit = { navController.navigate("${RoutePath.APP_MOOD}/${Uri.encode(it.id)}/edit") },
                     )
                 }
 
-                composable("/app/mood/{entryId}/edit") { backStackEntry ->
+                composable("${RoutePath.APP_MOOD}/{entryId}/edit") { backStackEntry ->
                     val entryId = backStackEntry.arguments?.getString("entryId") ?: return@composable
                     val action = rememberRecordAction()
                     val lookup = rememberRecordLookup(entryId) {
-                        moodEntryRepository.getById(entryId)
+                        val ownerId = relationshipService.getOwner()?.id
+                        moodEntryRepository.getById(entryId)?.takeIf { it.belongsToOwner(ownerId) }
                     }
-                    val entry = lookup.record
-                    entry?.let { e ->
+                    lookup.record?.let { entry ->
                         MoodEntryScreen(
-                            initialMood = e.moodValue,
-                            initialNote = e.note ?: "",
+                            entryId = entry.id, entryDate = entry.entryDate,
+                            initialMood = entry.moodValue, initialEmoji = entry.moodEmoji, initialNote = entry.note.orEmpty(),
                             onSave = { moodValue, moodEmoji, note ->
                                 action.run("Mood saved.", "Couldn’t save this mood.", afterWrite = { navController.popBackStack() }) {
-                                    checkNotNull(moodEntryRepository.update(e.id, mapOf(
-                                        "moodValue" to moodValue,
-                                        "moodEmoji" to moodEmoji,
-                                        "note" to note
+                                    checkNotNull(moodEntryRepository.update(entry.id, mapOf(
+                                        "moodValue" to moodValue, "moodEmoji" to moodEmoji, "note" to note,
                                     )))
                                 }
                             },
-                            onBack = {
-                                if (!action.running) navController.popBackStack()
-                            }
+                            onDelete = {
+                                action.run("Check-in deleted.", "Couldn’t delete this check-in.", afterWrite = { navController.popBackStack() }) {
+                                    moodEntryRepository.softDelete(entry.id)
+                                }
+                            },
+                            onBack = { if (!action.running) navController.popBackStack() },
+                            saving = action.running,
+                            errorMessage = action.errorMessage,
                         )
                     } ?: RecordLookupScreen("Mood entry", lookup) { navController.popBackStack() }
                 }

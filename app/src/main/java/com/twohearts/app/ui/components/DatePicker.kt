@@ -15,10 +15,11 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,7 +39,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 import com.twohearts.app.ui.theme.TwoHeartsTokens
@@ -284,11 +284,14 @@ private fun DatePickerSheet(
 
     // The sheet holds a working copy; nothing is written back until confirm,
     // so dismissing by tapping the scrim is always a cancel.
-    var year by remember { mutableIntStateOf(initial?.year ?: defaultYear) }
-    var month by remember { mutableIntStateOf(initial?.month ?: defaultMonth) }
-    var day by remember { mutableIntStateOf(initial?.day ?: defaultDay) }
+    val firstYear = minOf(minYear, maxYear)
+    val startingYear = (initial?.year ?: defaultYear).coerceIn(firstYear, maxYear)
+    val startingMonth = initial?.month ?: defaultMonth
+    var year by remember { mutableIntStateOf(startingYear) }
+    var month by remember { mutableIntStateOf(startingMonth) }
+    var day by remember { mutableIntStateOf(minOf(initial?.day ?: defaultDay, daysInMonth(startingYear, startingMonth))) }
 
-    val years = remember(minYear, maxYear) { (maxYear downTo minYear).toList() }
+    val years = remember(firstYear, maxYear) { (maxYear downTo firstYear).toList() }
     val days = remember(year, month) { (1..daysInMonth(year, month)).toList() }
 
     // Clamp the day when a shorter month is selected: choosing 31 then
@@ -324,7 +327,7 @@ private fun DatePickerSheet(
         Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space4))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
             horizontalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space2),
         ) {
             PickerColumn(
@@ -389,7 +392,6 @@ private fun PickerColumn(
     selectedIndex: Int,
     onSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    contentWidth: Dp = 64.dp,
 ) {
     val thColors = LocalTwoHeartsColors.current
 
@@ -401,21 +403,18 @@ private fun PickerColumn(
         )
         Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space2))
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 200.dp)
-                .verticalScroll(rememberScrollState())
-                .semantics { contentDescription = label },
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp).semantics { contentDescription = label },
+            state = rememberLazyListState(initialFirstVisibleItemIndex = (selectedIndex - 1).coerceAtLeast(0)),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            items.forEachIndexed { index, item ->
+            itemsIndexed(items, key = { _, item -> item }) { index, item ->
                 val isSelected = index == selectedIndex
                 val shape = RoundedCornerShape(TwoHeartsTokens.Radius.sm)
                 Box(
                     modifier = Modifier
                         .padding(vertical = 2.dp)
-                        .width(contentWidth)
+                        .fillMaxWidth()
                         .heightIn(min = TwoHeartsTokens.Dimensions.touchTargetMin)
                         .clip(shape)
                         .background(

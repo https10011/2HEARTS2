@@ -25,3 +25,12 @@ internal fun validPeriodDates(startValue: String, endValue: String, today: Local
     val end = periodDate(endValue) ?: return false
     return end in start..today
 }
+
+internal fun PeriodEntry.belongsToPeriodOwner(ownerId: String?): Boolean = profileId == ownerId || profileId == "owner"
+
+internal fun latestLoggedPeriod(entries: List<PeriodEntry>, today: LocalDate): PeriodEntry? =
+    entries.mapNotNull { entry ->
+        periodDate(entry.startDate)?.takeIf { !it.isAfter(today) }?.let { date -> entry to date }
+    }.maxWithOrNull(compareBy<Pair<PeriodEntry, LocalDate>> { it.second }.thenBy { it.first.updatedAt })?.first
+
+internal fun periodFlowLabel(value: String): String = value.replaceFirstChar(Char::titlecase).ifBlank { "Flow unspecified" }

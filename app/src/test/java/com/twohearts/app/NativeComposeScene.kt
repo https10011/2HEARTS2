@@ -92,6 +92,10 @@ internal class NativeComposeScene(private val outDir: File) : AutoCloseable {
 
     fun dialogText(label: String) = hasText(dialogView(), label)
     fun activityText(label: String) = hasText(activityView, label)
+
+    fun activityDescription(label: String): Boolean = nodes(activityView).any {
+        it.config.getOrNull(SemanticsProperties.ContentDescription)?.contains(label) == true
+    }
     fun scrollActivityBy(pixels: Float): Boolean {
         layout(activityView)
         val action = nodes(activityView).firstNotNullOfOrNull { it.config.getOrNull(SemanticsActions.ScrollBy)?.action }

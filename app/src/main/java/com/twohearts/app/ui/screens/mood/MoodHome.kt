@@ -1,31 +1,43 @@
 package com.twohearts.app.ui.screens.mood
 
-import com.twohearts.app.ui.components.ThIcons
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.EmptyState
-import com.twohearts.app.ui.components.Header
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import com.twohearts.app.data.entity.MoodEntry
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.ui.components.ButtonVariant
+import com.twohearts.app.ui.components.StatusVariant
+import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThDivider
+import com.twohearts.app.ui.components.ThEyebrow
+import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.ThStatusBanner
+import com.twohearts.app.ui.components.ThTopBar
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.ThTextStyles
+import com.twohearts.app.ui.theme.TwoHeartsTokens
+import java.time.LocalDate
 
-/**
- * MoodEntryData — mood entry display data.
- */
-data class MoodEntryData(
-    val value: String,
-    val emoji: String,
-    val label: String
-)
+data class MoodEntryData(val value: String, val emoji: String, val label: String)
 
-/**
- * MoodMeta — mood metadata.
- */
 object MoodMeta {
     val moods = listOf(
         MoodEntryData("happy", "😊", "Happy"),
@@ -37,24 +49,17 @@ object MoodMeta {
         MoodEntryData("tired", "😴", "Tired"),
         MoodEntryData("sad", "😢", "Sad"),
         MoodEntryData("anxious", "😰", "Anxious"),
-        MoodEntryData("stressed", "😤", "Stressed")
+        MoodEntryData("stressed", "😤", "Stressed"),
     )
 
-    fun getMood(value: String): MoodEntryData? {
-        return moods.find { it.value == value }
-    }
+    fun getMood(value: String): MoodEntryData? = moods.firstOrNull { it.value == value }
 }
 
-/**
- * MoodHome — mood check-in screen.
- *
- * matches legacy MoodHome with:
- * - Today's feeling card
- * - Quick selector
- * - Streak display
- * - History link
- */
-@OptIn(ExperimentalMaterial3Api::class)
+internal fun moodLabel(entry: MoodEntry): String =
+    MoodMeta.getMood(entry.moodValue)?.label ?: entry.moodValue.replaceFirstChar(Char::titlecase).ifBlank { "Saved mood" }
+
+internal fun MoodEntry.belongsToOwner(ownerId: String?): Boolean = profileId == ownerId || profileId == "owner"
+
 @Composable
 fun MoodHome(
     todayMood: MoodEntry?,
@@ -63,162 +68,59 @@ fun MoodHome(
     onViewHistory: () -> Unit,
     onBack: () -> Unit,
     onQuickMood: (MoodEntryData) -> Unit = {},
+    updating: Boolean = false,
+    errorMessage: String? = null,
+    today: LocalDate = LocalDate.now(),
 ) {
-    Scaffold(
-        topBar = {
-            Header(
-                title = "Mood",
-                onBack = onBack
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddMood,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Icon(
-                    imageVector = ThIcons.Add,
-                    contentDescription = "Log Mood"
-                )
-            }
-        }
-    ) { paddingValues ->
+    val spacing = TwoHeartsTokens.Spacing
+    val colors = LocalTwoHeartsColors.current
+    Scaffold(topBar = { ThTopBar("Mood", onBack = onBack) }) { insets ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 96.dp),
+            Modifier.fillMaxSize().padding(insets),
+            contentPadding = PaddingValues(horizontal = spacing.screenGutter, vertical = spacing.space4),
+            verticalArrangement = Arrangement.spacedBy(spacing.space3),
         ) {
-            // Today's mood card
             item {
-                Text(
-                    text = "Today",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                if (todayMood != null) {
-                    val moodData = MoodMeta.getMood(todayMood.moodValue)
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = moodData?.emoji ?: "😐",
-                                style = MaterialTheme.typography.displayMedium
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = moodData?.label ?: todayMood.moodValue,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            if (todayMood.note != null) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = todayMood.note,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                )
+                Surface(color = colors.surfaceBlush, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(spacing.space4), verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
+                        ThEyebrow("Today · ${DateTimeHelper.formatShortDisplay(today.toString())}", color = colors.roseDeep)
+                        if (todayMood == null) {
+                            Text("How are you feeling?", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(spacing.space3),
+                            ) {
+                                val emoji = todayMood.moodEmoji.ifBlank { MoodMeta.getMood(todayMood.moodValue)?.emoji.orEmpty() }
+                                if (emoji.isNotEmpty()) Text(emoji, Modifier.clearAndSetSemantics {}, style = MaterialTheme.typography.headlineMedium)
+                                Text(moodLabel(todayMood), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+                            }
+                            todayMood.note?.takeIf(String::isNotBlank)?.let {
+                                Text(it, style = ThTextStyles.reading, color = colors.textSecondary, maxLines = 4, overflow = TextOverflow.Ellipsis)
                             }
                         }
-                    }
-                } else {
-                    Card(
-                        onClick = onAddMood,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "How are you feeling today?",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Tap to log your mood",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Quick mood selector
-            item {
-                Text(
-                    text = "Quick check-in",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                MoodChoices(selected = todayMood?.moodValue, onSelect = onQuickMood, compact = true)
-            }
-
-            // Recent moods
-            item {
-                Text(
-                    text = "Mood history",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Card(
-                    onClick = onViewHistory,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "View history",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = "→",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.primary
+                        ThButton(
+                            onAddMood, text = if (todayMood == null) "Check in with a note" else "Edit today’s check-in",
+                            variant = ButtonVariant.GHOST, icon = ThIcons.Edit, enabled = !updating,
                         )
                     }
                 }
             }
-            items(recentMoods.take(3), key = { it.id }) { entry ->
-                val mood = MoodMeta.getMood(entry.moodValue)
-                Row(
-                    Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(mood?.label ?: entry.moodValue, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-                    Text(
-                        DateTimeHelper.formatShortDisplay(entry.entryDate),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall,
-                    )
+            errorMessage?.let { message -> item { ThStatusBanner(StatusVariant.ERROR, message) } }
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
+                    Text("Quick check-in", style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+                    MoodChoices(todayMood?.moodValue, onQuickMood, compact = true, enabled = !updating)
+                }
+            }
+            item {
+                ThDivider()
+                ThButton(onViewHistory, text = "Mood history", variant = ButtonVariant.GHOST, icon = ThIcons.ChevronRight)
+            }
+            items(recentMoods.filter { it.entryDate != today.toString() }.take(3), key = { it.id }) { entry ->
+                Column(verticalArrangement = Arrangement.spacedBy(spacing.space1)) {
+                    Text(moodLabel(entry), style = MaterialTheme.typography.titleMedium)
+                    Text(DateTimeHelper.formatShortDisplay(entry.entryDate), color = colors.textSecondary, style = MaterialTheme.typography.bodySmall)
+                    ThDivider()
                 }
             }
         }

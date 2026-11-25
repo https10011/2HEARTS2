@@ -24,6 +24,7 @@ internal fun RecordEditorLayout(
     onBack: () -> Unit,
     saving: Boolean,
     errorMessage: String?,
+    saveEnabled: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val spacing = TwoHeartsTokens.Spacing
@@ -34,7 +35,7 @@ internal fun RecordEditorLayout(
             Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background)) {
                 ThDivider()
                 ThButton(
-                    onClick = onSave, text = saveText, loading = saving, full = true, icon = ThIcons.Check,
+                    onClick = onSave, text = saveText, enabled = saveEnabled, loading = saving, full = true, icon = ThIcons.Check,
                     modifier = Modifier.padding(horizontal = spacing.screenGutter, vertical = spacing.space2),
                 )
             }

@@ -35,7 +35,7 @@ class PlaceRepository(private val dao: PlaceDao) : BaseRepository<Place> {
             longitude = changes["longitude"] as? Double ?: existing.longitude,
             notes = if (changes.containsKey("notes")) changes["notes"] as? String else existing.notes,
             category = changes["category"] as? String ?: existing.category,
-            photoRef = changes["photoRef"] as? String ?: existing.photoRef,
+            photoRef = if (changes.containsKey("photoRef")) changes["photoRef"] as? String else existing.photoRef,
             memoryId = changes["memoryId"] as? String ?: existing.memoryId,
             updatedAt = nowUtc()
         )

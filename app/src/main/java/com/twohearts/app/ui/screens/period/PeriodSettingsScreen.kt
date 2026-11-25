@@ -1,15 +1,16 @@
 package com.twohearts.app.ui.screens.period
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.*
+import com.twohearts.app.ui.components.RecordEditorLayout
+import com.twohearts.app.ui.components.ThEyebrow
+import com.twohearts.app.ui.components.ThInput
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 
 @Composable
@@ -23,39 +24,31 @@ fun PeriodSettingsScreen(
 ) {
     var cycleText by rememberSaveable(initialCycle) { mutableStateOf(initialCycle.toString()) }
     var lengthText by rememberSaveable(initialLength) { mutableStateOf(initialLength.toString()) }
-    val cycle = cycleText.toIntOrNull()
-    val length = lengthText.toIntOrNull()
-    val valid = cycle != null && cycle in 1..365 && length != null && length in 1..minOf(cycle, 30)
+    val cycle = cycleText.trim().toIntOrNull()
+    val length = lengthText.trim().toIntOrNull()
+    val periodLimit = minOf(cycle?.takeIf { it in 1..365 } ?: 30, 30)
+    val valid = cycle != null && cycle in 1..365 && length != null && length in 1..periodLimit
     val colors = LocalTwoHeartsColors.current
 
-    Scaffold(topBar = { Header(title = "Cycle settings", onBack = onBack) }) { insets ->
-        Column(
-            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                "These figures estimate the next start and length of your period. They stay on this device.",
-                color = colors.textSecondary,
-            )
-            Input(
-                value = cycleText, onValueChange = { cycleText = it },
-                label = "Typical cycle length (days)", modifier = Modifier.fillMaxWidth(),
-                keyboardType = KeyboardType.Number,
-                error = if (cycle == null || cycle !in 1..365) "Enter 1–365 days." else null,
-            )
-            Input(
-                value = lengthText, onValueChange = { lengthText = it },
-                label = "Typical period length (days)", modifier = Modifier.fillMaxWidth(),
-                keyboardType = KeyboardType.Number,
-                error = if (length == null || length !in 1..minOf(cycle ?: 30, 30)) {
-                    "Enter 1–30 days, within your cycle length."
-                } else null,
-            )
-            if (error != null) ThStatusBanner(StatusVariant.ERROR, error)
-            ThButton(
-                onClick = { if (valid) onSave(cycle, length) },
-                enabled = valid, loading = saving, text = "Save settings", full = true,
-            )
-        }
+    RecordEditorLayout(
+        title = "Cycle settings", saveText = "Save settings",
+        onSave = { if (valid && !saving) onSave(cycle, length) },
+        onBack = onBack, saving = saving, errorMessage = error, saveEnabled = valid,
+    ) {
+        ThEyebrow("Calendar estimates", color = colors.goldInk)
+        Text(
+            "Set the usual lengths to estimate future dates. These settings stay on this device.",
+            style = MaterialTheme.typography.bodyLarge, color = colors.textSecondary,
+        )
+        ThInput(
+            cycleText, { cycleText = it }, label = "Typical cycle length (days)",
+            keyboardType = KeyboardType.Number, enabled = !saving,
+            error = "Enter 1–365 days.".takeIf { cycle == null || cycle !in 1..365 },
+        )
+        ThInput(
+            lengthText, { lengthText = it }, label = "Typical period length (days)",
+            keyboardType = KeyboardType.Number, enabled = !saving,
+            error = "Enter 1–$periodLimit days.".takeIf { length == null || length !in 1..periodLimit },
+        )
     }
 }

@@ -28,7 +28,7 @@ internal fun NavGraphBuilder.periodRoutes(
     val edit: (PeriodEntry) -> Unit = { nav.navigate("${RoutePath.APP_PERIOD}/${Uri.encode(it.id)}/edit") }
 
     composable(RoutePath.APP_PERIOD) {
-        val latest = privateEntries(relationship, entries).firstOrNull()
+        val latest = latestLoggedPeriod(privateEntries(relationship, entries), java.time.LocalDate.now())
         val saved by remember { settings.observe() }.collectAsStateWithLifecycle(initialValue = null)
         PeriodHome(
             latestEntry = latest,
@@ -106,7 +106,7 @@ internal fun NavGraphBuilder.periodRoutes(
         val id = route.arguments?.getString("entryId") ?: return@composable
         val lookup = rememberRecordLookup(id) {
             val ownerId = relationship.getOwner()?.id
-            entries.getById(id)?.takeIf { it.profileId == ownerId || it.profileId == "owner" }
+            entries.getById(id)?.takeIf { it.belongsToPeriodOwner(ownerId) }
         }
         val selected = lookup.record
         if (selected != null) {
@@ -128,7 +128,7 @@ private fun privateEntries(
 ): List<PeriodEntry> {
     val owner by remember(relationship) { relationship.observeOwner() }.collectAsStateWithLifecycle(initialValue = null)
     val entries by remember(repository) { repository.observeAll() }.collectAsStateWithLifecycle(initialValue = emptyList())
-    return remember(entries, owner?.id) { entries.filter { it.profileId == owner?.id || it.profileId == "owner" } }
+    return remember(entries, owner?.id) { entries.filter { it.belongsToPeriodOwner(owner?.id) } }
 }
 
 @Composable

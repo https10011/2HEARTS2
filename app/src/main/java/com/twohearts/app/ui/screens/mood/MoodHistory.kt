@@ -1,109 +1,103 @@
 package com.twohearts.app.ui.screens.mood
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.components.ThSectionTabs
-import com.twohearts.app.ui.components.EmptyState
-import com.twohearts.app.ui.components.Header
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import com.twohearts.app.data.entity.MoodEntry
 import com.twohearts.app.services.datetime.DateTimeHelper
+import com.twohearts.app.ui.components.ButtonVariant
+import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThDivider
+import com.twohearts.app.ui.components.ThEmptyState
+import com.twohearts.app.ui.components.ThEyebrow
+import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.ThSectionTabs
+import com.twohearts.app.ui.components.ThTopBar
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.TwoHeartsTokens
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
-/**
- * MoodHistory — mood history screen.
- *
- * matches legacy MoodHistory with:
- * - Week/month/all-time distribution
- * - Mood list
- */
-@OptIn(ExperimentalMaterial3Api::class)
+internal enum class MoodWindow(val label: String) { WEEK("7 days"), MONTH("Month"), ALL("All") }
+
+private fun moodDate(entry: MoodEntry): LocalDate? = runCatching { LocalDate.parse(entry.entryDate) }.getOrNull()
+
+internal fun moodHistoryGroups(
+    moods: List<MoodEntry>, window: MoodWindow, today: LocalDate,
+): Map<YearMonth?, List<MoodEntry>> {
+    val first = when (window) {
+        MoodWindow.WEEK -> today.minusDays(6)
+        MoodWindow.MONTH -> today.minusMonths(1).plusDays(1)
+        MoodWindow.ALL -> null
+    }
+    return moods.map { it to moodDate(it) }
+        .filter { (_, date) -> first == null || (date != null && date in first..today) }
+        .sortedWith(compareByDescending<Pair<MoodEntry, LocalDate?>> { it.second }.thenByDescending { it.first.updatedAt }.thenBy { it.first.id })
+        .groupBy({ (_, date) -> date?.let(YearMonth::from) }, { (entry, _) -> entry })
+}
+
 @Composable
 fun MoodHistory(
     moods: List<MoodEntry>,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    ownerId: String? = null,
+    onEdit: ((MoodEntry) -> Unit)? = null,
+    today: LocalDate = LocalDate.now(),
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Week", "Month", "All Time")
+    var tab by rememberSaveable { mutableIntStateOf(0) }
+    val window = MoodWindow.entries[tab]
+    val groups = remember(moods, window, today) { moodHistoryGroups(moods, window, today) }
+    val spacing = TwoHeartsTokens.Spacing
 
-    val filteredMoods = remember(moods, selectedTab) {
-        val now = java.time.LocalDate.now()
-        when (selectedTab) {
-            0 -> moods.filter {
-                val entryDate = try {
-                    java.time.LocalDate.parse(it.entryDate)
-                } catch (e: Exception) { null }
-                entryDate != null && entryDate.isAfter(now.minusWeeks(1))
-            }
-            1 -> moods.filter {
-                val entryDate = try {
-                    java.time.LocalDate.parse(it.entryDate)
-                } catch (e: Exception) { null }
-                entryDate != null && entryDate.isAfter(now.minusMonths(1))
-            }
-            else -> moods
-        }
-    }
-
-    Scaffold(
-        topBar = {
-            Header(
-                title = "Mood History",
-                onBack = onBack
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            ThSectionTabs(labels = tabs, selectedIndex = selectedTab, onSelect = { selectedTab = it })
-
-            if (filteredMoods.isEmpty()) {
-                EmptyState(
-                    title = "No Moods Logged",
-                    message = "Start tracking your mood to see history"
-                )
-            } else {
-                // Distribution summary
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            text = "Mood Distribution",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "${filteredMoods.size} entries",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                    }
-                }
-
-                // Mood list
+    Scaffold(topBar = { ThTopBar("Mood history", onBack = onBack) }) { insets ->
+        Column(Modifier.fillMaxSize().padding(insets)) {
+            ThSectionTabs(MoodWindow.entries.map { it.label }, tab, { tab = it })
+            key(window) {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = spacing.screenGutter, vertical = spacing.space3),
+                    verticalArrangement = Arrangement.spacedBy(spacing.space2),
                 ) {
-                    items(filteredMoods) { mood ->
-                        MoodHistoryItem(mood = mood)
+                    if (groups.isEmpty()) item {
+                        ThEmptyState(
+                            title = if (moods.isEmpty()) "No check-ins yet" else "No check-ins in this period",
+                            description = if (moods.isEmpty()) "Your saved moods will appear here." else null,
+                            actionLabel = "Show all".takeIf { moods.isNotEmpty() },
+                            onAction = { tab = MoodWindow.ALL.ordinal },
+                        )
+                    }
+                    for ((month, entries) in groups) {
+                        item {
+                            Text(
+                                month?.format(monthTitle) ?: "Check these dates", style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(top = spacing.space2).semantics { heading() },
+                            )
+                        }
+                        items(entries, key = { it.id }) { entry ->
+                            val own = entry.belongsToOwner(ownerId)
+                            MoodHistoryRow(entry, own, onEdit?.takeIf { own }?.let { { it(entry) } })
+                            ThDivider()
+                        }
                     }
                 }
             }
@@ -111,56 +105,21 @@ fun MoodHistory(
     }
 }
 
-/**
- * MoodHistoryItem — mood history list item.
- */
 @Composable
-fun MoodHistoryItem(
-    mood: MoodEntry,
-    modifier: Modifier = Modifier
-) {
-    val moodData = MoodMeta.getMood(mood.moodValue)
-
-    Card(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Emoji
-            Text(
-                text = moodData?.emoji ?: "😐",
-                style = MaterialTheme.typography.titleLarge
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // Mood info
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = moodData?.label ?: mood.moodValue,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                if (mood.note != null) {
-                    Text(
-                        text = mood.note,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        maxLines = 1
-                    )
-                }
-            }
-
-            // Date
-            Text(
-                text = DateTimeHelper.formatShortDisplay(mood.entryDate),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
+private fun MoodHistoryRow(entry: MoodEntry, own: Boolean, edit: (() -> Unit)?) {
+    val spacing = TwoHeartsTokens.Spacing
+    val colors = LocalTwoHeartsColors.current
+    Row(Modifier.padding(vertical = spacing.space2), horizontalArrangement = Arrangement.spacedBy(spacing.space3)) {
+        val emoji = entry.moodEmoji.ifBlank { MoodMeta.getMood(entry.moodValue)?.emoji.orEmpty() }
+        if (emoji.isNotEmpty()) Text(emoji, Modifier.clearAndSetSemantics {}, style = MaterialTheme.typography.titleLarge)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.space1)) {
+            val date = moodDate(entry)?.let { DateTimeHelper.formatShortDisplay(it.toString()) } ?: "Date unavailable"
+            ThEyebrow(if (own) date else "$date · Other profile", color = colors.roseDeep)
+            Text(moodLabel(entry), style = MaterialTheme.typography.titleMedium)
+            entry.note?.takeIf(String::isNotBlank)?.let { Text(it, color = colors.textSecondary) }
+            if (edit != null) ThButton(edit, text = "Edit check-in", variant = ButtonVariant.GHOST, icon = ThIcons.Edit)
         }
     }
 }
+
+private val monthTitle = DateTimeFormatter.ofPattern("MMMM yyyy")
