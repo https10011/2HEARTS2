@@ -127,7 +127,7 @@ class MediaStorage(private val context: Context) {
      * Delete a media file.
      */
     fun delete(mediaId: String): Boolean {
-        val extensions = listOf("jpg", "jpeg", "png", "gif", "webp", "mp4", "webm")
+        val extensions = listOf("jpg", "jpeg", "png", "gif", "webp", "mp4", "webm", "bin")
         for (ext in extensions) {
             val file = File(mediaDir, "$mediaId.$ext")
             if (file.exists()) {

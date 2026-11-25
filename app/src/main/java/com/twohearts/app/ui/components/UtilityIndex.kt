@@ -67,9 +67,11 @@ internal fun UtilityItem(
 
 
 @Composable
-internal fun UtilityPage(title: String, onBack: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+internal fun UtilityPage(
+    title: String, onBack: () -> Unit, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit,
+) {
     val spacing = TwoHeartsTokens.Spacing
-    Scaffold(topBar = { ThTopBar(title, onBack = onBack) }) { insets ->
+    Scaffold(modifier = modifier, topBar = { ThTopBar(title, onBack = onBack) }) { insets ->
         Column(
             Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,

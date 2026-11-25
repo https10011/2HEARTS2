@@ -17,7 +17,7 @@ import androidx.security.crypto.MasterKeys
  * - PBKDF2-HMAC-SHA-256 hashing (120k iterations, 128-bit salt)
  * - Constant-time comparison
  */
-class SecureStorage(private val context: Context) {
+internal class SecureStorage(private val context: Context) : PinMaterialStore {
 
     private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
@@ -32,7 +32,7 @@ class SecureStorage(private val context: Context) {
     /**
      * Store PIN hash material (salt + verifier).
      */
-    fun storePinMaterial(salt: String, verifier: String) {
+    override fun storePinMaterial(salt: String, verifier: String) {
         check(sharedPreferences.edit()
             .putString(KEY_PIN_SALT, salt)
             .putString(KEY_PIN_VERIFIER, verifier)
@@ -42,21 +42,21 @@ class SecureStorage(private val context: Context) {
     /**
      * Retrieve PIN salt.
      */
-    fun getPinSalt(): String? {
+    override fun getPinSalt(): String? {
         return sharedPreferences.getString(KEY_PIN_SALT, null)
     }
 
     /**
      * Retrieve PIN verifier.
      */
-    fun getPinVerifier(): String? {
+    override fun getPinVerifier(): String? {
         return sharedPreferences.getString(KEY_PIN_VERIFIER, null)
     }
 
     /**
      * Check if PIN is set.
      */
-    fun hasPin(): Boolean {
+    override fun hasPin(): Boolean {
         return sharedPreferences.contains(KEY_PIN_SALT) &&
                 sharedPreferences.contains(KEY_PIN_VERIFIER)
     }
@@ -64,7 +64,7 @@ class SecureStorage(private val context: Context) {
     /**
      * Clear PIN material.
      */
-    fun clearPin() {
+    override fun clearPin() {
         check(sharedPreferences.edit()
             .remove(KEY_PIN_SALT)
             .remove(KEY_PIN_VERIFIER)
@@ -82,4 +82,13 @@ class SecureStorage(private val context: Context) {
         private const val KEY_PIN_SALT = "pin_salt"
         private const val KEY_PIN_VERIFIER = "pin_verifier"
     }
+}
+
+
+internal interface PinMaterialStore {
+    fun storePinMaterial(salt: String, verifier: String)
+    fun getPinSalt(): String?
+    fun getPinVerifier(): String?
+    fun hasPin(): Boolean
+    fun clearPin()
 }

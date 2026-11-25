@@ -9,3 +9,7 @@ enum class VaultContentType(val displayName: String, val icon: ImageVector) {
     NOTE("Note", ThIcons.Note),
     FILE("File", ThIcons.File),
 }
+
+
+internal fun vaultContentType(value: String): VaultContentType =
+    VaultContentType.entries.firstOrNull { it.name.equals(value, ignoreCase = true) } ?: VaultContentType.FILE

@@ -25,11 +25,12 @@ internal fun RecordEditorLayout(
     saving: Boolean,
     errorMessage: String?,
     saveEnabled: Boolean = true,
+    modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val spacing = TwoHeartsTokens.Spacing
     Scaffold(
-        modifier = Modifier.imePadding(),
+        modifier = modifier.imePadding(),
         topBar = { ThTopBar(title, onBack = onBack) },
         bottomBar = {
             Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background)) {

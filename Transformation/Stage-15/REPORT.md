@@ -35,4 +35,9 @@ Stage 14 passed on `6b7048d6fdc8cca42b759da7f5ff546ce6c7959e`. Inspected the bas
 - [x] Verify live search, accessible result navigation and privacy scope.
 - [x] Verify legacy and versioned Notes and Reminders transfer, invalid files, cancellation, cache cleanup, and confirmation for permanent reset.
 - [x] Inspect native renders in both palettes at standard and large text, pass both full suites, and verify the debug APK.
-- [ ] Commit, push, verify exact CI and artifact, and continue to Stage 16.
+- [x] Commit, push, verify exact CI and artifact, and continue to Stage 16.
+
+
+## Remote verification
+
+GitHub confirmed `d5ddbe54426247b0ab93b0fe44d0a4bc5b718296` on `master`. Build Android APK run `45522674260` passed and published `twohearts-debug-apk` artifact `14980207806` for that commit. [Commit](https://github.com/https10011/2HEARTS2/commit/d5ddbe54426247b0ab93b0fe44d0a4bc5b718296) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45522674260) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45522674260/artifacts/14980207806)

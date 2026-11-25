@@ -11,6 +11,7 @@ import com.twohearts.app.data.repository.generateId
 import com.twohearts.app.data.repository.nowUtc
 import java.io.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 
 internal class VaultStorage(
@@ -19,41 +20,78 @@ internal class VaultStorage(
     private val mediaStorage: MediaStorage,
     private val items: VaultItemRepository,
 ) {
-    suspend fun add(title: String, type: String, payload: String?) = withContext(Dispatchers.IO) {
+    suspend fun add(title: String, type: String, payload: String?): VaultItem {
         require(title.isNotBlank() && !payload.isNullOrBlank())
         val timestamp = nowUtc()
-        val stored = if (type == "note") null else {
-            val uri = Uri.parse(payload)
-            require(uri.scheme == "content")
-            val mime = context.contentResolver.getType(uri)
-            when (type) {
-                "photo" -> checkNotNull(mime?.takeIf { it.startsWith("image/") }?.let { mediaStorage.store(uri, it) })
-                "video" -> checkNotNull(mime?.takeIf { it.startsWith("video/") }?.let { mediaStorage.store(uri, it) })
-                "file" -> checkNotNull(mediaStorage.storeDocument(uri, mime ?: "application/octet-stream"))
-                else -> error("Unsupported vault type")
+        var copied: MediaAssetInfo? = null
+        return try {
+            // The same transaction also excludes the orphan sweep while copying.
+            database.withTransaction {
+                val file = if (type == "note") null else withContext(Dispatchers.IO) {
+                    copy(Uri.parse(payload), type).also { copied = it }
+                }
+                if (file != null) {
+                    check(file.fileSize > 0)
+                    if (type == "photo") check(file.width != null && file.height != null)
+                    database.mediaAssetDao().insert(MediaAsset(
+                        file.filePath, file.mimeType, file.fileSize, file.width, file.height,
+                        id = file.id, createdAt = timestamp, updatedAt = timestamp,
+                    ))
+                }
+                val record = VaultItem(
+                    title = title.trim(), contentType = type, contentText = payload.takeIf { type == "note" },
+                    mediaRef = file?.id, id = generateId(), createdAt = timestamp, updatedAt = timestamp,
+                )
+                items.create(record)
             }
+        } finally {
+            clean(copied?.id)
         }
-        val record = VaultItem(
-            title = title.trim(), contentType = type, contentText = payload.takeIf { type == "note" },
-            mediaRef = stored?.id, id = generateId(), createdAt = timestamp, updatedAt = timestamp,
-        )
-        database.withTransaction {
-            if (stored != null) {
-                database.mediaAssetDao().insert(MediaAsset(
-                    stored.filePath, stored.mimeType, stored.fileSize, stored.width, stored.height,
-                    id = stored.id, createdAt = timestamp, updatedAt = timestamp,
-                ))
+    }
+
+    suspend fun delete(id: String) {
+        var detached: String? = null
+        try {
+            database.withTransaction {
+                val item = items.getById(id) ?: return@withTransaction
+                detached = item.mediaRef
+                items.softDelete(id)
             }
-            items.create(record)
+        } finally {
+            clean(detached)
         }
     }
 
     suspend fun export(asset: MediaAsset, destination: Uri) = withContext(Dispatchers.IO) {
-        val source = File(asset.filePath)
-        val mediaRoot = File(context.filesDir, "media").canonicalFile
-        check(source.canonicalFile.parentFile == mediaRoot && source.isFile)
+        require(destination.scheme == "content")
+        val source = checkNotNull(privateFile(asset))
         checkNotNull(context.contentResolver.openOutputStream(destination, "wt")).use { output ->
             source.inputStream().use { it.copyTo(output) }
         }
+    }
+
+    suspend fun availableAsset(ref: String): MediaAsset? = withContext(Dispatchers.IO) {
+        database.mediaAssetDao().getById(ref)?.takeIf { privateFile(it) != null }
+    }
+
+    private fun privateFile(asset: MediaAsset): File? {
+        val mediaRoot = File(context.filesDir, "media").canonicalFile
+        return File(asset.filePath).canonicalFile.takeIf { it.parentFile == mediaRoot && it.isFile }
+    }
+
+    private fun copy(uri: Uri, type: String): MediaAssetInfo {
+        require(uri.scheme == "content")
+        val mime = context.contentResolver.getType(uri)
+        return checkNotNull(when (type) {
+            "photo" -> mime?.takeIf { it.startsWith("image/") }?.let { mediaStorage.store(uri, it) }
+            "video" -> mime?.takeIf { it.startsWith("video/") }?.let { mediaStorage.store(uri, it) }
+            "file" -> mediaStorage.storeDocument(uri, mime ?: "application/octet-stream")
+            else -> error("Unsupported vault type")
+        })
+    }
+
+    private suspend fun clean(id: String?) {
+        if (id == null) return
+        withContext(NonCancellable) { runCatching { deleteUnreferencedMedia(database, mediaStorage, id) } }
     }
 }

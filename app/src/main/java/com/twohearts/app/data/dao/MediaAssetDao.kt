@@ -34,6 +34,7 @@ interface MediaAssetDao {
         UNION SELECT photo_ref FROM profiles WHERE photo_ref IS NOT NULL
         UNION SELECT photo_ref FROM places WHERE photo_ref IS NOT NULL
         UNION SELECT media_asset_id FROM memory_media
+        UNION SELECT media_ref FROM vault_items WHERE media_ref IS NOT NULL AND deleted_at IS NULL
     """)
     suspend fun retainedIds(): List<String>
 
@@ -41,6 +42,7 @@ interface MediaAssetDao {
         SELECT EXISTS(SELECT 1 FROM profiles WHERE photo_ref = :id)
             OR EXISTS(SELECT 1 FROM places WHERE photo_ref = :id)
             OR EXISTS(SELECT 1 FROM memory_media WHERE media_asset_id = :id)
+            OR EXISTS(SELECT 1 FROM vault_items WHERE media_ref = :id AND deleted_at IS NULL)
     """)
     suspend fun isReferenced(id: String): Boolean
 

@@ -1,6 +1,6 @@
 package com.twohearts.app.services.security
 
-import com.twohearts.app.data.settings.SecureStorage
+import com.twohearts.app.data.settings.PinMaterialStore
 import com.twohearts.app.data.settings.SettingsStorage
 import com.twohearts.app.services.lifecycle.LifecycleListener
 import com.twohearts.app.services.lifecycle.LifecycleService
@@ -22,8 +22,8 @@ import java.util.concurrent.CopyOnWriteArrayList
  * - Re-lock on foreground after timeout
  * - Lock state is MEMORY-ONLY (cold start always locks)
  */
-class AppLockService(
-    openSecureStorage: () -> SecureStorage,
+class AppLockService internal constructor(
+    openSecureStorage: () -> PinMaterialStore,
     private val settingsStorage: SettingsStorage,
     private val lifecycleService: LifecycleService
 ) {

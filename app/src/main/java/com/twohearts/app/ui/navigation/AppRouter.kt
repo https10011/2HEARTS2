@@ -936,6 +936,7 @@ internal fun AppRouter(
                     val action = rememberRecordAction()
                     AddVaultContent(
                         saving = action.running,
+                        errorMessage = action.errorMessage,
                         onBack = { if (!action.running) navController.popBackStack() },
                         onContentAdded = { title, type, payload ->
                             action.run("Saved to Vault.", "Couldn’t save this vault item.", afterWrite = { navController.popBackStack() }) {
@@ -948,7 +949,7 @@ internal fun AppRouter(
                 composable(RoutePath.APP_VAULT_CONTENT.replace(":contentId", "{contentId}")) { route ->
                     val id = route.arguments?.getString("contentId") ?: return@composable
                     val lookup = rememberRecordLookup(id) {
-                        vaultRepository.getById(id)?.let { it to it.mediaRef?.let { ref -> mediaAssetDao.getById(ref) } }
+                        vaultRepository.getById(id)?.let { it to it.mediaRef?.let { ref -> vaultStorage.availableAsset(ref) } }
                     }
                     val action = rememberRecordAction()
                     val item = lookup.record
@@ -959,10 +960,12 @@ internal fun AppRouter(
                             onBack = { if (!action.running) navController.popBackStack() },
                             onDelete = {
                                 action.run("Vault item deleted.", "Couldn’t delete this vault item.", afterWrite = { navController.popBackStack() }) {
-                                    vaultRepository.softDelete(it.id)
+                                    vaultStorage.delete(it.id)
                                 }
                             },
                             onExport = { uri -> vaultStorage.export(checkNotNull(item.second), uri) },
+                            deleting = action.running,
+                            errorMessage = action.errorMessage,
                         )
                     } else RecordLookupScreen("Vault item", lookup) { navController.popBackStack() }
                 }
