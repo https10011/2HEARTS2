@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- **Latest verified implementation commit** — `d5ddbe54426247b0ab93b0fe44d0a4bc5b718296`. Git and CI verified Settings, Profile, Search, and utilities. [Commit](https://github.com/https10011/2HEARTS2/commit/d5ddbe54426247b0ab93b0fe44d0a4bc5b718296) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45522674260) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45522674260/artifacts/14980207806)
+- **Latest verified implementation commit** — `d144a9dfb2188e4c52cd3e1f2761b58eec77a5ae`. Git and CI verified App lock and Vault. [Commit](https://github.com/https10011/2HEARTS2/commit/d144a9dfb2188e4c52cd3e1f2761b58eec77a5ae) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45526347818) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45526347818/artifacts/14982262989)
 - **Stage 1 complete** — JDK 17 and SDK 35 reproduced the debug APK and both unit suites. Each variant passed 134 tests, and the native harnesses produced 149 renders. The report records the screen inventory, visual evidence, and emulator constraints.
 - **Stage 2 complete** — Fixed the Room migration for the optional profile photo column and registered the existing indexes in schema 14. Both unit-test variants passed 137 tests and CI packaged a verified APK. A same-signer Android 13 emulator update launched, migrated, and retained the test note. The transformed APK’s handset walkthrough remains pending. [Stage 2 report](Stage-2/REPORT.md)
 - **Stage 3 complete** — The palette and licensed bundled fonts rendered in both themes, including 360 dp at 200% effective font scale. Both unit suites passed 139 tests, and the APK and resources verified. The published stage workflow passed. [Stage 3 report](Stage-3/REPORT.md)
@@ -18,7 +18,8 @@
 - **Stage 13 complete** — Tasks, calendar dates, and delivered alerts have distinct native layouts. Both full suites passed 205 tests, including WorkManager queue changes and the Android notification shadow. Local APK and native evidence verified. CI passed and published the exact APK. The software guest stayed offline through boot and the handset check is pending. [Stage 13 report](Stage-13/REPORT.md)
 - **Stage 14 complete** — Places has local photo previews and reference-safe writes. Mood History uses local calendar windows and owner edit actions. The private Period experience distinguishes logged dates from estimates and keeps both date-picker actions visible at 200% text. Both variants passed 217 tests and the local APK verified. CI passed and published the exact APK. [Stage 14 report](Stage-14/REPORT.md)
 - **Stage 15 complete** — Settings, profiles, search and local utilities have native evidence. The exact import preview commits in Room, failed writes roll back, and search excludes Vault. Both full suites passed 228 tests, and the local APK verified. CI passed and published the exact APK. [Stage 15 report](Stage-15/REPORT.md)
-- **Stage 16 locally verified** — App lock and Vault have revised native screens. A cold PIN gate and a simulated timeout hide Home. File storage and cleanup honor live Vault references. Both full suites passed 236 tests, and the signed debug APK verified. Physical Keystore and media playback remain release checks. Exact remote and CI verification are the next gate. [Stage 16 report](Stage-16/REPORT.md)
+- **Stage 16 complete** — App lock and Vault have revised native screens. A cold PIN gate and a simulated timeout hide Home. File storage and cleanup honor live Vault references. Both full suites passed 236 tests, the signed APK verified, and CI published the APK for the exact commit. Physical Keystore and media playback remain release checks. [Stage 16 report](Stage-16/REPORT.md)
+- **Stage 17 locally verified** — The pipeline generates 26 registered sprites from 21 unchanged originals. Byte comparison and the native room review passed. Both variants passed 240 tests, and the fresh signed APK measured 27,780,144 bytes. Exact remote and CI verification remain the next gate. [Stage 17 report](Stage-17/REPORT.md)
 - **Signing and upgrade** — The two downloaded CI APKs have different debug signing certificates. The owner confirmed normal operation of the already installed app, which remains the working baseline. A same-signer local upgrade retained data in the guest. The published CI debug packages require a compatible signer to update an older installation in place.
 
 ## Intake checkpoint
@@ -28,7 +29,7 @@
 - **Build and tests** — The pre-transformation Actions run succeeded and listed a downloadable artifact. The Phase 20 report records 134 tests per variant and a successful local debug build. No fresh local transformation tests have run. [Actions run](https://github.com/https10011/2HEARTS2/actions/runs/44439439508) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44439439508/artifacts/14489748983) · [Phase 20 report](../UI-UX/Phase-20/PHASE-20-FINAL-CONSOLIDATION.md)
 - **Visual and runtime evidence** — The baseline review used prior Compose renders and the Phase 20 Android 13 emulator report. Fresh renders and signed-candidate verification remain pending.
 - **Environment** — Preflight found Java 21 and GitHub CLI. JDK 17, SDK 35, `adb`, and Android runtime setup are Stage 1 work. The host exposes no `/dev/kvm`.
-- **Next task** — Verify the published Stage 16 commit and APK in CI, then begin the Stage 17 Yuki art pipeline. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
+- **Next task** — Verify the published Stage 17 APK and CI run and continue to the Yuki engine and persistence stage. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
 
 ## Stage status
 
@@ -49,8 +50,8 @@
 | 13. Reminders, Important Dates, and Notifications | Complete |
 | 14. Places, Mood, and Period | Complete |
 | 15. Settings, Profile, Search, and utilities | Complete |
-| 16. App lock and Vault | Local tests, visual review, and APK passed. CI verification pending |
-| 17. Yuki art pipeline | Pending |
+| 16. App lock and Vault | Complete |
+| 17. Yuki art pipeline | Local tests, visual review, and APK passed. CI verification pending |
 | 18. Yuki engine and persistence | Pending |
 | 19. Yuki room and Home integration | Pending |
 | 20. Full visual, accessibility, and performance audit | Pending |

@@ -1,0 +1,209 @@
+{
+  "version": 1,
+  "tile": [
+    416,
+    324
+  ],
+  "ground": [
+    208,
+    299
+  ],
+  "poses": {
+    "sit": {
+      "source": "001-Yuki-sitting.png",
+      "sha256": "0f9f40c41334ccb8910a1c8d92baa5180c07036215499f4adb2860427fdb606f"
+    },
+    "sleep": {
+      "source": "002-Yuki-Sleeing.png",
+      "sha256": "a3e0c52f6822a38b067b33bda894a50e99e10f4793b641ea7ec07cc5c79244c1"
+    },
+    "idle": {
+      "source": "003-Yuki-Idle.png",
+      "sha256": "bc2d38f16024449b671f843a645b51837e31f10f1cd6bdcfe5d180fae0c651b7"
+    },
+    "stand": {
+      "source": "004-Yuki-Standing.png",
+      "sha256": "71736b4040093c5b71cd7032cc831831b118211004d97f9b441e8ba644daa1a9"
+    },
+    "walk": {
+      "source": "005-Yuki-Walking.png",
+      "sha256": "55fd4e32c230c50bbffebbac1af1fc1faee8443ac00106141f1754401fb64f35"
+    },
+    "walk_alt": {
+      "source": "006-Yuki-Walking-2.png",
+      "sha256": "965af90a7932822b5c4a2936a99e726c80f6b8e7e5c8509c1ad6769b2045eefe"
+    },
+    "run": {
+      "source": "007-Yuki-Running.png",
+      "sha256": "5ede1b7c0cf2833dd4efc7093c486439c4bd02ae09f4cde51c290509a17c3e5f"
+    },
+    "run_alt": {
+      "source": "008-Yuki-Running-2.png",
+      "sha256": "efc405cbd39aaf97e28d4d011d55ed5959052b6c0ccec492b9cfcd0691d9be66"
+    },
+    "run_extend": {
+      "source": "009-Yuki-Running-3.png",
+      "sha256": "e7d9c97bc773fbdf10db05878326e084dea787fdacf5409c3d734437eeb35c3d"
+    },
+    "jump": {
+      "source": "010-Yuki-Jumping.png",
+      "sha256": "26983cb4fbe431606cf92988701a966271113c7fbf3a5d4224ad9ed04107ad6e"
+    },
+    "stretch": {
+      "source": "011-Yuki-Stretching.png",
+      "sha256": "86c6812284fb740683b55cba1b1f6b9a398cd179a68e1ef239de938962d82427"
+    },
+    "eat": {
+      "source": "012-Yuki-Eating.png",
+      "sha256": "2f495cbcad50df0afab0a036254dd3a1f8c0c29e8553fc98ffb598196ea60e97"
+    },
+    "drink": {
+      "source": "013-Yuki-Drinking.png",
+      "sha256": "93b926b857be15ca6703531474e0eda471206fbce0580a15bfa3b8eb45fe945b"
+    },
+    "paw": {
+      "source": "014-Yuki-Smacking-Playful.png",
+      "sha256": "894e6de96bff4783a01e64228ed15517fc606cc39242414a2349d3cdbbc25d32"
+    },
+    "groom": {
+      "source": "015-Yuki-Grooming.png",
+      "sha256": "43cf6778323d181c12b0369c1b59e8538a124296815767db6e9a5bcb5f5f017d"
+    },
+    "groom_alt": {
+      "source": "017-Yuki-Grooming-2.png",
+      "sha256": "83609c41e54bc0b8df46bd7426f5b90bcdc8a5d7d6b78aca6f16fcc592ac3b7a"
+    },
+    "sit_alt": {
+      "source": "018-Yuki-Sitiing-Idle-2.png",
+      "sha256": "7b513227cafc0f4ca616ea18ab905b830ce2cbca14d7d38cabe996638532c4fe"
+    },
+    "sad": {
+      "source": "019-Yuki-Sad.png",
+      "sha256": "2f57da468af6084741c97c9cfc1393402f503127ce54177e74c5edba8486eb29"
+    },
+    "annoyed": {
+      "source": "020-Yuki-Angry.png",
+      "sha256": "bcb2373d0a48018d951d72500adb89c7ebdb5d279319c36f8e614894d1bc67f1"
+    },
+    "loaf": {
+      "source": "021-Yuki-Loaf.png",
+      "sha256": "2efd785a23513ac18d61d1bdd8e592a8fa7e23804975a55af8193972899ada88"
+    },
+    "roll": {
+      "source": "022-Yuki-Playful-2.png",
+      "sha256": "0ae6714909be2dd88adbcb00e0d83d5f72e72c1582520d407e40d1fc5003b28f"
+    },
+    "sit_half_blink": {
+      "derivedFrom": "sit"
+    },
+    "sit_blink": {
+      "derivedFrom": "sit"
+    },
+    "sit_ear_flick": {
+      "derivedFrom": "sit"
+    },
+    "sit_tail_left": {
+      "derivedFrom": "sit"
+    },
+    "sit_tail_right": {
+      "derivedFrom": "sit"
+    }
+  },
+  "clips": {
+    "settle": [
+      "stand",
+      "idle",
+      "sit"
+    ],
+    "blink": [
+      "sit",
+      "sit_half_blink",
+      "sit_blink",
+      "sit_half_blink",
+      "sit"
+    ],
+    "ear": [
+      "sit",
+      "sit_ear_flick",
+      "sit"
+    ],
+    "tail": [
+      "sit",
+      "sit_tail_left",
+      "sit",
+      "sit_tail_right",
+      "sit"
+    ],
+    "attention": [
+      "sit",
+      "sit_alt",
+      "idle"
+    ],
+    "walk": [
+      "stand",
+      "walk",
+      "walk_alt",
+      "stand"
+    ],
+    "chase": [
+      "stand",
+      "walk",
+      "run",
+      "run_alt",
+      "run_extend",
+      "jump",
+      "paw",
+      "stand"
+    ],
+    "feed": [
+      "stand",
+      "idle",
+      "eat",
+      "idle",
+      "sit_alt"
+    ],
+    "drink": [
+      "stand",
+      "idle",
+      "drink",
+      "idle",
+      "sit"
+    ],
+    "groom": [
+      "sit",
+      "groom",
+      "groom_alt",
+      "groom",
+      "sit"
+    ],
+    "pet": [
+      "sit",
+      "sit_alt",
+      "sit_half_blink",
+      "roll",
+      "sit_alt"
+    ],
+    "nap": [
+      "sit",
+      "loaf",
+      "sleep"
+    ],
+    "wake": [
+      "sleep",
+      "loaf",
+      "stretch",
+      "stand",
+      "sit"
+    ],
+    "quiet": [
+      "sit",
+      "sad",
+      "loaf"
+    ],
+    "interrupted": [
+      "sit",
+      "annoyed",
+      "sit"
+    ]
+  }
+}

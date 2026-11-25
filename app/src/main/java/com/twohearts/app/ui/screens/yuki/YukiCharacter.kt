@@ -136,8 +136,8 @@ internal fun YukiRoom(state: YukiState, animate: Boolean, onPet: (() -> Unit)? =
             Image(
                 displayed.asImageBitmap(),
                 contentDescription = "Yuki, an orange tabby",
-                modifier = Modifier.padding(bottom = 36.dp).widthIn(max = 212.dp)
-                    .fillMaxWidth(.63f).height(166.dp)
+                modifier = Modifier.padding(bottom = 20.dp).widthIn(max = 300.dp)
+                    .fillMaxWidth().height(206.dp)
                     .graphicsLayer { translationX = travel * 48.dp.toPx(); translationY = jump.dp.toPx() },
                 contentScale = ContentScale.Fit,
                 alignment = Alignment.BottomCenter,

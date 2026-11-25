@@ -10,8 +10,8 @@ plugins {
 
 val packagedYukiAssets = layout.buildDirectory.dir("generated/yukiAssets")
 val packageYukiArt by tasks.registering(Sync::class) {
-    from(rootProject.file("Yuki Assets")) {
-        include("*.png")
+    from(rootProject.file("Yuki Assets/Runtime")) {
+        include("*.png", "atlas.json")
         into("yuki")
     }
     into(packagedYukiAssets)

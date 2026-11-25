@@ -33,4 +33,8 @@ Stage 15 passed on `d5ddbe54426247b0ab93b0fe44d0a4bc5b718296`. Reviewed the nati
 - [x] Refine Vault list, creation, note and media viewing, document export and delete. Verify local selection, commit, cancellation, shared references and reopen.
 - [x] Verify Vault stays outside ordinary search and Notes and Reminders transfer.
 - [x] Inspect both themes and large text on native screens, then pass both full suites and the debug APK checks.
-- [ ] Commit, push, verify exact CI and artifact, and continue to the Yuki art pipeline.
+- [x] Commit, push, verify exact CI and artifact, and continue to the Yuki art pipeline.
+
+## Remote verification
+
+GitHub confirmed `d144a9dfb2188e4c52cd3e1f2761b58eec77a5ae` on `master`. Build Android APK run `45526347818` passed and published `twohearts-debug-apk` artifact `14982262989` for that commit. [Commit](https://github.com/https10011/2HEARTS2/commit/d144a9dfb2188e4c52cd3e1f2761b58eec77a5ae) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45526347818) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45526347818/artifacts/14982262989)

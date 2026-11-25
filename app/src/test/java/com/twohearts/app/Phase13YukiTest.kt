@@ -2,7 +2,6 @@ package com.twohearts.app
 
 import android.app.Application
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.twohearts.app.data.game.*
@@ -90,13 +89,11 @@ class Phase13YukiTest {
         YukiPose.entries.forEach { pose ->
             val art = requireNotNull(YukiArt.load(app, pose)) { "No packaged artwork for ${pose.name}" }
             assertTrue(art.width <= 512 && art.height <= 512)
+            assertEquals(Color.TRANSPARENT, art.getPixel(0, 0))
+            assertEquals(Color.TRANSPARENT, art.getPixel(art.width - 1, art.height - 1))
         }
-        val orange = Color.rgb(208, 114, 57)
-        val pixels = IntArray(25) { Color.rgb(234, 234, 234) }
-        for (y in 1..3) for (x in 1..3) pixels[y * 5 + x] = orange
-        pixels[12] = Color.WHITE
-        val cleaned = YukiArt.removeCheckerMatte(Bitmap.createBitmap(pixels, 5, 5, Bitmap.Config.ARGB_8888))
-        assertEquals(3, cleaned.width)
-        assertEquals(Color.WHITE, cleaned.getPixel(1, 1))
+        val sitting = requireNotNull(YukiArt.load(app, YukiPose.SIT))
+        assertEquals(Color.rgb(252, 240, 225), sitting.getPixel(180, 190))
+        assertEquals(Color.rgb(252, 240, 225), sitting.getPixel(193, 169))
     }
 }
