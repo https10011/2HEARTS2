@@ -1,20 +1,33 @@
 package com.twohearts.app.ui.screens.settings
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twohearts.app.services.appstate.AppStateService
-import com.twohearts.app.ui.components.ThTopBar
+import com.twohearts.app.ui.components.ThChoiceChip
+import com.twohearts.app.ui.components.ThEyebrow
+import com.twohearts.app.ui.components.UtilityGroup
+import com.twohearts.app.ui.components.UtilityPage
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.TwoHeartsTokens
 import kotlinx.coroutines.launch
 
 @Composable
@@ -23,61 +36,75 @@ fun AppearanceSettingsScreen(appStateService: AppStateService, onBack: () -> Uni
     val textSize by appStateService.textSize.collectAsStateWithLifecycle()
     val reduceMotion by appStateService.reduceMotion.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    AppearanceSettingsContent(
+        theme, textSize, reduceMotion, onBack,
+        onTheme = { scope.launch { appStateService.setThemeMode(it) } },
+        onTextSize = { scope.launch { appStateService.setTextSize(it) } },
+        onMotion = { scope.launch { appStateService.setReduceMotion(it) } },
+    )
+}
 
-    Scaffold(topBar = { ThTopBar(title = "Appearance", onBack = onBack) }) { insets ->
-        Column(
-            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            AppearanceChoices("Theme", theme, listOf("system" to "Follow Android", "light" to "Light", "dark" to "Dark")) {
-                scope.launch { appStateService.setThemeMode(it) }
+@Composable
+internal fun AppearanceSettingsContent(
+    theme: String, textSize: String, reduced: Boolean, onBack: () -> Unit,
+    onTheme: (String) -> Unit, onTextSize: (String) -> Unit, onMotion: (Boolean) -> Unit,
+) {
+    val spacing = TwoHeartsTokens.Spacing
+    val colors = LocalTwoHeartsColors.current
+    UtilityPage("Appearance", onBack) {
+        Surface(color = colors.surfaceBlush, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(spacing.space4), verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
+                ThEyebrow("Preview", color = colors.roseDeep)
+                Text("TwoHearts", style = MaterialTheme.typography.displayMedium)
+                Text("Your memories, notes, and dates", style = MaterialTheme.typography.bodyLarge, color = colors.textSecondary)
             }
-            HorizontalDivider()
+        }
+        UtilityGroup("Theme") {
+            AppearanceChoices(theme, listOf("system" to "Follow Android", "light" to "Light", "dark" to "Dark"), onTheme)
+        }
+        UtilityGroup("Text size") {
             AppearanceChoices(
-                "Text size", textSize,
-                listOf("small" to "Small", "default" to "Default", "large" to "Large", "extra_large" to "Extra large"),
-            ) { scope.launch { appStateService.setTextSize(it) } }
-            HorizontalDivider()
-            Row(
-                Modifier.fillMaxWidth().heightIn(min = 60.dp).toggleable(
-                    value = reduceMotion, role = Role.Switch,
-                    onValueChange = { value -> scope.launch { appStateService.setReduceMotion(value) } },
-                ),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text("Reduce motion", style = MaterialTheme.typography.titleMedium)
-                    Text(
-                        "Use simpler transitions and fewer decorative animations.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Switch(checked = reduceMotion, onCheckedChange = null)
-            }
+                textSize, listOf("small" to "Small", "default" to "Default", "large" to "Large", "extra_large" to "Extra large"), onTextSize,
+            )
+        }
+        UtilityGroup("Motion") {
+            UtilityToggle(
+                "Reduce motion", "Use simpler transitions and fewer decorative animations.",
+                reduced, onChange = onMotion,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AppearanceChoices(selected: String, choices: List<Pair<String, String>>, onSelect: (String) -> Unit) {
+    val spacing = TwoHeartsTokens.Spacing
+    FlowRow(
+        Modifier.fillMaxWidth().selectableGroup().padding(top = spacing.space2),
+        horizontalArrangement = Arrangement.spacedBy(spacing.space2),
+    ) {
+        choices.forEach { (value, label) ->
+            ThChoiceChip(selected == value, { onSelect(value) }, label = { Text(label) })
         }
     }
 }
 
 @Composable
-private fun AppearanceChoices(
-    title: String, selected: String,
-    choices: List<Pair<String, String>>, onSelect: (String) -> Unit,
+internal fun UtilityToggle(
+    title: String, details: String, checked: Boolean, enabled: Boolean = true, onChange: (Boolean) -> Unit,
 ) {
-    Column(Modifier.selectableGroup()) {
-        Text(title, style = MaterialTheme.typography.titleLarge)
-        choices.forEach { (key, label) ->
-            Row(
-                Modifier.fillMaxWidth().heightIn(min = 48.dp).selectable(
-                    selected = selected == key, role = Role.RadioButton, onClick = { onSelect(key) },
-                ),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                RadioButton(selected == key, onClick = null)
-                Text(label)
-            }
+    val spacing = TwoHeartsTokens.Spacing
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = TwoHeartsTokens.Dimensions.touchTargetMin)
+            .toggleable(checked, enabled = enabled, role = Role.Switch, onValueChange = onChange)
+            .padding(vertical = spacing.space3),
+        horizontalArrangement = Arrangement.spacedBy(spacing.space3), verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.space1)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(details, style = MaterialTheme.typography.bodyMedium, color = LocalTwoHeartsColors.current.textSecondary)
         }
+        Switch(checked = checked, onCheckedChange = null, enabled = enabled)
     }
 }

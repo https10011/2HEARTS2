@@ -497,7 +497,7 @@ class Phase0RenderHarness {
         }
         render("p12-settings-large", dark = true, scale = TextScalingLevel.EXTRA_LARGE) { SettingsHomeScreen({}, {}) }
         render("p12-import-export", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
-            com.twohearts.app.ui.screens.settings.ImportScreen(notes, reminders, {})
+            com.twohearts.app.ui.screens.settings.ImportScreen(notes, reminders, {}, db)
         }
         render("p12-storage", dark = true, scale = TextScalingLevel.EXTRA_LARGE) {
             com.twohearts.app.ui.screens.settings.StorageSettingsScreen(services, {})

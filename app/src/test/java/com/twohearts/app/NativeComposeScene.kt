@@ -83,7 +83,8 @@ internal class NativeComposeScene(private val outDir: File) : AutoCloseable {
 
     private fun clickNode(occurrence: Int, matches: (SemanticsNode) -> Boolean): Boolean {
         layout(activityView)
-        val actions = nodes(activityView).filter(matches).mapNotNull { it.config.getOrNull(SemanticsActions.OnClick)?.action }
+        val actions = nodes(activityView).filter(matches).filter { it.config.getOrNull(SemanticsProperties.Disabled) == null }
+            .mapNotNull { it.config.getOrNull(SemanticsActions.OnClick)?.action }
         val handled = actions.getOrNull(occurrence)?.invoke() == true
         advanceFrames()
         layout(activityView)
@@ -92,6 +93,10 @@ internal class NativeComposeScene(private val outDir: File) : AutoCloseable {
 
     fun dialogText(label: String) = hasText(dialogView(), label)
     fun activityText(label: String) = hasText(activityView, label)
+
+    fun activityTexts(): List<String> = nodes(activityView).flatMap { node ->
+        node.config.getOrNull(SemanticsProperties.Text).orEmpty().map { it.text }
+    }
 
     fun activityDescription(label: String): Boolean = nodes(activityView).any {
         it.config.getOrNull(SemanticsProperties.ContentDescription)?.contains(label) == true

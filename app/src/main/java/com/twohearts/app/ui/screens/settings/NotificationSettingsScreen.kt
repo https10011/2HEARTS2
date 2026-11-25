@@ -1,19 +1,30 @@
 package com.twohearts.app.ui.screens.settings
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twohearts.app.data.settings.AppSettings
 import com.twohearts.app.data.settings.SettingsStorage
-import com.twohearts.app.ui.components.*
+import com.twohearts.app.ui.components.ButtonVariant
+import com.twohearts.app.ui.components.NotificationPermissionAction
+import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThDivider
+import com.twohearts.app.ui.components.ThEyebrow
+import com.twohearts.app.ui.components.ThIcons
+import com.twohearts.app.ui.components.UtilityGroup
+import com.twohearts.app.ui.components.UtilityPage
+import com.twohearts.app.ui.components.rememberNotificationPermissionControl
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.TwoHeartsTokens
 import kotlinx.coroutines.launch
 
 @Composable
@@ -21,58 +32,49 @@ fun NotificationSettingsScreen(settingsStorage: SettingsStorage, onBack: () -> U
     val settings by settingsStorage.settings.collectAsStateWithLifecycle(initialValue = AppSettings())
     val scope = rememberCoroutineScope()
     val permission = rememberNotificationPermissionControl()
-
-    Scaffold(topBar = { ThTopBar(title = "Notifications", onBack = onBack) }) { insets ->
-        Column(
-            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            NotificationPreference(
-                "TwoHearts notifications", "Control whether TwoHearts can send alerts.",
-                checked = settings.notificationsEnabled,
-                onChange = { enabled -> scope.launch { settingsStorage.setNotificationsEnabled(enabled) } },
-            )
-            HorizontalDivider()
-            NotificationPreference(
-                "Reminders", "Allow alerts for scheduled reminders.",
-                checked = settings.remindersEnabled, enabled = settings.notificationsEnabled,
-                onChange = { enabled -> scope.launch { settingsStorage.setRemindersEnabled(enabled) } },
-            )
-            if (permission.action != NotificationPermissionAction.ALLOWED) {
-                ThStatusBanner(StatusVariant.INFO, "Android notifications are off for TwoHearts.")
-                if (permission.action == NotificationPermissionAction.REQUEST) {
-                    ThButton(
-                        onClick = permission.request,
-                        text = "Allow Android alerts",
-                    )
-                }
-            }
-            ThButton(
-                onClick = permission.openSettings,
-                variant = ButtonVariant.SECONDARY, text = "Android notification settings",
-            )
-        }
-    }
+    NotificationSettingsContent(
+        settings, permission.action, onBack, permission.openSettings, permission.request,
+        onAllowed = { enabled -> scope.launch { settingsStorage.setNotificationsEnabled(enabled) } },
+        onReminders = { enabled -> scope.launch { settingsStorage.setRemindersEnabled(enabled) } },
+    )
 }
 
 @Composable
-private fun NotificationPreference(
-    title: String,
-    description: String,
-    checked: Boolean,
-    enabled: Boolean = true,
-    onChange: (Boolean) -> Unit,
+internal fun NotificationSettingsContent(
+    settings: AppSettings, permission: NotificationPermissionAction, onBack: () -> Unit,
+    openAndroid: () -> Unit, requestAndroid: () -> Unit, onAllowed: (Boolean) -> Unit, onReminders: (Boolean) -> Unit,
 ) {
-    Row(
-        Modifier.fillMaxWidth().heightIn(min = 60.dp)
-            .toggleable(checked, enabled = enabled, role = Role.Switch, onValueChange = onChange),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Text(description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    val spacing = TwoHeartsTokens.Spacing
+    val colors = LocalTwoHeartsColors.current
+    val allowed = permission == NotificationPermissionAction.ALLOWED
+    UtilityPage("Notifications", onBack) {
+        Surface(shape = MaterialTheme.shapes.large, color = colors.surfaceWarm, modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(spacing.space4), verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
+                ThEyebrow("Device access", color = colors.roseDeep)
+                Text(
+                    if (allowed) "Android alerts allowed" else "Android alerts are off",
+                    style = MaterialTheme.typography.headlineSmall,
+                )
+                if (!allowed) Text(
+                    "Turn on Android alerts to receive scheduled reminders.",
+                    style = MaterialTheme.typography.bodyMedium, color = colors.textSecondary,
+                )
+                if (permission == NotificationPermissionAction.REQUEST) {
+                    ThButton(requestAndroid, text = "Allow Android alerts", icon = ThIcons.Bell)
+                }
+                ThButton(openAndroid, text = "Android notification settings", variant = ButtonVariant.GHOST, icon = ThIcons.Settings)
+            }
         }
-        Switch(checked = checked, onCheckedChange = null, enabled = enabled)
+        UtilityGroup("TwoHearts preferences") {
+            UtilityToggle(
+                "TwoHearts notifications", "Allow TwoHearts to send alerts on this device.",
+                settings.notificationsEnabled, onChange = onAllowed,
+            )
+            ThDivider()
+            UtilityToggle(
+                "Reminders", "Alert at the time you set for a reminder.",
+                settings.remindersEnabled, enabled = settings.notificationsEnabled, onChange = onReminders,
+            )
+        }
     }
 }

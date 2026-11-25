@@ -1135,6 +1135,7 @@ internal fun AppRouter(
                     ImportScreen(
                         noteRepository = noteRepository,
                         reminderRepository = reminderRepository,
+                        database = TwoHeartsDatabase.getDatabase(appContext),
                         onBack = {
                             navController.popBackStack()
                         }

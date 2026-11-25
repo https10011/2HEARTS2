@@ -1,16 +1,29 @@
 package com.twohearts.app.ui.screens.settings
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.twohearts.app.data.entity.Profile
 import com.twohearts.app.services.media.ProfilePhotoChange
-import com.twohearts.app.ui.components.*
+import com.twohearts.app.ui.components.ProfilePhotoChangeSaver
+import com.twohearts.app.ui.components.ProfilePhotoEditor
+import com.twohearts.app.ui.components.RecordEditorLayout
+import com.twohearts.app.ui.components.ThDatePicker
+import com.twohearts.app.ui.components.ThEyebrow
+import com.twohearts.app.ui.components.ThInput
+import com.twohearts.app.ui.components.profilePhotoBackAction
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.TwoHeartsTokens
+import java.time.LocalDate
 
 @Composable
 fun ProfileSettingsScreen(
@@ -26,24 +39,38 @@ fun ProfileSettingsScreen(
         mutableStateOf<ProfilePhotoChange>(ProfilePhotoChange.Keep)
     }
     val back = profilePhotoBackAction(photo, saving, onBack)
+    val validBirthday = birthday.isBlank() || validProfileDate(birthday)
+    val valid = name.isNotBlank() && validBirthday
+    RecordEditorLayout(
+        "Your profile", "Save profile", onSave = {
+            if (valid && !saving) onSave(name.trim(), birthday.ifBlank { null }, photo)
+        }, onBack = back, saving = saving, errorMessage = error, saveEnabled = valid,
+    ) {
+        SettingsPortrait(name, profile?.photoRef, "Your profile photo", photo, { photo = it }, enabled = !saving)
+        ThInput(name, { name = it }, label = "Your name", enabled = !saving)
+        ThDatePicker(
+            birthday, { birthday = it }, label = "Birthday (optional)", enabled = !saving,
+            error = "Choose a valid date up to today.".takeUnless { validBirthday },
+        )
+    }
+}
 
-    Scaffold(topBar = { Header(title = "Your profile", onBack = back) }) { insets ->
-        Column(
-            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-            ProfilePhotoEditor(name, profile?.photoRef, "Your profile photo", photo, { photo = it }, enabled = !saving)
-            Input(value = name, onValueChange = { name = it }, label = "Your name", modifier = Modifier.fillMaxWidth())
-            ThDatePicker(
-                value = birthday, onValueChange = { birthday = it },
-                label = "Birthday (optional)", enabled = !saving,
-                support = "Used to remember your birthday in TwoHearts.",
-            )
-            if (error != null) ThStatusBanner(StatusVariant.ERROR, error)
-            ThButton(
-                onClick = { onSave(name.trim(), birthday.ifBlank { null }, photo) },
-                full = true, enabled = name.isNotBlank(), loading = saving, text = "Save profile",
-            )
+internal fun validProfileDate(value: String, today: LocalDate = LocalDate.now()): Boolean =
+    runCatching { !LocalDate.parse(value).isAfter(today) }.getOrDefault(false)
+
+@Composable
+internal fun SettingsPortrait(
+    name: String, photoRef: String?, label: String, change: ProfilePhotoChange,
+    onChange: (ProfilePhotoChange) -> Unit, enabled: Boolean,
+) {
+    val spacing = TwoHeartsTokens.Spacing
+    val colors = LocalTwoHeartsColors.current
+    Surface(
+        modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, color = colors.surfaceWarm,
+    ) {
+        Column(Modifier.padding(spacing.space4), verticalArrangement = Arrangement.spacedBy(spacing.space3)) {
+            ThEyebrow(label, color = colors.roseDeep)
+            ProfilePhotoEditor(name, photoRef, label, change, onChange, enabled = enabled)
         }
     }
 }

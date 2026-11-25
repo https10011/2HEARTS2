@@ -1,46 +1,61 @@
 package com.twohearts.app.ui.screens.about
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import com.twohearts.app.services.device.DeviceCapabilities
 import com.twohearts.app.ui.components.BrandLogo
 import com.twohearts.app.ui.components.BrandLogoVariant
-import com.twohearts.app.ui.components.ThTopBar
+import com.twohearts.app.ui.components.ThEyebrow
+import com.twohearts.app.ui.components.UtilityGroup
+import com.twohearts.app.ui.components.UtilityPage
+import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import com.twohearts.app.ui.theme.TwoHeartsTokens
 
 @Composable
 fun AboutScreen(onBack: () -> Unit) {
     val context = LocalContext.current
-    val metadata = remember(context) { DeviceCapabilities(context) }
-    val secondary = MaterialTheme.colorScheme.onSurfaceVariant
+    val device = remember(context) { DeviceCapabilities(context) }
+    val spacing = TwoHeartsTokens.Spacing
+    val colors = LocalTwoHeartsColors.current
 
-    Scaffold(topBar = { ThTopBar(title = "About TwoHearts", onBack = onBack) }) { insets ->
-        Column(
-            Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            BrandLogo(Modifier.align(Alignment.CenterHorizontally), variant = BrandLogoVariant.MARK, size = 96)
-            Text("TwoHearts", style = MaterialTheme.typography.headlineSmall)
-            Text("A private place for your relationship’s everyday moments and milestones.", color = secondary)
-            HorizontalDivider()
-            Text("App information", style = MaterialTheme.typography.titleMedium)
-            Text("Version ${metadata.getAppVersion()} · Build ${metadata.getAppVersionCode()}", color = secondary)
-            Text("Android ${metadata.getAndroidVersionName()}", color = secondary)
-            HorizontalDivider()
-            Text("Privacy", style = MaterialTheme.typography.titleMedium)
-            Text("TwoHearts works offline. Records stay on this device unless you export them.", color = secondary)
-            Text("TwoHearts uses no online account or analytics.", color = secondary)
-            HorizontalDivider()
-            Text("Credits", style = MaterialTheme.typography.titleMedium)
-            Text("Design and development by the TwoHearts team.", color = secondary)
-            Text("Companion cat · Yuki", color = secondary)
+    UtilityPage("About TwoHearts", onBack) {
+        Surface(color = colors.surfaceBlush, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(spacing.space5), verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
+                BrandLogo(variant = BrandLogoVariant.MARK, size = 76)
+                Text("TwoHearts", style = MaterialTheme.typography.displayMedium)
+                Text(
+                    "A private place for your relationship’s everyday moments and milestones.",
+                    style = MaterialTheme.typography.bodyLarge, color = colors.textSecondary,
+                )
+            }
+        }
+        UtilityGroup("App information") {
+            Column(Modifier.padding(vertical = spacing.space3), verticalArrangement = Arrangement.spacedBy(spacing.space1)) {
+                Text("Version ${device.getAppVersion()} · Build ${device.getAppVersionCode()}", style = MaterialTheme.typography.titleMedium)
+                Text("Android ${device.getAndroidVersionName()}", color = colors.textSecondary)
+            }
+        }
+        UtilityGroup("Privacy") {
+            Text(
+                "TwoHearts works offline. Your saved records stay on this device. Export can create a separate file of Notes and Reminders.",
+                modifier = Modifier.padding(vertical = spacing.space3), color = colors.textSecondary,
+            )
+        }
+        UtilityGroup("Credits") {
+            Column(Modifier.padding(vertical = spacing.space3), verticalArrangement = Arrangement.spacedBy(spacing.space2)) {
+                Text("Design and development by the TwoHearts team.", color = colors.textSecondary)
+                ThEyebrow("Companion cat", color = colors.roseDeep)
+                Text("Yuki", style = MaterialTheme.typography.titleMedium)
+            }
         }
     }
 }

@@ -32,4 +32,9 @@ Stage 13 passed on `e2f686a8bbccffe1ad804cb96e3a02d6d2d7c0be`. Reviewed native P
 - [x] Retain quick mood check-in and note preservation, verify local history windows and entry ownership, and exercise historical edits and deletion.
 - [x] Preserve private Period scope and all six routes. Verify date boundaries, estimates, change and deletion, saved lengths, and reopening.
 - [x] Review native images in both palettes and at standard and large font sizes, then run both unit variants and assemble and inspect the APK.
-- [ ] Commit, push, verify exact CI and artifact, record results, and continue to Stage 15.
+- [x] Commit, push, verify exact CI and artifact, record results, and continue to Stage 15.
+
+
+## Remote verification
+
+GitHub confirmed `6b7048d6fdc8cca42b759da7f5ff546ce6c7959e` on `master`. Build Android APK run `45518395408` passed and published `twohearts-debug-apk` artifact `14978217858` for that commit. [Commit](https://github.com/https10011/2HEARTS2/commit/6b7048d6fdc8cca42b759da7f5ff546ce6c7959e) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45518395408) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45518395408/artifacts/14978217858)
