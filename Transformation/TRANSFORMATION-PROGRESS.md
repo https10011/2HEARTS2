@@ -21,7 +21,7 @@
 - **Stage 16 complete** — App lock and Vault have revised native screens. A cold PIN gate and a simulated timeout hide Home. File storage and cleanup honor live Vault references. Both full suites passed 236 tests, the signed APK verified, and CI published the APK for the exact commit. Physical Keystore and media playback remain release checks. [Stage 16 report](Stage-16/REPORT.md)
 - **Stage 17 complete** — The pipeline generates 26 registered sprites from 21 unchanged originals. Byte comparison and the native room review passed. Both variants passed 240 tests, and the fresh signed APK measured 27,780,144 bytes. CI passed on its second attempt and published the APK for the exact source commit. [Stage 17 report](Stage-17/REPORT.md)
 - **Stage 18 complete** — Yuki uses a seeded motion controller and a lifecycle-aware Canvas. Concurrent care is accepted once, and earlier saves and time advancement passed the regression checks. Both suites passed 249 tests, native motion was inspected, and CI published the APK for the exact commit. [Stage 18 report](Stage-18/REPORT.md)
-- **Stage 19 locally verified** — Yuki's room, care, keepsakes, visible apparel and Home preview passed the native review and motion recordings. Both full suites passed 255 tests and the signed APK verified. Exact remote CI is the next gate. Handset frame timing remains pending. [Stage 19 report](Stage-19/REPORT.md)
+- **Stage 19 locally verified** — Yuki's room, care, keepsakes, visible apparel and Home preview passed the native review and motion recordings. Both full suites passed 255 tests and the signed APK verified. The first remote run hit a repeated Robolectric SDK download failure. The test runner endpoint is being verified before the stage closes. Handset frame timing remains pending. [Stage 19 report](Stage-19/REPORT.md)
 - **Signing and upgrade** — The two downloaded CI APKs have different debug signing certificates. The owner confirmed normal operation of the already installed app, which remains the working baseline. A same-signer local upgrade retained data in the guest. The published CI debug packages require a compatible signer to update an older installation in place.
 
 ## Intake checkpoint
@@ -31,7 +31,7 @@
 - **Build and tests** — The pre-transformation Actions run succeeded and listed a downloadable artifact. The Phase 20 report records 134 tests per variant and a successful local debug build. No fresh local transformation tests have run. [Actions run](https://github.com/https10011/2HEARTS2/actions/runs/44439439508) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44439439508/artifacts/14489748983) · [Phase 20 report](../UI-UX/Phase-20/PHASE-20-FINAL-CONSOLIDATION.md)
 - **Visual and runtime evidence** — The baseline review used prior Compose renders and the Phase 20 Android 13 emulator report. Fresh renders and signed-candidate verification remain pending.
 - **Environment** — Preflight found Java 21 and GitHub CLI. JDK 17, SDK 35, `adb`, and Android runtime setup are Stage 1 work. The host exposes no `/dev/kvm`.
-- **Next task** — Verify the published Stage 19 CI and APK, then run the cross-application audit. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
+- **Next task** — Verify and publish the Stage 19 CI download fix, confirm the artifact, and begin the cross-application audit. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
 
 ## Stage status
 

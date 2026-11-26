@@ -62,6 +62,14 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+            all {
+                // Use the same Maven Central endpoint as Gradle for instrumented SDK downloads.
+                it.systemProperty(
+                    "robolectric.dependency.repo.url",
+                    providers.systemProperty("robolectric.dependency.repo.url")
+                        .orElse("https://repo.maven.apache.org/maven2").get(),
+                )
+            }
         }
     }
 }
