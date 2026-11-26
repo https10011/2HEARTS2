@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.twohearts.app.data.game.*
 import com.twohearts.app.ui.components.*
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
+import java.time.Instant
 import kotlinx.coroutines.delay
 
 @Composable
@@ -31,7 +32,7 @@ fun YukiScreen(viewModel: YukiViewModel, onBack: () -> Unit) {
     val presentation by viewModel.presentation.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val visible by lifecycle.currentStateFlow.collectAsState()
-    val active = visible.isAtLeast(Lifecycle.State.STARTED)
+    val active = visible.isAtLeast(Lifecycle.State.RESUMED)
     val state = presentation.state
     val view = LocalView.current
     var lastLevel by remember { mutableStateOf(state?.level) }
@@ -46,18 +47,12 @@ fun YukiScreen(viewModel: YukiViewModel, onBack: () -> Unit) {
     }
 
     LaunchedEffect(active) {
-        if (active) {
-            viewModel.refresh()
-            while (true) {
-                delay(60_000)
-                viewModel.refresh()
-            }
-        }
+        if (active) viewModel.refresh()
     }
-    LaunchedEffect(active, state?.activityStartedAt, state?.activity) {
-        val duration = state?.activity?.durationMs ?: 0
-        if (active && duration > 0) {
-            delay(duration)
+    LaunchedEffect(active, state, presentation.failed) {
+        if (!active || state == null || presentation.failed) return@LaunchedEffect
+        while (true) {
+            delay(state.nextUpdateDelayMillis(Instant.now()))
             viewModel.refresh()
         }
     }
@@ -76,6 +71,7 @@ fun YukiScreen(viewModel: YukiViewModel, onBack: () -> Unit) {
         YukiHub(
             state, presentation.feedback, presentation.working, presentation.failed, active,
             onBack, viewModel::processAction, viewModel::selectToy, viewModel::equipAccessory,
+            refusal = presentation.refusal,
         )
     }
 }
@@ -92,6 +88,7 @@ internal fun YukiHub(
     onAction: (YukiAction) -> Unit,
     onToy: (YukiToy) -> Unit,
     onAccessory: (String) -> Unit,
+    refusal: Int = 0,
 ) {
     var shelf by rememberSaveable { mutableStateOf(false) }
     val colors = LocalTwoHeartsColors.current
@@ -105,7 +102,7 @@ internal fun YukiHub(
             Modifier.fillMaxSize().padding(insets).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            YukiRoom(state, animate, onPet = if (busy || sleeping) null else { { onAction(YukiAction.PET) } })
+            YukiRoom(state, animate, refusal = refusal, onPet = if (busy || sleeping) null else { { onAction(YukiAction.PET) } })
             Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(state.name, style = MaterialTheme.typography.headlineMedium)
                 Text(mood, style = MaterialTheme.typography.titleMedium, color = colors.roseDeep)

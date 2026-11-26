@@ -188,6 +188,11 @@
       "loaf",
       "sleep"
     ],
+    "drowse": [
+      "loaf",
+      "sleep",
+      "loaf"
+    ],
     "wake": [
       "sleep",
       "loaf",

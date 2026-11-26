@@ -113,27 +113,52 @@ fun xpForLevel(level: Int): Int = 80 + level.coerceIn(1, 10_000) * 20
 private fun parseYukiTime(value: String?): Instant? =
     value?.let { runCatching { Instant.parse(it) }.getOrNull() }
 
+private const val HOUR_SECONDS = 3_600L
+private const val MAX_ABSENCE_SECONDS = 72 * HOUR_SECONDS
+private const val NAP_SECONDS = 8 * HOUR_SECONDS
+
+internal fun YukiState.activityElapsedMillis(now: Instant): Long {
+    val start = parseYukiTime(activityStartedAt) ?: return Long.MAX_VALUE
+    return Duration.between(start, now).coerceIn(Duration.ZERO, Duration.ofDays(3)).toMillis()
+}
+
+internal fun YukiState.nextUpdateDelayMillis(now: Instant): Long {
+    val last = parseYukiTime(updatedAt)?.takeUnless { it.isAfter(now) } ?: now
+    val hour = last.plusSeconds(HOUR_SECONDS)
+    val start = parseYukiTime(activityStartedAt)?.takeUnless { it.isAfter(now) } ?: last
+    val activityEnd = when {
+        activity == YukiActivity.SLEEPING -> start.plusSeconds(NAP_SECONDS)
+        activity.durationMs > 0 -> start.plusMillis(activity.durationMs)
+        else -> hour
+    }
+    return Duration.between(now, minOf(hour, activityEnd))
+        .coerceIn(Duration.ofMillis(100), Duration.ofHours(1)).toMillis()
+}
+
 fun applyTimeDecay(state: YukiState, now: Instant): YukiState {
     val savedTime = parseYukiTime(state.updatedAt)
     val last = savedTime?.takeUnless { it.isAfter(now) } ?: now
-    val elapsed = Duration.between(last, now).seconds.coerceIn(0, 72 * 3_600L)
-    val hours = (elapsed / 3_600).toInt()
+    val elapsed = Duration.between(last, now).seconds.coerceIn(0, MAX_ABSENCE_SECONDS)
+    val hours = (elapsed / HOUR_SECONDS).toInt()
+    val completed = last.plusSeconds(hours * HOUR_SECONDS)
     val activityStart = parseYukiTime(state.activityStartedAt)?.takeUnless { it.isAfter(now) } ?: last
     val sinceActivity = Duration.between(activityStart, now).seconds
     val sleeping = state.activity == YukiActivity.SLEEPING
-    val hoursAsleep = if (sleeping) minOf(hours, 8, (sinceActivity / 3600).coerceAtMost(8).toInt()) else 0
+    val overlapStart = maxOf(activityStart, last)
+    val overlapEnd = minOf(activityStart.plusSeconds(NAP_SECONDS), completed)
+    val hoursAsleep = if (sleeping) (Duration.between(overlapStart, overlapEnd).seconds / HOUR_SECONDS).coerceAtLeast(0).toInt() else 0
     val activity = when {
-        sleeping && sinceActivity < 8 * 3600 -> YukiActivity.SLEEPING
+        sleeping && sinceActivity < NAP_SECONDS -> YukiActivity.SLEEPING
         state.activity.durationMs > 0 && Duration.between(activityStart, now) < Duration.ofMillis(state.activity.durationMs) -> state.activity
         else -> YukiActivity.IDLE
     }
     val hunger = (state.hunger - hours * 3).coerceAtLeast(minOf(state.hunger, 24))
     val energy = (state.energy + hours * 2 + hoursAsleep * 10).coerceAtMost(100)
-    val happiness = (state.happiness - hours / 3).coerceAtLeast(minOf(state.happiness, 45))
-    val cleanliness = (state.cleanliness - hours / 2).coerceAtLeast(minOf(state.cleanliness, 32))
+    val happiness = (state.happiness - elapsedIntervals(last, completed, 3)).coerceAtLeast(minOf(state.happiness, 45))
+    val cleanliness = (state.cleanliness - elapsedIntervals(last, completed, 2)).coerceAtLeast(minOf(state.cleanliness, 32))
     val advancedTo = when {
-        savedTime != last || elapsed >= 72 * 3_600L -> now
-        else -> last.plusSeconds(hours.toLong() * 3600)
+        savedTime != last || elapsed >= MAX_ABSENCE_SECONDS -> now
+        else -> completed
     }
     return state.copy(
         hunger = hunger, energy = energy, happiness = happiness, cleanliness = cleanliness,
@@ -142,6 +167,11 @@ fun applyTimeDecay(state: YukiState, now: Instant): YukiState {
         activityStartedAt = if (activity == YukiActivity.IDLE) null else activityStart.toString(),
         updatedAt = advancedTo.toString(),
     )
+}
+
+private fun elapsedIntervals(start: Instant, end: Instant, hours: Int): Int {
+    val interval = hours * HOUR_SECONDS
+    return (Math.floorDiv(end.epochSecond, interval) - Math.floorDiv(start.epochSecond, interval)).toInt()
 }
 
 internal fun interactionDate(now: Instant): String = now.atZone(ZoneId.systemDefault()).toLocalDate().toString()

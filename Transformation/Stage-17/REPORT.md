@@ -31,4 +31,8 @@ Stage 16 passed on `d144a9dfb2188e4c52cd3e1f2761b58eec77a5ae`. Reviewed the 21 o
 - [x] Map every pose to one or more clips and generate reproducible, transparent and floor-aligned sprites.
 - [x] Author supplemental eye, ear and tail motion frames with stable body anchors.
 - [x] Inspect the current Compose room and Android packaged artwork, and verify both full Gradle suites and the APK.
-- [ ] Commit, push, verify exact remote CI and artifact, and continue to the Yuki engine and persistence stage.
+- [x] Commit, push, verify exact remote CI and artifact, and continue to the Yuki engine and persistence stage.
+
+## Remote verification
+
+GitHub confirmed `d74c35dd0bf629db86f6c8a5a4c6e9a23e67c02d` on `master`. The first attempt built the APK and then failed while Robolectric fetched its Android runtime. Attempt 2 tested the same source and published `twohearts-debug-apk` artifact `15139834523` without a workflow change. [Commit](https://github.com/https10011/2HEARTS2/commit/d74c35dd0bf629db86f6c8a5a4c6e9a23e67c02d) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45529359216) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45529359216/artifacts/15139834523)

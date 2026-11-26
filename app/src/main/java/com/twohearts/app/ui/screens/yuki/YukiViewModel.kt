@@ -19,6 +19,7 @@ internal data class YukiPresentation(
     val feedback: String? = null,
     val working: Boolean = false,
     val failed: Boolean = false,
+    val refusal: Int = 0,
 )
 
 class YukiViewModel(application: Application) : AndroidViewModel(application) {
@@ -27,24 +28,26 @@ class YukiViewModel(application: Application) : AndroidViewModel(application) {
     internal val presentation = _presentation.asStateFlow()
 
     fun refresh() = update { current ->
-        val saved = current.state ?: service.loadYukiState()
-        current.copy(state = service.applyDecay(saved))
+        current.copy(state = service.refresh())
     }
 
     fun processAction(action: YukiAction) = update { current ->
-        val state = current.state ?: return@update current
-        val result = service.processAction(state, action)
-        current.copy(state = result.state, feedback = result.message)
+        if (current.state == null) return@update current
+        val result = service.perform(action)
+        current.copy(
+            state = result.state, feedback = result.message,
+            refusal = if (result.accepted) current.refusal else current.refusal + 1,
+        )
     }
 
     fun equipAccessory(id: String) = update { current ->
-        val state = current.state ?: return@update current
-        current.copy(state = service.equipAccessory(state, id), feedback = null)
+        if (current.state == null) return@update current
+        current.copy(state = service.changeAccessory(id), feedback = null)
     }
 
     fun selectToy(toy: YukiToy) = update { current ->
-        val state = current.state ?: return@update current
-        current.copy(state = service.selectToy(state, toy), feedback = null)
+        if (current.state == null) return@update current
+        current.copy(state = service.changeToy(toy), feedback = null)
     }
 
     private fun update(transform: (YukiPresentation) -> YukiPresentation) {

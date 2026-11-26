@@ -41,6 +41,7 @@
     "groom": ["sit", "groom", "groom_alt", "groom", "sit"],
     "pet": ["sit", "sit_alt", "sit_half_blink", "roll", "sit_alt"],
     "nap": ["sit", "loaf", "sleep"],
+    "drowse": ["loaf", "sleep", "loaf"],
     "wake": ["sleep", "loaf", "stretch", "stand", "sit"],
     "quiet": ["sit", "sad", "loaf"],
     "interrupted": ["sit", "annoyed", "sit"]

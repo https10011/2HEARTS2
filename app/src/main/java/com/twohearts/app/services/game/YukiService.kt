@@ -8,10 +8,29 @@ import java.time.Instant
 
 /**
  * Persists the original Yuki save key. New fields are optional when restoring older saves.
- * Reads and writes for an active hub are serialized by its ViewModel.
+ * A route reload reads the previous write under the same process-wide lock.
  */
 class YukiService(context: Context) {
     private val prefs = context.applicationContext.getSharedPreferences(STORAGE_KEY, Context.MODE_PRIVATE)
+
+    internal fun refresh(now: Instant = Instant.now()): YukiState = synchronized(saveLock) {
+        val state = loadYukiState(now)
+        if (prefs.contains(JSON_KEY)) applyDecay(state, now) else state.also(::saveYukiState)
+    }
+
+    internal fun perform(action: YukiAction, now: Instant = Instant.now()): ActionResult = synchronized(saveLock) {
+        processAction(loadYukiState(now), action, now)
+    }
+
+    internal fun changeAccessory(id: String): YukiState = synchronized(saveLock) {
+        val now = Instant.now()
+        equipAccessory(applyTimeDecay(loadYukiState(now), now), id)
+    }
+
+    internal fun changeToy(toy: YukiToy): YukiState = synchronized(saveLock) {
+        val now = Instant.now()
+        selectToy(applyTimeDecay(loadYukiState(now), now), toy)
+    }
 
     fun loadYukiState(now: Instant = Instant.now()): YukiState {
         val raw = runCatching { prefs.getString(JSON_KEY, null) }.getOrNull()
@@ -93,21 +112,23 @@ class YukiService(context: Context) {
         return advanced
     }
 
-    data class ActionResult(val state: YukiState, val message: String)
+    data class ActionResult(val state: YukiState, val message: String, val accepted: Boolean = true)
 
     fun processAction(state: YukiState, action: YukiAction, now: Instant = Instant.now()): ActionResult {
         val current = applyTimeDecay(state, now)
+        if (current.activity.durationMs > 0) return ActionResult(current, "Give Yuki a moment to finish.", accepted = false)
         if (current.activity == YukiActivity.SLEEPING && action != YukiAction.WAKE) {
-            return ActionResult(current, "Yuki is napping. Wake Yuki to interact.")
+            return ActionResult(current, "Yuki is napping. Wake Yuki to interact.", accepted = false)
         }
         if (action == YukiAction.WAKE) {
+            if (current.activity != YukiActivity.SLEEPING) return ActionResult(current, "Yuki is already awake.", accepted = false)
             val awake = current.copy(activity = YukiActivity.IDLE, activityStartedAt = null)
             saveYukiState(awake)
             return ActionResult(awake, "Yuki wakes and looks around.")
         }
-        if (action == YukiAction.FEED && current.hunger >= 95) return ActionResult(current, "Yuki has had enough to eat.")
+        if (action == YukiAction.FEED && current.hunger >= 95) return ActionResult(current, "Yuki has had enough to eat.", accepted = false)
         if (action == YukiAction.PLAY && current.energy < current.selectedToy.energyCost + 10) {
-            return ActionResult(current, "Yuki is ready for a rest.")
+            return ActionResult(current, "Yuki is ready for a rest.", accepted = false)
         }
 
         val effects = when (action) {
@@ -163,11 +184,13 @@ class YukiService(context: Context) {
 
     fun equipAccessory(state: YukiState, id: String): YukiState {
         if (id !in state.ownedAccessories || getAccessoryById(id) == null) return state
-        return state.copy(accessory = id.takeUnless { it == "none" }).also(::saveYukiState)
+        val accessory = id.takeUnless { it == "none" }
+        if (state.accessory == accessory) return state
+        return state.copy(accessory = accessory).also(::saveYukiState)
     }
 
     fun selectToy(state: YukiState, toy: YukiToy): YukiState {
-        if (state.level < toy.unlockLevel) return state
+        if (state.level < toy.unlockLevel || state.selectedToy == toy) return state
         return state.copy(selectedToy = toy).also(::saveYukiState)
     }
 
@@ -181,6 +204,7 @@ class YukiService(context: Context) {
     companion object {
         private const val STORAGE_KEY = "twohearts_yuki"
         private const val JSON_KEY = "yuki_state"
+        private val saveLock = Any()
     }
 }
 
