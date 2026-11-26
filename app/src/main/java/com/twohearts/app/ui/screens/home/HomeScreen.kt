@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -45,6 +47,8 @@ import com.twohearts.app.data.entity.MoodEntry
 import com.twohearts.app.data.entity.Note
 import com.twohearts.app.data.entity.Profile
 import com.twohearts.app.data.entity.Reminder
+import com.twohearts.app.data.game.YukiActivity
+import com.twohearts.app.data.game.YukiMood
 import com.twohearts.app.data.repository.ImportantDateRepository
 import com.twohearts.app.data.repository.MemoryRepository
 import com.twohearts.app.data.repository.MoodEntryRepository
@@ -67,6 +71,7 @@ import com.twohearts.app.ui.decorations.OnboardingArt
 import com.twohearts.app.ui.decorations.ThDecoration
 import com.twohearts.app.ui.navigation.RoutePath
 import com.twohearts.app.ui.navigation.ShellSearchAction
+import com.twohearts.app.ui.screens.yuki.YukiPortrait
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 import com.twohearts.app.ui.theme.ThTextStyles
 import com.twohearts.app.ui.theme.TwoHeartsTokens
@@ -499,61 +504,45 @@ private fun YukiSection(presence: YukiPresence?, onNavigate: (String) -> Unit) {
     val thColors = LocalTwoHeartsColors.current
 
     ThSurfaceCard(
+        tone = CardTone.WARM,
         onClick = { onNavigate(RoutePath.APP_YUKI) },
         modifier = Modifier.semantics {
-            contentDescription = "Yuki" + (presence?.let { ", ${it.statusLine}" } ?: "")
+            contentDescription = if (presence == null) "Open Yuki’s room" else "${presence.name}, ${presence.statusLine}"
         },
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(TwoHeartsTokens.Radius.md))
-                    .background(thColors.surfaceWarm),
-                contentAlignment = Alignment.Center,
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 278.dp && LocalDensity.current.fontScale >= 1.5f
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.space3),
             ) {
-                Icon(
-                    imageVector = ThIcons.Cat,
-                    contentDescription = null,
-                    tint = thColors.goldInk,
-                    modifier = Modifier.size(24.dp),
+                YukiPortrait(
+                    activity = presence?.activity ?: YukiActivity.IDLE, mood = presence?.mood ?: YukiMood.NEUTRAL,
+                    modifier = if (compact) Modifier.size(54.dp, 68.dp) else Modifier.size(74.dp, 82.dp),
+                    accessory = presence?.accessory,
+                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(TwoHeartsTokens.Spacing.tightGap),
+                ) {
+                    Text(
+                        presence?.name ?: "Yuki", style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        presence?.statusLine ?: "Come say hello",
+                        style = MaterialTheme.typography.bodyMedium, color = thColors.textSecondary,
+                    )
+                    if (presence != null && presence.level > 1) Text(
+                        if (compact) "Level ${presence.level}" else "Companion level ${presence.level}",
+                        style = MaterialTheme.typography.bodySmall, color = thColors.textTertiary,
+                    )
+                }
+                if (!compact) Icon(
+                    ThIcons.ChevronRight, contentDescription = null,
+                    tint = thColors.roseDeep, modifier = Modifier.size(20.dp),
                 )
             }
-
-            Spacer(modifier = Modifier.width(TwoHeartsTokens.Spacing.space3))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = presence?.name ?: "Yuki",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.tightGap))
-                Text(
-                    text = presence?.statusLine ?: "Come say hello",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = thColors.textSecondary,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-
-            if (presence != null) {
-                Text(
-                    text = "Lv ${presence.level}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = thColors.textTertiary,
-                )
-            }
-
-            Spacer(modifier = Modifier.width(TwoHeartsTokens.Spacing.space2))
-
-            Icon(
-                imageVector = ThIcons.ChevronRight,
-                contentDescription = null,
-                tint = thColors.textTertiary,
-                modifier = Modifier.size(20.dp),
-            )
         }
     }
 }
@@ -639,4 +628,7 @@ data class YukiPresence(
     val name: String,
     val statusLine: String,
     val level: Int,
+    val activity: YukiActivity = YukiActivity.IDLE,
+    val mood: YukiMood = YukiMood.NEUTRAL,
+    val accessory: String? = null,
 )

@@ -38,7 +38,7 @@ internal enum class YukiMotion(
     PET(longArrayOf(140, 250, 180, 900, 230), priority = 4),
     NAP(longArrayOf(210, 360, 430), priority = 4),
     DROWSE(longArrayOf(650, 2_300, 620)),
-    WAKE(longArrayOf(260, 260, 360, 270, 250), priority = 3),
+    WAKE(longArrayOf(240, 260, 180, 340, 270, 240), priority = 3),
     QUIET(longArrayOf(180, 350, 250)),
     INTERRUPTED(longArrayOf(120, 530, 180), priority = 2);
 
@@ -60,17 +60,20 @@ internal data class YukiSpriteFrame(
 )
 
 internal fun stillYukiFrame(state: YukiState): YukiSpriteFrame {
-    val pose = when (state.activity) {
-        YukiActivity.IDLE -> moodPose(yukiMood(state))
-        YukiActivity.EATING -> YukiPose.EAT
-        YukiActivity.DRINKING -> YukiPose.DRINK
-        YukiActivity.PLAYING -> YukiPose.PAW
-        YukiActivity.SLEEPING -> YukiPose.SLEEP
-        YukiActivity.GROOMING -> YukiPose.GROOM
-        YukiActivity.BEING_PETTED, YukiActivity.PURRING -> YukiPose.ROLL
-    }
     val atBowl = state.activity == YukiActivity.EATING || state.activity == YukiActivity.DRINKING
-    return YukiSpriteFrame(pose = pose, x = if (atBowl) -.14f else 0f)
+    return YukiSpriteFrame(
+        pose = yukiRestingPose(state.activity, yukiMood(state)), x = if (atBowl) -.14f else 0f,
+    )
+}
+
+internal fun yukiRestingPose(activity: YukiActivity, mood: YukiMood): YukiPose = when (activity) {
+    YukiActivity.IDLE -> moodPose(mood)
+    YukiActivity.EATING -> YukiPose.EAT
+    YukiActivity.DRINKING -> YukiPose.DRINK
+    YukiActivity.PLAYING -> YukiPose.PAW
+    YukiActivity.SLEEPING -> YukiPose.SLEEP
+    YukiActivity.GROOMING -> YukiPose.GROOM
+    YukiActivity.BEING_PETTED, YukiActivity.PURRING -> YukiPose.ROLL
 }
 
 private fun moodPose(mood: YukiMood) = when (mood) {
@@ -142,7 +145,7 @@ internal class YukiMotionController(
     fun sample(time: Long): YukiSpriteFrame {
         val active = running
         if (active != null && time - active.since < active.duration) {
-            return active.frameAt(time).let { it.copy(stretch = breathing(time, it.pose)) }.also { frame = it }
+            return active.frameAt(time).let { it.copy(stretch = it.stretch * breathing(time, it.pose)) }.also { frame = it }
         }
         if (active != null) {
             running = null
@@ -234,7 +237,16 @@ internal class YukiMotionController(
                     facesRight = incoming.visibleFacesRight, nextFacesRight = motion.facesRight, focused = motion,
                 )
             }
-            return YukiSpriteFrame(poses[index], following, morph, x, y, facesRight = motion.facesRight, focused = motion)
+            val pose = poses[index]
+            val carePulse = when (pose) {
+                YukiPose.EAT -> mouthMotion(within, 330, .017f)
+                YukiPose.DRINK -> mouthMotion(within, 240, .013f)
+                else -> 1f
+            }
+            return YukiSpriteFrame(
+                pose, following, morph, x, y,
+                stretch = carePulse, facesRight = motion.facesRight, focused = motion,
+            )
         }
     }
 
@@ -253,3 +265,10 @@ private val YukiSpriteFrame.visiblePose get() = if (blend > .5f) nextPose else p
 private val YukiSpriteFrame.visibleFacesRight get() = if (blend > .5f) nextFacesRight else facesRight
 private fun ease(progress: Float): Float = progress.coerceIn(0f, 1f).let { it * it * (3f - 2f * it) }
 private fun mix(from: Float, to: Float, fraction: Float) = from + (to - from) * fraction
+
+// Small care beats around the planted paw line make a held eating pose read
+// as bites or laps, including a brief spring back before the next beat.
+private fun mouthMotion(elapsed: Long, period: Long, depth: Float): Float {
+    val phase = (elapsed % period).toFloat() / period
+    return 1f - depth * sin(phase * PI).toFloat()
+}

@@ -32,11 +32,12 @@ class YukiService(context: Context) {
         selectToy(applyTimeDecay(loadYukiState(now), now), toy)
     }
 
-    fun loadYukiState(now: Instant = Instant.now()): YukiState {
-        val raw = runCatching { prefs.getString(JSON_KEY, null) }.getOrNull()
-            ?: return YukiState.createDefault(now = now)
-        val parsed = runCatching { JSONObject(raw) }.getOrNull()
-            ?: return YukiState.createDefault(now = now)
+    fun loadYukiState(now: Instant = Instant.now()): YukiState =
+        readSavedYukiState(now) ?: YukiState.createDefault(now = now)
+
+    internal fun readSavedYukiState(now: Instant): YukiState? {
+        val raw = runCatching { prefs.getString(JSON_KEY, null) }.getOrNull() ?: return null
+        val parsed = runCatching { JSONObject(raw) }.getOrNull() ?: return null
         val hunger = parsed.optInt("hunger", 80).coerceIn(0, 100)
         val energy = parsed.optInt("energy", 90).coerceIn(0, 100)
         val happiness = parsed.optInt("happiness", 85).coerceIn(0, 100)

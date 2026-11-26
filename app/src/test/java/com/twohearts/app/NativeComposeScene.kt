@@ -102,11 +102,17 @@ internal class NativeComposeScene(private val outDir: File) : AutoCloseable {
         it.config.getOrNull(SemanticsProperties.ContentDescription)?.contains(label) == true
     }
     fun scrollActivityBy(pixels: Float): Boolean {
-        layout(activityView)
-        val action = nodes(activityView).firstNotNullOfOrNull { it.config.getOrNull(SemanticsActions.ScrollBy)?.action }
+        return scrollBy(activityView, pixels)
+    }
+
+    fun scrollDialogBy(pixels: Float): Boolean = scrollBy(dialogView(), pixels)
+
+    private fun scrollBy(view: View, pixels: Float): Boolean {
+        layout(view)
+        val action = nodes(view).firstNotNullOfOrNull { it.config.getOrNull(SemanticsActions.ScrollBy)?.action }
         val handled = action?.invoke(0f, pixels) == true
         advanceFrames()
-        layout(activityView)
+        layout(view)
         return handled
     }
 
@@ -119,6 +125,7 @@ internal class NativeComposeScene(private val outDir: File) : AutoCloseable {
         layout(view)
         val action = nodes(view).firstOrNull {
             it.config.getOrNull(SemanticsProperties.Text)?.any { item -> item.text == label } == true &&
+                it.config.getOrNull(SemanticsProperties.Disabled) == null &&
                 it.config.getOrNull(SemanticsActions.OnClick) != null
         }?.config?.getOrNull(SemanticsActions.OnClick)?.action
         val handled = action?.invoke() == true

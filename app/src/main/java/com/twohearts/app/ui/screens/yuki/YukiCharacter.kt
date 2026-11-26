@@ -1,15 +1,16 @@
 package com.twohearts.app.ui.screens.yuki
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,15 +22,13 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.platform.LocalContext
@@ -38,48 +37,31 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.twohearts.app.data.game.YukiActivity
 import com.twohearts.app.data.game.YukiState
-import com.twohearts.app.data.game.YukiToy
 import com.twohearts.app.data.game.activityElapsedMillis
 import com.twohearts.app.ui.components.ThIcons
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 import com.twohearts.app.ui.theme.LocalTwoHeartsMotion
 import java.time.Instant
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
 internal fun YukiRoom(state: YukiState, animate: Boolean, onPet: (() -> Unit)? = null, refusal: Int = 0) {
-    val colors = LocalTwoHeartsColors.current
-    Box(
-        Modifier.fillMaxWidth().height(260.dp).clip(RoundedCornerShape(24.dp))
-            .background(Brush.verticalGradient(listOf(colors.surfaceWarm, colors.surfaceBlush)))
-            .then(if (onPet == null) Modifier else Modifier.clickable(
-                role = Role.Button, onClickLabel = "Pet Yuki", onClick = onPet,
-            )),
-        contentAlignment = Alignment.BottomCenter,
-    ) {
-        Canvas(Modifier.matchParentSize()) {
-            val floor = size.height * .73f
-            drawRect(colors.surfaceElevated.copy(alpha = .72f), Offset(0f, floor), Size(size.width, size.height - floor))
-            val window = Size(size.width * .28f, size.height * .39f)
-            val origin = Offset(size.width * .63f, size.height * .11f)
-            drawRoundRect(colors.goldBg, origin, window, CornerRadius(18.dp.toPx()))
-            drawLine(colors.goldInk.copy(alpha = .24f), origin + Offset(window.width / 2, 0f), origin + Offset(window.width / 2, window.height), 2.dp.toPx())
-            drawLine(colors.goldInk.copy(alpha = .24f), origin + Offset(0f, window.height / 2), origin + Offset(window.width, window.height / 2), 2.dp.toPx())
-            drawOval(colors.roseMuted.copy(alpha = .28f), Offset(size.width * .14f, size.height * .78f), Size(size.width * .72f, size.height * .13f))
-            drawOval(colors.roseDeep.copy(alpha = .63f), Offset(size.width * .08f, size.height * .81f), Size(size.width * .13f, size.height * .045f))
-            if (state.activity == YukiActivity.EATING || state.activity == YukiActivity.DRINKING) {
-                val rim = if (state.activity == YukiActivity.DRINKING) colors.sage else colors.goldInk
-                drawOval(rim, Offset(size.width * .091f, size.height * .81f), Size(size.width * .108f, size.height * .019f))
-            }
-            if (state.selectedToy == YukiToy.BALL) {
-                drawCircle(colors.goldInk, radius = 8.dp.toPx(), center = Offset(size.width * .84f, size.height * .82f))
-            }
+    val dark = MaterialTheme.colorScheme.background.luminance() < .25f
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        Box(
+            Modifier.fillMaxWidth().height((maxWidth / 1.25f).coerceIn(214.dp, 302.dp)).clip(RoundedCornerShape(24.dp))
+                .then(if (onPet == null) Modifier else Modifier.clickable(
+                    role = Role.Button, onClickLabel = "Pet Yuki", onClick = onPet,
+                )),
+            contentAlignment = Alignment.BottomCenter,
+        ) {
+            Canvas(Modifier.matchParentSize()) { drawYukiRoom(dark, state.activity, state.selectedToy) }
+            YukiSprite(state, animate, refusal, Modifier.matchParentSize())
         }
-        YukiSprite(state, animate, refusal, Modifier.matchParentSize())
     }
 }
 
@@ -155,18 +137,36 @@ private fun YukiSprite(state: YukiState, animate: Boolean, refusal: Int, modifie
             val front = art[current.pose] ?: art[YukiPose.SIT] ?: return@Canvas
             val next = art[current.nextPose]
             val samePose = next === front && current.facesRight == current.nextFacesRight
+            var outfitFrame = current
+            var outfitWidth = 1f
             if (next == null || samePose || current.blend <= 0f) {
                 drawSprite(front, current)
             } else if (current.blend >= 1f) {
                 drawSprite(next, current, facesRight = current.nextFacesRight)
+            } else if (current.facesRight != current.nextFacesRight) {
+                val turningScale = .84f + .16f * abs(2f * current.blend - 1f)
+                val turningToNext = current.blend >= .5f
+                outfitFrame = current.copy(
+                    pose = if (turningToNext) current.nextPose else current.pose,
+                    facesRight = if (turningToNext) current.nextFacesRight else current.facesRight,
+                    blend = 0f,
+                )
+                outfitWidth = turningScale
+                drawSprite(if (turningToNext) next else front, outfitFrame, horizontalScale = turningScale)
             } else {
-                // Interpolate premultiplied pixels so solid shared areas stay
-                // opaque while the outline changes.
+                // Follow the changing head height while keeping the paw line
+                // fixed. The bounded adjustment keeps both drawings readable.
+                val firstHead = registeredYukiHeadHeight(current.pose)
+                val nextHead = registeredYukiHeadHeight(current.nextPose)
+                val blendedHead = firstHead + (nextHead - firstHead) * current.blend
+                val firstScale = (blendedHead / firstHead).coerceIn(.84f, 1.16f)
+                val nextScale = (blendedHead / nextHead).coerceIn(.84f, 1.16f)
                 drawContext.canvas.saveLayer(Rect(Offset.Zero, size), layer)
-                drawSprite(front, current, 1f - current.blend)
-                drawSprite(next, current, current.blend, BlendMode.Plus, current.nextFacesRight)
+                drawSprite(front, current, 1f - current.blend, verticalScale = firstScale)
+                drawSprite(next, current, current.blend, BlendMode.Plus, current.nextFacesRight, verticalScale = nextScale)
                 drawContext.canvas.restore()
             }
+            drawYukiWardrobe(state.accessory, outfitFrame, spriteGround(current), spriteRatio(), outfitWidth)
         }
     } else {
         Icon(
@@ -178,18 +178,23 @@ private fun YukiSprite(state: YukiState, animate: Boolean, refusal: Int, modifie
 
 private fun DrawScope.drawSprite(
     tile: ImageBitmap, frame: YukiSpriteFrame, alpha: Float = 1f, blendMode: BlendMode = BlendMode.SrcOver,
-    facesRight: Boolean = frame.facesRight,
+    facesRight: Boolean = frame.facesRight, verticalScale: Float = 1f, horizontalScale: Float = 1f,
 ) {
-    val fit = minOf(size.width * .84f / YukiArt.WIDTH, size.height * .79f / YukiArt.HEIGHT)
-    val center = size.width * (.5f + frame.x)
-    val floor = size.height * (.852f - frame.lift)
+    val fit = spriteRatio()
+    val ground = spriteGround(frame)
     val width = (YukiArt.WIDTH * fit).roundToInt().coerceAtLeast(1)
     val height = (YukiArt.HEIGHT * fit).roundToInt().coerceAtLeast(1)
     withTransform({
-        translate(center, floor)
-        scale(if (facesRight) -1f else 1f, frame.stretch, Offset.Zero)
+        translate(ground.x, ground.y)
+        scale(if (facesRight) -horizontalScale else horizontalScale, frame.stretch * verticalScale, Offset.Zero)
         translate(-YukiArt.GROUND_X * fit, -YukiArt.GROUND_Y * fit)
     }) {
         drawImage(tile, dstSize = IntSize(width, height), alpha = alpha, blendMode = blendMode)
     }
 }
+
+
+private fun DrawScope.spriteRatio() = minOf(size.width * .84f / YukiArt.WIDTH, size.height * .79f / YukiArt.HEIGHT)
+
+private fun DrawScope.spriteGround(frame: YukiSpriteFrame) =
+    Offset(size.width * (.5f + frame.x), size.height * (.852f - frame.lift))

@@ -31,4 +31,8 @@ Stage 17 passed on `d74c35dd0bf629db86f6c8a5a4c6e9a23e67c02d`. Reviewed the Yuki
 - [x] Verify suspend and resume, reduced motion, stable anchors, and actual Compose frame sequences in automated tests.
 - [x] Prove consistent elapsed-time updates, old-save recovery, duplicate suppression and persistence.
 - [x] Pass both full suites and verify the debug APK.
-- [ ] Commit, push, verify exact CI and artifact, and continue to the room and Home integration stage.
+- [x] Commit, push, verify exact CI and artifact, and continue to the room and Home integration stage.
+
+## Remote verification
+
+GitHub confirmed `03d68fd182f23f26cd1a3f31a8a8446dffdf6990` on `master`. Build Android APK run `45871221277` passed and published `twohearts-debug-apk` artifact `15143197456` for that commit. [Commit](https://github.com/https10011/2HEARTS2/commit/03d68fd182f23f26cd1a3f31a8a8446dffdf6990) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45871221277) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45871221277/artifacts/15143197456)

@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- **Latest verified implementation commit** — `d74c35dd0bf629db86f6c8a5a4c6e9a23e67c02d`. Git and CI verified the Yuki art pipeline. [Commit](https://github.com/https10011/2HEARTS2/commit/d74c35dd0bf629db86f6c8a5a4c6e9a23e67c02d) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45529359216) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45529359216/artifacts/15139834523)
+- **Latest verified implementation commit** — `03d68fd182f23f26cd1a3f31a8a8446dffdf6990`. Git and CI verified the Yuki engine and persistence. [Commit](https://github.com/https10011/2HEARTS2/commit/03d68fd182f23f26cd1a3f31a8a8446dffdf6990) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45871221277) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45871221277/artifacts/15143197456)
 - **Stage 1 complete** — JDK 17 and SDK 35 reproduced the debug APK and both unit suites. Each variant passed 134 tests, and the native harnesses produced 149 renders. The report records the screen inventory, visual evidence, and emulator constraints.
 - **Stage 2 complete** — Fixed the Room migration for the optional profile photo column and registered the existing indexes in schema 14. Both unit-test variants passed 137 tests and CI packaged a verified APK. A same-signer Android 13 emulator update launched, migrated, and retained the test note. The transformed APK’s handset walkthrough remains pending. [Stage 2 report](Stage-2/REPORT.md)
 - **Stage 3 complete** — The palette and licensed bundled fonts rendered in both themes, including 360 dp at 200% effective font scale. Both unit suites passed 139 tests, and the APK and resources verified. The published stage workflow passed. [Stage 3 report](Stage-3/REPORT.md)
@@ -20,7 +20,8 @@
 - **Stage 15 complete** — Settings, profiles, search and local utilities have native evidence. The exact import preview commits in Room, failed writes roll back, and search excludes Vault. Both full suites passed 228 tests, and the local APK verified. CI passed and published the exact APK. [Stage 15 report](Stage-15/REPORT.md)
 - **Stage 16 complete** — App lock and Vault have revised native screens. A cold PIN gate and a simulated timeout hide Home. File storage and cleanup honor live Vault references. Both full suites passed 236 tests, the signed APK verified, and CI published the APK for the exact commit. Physical Keystore and media playback remain release checks. [Stage 16 report](Stage-16/REPORT.md)
 - **Stage 17 complete** — The pipeline generates 26 registered sprites from 21 unchanged originals. Byte comparison and the native room review passed. Both variants passed 240 tests, and the fresh signed APK measured 27,780,144 bytes. CI passed on its second attempt and published the APK for the exact source commit. [Stage 17 report](Stage-17/REPORT.md)
-- **Stage 18 locally verified** — Yuki uses a seeded motion controller and a lifecycle-aware Canvas. Separate service instances accepted a concurrent care action once, and earlier saves and time advancement passed the regression checks. Both full suites passed 249 tests, native motion was inspected, and the signed APK verified. Exact remote CI remains the next gate. [Stage 18 report](Stage-18/REPORT.md)
+- **Stage 18 complete** — Yuki uses a seeded motion controller and a lifecycle-aware Canvas. Concurrent care is accepted once, and earlier saves and time advancement passed the regression checks. Both suites passed 249 tests, native motion was inspected, and CI published the APK for the exact commit. [Stage 18 report](Stage-18/REPORT.md)
+- **Stage 19 locally verified** — Yuki's room, care, keepsakes, visible apparel and Home preview passed the native review and motion recordings. Both full suites passed 255 tests and the signed APK verified. Exact remote CI is the next gate. Handset frame timing remains pending. [Stage 19 report](Stage-19/REPORT.md)
 - **Signing and upgrade** — The two downloaded CI APKs have different debug signing certificates. The owner confirmed normal operation of the already installed app, which remains the working baseline. A same-signer local upgrade retained data in the guest. The published CI debug packages require a compatible signer to update an older installation in place.
 
 ## Intake checkpoint
@@ -30,7 +31,7 @@
 - **Build and tests** — The pre-transformation Actions run succeeded and listed a downloadable artifact. The Phase 20 report records 134 tests per variant and a successful local debug build. No fresh local transformation tests have run. [Actions run](https://github.com/https10011/2HEARTS2/actions/runs/44439439508) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44439439508/artifacts/14489748983) · [Phase 20 report](../UI-UX/Phase-20/PHASE-20-FINAL-CONSOLIDATION.md)
 - **Visual and runtime evidence** — The baseline review used prior Compose renders and the Phase 20 Android 13 emulator report. Fresh renders and signed-candidate verification remain pending.
 - **Environment** — Preflight found Java 21 and GitHub CLI. JDK 17, SDK 35, `adb`, and Android runtime setup are Stage 1 work. The host exposes no `/dev/kvm`.
-- **Next task** — Verify the published Stage 18 CI run and APK, then begin the room and Home integration. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
+- **Next task** — Verify the published Stage 19 CI and APK, then run the cross-application audit. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
 
 ## Stage status
 
@@ -53,8 +54,8 @@
 | 15. Settings, Profile, Search, and utilities | Complete |
 | 16. App lock and Vault | Complete |
 | 17. Yuki art pipeline | Complete |
-| 18. Yuki engine and persistence | Local tests, visual review, and APK passed. CI verification pending |
-| 19. Yuki room and Home integration | Pending |
+| 18. Yuki engine and persistence | Complete |
+| 19. Yuki room and Home integration | Local tests, visual review, and APK passed. CI verification pending |
 | 20. Full visual, accessibility, and performance audit | Pending |
 | 21. Repository cleanup | Pending |
 | 22. Android release rehearsal | Pending |

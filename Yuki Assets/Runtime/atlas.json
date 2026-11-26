@@ -196,6 +196,7 @@
     "wake": [
       "sleep",
       "loaf",
+      "idle",
       "stretch",
       "stand",
       "sit"
