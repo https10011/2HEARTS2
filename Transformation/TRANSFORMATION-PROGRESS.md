@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- **Latest verified checkpoint** — `7ddcad4cf6ee74787370c2a5e1f6909aeef68ea5`. Git and CI verified repository cleanup. [Commit](https://github.com/https10011/2HEARTS2/commit/7ddcad4cf6ee74787370c2a5e1f6909aeef68ea5) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45918312614) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45918312614/artifacts/15163390569)
+- **Latest verified rehearsal checkpoint** — `616b1f29b69cb48a226a839ccc1b727afb7688a4`. Git and CI verified packaging and Android runtime jobs on API 26, 33, and 35. [Commit](https://github.com/https10011/2HEARTS2/commit/616b1f29b69cb48a226a839ccc1b727afb7688a4) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45922098054) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45922098054/artifacts/15164697277)
 - **Stage 1 complete** — JDK 17 and SDK 35 reproduced the debug APK and both unit suites. Each variant passed 134 tests, and the native harnesses produced 149 renders. The report records the screen inventory, visual evidence, and emulator constraints.
 - **Stage 2 complete** — Fixed the Room migration for the optional profile photo column and registered the existing indexes in schema 14. Both unit-test variants passed 137 tests and CI packaged a verified APK. A same-signer Android 13 emulator update launched, migrated, and retained the test note. The transformed APK’s handset walkthrough remains pending. [Stage 2 report](Stage-2/REPORT.md)
 - **Stage 3 complete** — The palette and licensed bundled fonts rendered in both themes, including 360 dp at 200% effective font scale. Both unit suites passed 139 tests, and the APK and resources verified. The published stage workflow passed. [Stage 3 report](Stage-3/REPORT.md)
@@ -24,7 +24,8 @@
 - **Stage 19 complete** — Yuki's room, care, keepsakes, visible apparel and Home preview passed native review and motion recordings. Both variants passed 255 tests. CI passed with the revised test endpoint and published the APK for the exact commit. Handset frame timing remains pending. [Stage 19 report](Stage-19/REPORT.md)
 - **Stage 20 complete** — Reviewed the full route inventory and 128 fresh native captures. Shared confirmations, dark surfaces, narrow navigation, and Yuki's landing passed rerender review. Both variants passed 258 tests, the signed debug APK verified, and CI published the artifact for the exact commit. [Stage 20 report](Stage-20/REPORT.md)
 - **Stage 21 complete** — Archived the two superseded master plans, updated reference links, and consolidated the active project guide. The debug suite ran all 258 tests from a clean checkout. The rebuilt signed APK’s archive entries match the prior local build. CI published the artifact for the exact commit. [Stage 21 report](Stage-21/REPORT.md)
-- **Stage 22 in progress** — The signed APK passed installed startup on API 26 and 35 and the first-use, PIN, returning-note, and Yuki walkthrough on API 33. Android 13 instrumentation passed actual video playback and system reminder delivery. Run `45921562421` is testing the revised legacy note fixture and in-place update on `a19a1b8ac8243ebb81590376b6d6d33b81042ac2`. [Stage 22 report](Stage-22/REPORT.md) · [Current CI](https://github.com/https10011/2HEARTS2/actions/runs/45921562421)
+- **Stage 22 complete** — The exact signed APK passed installed startup on API 26, 33, and 35. API 33 passed first use, PIN, actual video playback and reminder delivery, Yuki’s foreground return, and an in-place fixture update retaining the note and profiles. The transformed handset walkthrough remains pending. [Stage 22 report](Stage-22/REPORT.md) · [Verified CI](https://github.com/https10011/2HEARTS2/actions/runs/45922098054)
+- **Stage 23 product audit complete** — Reviewed all 24 route groups and 23 stage reports. Fresh debug and release suites passed 258 tests each and both APKs built. The **Verify Android delivery** job tracks the exact final commit’s remote acceptance and records its signed APK identity beside the artifact. [Final report](Stage-23/REPORT.md) · [Delivery workflow](https://github.com/https10011/2HEARTS2/actions/workflows/build-android.yml)
 - **Signing and upgrade** — The two downloaded CI APKs have different debug signing certificates. The owner confirmed normal operation of the already installed app, which remains the working baseline. A same-signer local upgrade retained data in the guest. The published CI debug packages require a compatible signer to update an older installation in place.
 
 ## Intake checkpoint
@@ -34,7 +35,7 @@
 - **Build and tests** — The pre-transformation Actions run succeeded and listed a downloadable artifact. The Phase 20 report records 134 tests per variant and a successful local debug build. No fresh local transformation tests have run. [Actions run](https://github.com/https10011/2HEARTS2/actions/runs/44439439508) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44439439508/artifacts/14489748983) · [Phase 20 report](../UI-UX/Phase-20/PHASE-20-FINAL-CONSOLIDATION.md)
 - **Visual and runtime evidence** — The baseline review used prior Compose renders and the Phase 20 Android 13 emulator report. Fresh renders and signed-candidate verification remain pending.
 - **Environment** — Preflight found Java 21 and GitHub CLI. JDK 17, SDK 35, `adb`, and Android runtime setup are Stage 1 work. The host exposes no `/dev/kvm`.
-- **Next task** — Exercise the signed APK on a hosted Android runtime and record the runtime and physical-device evidence. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
+- **Delivery gate** — Use the final `master` commit’s delivery receipt to verify the signed APK, archive digest, package metadata, and emulator results together. The transformed TECNO walkthrough remains the next physical verification item. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md) · [Delivery workflow](https://github.com/https10011/2HEARTS2/actions/workflows/build-android.yml)
 
 ## Stage status
 
@@ -61,5 +62,5 @@
 | 19. Yuki room and Home integration | Complete |
 | 20. Full visual, accessibility, and performance audit | Complete |
 | 21. Repository cleanup | Complete |
-| 22. Android release rehearsal | In progress |
-| 23. Final product acceptance and APK | Pending |
+| 22. Android release rehearsal | Complete, TECNO walkthrough pending |
+| 23. Final product acceptance and APK | Local audit complete. Exact remote acceptance in the delivery receipt |

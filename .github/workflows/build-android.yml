@@ -19,6 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      apk_id: ${{ steps.publish.outputs.artifact-id }}
+      apk_url: ${{ steps.publish.outputs.artifact-url }}
+      apk_archive_digest: ${{ steps.publish.outputs.artifact-digest }}
 
     steps:
       - name: Checkout repository
@@ -46,6 +50,7 @@ jobs:
         run: ./gradlew :app:assembleDebugAndroidTest --no-daemon
 
       - name: Upload APK artifact
+        id: publish
         uses: actions/upload-artifact@v4
         with:
           name: twohearts-debug-apk
@@ -168,4 +173,69 @@ jobs:
           name: twohearts-runtime-api-${{ matrix.api }}
           path: runtime-evidence/
           if-no-files-found: warn
+          retention-days: 30
+
+  delivery-receipt:
+    name: Verify Android delivery
+    needs: [build-apk, runtime-rehearsal]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      APK_ARTIFACT_ID: ${{ needs.build-apk.outputs.apk_id }}
+      APK_ARTIFACT_URL: ${{ needs.build-apk.outputs.apk_url }}
+      APK_ARCHIVE_DIGEST: ${{ needs.build-apk.outputs.apk_archive_digest }}
+
+    steps:
+      - name: Retrieve tested APK
+        uses: actions/download-artifact@v4
+        with:
+          name: twohearts-debug-apk
+          path: candidate
+
+      - name: Retrieve emulator receipts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: twohearts-runtime-api-*
+          path: rehearsal
+
+      - name: Verify and record package identity
+        run: |
+          set -euo pipefail
+          sdk_tools="$ANDROID_HOME/build-tools/35.0.0"
+          if [ ! -x "$sdk_tools/apksigner" ]; then
+            sdkmanager 'build-tools;35.0.0'
+          fi
+          apk=candidate/app-debug.apk
+          unzip -tq "$apk"
+          "$sdk_tools/zipalign" -c 4 "$apk"
+          metadata=$("$sdk_tools/aapt" dump badging "$apk")
+          signing=$("$sdk_tools/apksigner" verify --verbose --print-certs "$apk")
+          apk_digest=$(sha256sum "$apk" | cut -d' ' -f1)
+          for api in 26 33 35; do
+            run="rehearsal/twohearts-runtime-api-$api"
+            test "$(cat "$run/source-commit.txt")" = "$GITHUB_SHA"
+            test "$(cut -d' ' -f1 "$run/apk-sha256.txt")" = "$apk_digest"
+          done
+          test -n "$APK_ARTIFACT_ID" && test -n "$APK_ARTIFACT_URL" && test -n "$APK_ARCHIVE_DIGEST"
+          {
+            printf '# TwoHearts APK delivery\n\n'
+            printf -- '- Source commit `%s`\n' "$GITHUB_SHA"
+            printf -- '- [Build Android APK](%s/%s/actions/runs/%s)\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID"
+            printf -- '- [twohearts-debug-apk](%s), artifact `%s`\n' "$APK_ARTIFACT_URL" "$APK_ARTIFACT_ID"
+            printf -- '- Archive SHA-256 `%s`\n' "$APK_ARCHIVE_DIGEST"
+            printf -- '- APK SHA-256 `%s`\n' "$apk_digest"
+            printf -- '- Debug and release unit tests passed. Android runtime jobs passed on API 26, 33, and 35.\n'
+            printf '\n```text\n'
+            printf '%s\n' "$metadata" | grep -E '^package:|^sdkVersion:|^targetSdkVersion:|^launchable-activity:|^native-code:'
+            printf '%s\n' "$signing" | grep -E '^Verified using v2|^Signer #1 certificate (DN|SHA-256 digest)'
+            printf '```\n'
+          } | tee ANDROID-DELIVERY.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish delivery receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: twohearts-delivery-receipt
+          path: ANDROID-DELIVERY.md
+          if-no-files-found: error
           retention-days: 30
