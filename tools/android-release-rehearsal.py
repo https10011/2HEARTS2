@@ -67,6 +67,15 @@ class Rehearsal:
             prefix,
         ))
 
+    def reveal(self, label, *, prefix=False):
+        width, height = map(int, re.findall(r"size: (\d+)x(\d+)", adb("shell", "wm", "size").decode())[-1])
+        for _ in range(4):
+            for node in self.dump().iter("node"):
+                texts = self.node_labels(node)
+                if (prefix and any(text.startswith(label) for text in texts)) or label in texts:
+                    return
+            adb("shell", "input", "swipe", width // 2, height * 4 // 5, width // 2, height // 4, 350)
+
     def enter(self, value, index=0):
         field = self.find(lambda node: node.get("class") == "android.widget.EditText", "text field")
         if index:
@@ -112,6 +121,8 @@ class Rehearsal:
         self.tap("Continue")
         self.enter("Sam")
         self.tap_prefix("The day you count from:")
+        if is_baseline:
+            self.reveal("Use ", prefix=True)
         self.tap_prefix("Use ")
         self.tap("Continue")
         self.tap("Continue")
@@ -148,14 +159,7 @@ class Rehearsal:
 
     def yuki(self):
         self.tap_prefix("Us")
-        for _ in range(4):
-            tree = self.dump()
-            if any("Yuki" in self.node_labels(node) for node in tree.iter("node")):
-                break
-            match = re.findall(r"size: (\d+)x(\d+)", adb("shell", "wm", "size").decode())[-1]
-            width, bottom = map(int, match)
-            x = width // 2
-            adb("shell", "input", "swipe", x, bottom * 4 // 5, x, bottom // 4, 350)
+        self.reveal("Yuki")
         self.tap("Yuki")
         self.see("Yuki’s room")
         self.capture("yuki-room")
@@ -201,12 +205,14 @@ def main():
         if api == 33:
             rehearsal.onboard()
             rehearsal.capture("home")
+            print("Onboarding and Android permission denial passed", flush=True)
             rehearsal.add_note()
             rehearsal.launch("returning-launch", cold=True)
             rehearsal.unlock()
             rehearsal.tap("Notes")
             rehearsal.see(FIXTURE_NOTE)
             rehearsal.yuki()
+            print("Cold PIN gate, local note, and Yuki return passed", flush=True)
         else:
             adb("shell", "input", "keyevent", "KEYCODE_HOME")
             rehearsal.launch("warm-launch")
@@ -217,6 +223,7 @@ def main():
             rehearsal.launch("baseline-launch", cold=True)
             rehearsal.onboard(is_baseline=True)
             rehearsal.add_note()
+            print("Populated the schema-13 fixture", flush=True)
             rehearsal.install(upgrade_fixtures / "upgrade.apk", upgrade=True)
             rehearsal.launch("retained-data-launch", cold=True)
             rehearsal.see("Avery")
