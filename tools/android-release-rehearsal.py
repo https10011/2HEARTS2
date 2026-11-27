@@ -90,6 +90,16 @@ class Rehearsal:
     def back():
         adb("shell", "input", "keyevent", "KEYCODE_BACK")
 
+    def background(self):
+        activity = adb(
+            "shell", "cmd", "package", "resolve-activity", "--brief",
+            "-a", "android.intent.action.MAIN", "-c", "android.intent.category.HOME",
+        ).decode().strip().splitlines()[-1]
+        assert "/" in activity, f"No Android launcher resolved: {activity}"
+        launcher = activity.split("/", 1)[0]
+        adb("shell", "input", "keyevent", "KEYCODE_HOME")
+        self.find(lambda node: node.get("package") == launcher, "the Android launcher")
+
     def capture(self, name):
         png = adb("exec-out", "screencap", "-p")
         assert png.startswith(b"\x89PNG\r\n\x1a\n"), name
@@ -167,7 +177,7 @@ class Rehearsal:
         self.capture("yuki-room")
         self.tap("Pet")
         self.see("Yuki’s room")
-        adb("shell", "input", "keyevent", "KEYCODE_HOME")
+        self.background()
         self.launch("yuki-warm-launch")
         self.see("Yuki’s room")
         self.capture("yuki-after-resume")
@@ -233,7 +243,7 @@ def main():
             if args.instrumentation:
                 rehearsal.instrument(args.instrumentation)
         else:
-            adb("shell", "input", "keyevent", "KEYCODE_HOME")
+            rehearsal.background()
             rehearsal.launch("warm-launch")
             rehearsal.see("Begin")
         if upgrade_fixtures:
