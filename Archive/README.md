@@ -2,7 +2,8 @@
 
 This archive preserves the **complete legacy React/Vite/Capacitor TwoHearts
 implementation** and all associated historical documentation for reference
-during the native Android migration.
+from the native Android migration. [Planning](Planning/) holds the two
+completed initiatives’ master plans.
 
 ---
 
@@ -181,5 +182,5 @@ Source SVG files: 20 rose-lily decorative vectors and the TwoHearts logo.
 The `Migration/` directory at the repository root is **NOT** part of
 this archive. It is the dedicated location for the native Android
 migration planning and documentation. See
-`Migration/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md` for the
+[archived migration roadmap](Planning/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md) for the
 comprehensive migration roadmap.

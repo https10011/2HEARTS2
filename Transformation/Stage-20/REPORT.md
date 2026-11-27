@@ -62,4 +62,8 @@ The overview sheets contain 128 native Compose renders with isolated test record
 - [x] Review first-use, normal, empty, error, and long-content states across the route inventory. Rerender changes in dark and light and check the affected narrow, short, and 200% layouts.
 - [x] Verify control targets, labels, modal boundaries, busy state, card text contrast, route reachability, and frame continuity through the affected sequence.
 - [x] Run both full test variants, regenerate Yuki art deterministically, check the APK, and review the Git diff.
-- [ ] Verify this checkpoint on `origin/master` and its exact CI and artifact, then begin repository cleanup.
+- [x] Verify this checkpoint on `origin/master` and its exact CI and artifact, then begin repository cleanup.
+
+## Remote verification
+
+GitHub confirmed `ad00145944a3ef4ed6b7129bebe4db2ade08f6f0` on `master`. Build Android APK run `45917209567` passed on its first attempt and published `twohearts-debug-apk` artifact `15162473323` for that commit. [Commit](https://github.com/https10011/2HEARTS2/commit/ad00145944a3ef4ed6b7129bebe4db2ade08f6f0) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45917209567) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45917209567/artifacts/15162473323)

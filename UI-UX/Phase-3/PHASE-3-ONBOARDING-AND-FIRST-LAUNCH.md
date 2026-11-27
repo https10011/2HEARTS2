@@ -106,7 +106,7 @@ Settings, or Yuki. Home begins in Phase 4 (§12).
 
 ## 3. Authoritative References
 
-- `UI-UX/MASTER-UI-UX-DIRECTIVE.md` — §22 Iconography, §98 Phase Roadmap,
+- `Archive/Planning/MASTER-UI-UX-DIRECTIVE.md` — §22 Iconography, §98 Phase Roadmap,
   §130 Phase Execution Rules, §149 Documentation; the onboarding and
   first-impression direction.
 - `UI-UX/Phase-0/PHASE-0-UI-UX-RECONNAISSANCE.md` — the onboarding baseline

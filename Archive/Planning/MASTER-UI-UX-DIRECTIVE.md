@@ -1,5 +1,7 @@
 TWOHEARTS — MASTER UI/UX REDESIGN DIRECTIVE
 
+> Historical plan for a completed initiative. Current work follows the [master transformation roadmap](../../Transformation/TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md).
+
 Post-Migration Product Experience, Visual Design, UX, Interaction, and Productization Specification
 
 ⸻
@@ -65,7 +67,7 @@ The Migration directory contains the recorded history of:
 
 Relevant documentation includes, but is not limited to:
 
-Migration/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md
+Archive/Planning/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md
 
 and the Stage documentation under:
 

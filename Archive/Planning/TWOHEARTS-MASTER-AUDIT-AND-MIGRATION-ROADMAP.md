@@ -1,5 +1,7 @@
 # TWOHEARTS — Master Audit, Architecture Documentation & Migration Roadmap
 
+> Historical plan for a completed initiative. Current work follows the [master transformation roadmap](../../Transformation/TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md).
+
 > **Document purpose:** Comprehensive audit of the current TwoHearts V1 application
 > and complete roadmap for future migration work. Based on actual repository inspection.
 >

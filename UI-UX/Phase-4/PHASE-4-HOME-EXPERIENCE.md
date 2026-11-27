@@ -11,7 +11,7 @@
 
 Before changing anything, the authoritative documents were read in full:
 
-- `UI-UX/MASTER-UI-UX-DIRECTIVE.md`
+- `Archive/Planning/MASTER-UI-UX-DIRECTIVE.md`
 - `UI-UX/Phase-0/PHASE-0-UI-UX-RECONNAISSANCE.md`
 - `UI-UX/Phase-1/PHASE-1-GLOBAL-VISUAL-LANGUAGE.md`
 - `UI-UX/Phase-2/PHASE-2-APP-SHELL-AND-NAVIGATION.md`

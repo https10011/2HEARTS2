@@ -1,7 +1,7 @@
 # Phase 0 — UI/UX Reconnaissance, Visual Baseline & Audit
 
 **Document type:** Post-migration UI/UX baseline (reconnaissance only)
-**Authoritative parent document:** `UI-UX/MASTER-UI-UX-DIRECTIVE.md`
+**Authoritative parent document:** `Archive/Planning/MASTER-UI-UX-DIRECTIVE.md`
 **Status:** COMPLETE — no redesign performed
 
 ---
@@ -37,7 +37,7 @@ Establish an honest, evidence-based baseline of the *current* native Kotlin/Comp
 - visual system (color, type, spacing, shape, elevation, imagery, iconography, motion)
 - UX behaviour (forms, CRUD, feedback, empty/error/loading states, confirmations, back behaviour)
 - cross-app consistency
-- product identity measured against `UI-UX/MASTER-UI-UX-DIRECTIVE.md`
+- product identity measured against `Archive/Planning/MASTER-UI-UX-DIRECTIVE.md`
 - accessibility, responsiveness, performance
 - Yuki
 
@@ -49,8 +49,8 @@ Phase 0 performs **no redesign**. It converts "the migration is finished" into "
 
 | Document | Role |
 |---|---|
-| `UI-UX/MASTER-UI-UX-DIRECTIVE.md` (3259 lines) | **Primary authority.** Read in full (sections 0–98 incl. the complete Phase 0–20 roadmap). |
-| `Migration/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md` (2232 lines) | Migration history, feature inventory, Part 9B Design/Asset Directive |
+| `Archive/Planning/MASTER-UI-UX-DIRECTIVE.md` (3259 lines) | **Primary authority.** Read in full (sections 0–98 incl. the complete Phase 0–20 roadmap). |
+| `Archive/Planning/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md` (2232 lines) | Migration history, feature inventory, Part 9B Design/Asset Directive |
 | `Migration/Stage-0` … `Migration/Stage-15` | All 16 stage documents enumerated; limitation/verification sections read |
 | `Migration/Stage-15/STAGE-15-FINAL-BUILD-AND-RELEASE.md` | Final build state + the 5 officially recorded known limitations |
 | `Yuki Assets/Yuki_Game_Engine.md` (3295 lines) | Yuki product/gameplay/asset authority (esp. §5 Authoritative Assets, §6 Fundamental Assets vs Animation, §7 Asset Integrity, §10 Behaviour State Machine) |
@@ -781,7 +781,7 @@ appears. Later phases should consolidate onto one layer rather than restyling sc
 
 ## 12. Product Identity Audit
 
-Measured against `UI-UX/MASTER-UI-UX-DIRECTIVE.md`.
+Measured against `Archive/Planning/MASTER-UI-UX-DIRECTIVE.md`.
 
 **Where it already feels like TwoHearts:**
 - The warm cream `#FDF6F0` / burgundy `#6A1B2B` palette is real, dominant, and consistent
@@ -1228,7 +1228,7 @@ they do not implement any Phase 1+ recommendation.
 
 | Requirement | Status |
 |---|---|
-| `UI-UX/MASTER-UI-UX-DIRECTIVE.md` read | ✅ (full, 3259 lines) |
+| `Archive/Planning/MASTER-UI-UX-DIRECTIVE.md` read | ✅ (full, 3259 lines) |
 | Migration documentation reviewed | ✅ (roadmap + Stage 0–15) |
 | Current native implementation inspected | ✅ (163 Kotlin files / 20,754 LOC) |
 | Actual visual inspection attempted | ✅ |

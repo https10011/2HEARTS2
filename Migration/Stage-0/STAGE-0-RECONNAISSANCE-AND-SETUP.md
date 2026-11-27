@@ -18,7 +18,7 @@ Establish the new project foundation and complete understanding of what needs to
 
 ### 2.1 Master Document Read and Understood
 
-The complete migration roadmap (`Migration/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md`, 2,232 lines) was read in full. Key sections understood:
+The complete migration roadmap (`Archive/Planning/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md`, 2,232 lines) was read in full. Key sections understood:
 
 - **Part 1–2:** TwoHearts overview and complete system audit (tech stack, architecture, data flow)
 - **Part 3:** Complete feature inventory (15 features across 77 screens)
@@ -134,7 +134,7 @@ All legacy React/Vite/Capacitor files were moved to `Archive/Legacy-React-Vite-C
 
 ### 2.6 Migration Roadmap Preserved
 
-`Migration/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md` — 2,232 lines, completely unchanged and intact. This is the governing document for all migration work.
+`Archive/Planning/TWOHEARTS-MASTER-AUDIT-AND-MIGRATION-ROADMAP.md` — 2,232 lines, completely unchanged and intact. This is the governing document for all migration work.
 
 ---
 

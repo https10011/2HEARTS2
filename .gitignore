@@ -12,8 +12,9 @@ bin/
 gen/
 out/
 
-# Gradle files
+# Local build-tool state
 .gradle/
+.kotlin/
 build/
 local.properties
 
@@ -82,6 +83,3 @@ pnpm-debug.log*
 # Vite / TS cache (legacy)
 *.tsbuildinfo
 .vite/
-
-# Brand-asset generator scratch install (see tools/generate-brand-assets.mjs)
-tools/node_modules/

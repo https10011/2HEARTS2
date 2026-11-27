@@ -1,8 +1,10 @@
 # TwoHearts autonomous execution progress
 
+This record captures the completed post-migration UI/UX initiative. [Current transformation progress](../Transformation/TRANSFORMATION-PROGRESS.md)
+
 ## Current checkpoint
 
-- **Current phase** — Phase 20 final consolidation. The master directive’s implementation phases are addressed. The final release checks and physical device confirmation are tracked below. [Master directive](MASTER-UI-UX-DIRECTIVE.md) · [Phase 20 report](Phase-20/PHASE-20-FINAL-CONSOLIDATION.md)
+- **Current phase** — Phase 20 final consolidation. The master directive’s implementation phases are addressed. The final release checks and physical device confirmation are tracked below. [Archived master directive](../Archive/Planning/MASTER-UI-UX-DIRECTIVE.md) · [Phase 20 report](Phase-20/PHASE-20-FINAL-CONSOLIDATION.md)
 - **Completed UI/UX phases at intake** — Phase 0 reconnaissance, Phase 1 visual language, Phase 2 shell and navigation, Phase 3 onboarding, and Phase 4 Home. Their implementation and reports are in the repository history.
 - **Completed since intake** — Phase 5 replaced the Us directory with a live relationship summary and feature previews. Phase 6 redesigned Memories and connected private photo/video selection, persistence, browsing, editing, and deletion. Phase 7 transformed Notes into a searchable, category-aware private writing experience. Phase 8 rebuilt Timeline around a continuous chronological story. [Phase 5 report](Phase-5/PHASE-5-US-RELATIONSHIP-HUB.md) · [Phase 6 report](Phase-6/PHASE-6-MEMORIES-EXPERIENCE.md) · [Phase 7 report](Phase-7/PHASE-7-NOTES-EXPERIENCE.md) · [Phase 8 report](Phase-8/PHASE-8-TIMELINE-EXPERIENCE.md)
 - **Phase 9** — Reminder completion and notification control, plus Important Date creation, editing, deletion, and recurrence ordering. [Phase 9 report](Phase-9/PHASE-9-REMINDERS-AND-IMPORTANT-DATES.md)
