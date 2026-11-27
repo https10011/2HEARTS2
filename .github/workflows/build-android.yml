@@ -49,3 +49,107 @@ jobs:
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
+
+  runtime-rehearsal:
+    name: Android runtime (API ${{ matrix.api }})
+    needs: build-apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [26, 33, 35]
+    env:
+      UPGRADE_BASELINE: 7a44bccfa596585d37c5f5572efd4717510485d6
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Retrieve published APK
+        uses: actions/download-artifact@v4
+        with:
+          name: twohearts-debug-apk
+          path: candidate
+
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          test -r /dev/kvm && test -w /dev/kvm
+
+      - name: Ensure APK signature tools are available
+        run: |
+          if [ ! -x "$ANDROID_HOME/build-tools/35.0.0/apksigner" ]; then
+            sdkmanager 'build-tools;35.0.0'
+          fi
+
+      - name: Set up JDK 17 for baseline build
+        if: matrix.api == 33
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle for baseline build
+        if: matrix.api == 33
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Prepare signed upgrade pair
+        if: matrix.api == 33
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin "$UPGRADE_BASELINE"
+          git worktree add --detach "$RUNNER_TEMP/twohearts-baseline" "$UPGRADE_BASELINE"
+          (cd "$RUNNER_TEMP/twohearts-baseline" && bash gradlew :app:assembleDebug --no-daemon)
+          signer="$ANDROID_HOME/build-tools/35.0.0/apksigner"
+          key="$RUNNER_TEMP/twohearts-upgrade.jks"
+          keytool -genkeypair -keystore "$key" -storepass android -keypass android \
+            -keyalg RSA -keysize 2048 -dname "CN=TwoHearts upgrade fixture" -alias fixture -validity 1
+          "$signer" sign --ks "$key" --ks-key-alias fixture --ks-pass pass:android \
+            --out "$RUNNER_TEMP/baseline.apk" "$RUNNER_TEMP/twohearts-baseline/app/build/outputs/apk/debug/app-debug.apk"
+          "$signer" sign --ks "$key" --ks-key-alias fixture --ks-pass pass:android \
+            --out "$RUNNER_TEMP/upgrade.apk" candidate/app-debug.apk
+          for apk in "$RUNNER_TEMP/baseline.apk" "$RUNNER_TEMP/upgrade.apk"; do
+            "$signer" verify --print-certs "$apk" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p'
+          done > "$RUNNER_TEMP/upgrade-signers.txt"
+          test "$(wc -l < "$RUNNER_TEMP/upgrade-signers.txt")" -eq 2
+          test "$(sort -u "$RUNNER_TEMP/upgrade-signers.txt" | wc -l)" -eq 1
+
+      - name: Record candidate identity
+        run: |
+          mkdir runtime-evidence
+          printf '%s\n' "$GITHUB_SHA" > runtime-evidence/source-commit.txt
+          sha256sum candidate/app-debug.apk > runtime-evidence/apk-sha256.txt
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs candidate/app-debug.apk > runtime-evidence/apk-signature.txt
+          if [ -f "$RUNNER_TEMP/upgrade-signers.txt" ]; then cp "$RUNNER_TEMP/upgrade-signers.txt" runtime-evidence/; fi
+
+      - name: Install and exercise candidate
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # v2.34.0
+        env:
+          REHEARSAL_API: ${{ matrix.api }}
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          script: |
+            if [ "$REHEARSAL_API" = 33 ]; then
+              python3 tools/android-release-rehearsal.py candidate/app-debug.apk runtime-evidence --full --baseline "$RUNNER_TEMP/baseline.apk" --upgrade "$RUNNER_TEMP/upgrade.apk"
+            else
+              python3 tools/android-release-rehearsal.py candidate/app-debug.apk runtime-evidence
+            fi
+
+      - name: Upload Android runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: twohearts-runtime-api-${{ matrix.api }}
+          path: runtime-evidence/
+          if-no-files-found: warn
+          retention-days: 30

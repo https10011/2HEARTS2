@@ -2,7 +2,7 @@
 
 ## Current checkpoint
 
-- **Latest verified implementation commit** — `ad00145944a3ef4ed6b7129bebe4db2ade08f6f0`. Git and CI verified the cross-app audit checkpoint. [Commit](https://github.com/https10011/2HEARTS2/commit/ad00145944a3ef4ed6b7129bebe4db2ade08f6f0) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45917209567) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45917209567/artifacts/15162473323)
+- **Latest verified checkpoint** — `7ddcad4cf6ee74787370c2a5e1f6909aeef68ea5`. Git and CI verified repository cleanup. [Commit](https://github.com/https10011/2HEARTS2/commit/7ddcad4cf6ee74787370c2a5e1f6909aeef68ea5) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45918312614) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45918312614/artifacts/15163390569)
 - **Stage 1 complete** — JDK 17 and SDK 35 reproduced the debug APK and both unit suites. Each variant passed 134 tests, and the native harnesses produced 149 renders. The report records the screen inventory, visual evidence, and emulator constraints.
 - **Stage 2 complete** — Fixed the Room migration for the optional profile photo column and registered the existing indexes in schema 14. Both unit-test variants passed 137 tests and CI packaged a verified APK. A same-signer Android 13 emulator update launched, migrated, and retained the test note. The transformed APK’s handset walkthrough remains pending. [Stage 2 report](Stage-2/REPORT.md)
 - **Stage 3 complete** — The palette and licensed bundled fonts rendered in both themes, including 360 dp at 200% effective font scale. Both unit suites passed 139 tests, and the APK and resources verified. The published stage workflow passed. [Stage 3 report](Stage-3/REPORT.md)
@@ -23,7 +23,7 @@
 - **Stage 18 complete** — Yuki uses a seeded motion controller and a lifecycle-aware Canvas. Concurrent care is accepted once, and earlier saves and time advancement passed the regression checks. Both suites passed 249 tests, native motion was inspected, and CI published the APK for the exact commit. [Stage 18 report](Stage-18/REPORT.md)
 - **Stage 19 complete** — Yuki's room, care, keepsakes, visible apparel and Home preview passed native review and motion recordings. Both variants passed 255 tests. CI passed with the revised test endpoint and published the APK for the exact commit. Handset frame timing remains pending. [Stage 19 report](Stage-19/REPORT.md)
 - **Stage 20 complete** — Reviewed the full route inventory and 128 fresh native captures. Shared confirmations, dark surfaces, narrow navigation, and Yuki's landing passed rerender review. Both variants passed 258 tests, the signed debug APK verified, and CI published the artifact for the exact commit. [Stage 20 report](Stage-20/REPORT.md)
-- **Stage 21 locally verified** — Archived the two superseded master plans, updated reference links, and consolidated the active project guide. The debug suite ran all 258 tests from a clean checkout. The rebuilt signed APK’s archive entries match the prior local build. Exact remote CI is next. [Stage 21 report](Stage-21/REPORT.md)
+- **Stage 21 complete** — Archived the two superseded master plans, updated reference links, and consolidated the active project guide. The debug suite ran all 258 tests from a clean checkout. The rebuilt signed APK’s archive entries match the prior local build. CI published the artifact for the exact commit. [Stage 21 report](Stage-21/REPORT.md)
 - **Signing and upgrade** — The two downloaded CI APKs have different debug signing certificates. The owner confirmed normal operation of the already installed app, which remains the working baseline. A same-signer local upgrade retained data in the guest. The published CI debug packages require a compatible signer to update an older installation in place.
 
 ## Intake checkpoint
@@ -33,7 +33,7 @@
 - **Build and tests** — The pre-transformation Actions run succeeded and listed a downloadable artifact. The Phase 20 report records 134 tests per variant and a successful local debug build. No fresh local transformation tests have run. [Actions run](https://github.com/https10011/2HEARTS2/actions/runs/44439439508) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/44439439508/artifacts/14489748983) · [Phase 20 report](../UI-UX/Phase-20/PHASE-20-FINAL-CONSOLIDATION.md)
 - **Visual and runtime evidence** — The baseline review used prior Compose renders and the Phase 20 Android 13 emulator report. Fresh renders and signed-candidate verification remain pending.
 - **Environment** — Preflight found Java 21 and GitHub CLI. JDK 17, SDK 35, `adb`, and Android runtime setup are Stage 1 work. The host exposes no `/dev/kvm`.
-- **Next task** — Verify the Stage 21 documentation and clean-checkout build, then run Android release rehearsal. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
+- **Next task** — Exercise the signed APK on a hosted Android runtime and record the runtime and physical-device evidence. [Master roadmap](TWOHEARTS-MASTER-TRANSFORMATION-ROADMAP.md)
 
 ## Stage status
 
@@ -59,6 +59,6 @@
 | 18. Yuki engine and persistence | Complete |
 | 19. Yuki room and Home integration | Complete |
 | 20. Full visual, accessibility, and performance audit | Complete |
-| 21. Repository cleanup | Clean-checkout tests and APK verified. CI pending |
-| 22. Android release rehearsal | Pending |
+| 21. Repository cleanup | Complete |
+| 22. Android release rehearsal | In progress |
 | 23. Final product acceptance and APK | Pending |

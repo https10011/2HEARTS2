@@ -22,4 +22,8 @@ Started from `ad00145944a3ef4ed6b7129bebe4db2ade08f6f0` after its workflow and A
 - [x] Check references and archive superseded plans while preserving implementation reports, crash records, licenses, assets, tests, and build files.
 - [x] Verify the documentation, review the staged diff, and run the suite and APK build from a clean checkout.
 - [x] Verify that packaged runtime resources and app code match the previous review. Record why fresh screen capture is unnecessary for this checkpoint.
-- [ ] Verify the exact pushed SHA and CI artifact before beginning release rehearsal.
+- [x] Verify the exact pushed SHA and CI artifact before beginning release rehearsal.
+
+## Remote verification
+
+GitHub confirmed `7ddcad4cf6ee74787370c2a5e1f6909aeef68ea5` on `master`. Build Android APK run `45918312614` passed on its first attempt and published `twohearts-debug-apk` artifact `15163390569`. [Commit](https://github.com/https10011/2HEARTS2/commit/7ddcad4cf6ee74787370c2a5e1f6909aeef68ea5) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45918312614) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45918312614/artifacts/15163390569)
