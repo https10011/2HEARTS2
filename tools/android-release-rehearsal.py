@@ -182,14 +182,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("apk", type=Path)
     parser.add_argument("evidence", type=Path)
-    parser.add_argument("--full", action="store_true")
-    parser.add_argument("--baseline", type=Path)
-    parser.add_argument("--upgrade", type=Path)
+    parser.add_argument("--upgrade-fixtures", type=Path, help="Directory with baseline.apk and upgrade.apk for API 33")
     args = parser.parse_args()
-    if bool(args.baseline) != bool(args.upgrade):
-        parser.error("supply both --baseline and --upgrade")
     assert adb("get-serialno").strip().startswith(b"emulator-"), "A disposable emulator is required"
     assert PACKAGE.encode() not in adb("shell", "pm", "list", "packages", PACKAGE), "An empty emulator is required"
+    api = int(adb("shell", "getprop", "ro.build.version.sdk").strip())
+    upgrade_fixtures = args.upgrade_fixtures if api == 33 else None
+    if upgrade_fixtures:
+        for name in ("baseline.apk", "upgrade.apk"):
+            assert (upgrade_fixtures / name).is_file(), f"Missing upgrade fixture {name}"
     adb("shell", "settings", "put", "secure", "show_ime_with_hard_keyboard", "1")
     rehearsal = Rehearsal(args.evidence)
     try:
@@ -197,7 +198,7 @@ def main():
         rehearsal.launch("fresh-launch", cold=True)
         rehearsal.see("Begin")
         rehearsal.capture("welcome")
-        if args.full:
+        if api == 33:
             rehearsal.onboard()
             rehearsal.capture("home")
             rehearsal.add_note()
@@ -210,13 +211,13 @@ def main():
             adb("shell", "input", "keyevent", "KEYCODE_HOME")
             rehearsal.launch("warm-launch")
             rehearsal.see("Begin")
-        if args.baseline:
+        if upgrade_fixtures:
             assert b"Success" in adb("uninstall", PACKAGE)
-            rehearsal.install(args.baseline)
+            rehearsal.install(upgrade_fixtures / "baseline.apk")
             rehearsal.launch("baseline-launch", cold=True)
             rehearsal.onboard(is_baseline=True)
             rehearsal.add_note()
-            rehearsal.install(args.upgrade, upgrade=True)
+            rehearsal.install(upgrade_fixtures / "upgrade.apk", upgrade=True)
             rehearsal.launch("retained-data-launch", cold=True)
             rehearsal.see("Avery")
             rehearsal.see("Sam")
