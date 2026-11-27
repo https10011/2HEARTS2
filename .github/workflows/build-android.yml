@@ -42,6 +42,9 @@ jobs:
       - name: Run unit tests
         run: ./gradlew test --no-daemon
 
+      - name: Build Android rehearsal tests
+        run: ./gradlew :app:assembleDebugAndroidTest --no-daemon
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -49,6 +52,14 @@ jobs:
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Upload Android test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: twohearts-runtime-test-apk
+          path: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+          if-no-files-found: error
+          retention-days: 7
 
   runtime-rehearsal:
     name: Android runtime (API ${{ matrix.api }})
@@ -73,6 +84,13 @@ jobs:
         with:
           name: twohearts-debug-apk
           path: candidate
+
+      - name: Retrieve instrumentation APK
+        if: matrix.api == 33
+        uses: actions/download-artifact@v4
+        with:
+          name: twohearts-runtime-test-apk
+          path: candidate/test
 
       - name: Enable emulator acceleration
         run: |
@@ -141,7 +159,7 @@ jobs:
           disable-animations: true
           disable-linux-hw-accel: auto
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
-          script: python3 tools/android-release-rehearsal.py candidate/app-debug.apk runtime-evidence --upgrade-fixtures "$RUNNER_TEMP"
+          script: python3 tools/android-release-rehearsal.py candidate/app-debug.apk runtime-evidence --upgrade-fixtures "$RUNNER_TEMP" --instrumentation candidate/test/app-debug-androidTest.apk
 
       - name: Upload Android runtime evidence
         if: always()

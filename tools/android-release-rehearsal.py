@@ -170,6 +170,20 @@ class Rehearsal:
         self.see("Yuki’s room")
         self.capture("yuki-after-resume")
 
+    def instrument(self, test_apk):
+        self.install(test_apk)
+        result = adb(
+            "shell", "am", "instrument", "-w", "-r",
+            "-e", "class", f"{PACKAGE}.ReleaseRuntimeTest",
+            f"{PACKAGE}.test/androidx.test.runner.AndroidJUnitRunner",
+            timeout=170, check=False,
+        )
+        (self.evidence / "instrumentation.txt").write_bytes(result)
+        video = adb("exec-out", "run-as", PACKAGE, "cat", "files/rehearsal-video.png", check=False)
+        if video.startswith(b"\x89PNG\r\n\x1a\n"):
+            (self.evidence / "decoder-playback.png").write_bytes(video)
+        assert b"OK (2 tests)" in result, result.decode(errors="replace")
+
     def diagnostics(self):
         commands = {
             "crash-buffer": ("logcat", "-b", "crash", "-d"),
@@ -187,6 +201,7 @@ def main():
     parser.add_argument("apk", type=Path)
     parser.add_argument("evidence", type=Path)
     parser.add_argument("--upgrade-fixtures", type=Path, help="Directory with baseline.apk and upgrade.apk for API 33")
+    parser.add_argument("--instrumentation", type=Path, help="Android test APK signed together with the candidate")
     args = parser.parse_args()
     assert adb("get-serialno").strip().startswith(b"emulator-"), "A disposable emulator is required"
     assert PACKAGE.encode() not in adb("shell", "pm", "list", "packages", PACKAGE), "An empty emulator is required"
@@ -213,6 +228,8 @@ def main():
             rehearsal.see(FIXTURE_NOTE)
             rehearsal.yuki()
             print("Cold PIN gate, local note, and Yuki return passed", flush=True)
+            if args.instrumentation:
+                rehearsal.instrument(args.instrumentation)
         else:
             adb("shell", "input", "keyevent", "KEYCODE_HOME")
             rehearsal.launch("warm-launch")
