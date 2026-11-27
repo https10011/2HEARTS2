@@ -149,12 +149,14 @@ class Rehearsal:
         self.tap("Unlock")
         self.see("Avery")
 
-    def add_note(self):
+    def add_note(self, is_baseline=False):
         self.tap("Notes")
         self.tap("Write your first note")
         self.enter(FIXTURE_NOTE)
-        self.enter("Saved on Android before the update.", index=1)
-        self.tap("Keep this note")
+        if is_baseline:
+            self.reveal("Content")
+        self.enter("Saved on Android before the update.", index=-1)
+        self.tap("Save" if is_baseline else "Keep this note")
         self.see(FIXTURE_NOTE)
 
     def yuki(self):
@@ -239,7 +241,7 @@ def main():
             rehearsal.install(upgrade_fixtures / "baseline.apk")
             rehearsal.launch("baseline-launch", cold=True)
             rehearsal.onboard(is_baseline=True)
-            rehearsal.add_note()
+            rehearsal.add_note(is_baseline=True)
             print("Populated the schema-13 fixture", flush=True)
             rehearsal.install(upgrade_fixtures / "upgrade.apk", upgrade=True)
             rehearsal.launch("retained-data-launch", cold=True)
