@@ -24,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
@@ -101,7 +103,11 @@ fun ThSurfaceCard(
             )
             .padding(contentPadding),
     ) {
-        val foreground = if (tone == CardTone.BRAND) thColors.onPrimaryAction else LocalContentColor.current
+        val foreground = when (tone) {
+            CardTone.BRAND -> thColors.onPrimaryAction
+            CardTone.OUTLINE -> LocalContentColor.current
+            else -> MaterialTheme.colorScheme.onSurface
+        }
         CompositionLocalProvider(LocalContentColor provides foreground) { content() }
     }
 }
@@ -127,6 +133,7 @@ fun ThSectionHeader(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
+                modifier = Modifier.semantics { heading() },
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )

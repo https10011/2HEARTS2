@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,10 +30,10 @@ import com.twohearts.app.services.datetime.DateTimeHelper
 import com.twohearts.app.ui.components.ButtonVariant
 import com.twohearts.app.ui.components.StatusVariant
 import com.twohearts.app.ui.components.ThButton
+import com.twohearts.app.ui.components.ThConfirmDialog
 import com.twohearts.app.ui.components.ThDivider
 import com.twohearts.app.ui.components.ThEyebrow
 import com.twohearts.app.ui.components.ThIcons
-import com.twohearts.app.ui.components.ThModal
 import com.twohearts.app.ui.components.ThStatusBanner
 import com.twohearts.app.ui.components.UtilityPage
 import com.twohearts.app.ui.components.VideoPreviewDialog
@@ -134,34 +131,29 @@ fun VaultContentViewer(
         if (type == VaultContentType.VIDEO) VideoPreviewDialog(asset.filePath) { previewing = false }
         if (type == VaultContentType.PHOTO) MemoryAttachmentPreview(MemoryMediaSource(asset)) { previewing = false }
     }
-    if (confirmingExport) VaultDecision(
-        "Save a separate copy?", "Anyone with access to the destination can open the exported file.",
-        confirmText = "Choose location", variant = ButtonVariant.PRIMARY, onConfirm = {
+    ThConfirmDialog(
+        open = confirmingExport,
+        onClose = { confirmingExport = false },
+        label = "Save a separate copy",
+        title = "Save a separate copy?",
+        description = "Anyone with access to the destination can open the exported file.",
+        actionLabel = "Choose location",
+        actionVariant = ButtonVariant.PRIMARY,
+        onAction = {
             confirmingExport = false
             exporter.launch(title.replace('/', '_').replace('\\', '_'))
         },
-        onDismiss = { confirmingExport = false },
     )
-    if (confirmingDelete) VaultDecision(
-        "Delete this vault item?", "This item will be removed from your vault.",
-        confirmText = "Delete", variant = ButtonVariant.DANGER, onConfirm = { confirmingDelete = false; onDelete(item) },
-        onDismiss = { confirmingDelete = false },
+    ThConfirmDialog(
+        open = confirmingDelete,
+        onClose = { confirmingDelete = false },
+        label = "Delete vault item",
+        title = "Delete this vault item?",
+        description = "This item will be removed from your vault.",
+        actionLabel = "Delete",
+        onAction = {
+            confirmingDelete = false
+            onDelete(item)
+        },
     )
-}
-
-@Composable
-private fun VaultDecision(
-    title: String, message: String, confirmText: String, variant: ButtonVariant,
-    onConfirm: () -> Unit, onDismiss: () -> Unit,
-) {
-    ThModal(open = true, onClose = onDismiss, label = title) {
-        Text(title, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
-        Text(
-            message, color = LocalTwoHeartsColors.current.textSecondary,
-            modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())
-                .padding(vertical = TwoHeartsTokens.Spacing.space3),
-        )
-        ThButton(onConfirm, text = confirmText, full = true, variant = variant)
-        ThButton(onDismiss, text = "Cancel", variant = ButtonVariant.GHOST)
-    }
 }

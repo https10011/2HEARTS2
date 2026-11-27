@@ -11,13 +11,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ViewRootForTest
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getAllSemanticsNodes
 import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.text.rememberTextMeasurer
 import com.twohearts.app.ui.navigation.AppShell
+import com.twohearts.app.ui.navigation.NavConfig
 import com.twohearts.app.ui.navigation.RoutePath
+import com.twohearts.app.ui.navigation.bottomNavLabelStyle
 import com.twohearts.app.ui.screens.home.HomeContent
 import com.twohearts.app.ui.screens.more.MoreScreen
 import com.twohearts.app.ui.theme.TwoHeartsTheme
@@ -71,6 +75,35 @@ class TransformationNavigationUiTest {
                 assertEquals(keyboardHeight == 0, nodes.any { it.hasDescription("Notes") })
             }
         }
+    }
+
+    @Test
+    @Config(qualifiers = "w320dp-h480dp-mdpi")
+    fun narrowLargeTypeKeepsFourSeparatedTabsInReadingOrder() {
+        val opened = mutableListOf<String>()
+        val labelWidths = mutableMapOf<String, Int>()
+        renderShell(RoutePath.APP_US, onTabClick = { opened += it }, content = {
+            val measurer = rememberTextMeasurer()
+            val labelStyle = bottomNavLabelStyle()
+            NavConfig.bottomNavItems.forEach { item ->
+                labelWidths[item.accessibilityLabel] =
+                    measurer.measure(item.label, labelStyle, maxLines = 1).size.width
+            }
+        }) { nodes ->
+            val tabs = nodes.filter { it.config.getOrNull(SemanticsProperties.Role) == Role.Tab }
+            assertEquals(NavConfig.bottomNavItems.map { it.accessibilityLabel }, tabs.map {
+                it.config[SemanticsProperties.ContentDescription].single()
+            })
+            assertEquals(listOf(false, true, false, false), tabs.map { it.config[SemanticsProperties.Selected] })
+            assertTrue(tabs.zipWithNext().all { (a, b) -> b.boundsInRoot.left - a.boundsInRoot.right >= 4f })
+            tabs.forEach { tab ->
+                val label = tab.config[SemanticsProperties.ContentDescription].single()
+                val required = labelWidths.getValue(label)
+                assertTrue("$label requires ${required}px in ${tab.boundsInRoot.width}px", tab.boundsInRoot.width >= required)
+                tab.click()
+            }
+        }
+        assertEquals(NavConfig.bottomNavItems.map { it.route }, opened)
     }
 
     private fun renderShell(

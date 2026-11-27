@@ -22,9 +22,9 @@ internal enum class YukiMotion(
     ATTENTION(longArrayOf(140, 440, 240)),
     WALK(longArrayOf(160, 250, 270, 250), travel = floatArrayOf(0f, -.027f, -.066f, -.072f)),
     CHASE(
-        longArrayOf(200, 320, 240, 270, 290, 300, 620, 760), priority = 4, facesRight = true,
-        travel = floatArrayOf(0f, .018f, .042f, .064f, .088f, .105f, .105f, .083f),
-        lift = floatArrayOf(0f, 0f, 0f, .020f, .026f, .088f, 0f, 0f),
+        longArrayOf(200, 320, 240, 270, 290, 300, 180, 520, 680), priority = 4, facesRight = true,
+        travel = floatArrayOf(0f, .018f, .042f, .064f, .088f, .105f, .111f, .105f, .083f),
+        lift = floatArrayOf(0f, 0f, 0f, .020f, .035f, .088f, 0f, 0f, 0f),
     ),
     FEED(
         longArrayOf(300, 300, 1430, 200, 170), priority = 4,

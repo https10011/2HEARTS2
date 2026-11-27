@@ -152,6 +152,7 @@
       "run_alt",
       "run_extend",
       "jump",
+      "walk_alt",
       "paw",
       "stand"
     ],

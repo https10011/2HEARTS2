@@ -35,7 +35,7 @@
     "tail": ["sit", "sit_tail_left", "sit", "sit_tail_right", "sit"],
     "attention": ["sit", "sit_alt", "idle"],
     "walk": ["stand", "walk", "walk_alt", "stand"],
-    "chase": ["stand", "walk", "run", "run_alt", "run_extend", "jump", "paw", "stand"],
+    "chase": ["stand", "walk", "run", "run_alt", "run_extend", "jump", "walk_alt", "paw", "stand"],
     "feed": ["stand", "idle", "eat", "idle", "sit_alt"],
     "drink": ["stand", "idle", "drink", "idle", "sit"],
     "groom": ["sit", "groom", "groom_alt", "groom", "sit"],

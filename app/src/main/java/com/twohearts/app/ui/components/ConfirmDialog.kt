@@ -2,20 +2,17 @@ package com.twohearts.app.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
-import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 import com.twohearts.app.ui.theme.TwoHeartsTokens
 
 @Composable
@@ -33,27 +30,25 @@ fun ThConfirmDialog(
     busyLabel: String = "Working…",
     dismissLabel: String = "Cancel",
 ) {
-    if (!open) return
-    AlertDialog(
-        shape = RoundedCornerShape(TwoHeartsTokens.Radius.xl),
-        containerColor = LocalTwoHeartsColors.current.surfaceElevated,
-        modifier = modifier.semantics { paneTitle = label },
-        onDismissRequest = { if (!busy) onClose() },
-        title = { Text(title, style = MaterialTheme.typography.headlineSmall) },
-        text = {
+    val spacing = TwoHeartsTokens.Spacing
+    ThModal(open = open, onClose = { if (!busy) onClose() }, modifier = modifier, label = label) {
+        Column(
+            Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(spacing.space2),
+        ) {
+            Text(title, Modifier.semantics { heading() }, style = MaterialTheme.typography.headlineSmall)
             Text(
-                description, Modifier.heightIn(max = 196.dp).verticalScroll(rememberScrollState()),
+                description,
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-        },
-        confirmButton = {
-            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                ThButton(
-                    onClick = onAction, variant = actionVariant, full = true,
-                    loading = busy, text = if (busy) busyLabel else actionLabel,
-                )
-                ThButton(onClick = onClose, variant = ButtonVariant.GHOST, full = true, enabled = !busy, text = dismissLabel)
-            }
-        },
-    )
+        }
+        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(spacing.space1)) {
+            Spacer(Modifier.height(spacing.space2))
+            ThButton(
+                onClick = onAction, variant = actionVariant, full = true,
+                loading = busy, text = if (busy) busyLabel else actionLabel,
+            )
+            ThButton(onClick = onClose, variant = ButtonVariant.GHOST, full = true, enabled = !busy, text = dismissLabel)
+        }
+    }
 }

@@ -45,10 +45,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.twohearts.app.ui.components.BrandLogo
 import com.twohearts.app.ui.components.BrandLogoVariant
 import com.twohearts.app.ui.components.BrandLogoTone
@@ -65,6 +67,13 @@ private val NavStackGap = 1.dp
 /** Thickness of the selected-state ring around the brand button. */
 private val BrandRingWidth = 2.dp
 
+@Composable
+internal fun bottomNavLabelStyle(): TextStyle = if (LocalDensity.current.fontScale > 1.2f) {
+    MaterialTheme.typography.labelSmall.copy(letterSpacing = 0.sp)
+} else {
+    MaterialTheme.typography.labelMedium
+}
+
 /** Floating navigation surface with equal-width tabs above the system gesture area. */
 @Composable
 fun BottomNav(
@@ -77,13 +86,14 @@ fun BottomNav(
     val thColors = LocalTwoHeartsColors.current
     val shape = RoundedCornerShape(TwoHeartsTokens.Radius.pill)
     val density = LocalDensity.current
+    val largeText = density.fontScale > 1.2f
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(
-                horizontal = if (density.fontScale > 1.2f) TwoHeartsTokens.Spacing.space2
+                horizontal = if (largeText) TwoHeartsTokens.Spacing.space1
                     else TwoHeartsTokens.Dimensions.bottomNavMargin,
                 vertical = TwoHeartsTokens.Spacing.space2,
             ),
@@ -104,8 +114,9 @@ fun BottomNav(
                     .fillMaxWidth()
                     .heightIn(min = TwoHeartsTokens.Dimensions.bottomNavHeight)
                     .selectableGroup()
-                    .padding(horizontal = TwoHeartsTokens.Spacing.space1),
+                    .padding(horizontal = if (largeText) 2.dp else TwoHeartsTokens.Spacing.space1),
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(if (largeText) TwoHeartsTokens.Spacing.space1 else 0.dp),
             ) {
                 items.forEach { item ->
                     val isActive = currentRoute == item.route
@@ -208,7 +219,7 @@ fun BrandNavTab(
         Text(
             text = label,
             modifier = Modifier.clearAndSetSemantics {},
-            style = MaterialTheme.typography.labelMedium,
+            style = bottomNavLabelStyle(),
             color = if (isActive) thColors.burgundy else thColors.textSecondary,
             textAlign = TextAlign.Center,
             maxLines = 1,
@@ -309,7 +320,7 @@ fun NavItemView(
         Text(
             text = item.label,
             modifier = Modifier.clearAndSetSemantics {},
-            style = MaterialTheme.typography.labelMedium,
+            style = bottomNavLabelStyle(),
             color = labelColor,
             textAlign = TextAlign.Center,
             maxLines = 1,

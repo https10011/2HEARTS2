@@ -68,6 +68,11 @@ class TransformationYukiEngineTest {
             assertTrue(frames.zipWithNext().all { (a, b) -> abs(a.x - b.x) <= .03f && abs(a.lift - b.lift) <= .03f })
             if (activity == YukiActivity.PLAYING) {
                 assertTrue(frames.any { it.facesRight && it.lift >= .08f })
+                val airborneIndex = frames.indexOfFirst { it.pose == YukiPose.JUMP }
+                val landingIndex = frames.indexOfFirst { it.pose == YukiPose.WALK_ALT }
+                val reachIndex = frames.indexOfFirst { it.pose == YukiPose.PAW }
+                assertTrue(airborneIndex < landingIndex && landingIndex < reachIndex)
+                assertEquals(0f, frames[reachIndex].lift, .0001f)
             }
         }
     }

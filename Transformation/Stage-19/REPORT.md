@@ -34,4 +34,8 @@ Stage 18 passed on `03d68fd182f23f26cd1a3f31a8a8446dffdf6990`. Reviewed the room
 - [x] Verify both pet actions, care and feedback, toy locks, accessory selection, actual milestones, and return from background.
 - [x] Inspect recorded idle and interaction motion, reduced motion, and stable sprite memory in automated tests.
 - [x] Pass both full suites and verify the debug APK.
-- [ ] Commit, push, verify exact CI and artifact, and continue to the cross-app audit.
+- [x] Commit, push, verify exact CI and artifact, and continue to the cross-app audit.
+
+## Remote verification
+
+GitHub confirmed `4f0cb76f9b5e34f2e4966f5c2316560bda737a51` on `master`. Build Android APK run `45876700117` passed on its first attempt with the revised test endpoint. It published `twohearts-debug-apk` artifact `15146075278` for that commit. [Commit](https://github.com/https10011/2HEARTS2/commit/4f0cb76f9b5e34f2e4966f5c2316560bda737a51) · [CI](https://github.com/https10011/2HEARTS2/actions/runs/45876700117) · [APK](https://github.com/https10011/2HEARTS2/actions/runs/45876700117/artifacts/15146075278)
