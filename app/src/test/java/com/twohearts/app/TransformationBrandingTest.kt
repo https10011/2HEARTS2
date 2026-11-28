@@ -8,6 +8,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.VectorDrawable
 import android.graphics.drawable.Drawable
 import android.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
@@ -100,6 +101,29 @@ class TransformationBrandingTest {
             }
             save("splash-$name", preview)
         }
+    }
+
+    @Test
+    fun vectorMarkMatchesTheOfficialContourAtDisplayScale() {
+        val mark = checkNotNull(context.getDrawable(R.drawable.twohearts_mark))
+        assertTrue(mark is VectorDrawable)
+        val reference = BitmapFactory.decodeResource(context.resources, R.drawable.brand_logo_mark)
+        val bounds = Rect(reference.width, reference.height, 0, 0)
+        for (y in 0 until reference.height) for (x in 0 until reference.width) {
+            if (Color.alpha(reference.getPixel(x, y)) >= 128) bounds.union(x, y, x + 1, y + 1)
+        }
+        val rendered = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888)
+        mark.setBounds(0, 0, rendered.width, rendered.height)
+        mark.draw(Canvas(rendered))
+        var intersection = 0
+        var union = 0
+        for (y in 0 until rendered.height) for (x in 0 until rendered.width) {
+            val before = Color.alpha(reference.getPixel(x + bounds.left, y + bounds.top)) >= 128
+            val after = Color.alpha(rendered.getPixel(x, y)) >= 128
+            if (before || after) union++
+            if (before && after) intersection++
+        }
+        assertTrue("Official silhouette overlap: $intersection / $union", intersection > union * .94)
     }
 
     private fun draw(drawable: Drawable, size: Int): Bitmap =

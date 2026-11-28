@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_launcher_foreground"
-    android:gravity="fill"
-    android:tint="@color/twohearts_launch_ink" />
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Android 12+ supplies a 288 dp plate. Give the artwork its own optical bounds. -->
+    <item android:width="288dp" android:height="288dp" android:gravity="center"
+        android:drawable="@android:color/transparent" />
+    <item android:width="112dp" android:height="87dp" android:gravity="center"
+        android:drawable="@drawable/twohearts_mark" />
+</layer-list>

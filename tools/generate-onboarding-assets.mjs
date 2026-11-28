@@ -6,7 +6,6 @@
  * brand mark with `generate-brand-assets.mjs`; this tool applies the same
  * approach to the *decorative* artwork the onboarding experience needs:
  *
- *  - the replaceable welcome hero photo (`assets/images/`), and
  *  - a curated subset of the owner-approved Rose/Lily florals
  *    (`assets/decorations/`) used to frame the welcome and completion moments.
  *
@@ -31,11 +30,6 @@ const OUT = path.join(ROOT, 'app/src/main/res/drawable-nodpi');
  * Pro class target), while staying small enough not to bloat the APK.
  */
 const TARGETS = [
-  {
-    svg: 'app/src/main/assets/images/onboarding-welcome-photo.svg',
-    png: 'onboarding_welcome_photo.png',
-    width: 960,
-  },
   {
     svg: 'app/src/main/assets/decorations/rose-lily-01.svg',
     png: 'decor_rose_lily_01.png',

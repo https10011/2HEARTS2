@@ -4,8 +4,8 @@ Source root is app/src/main/java/com/twohearts/app/ui. Status **A** means invent
 
 | Phase | Experience | Source | States and interactions | Design treatment | Implementation / verification |
 |---|---|---|---|---|---|
-| 01 | Startup | MainActivity | System splash → bootstrap / retry → first destination | Dedicated vector field; hydrate settings without a delay | A · open |
-| 01 | Welcome | onboarding/WelcomeScreen | Fresh / resumed / large type | Book cover and a single Begin action | A · open |
+| 01 | Startup | MainActivity | System splash → bootstrap / retry → first destination | Dedicated vector field; hydrate settings without a delay | T/V · Phase-01/evidence |
+| 01 | Welcome | onboarding/WelcomeScreen | Fresh / resumed / large type | Book cover and a single Begin action | T/V · Phase-01/evidence |
 | 03 | Setup | onboarding | Owner, partner, relationship date, personalization, capabilities, PIN, completion, draft restore | Page by page inscription, inline validation, optional photo and skip | A · open |
 | 02 | Shell | navigation | Five roots, system Back, keyboard, notifications, search, long-label and selected state | Flush dock with a round center seal and measured safe area | A · open |
 | 02 | Home | screens/home | Missing / one / two portraits, long names, upcoming, notes, mood, Yuki | Portrait frontispiece and timely actions | A · open |
@@ -35,7 +35,7 @@ AppRouter and PeriodRoutes bind these destinations. The onboarding paths name fl
 
 | Destination | Implementation | Status and evidence |
 |---|---|---|
-| `/onboarding/welcome` | OnboardingFlow / WelcomeScreen | A |
+| `/onboarding/welcome` | OnboardingFlow / WelcomeScreen | T/V · Phase-01/evidence |
 | `/onboarding/profile` | OnboardingFlow / ProfileSetupScreen | A |
 | `/onboarding/relationship` | OnboardingFlow / RelationshipSetupScreen | A |
 | `/onboarding/personalization` | OnboardingFlow / PersonalizationSetupScreen | A |

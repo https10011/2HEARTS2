@@ -12,14 +12,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.twohearts.app.R
+import com.twohearts.app.ui.theme.TwoHeartsTokens
 import com.twohearts.app.ui.theme.LocalTwoHeartsColors
 
 /**
  * BrandLogo — the ONE authoritative TwoHearts brand mark.
  *
- * Renders the official owner-supplied artwork, rasterized from the SVGs in
- * `assets/branding/` into density-independent drawables by
- * `tools/generate-brand-assets.mjs`.
+ * The full lockup uses the owner artwork. The compact mark uses the native
+ * vector traced from that artwork, with its optical bounds preserved.
  *
  * Variants:
  *  - [BrandLogoVariant.BRAND] — full lockup: interlocked hearts + wordmark.
@@ -44,8 +44,8 @@ fun BrandLogo(
     val (resId, aspect) = when (variant) {
         // 720x617
         BrandLogoVariant.BRAND -> R.drawable.brand_logo to 0.857f
-        // 512x476
-        BrandLogoVariant.MARK -> R.drawable.brand_logo_mark to 0.930f
+        // Cropped optical bounds of the official intertwined mark.
+        BrandLogoVariant.MARK -> R.drawable.twohearts_mark to (334f / 429f)
     }
 
     Image(
@@ -57,6 +57,8 @@ fun BrandLogo(
         contentScale = ContentScale.Fit,
         colorFilter = if (useLightInk) {
             ColorFilter.tint(thColors.textOnAccent)
+        } else if (variant == BrandLogoVariant.MARK) {
+            ColorFilter.tint(TwoHeartsTokens.Color.burgundy600)
         } else {
             null
         },

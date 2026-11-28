@@ -113,6 +113,22 @@ class Rehearsal:
         assert b"Status: ok" in result and b"Error:" not in result, result.decode()
         assert adb("shell", "pidof", PACKAGE).strip(), "TwoHearts process is missing"
 
+    def capture_entry_sequence(self):
+        """Sample a separate cold start so screenshot work cannot skew the timed launch."""
+        self.background()
+        adb("shell", "am", "force-stop", PACKAGE)
+        with subprocess.Popen(
+            ["adb", "shell", "am", "start", "-W", "-n", ACTIVITY],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        ) as launch:
+            for index in range(8):
+                self.capture(f"entry-{index:02d}")
+                if launch.poll() is not None:
+                    break
+            result, _ = launch.communicate(timeout=40)
+        assert launch.returncode == 0 and b"Status: ok" in result, result
+        self.see("Begin")
+
     def install(self, apk, upgrade=False):
         result = adb("install", *(["-r"] if upgrade else []), apk, timeout=120)
         assert b"Success" in result, result.decode()
@@ -229,6 +245,7 @@ def main():
         rehearsal.launch("fresh-launch", cold=True)
         rehearsal.see("Begin")
         rehearsal.capture("welcome")
+        rehearsal.capture_entry_sequence()
         if api == 33:
             rehearsal.onboard()
             rehearsal.capture("home")
