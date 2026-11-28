@@ -21,14 +21,15 @@ class Phase2ShellNavigationTest {
     // ─── Navigation vocabulary ────────────────────────────────────────
 
     @Test
-    fun `bottom bar holds Home Us Notes and More`() {
+    fun `bottom bar centers Us between writing and companion destinations`() {
         val items = NavConfig.bottomNavItems
-        assertEquals(4, items.size)
+        assertEquals(5, items.size)
         assertEquals(
             listOf(
                 RoutePath.APP_HOME,
-                RoutePath.APP_US,
                 RoutePath.APP_NOTES,
+                RoutePath.APP_US,
+                RoutePath.APP_YUKI,
                 RoutePath.APP_MORE,
             ),
             items.map { it.route },
@@ -192,17 +193,9 @@ class Phase2ShellNavigationTest {
         )
     }
 
-    // ─── Yuki boundary ────────────────────────────────────────────────
-
     @Test
-    fun `yuki is reachable and treated as a detail surface`() {
-        // Phase 2 verifies the shell can navigate to and from Yuki without
-        // redesigning it. It is a step in from a primary area, so it keeps
-        // the standard back affordance.
-        assertEquals(
-            ShellSurfaces.Role.DETAIL,
-            ShellSurfaces.roleOf(RoutePath.APP_YUKI),
-        )
-        assertTrue(ShellSurfaces.showsBackAffordance(RoutePath.APP_YUKI))
+    fun `Yuki is reachable directly from the primary dock`() {
+        assertEquals(ShellSurfaces.Role.ROOT, ShellSurfaces.roleOf(RoutePath.APP_YUKI))
+        assertFalse(ShellSurfaces.showsBackAffordance(RoutePath.APP_YUKI))
     }
 }

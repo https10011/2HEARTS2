@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -59,6 +60,7 @@ fun ProfileAvatar(
     size: Int = 64,
     label: String? = null,
     selectedPhoto: Uri? = null,
+    shape: Shape = CircleShape,
 ) {
     val thColors = LocalTwoHeartsColors.current
     val initial = name.trim().firstOrNull()?.uppercaseChar()?.toString() ?: ""
@@ -88,7 +90,7 @@ fun ProfileAvatar(
         modifier = modifier
             .size(size.dp)
             .semantics { if (label != null) contentDescription = label }
-            .clip(CircleShape)
+            .clip(shape)
             .background(
                 Brush.linearGradient(
                     colors = listOf(TwoHeartsTokens.Color.burgundy600, TwoHeartsTokens.Color.burgundy400)
@@ -97,7 +99,7 @@ fun ProfileAvatar(
             .border(
                 TwoHeartsTokens.Border.hairline,
                 thColors.textOnAccent.copy(alpha = 0.22f),
-                CircleShape,
+                shape,
             ),
         contentAlignment = Alignment.Center,
     ) {
@@ -113,7 +115,7 @@ fun ProfileAvatar(
             )
         } else {
             Icon(
-                imageVector = ThIcons.Heart,
+                imageVector = ThIcons.Person,
                 contentDescription = null,
                 tint = thColors.textOnAccent.copy(alpha = 0.9f),
                 modifier = Modifier.size((size * 0.46).dp),

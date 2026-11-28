@@ -7,8 +7,8 @@ Source root is app/src/main/java/com/twohearts/app/ui. Status **A** means invent
 | 01 | Startup | MainActivity | System splash → bootstrap / retry → first destination | Dedicated vector field; hydrate settings without a delay | T/V · Phase-01/evidence |
 | 01 | Welcome | onboarding/WelcomeScreen | Fresh / resumed / large type | Book cover and a single Begin action | T/V · Phase-01/evidence |
 | 03 | Setup | onboarding | Owner, partner, relationship date, personalization, capabilities, PIN, completion, draft restore | Page by page inscription, inline validation, optional photo and skip | A · open |
-| 02 | Shell | navigation | Five roots, system Back, keyboard, notifications, search, long-label and selected state | Flush dock with a round center seal and measured safe area | A · open |
-| 02 | Home | screens/home | Missing / one / two portraits, long names, upcoming, notes, mood, Yuki | Portrait frontispiece and timely actions | A · open |
+| 02 | Shell | navigation | Five roots, system Back, keyboard, notifications, search, long-label and selected state | Flush dock with a round center seal and measured safe area | I/T · inspected samples in Phase-02/evidence |
+| 02 | Home | screens/home | Missing / one / two portraits, long names, upcoming, notes, mood, Yuki | Portrait frontispiece and timely actions | I/T · inspected samples in Phase-02/evidence |
 | 03 | Us | screens/us | First visit, dated, populated, missing records and feature links | Relationship contents with date gutter and grouped chapter links | A · open |
 | 03 | More | screens/more | Search, notification, settings and feature entry points | Scannable functional index | A · open |
 | 04 | Memories | screens/memories | Gallery, text only, detail, add, edit, photo / video preview, delete, failed media | Contact sheet, captioned photo plate and media-first editor | A · open |

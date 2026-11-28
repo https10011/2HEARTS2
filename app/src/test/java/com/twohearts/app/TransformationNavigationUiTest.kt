@@ -79,7 +79,7 @@ class TransformationNavigationUiTest {
 
     @Test
     @Config(qualifiers = "w320dp-h480dp-mdpi")
-    fun narrowLargeTypeKeepsFourSeparatedTabsInReadingOrder() {
+    fun narrowLargeTypeKeepsFiveSeparatedTabsInReadingOrder() {
         val opened = mutableListOf<String>()
         val labelWidths = mutableMapOf<String, Int>()
         renderShell(RoutePath.APP_US, onTabClick = { opened += it }, content = {
@@ -94,7 +94,7 @@ class TransformationNavigationUiTest {
             assertEquals(NavConfig.bottomNavItems.map { it.accessibilityLabel }, tabs.map {
                 it.config[SemanticsProperties.ContentDescription].single()
             })
-            assertEquals(listOf(false, true, false, false), tabs.map { it.config[SemanticsProperties.Selected] })
+            assertEquals(listOf(false, false, true, false, false), tabs.map { it.config[SemanticsProperties.Selected] })
             assertTrue(tabs.zipWithNext().all { (a, b) -> b.boundsInRoot.left - a.boundsInRoot.right >= 4f })
             tabs.forEach { tab ->
                 val label = tab.config[SemanticsProperties.ContentDescription].single()

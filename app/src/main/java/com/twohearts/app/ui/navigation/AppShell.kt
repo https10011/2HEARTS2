@@ -26,37 +26,7 @@ import com.twohearts.app.ui.components.ToastProvider
 import com.twohearts.app.ui.components.ToastState
 import com.twohearts.app.ui.theme.TwoHeartsTokens
 
-/**
- * AppShell — the layout that wraps every in-app screen.
- *
- * Owns the bottom navigation, system back handling, and the toast host.
- *
- * ## Phase 2 changes, and why
- *
- *  - **The navigation bar is shown on primary areas only.** It previously
- *    sat outside the `NavHost` and so rendered over detail, editor and modal
- *    surfaces too — including create flows, where the bar's destinations are
- *    not where leaving the screen would take you, and where the approved
- *    reference screens show no bar. Visibility now comes from
- *    [NavConfig.isPrimaryRoute]: one decision in one place, instead of a
- *    rule each screen has to remember.
- *
- *  - **The bar actually floats over the content.** It used to live in
- *    `Scaffold`'s `bottomBar` slot, which reserves a full-width strip of
- *    page colour beneath the pill — so the "floating" surface was resting on
- *    its own opaque band and never over the content. The bar is now drawn in
- *    an overlay above the content, and the content is given matching bottom
- *    padding so its last row can still be scrolled clear.
- *
- *  - **The shell owns the window insets.** With `enableEdgeToEdge()`, the
- *    previous arrangement let the bar sit inside the system gesture area:
- *    `Scaffold` pushed the bottom inset into the *content* padding while the
- *    bar itself contributed nothing. The shell now consumes the safe-drawing
- *    insets for the whole content region and then hands that region exactly
- *    the padding the navigation reserve needs, so the two never double up
- *    (screens themselves still apply their own insets and see them already
- *    consumed, which is the intended contract — see `ThScreen`).
- */
+/** Owns safe insets, measured dock height, feedback and system Back. */
 @Composable
 internal fun AppShell(
     currentRoute: String,
@@ -84,11 +54,7 @@ internal fun AppShell(
     val keyboardVisible = keyboardInsets.getBottom(LocalDensity.current) > 0
     val showBottomNav = ShellLayout.showsBottomNav(currentRoute, keyboardVisible)
     var navBodyHeight by remember { mutableStateOf(TwoHeartsTokens.Dimensions.bottomNavHeight) }
-    val bottomInset = if (showBottomNav) {
-        ShellLayout.contentBottomInset + (navBodyHeight - TwoHeartsTokens.Dimensions.bottomNavHeight).coerceAtLeast(0.dp)
-    } else {
-        0.dp
-    }
+    val bottomInset = if (showBottomNav) navBodyHeight else 0.dp
 
     ToastProvider(state = feedback, bottomInset = bottomInset) {
         CompositionLocalProvider(LocalShellRoute provides currentRoute) {

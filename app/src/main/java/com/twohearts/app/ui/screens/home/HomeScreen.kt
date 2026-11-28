@@ -212,26 +212,9 @@ fun HomeContent(
 private fun HomeHero(data: HomeData, onNavigate: (String) -> Unit) {
     val colors = LocalTwoHeartsColors.current
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    0f to colors.surfaceBlush,
-                    0.5f to colors.surfaceWarm,
-                    1f to MaterialTheme.colorScheme.background,
-                )
-            ),
+        modifier = Modifier.fillMaxWidth().background(colors.infoBg),
         contentAlignment = Alignment.TopCenter,
     ) {
-        ThDecoration(
-            art = OnboardingArt.ROSE_LILY_TRAIL,
-            position = DecorationPosition.TOP_END,
-            size = 172.dp,
-            alpha = 0.10f,
-            offsetX = 18.dp,
-            offsetY = 18.dp,
-        )
-
         Column(
             modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth()
                 .padding(horizontal = TwoHeartsTokens.Spacing.screenGutter)
@@ -242,13 +225,11 @@ private fun HomeHero(data: HomeData, onNavigate: (String) -> Unit) {
                 modifier = Modifier.fillMaxWidth().heightIn(min = TwoHeartsTokens.Dimensions.touchTargetMin),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                BrandLogo(variant = BrandLogoVariant.MARK, size = 34)
-                Spacer(Modifier.width(TwoHeartsTokens.Spacing.space2))
                 Text(
                     homeGreeting(data.hour),
                     modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = colors.textSecondary,
+                    style = MaterialTheme.typography.displaySmall,
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 ThIconButton(onClick = { onNavigate(RoutePath.APP_NOTIFICATIONS) }, label = "Notifications") {
                     Icon(ThIcons.Bell, contentDescription = null, tint = colors.textSecondary)
@@ -256,7 +237,8 @@ private fun HomeHero(data: HomeData, onNavigate: (String) -> Unit) {
                 ShellSearchAction { onNavigate(RoutePath.APP_SEARCH) }
             }
 
-            Spacer(Modifier.height(TwoHeartsTokens.Spacing.space5))
+            HorizontalDivider(color = colors.borderStrong)
+            Spacer(Modifier.height(TwoHeartsTokens.Spacing.space4))
             CouplePortrait(
                 owner = data.owner,
                 partner = data.partner,
@@ -275,6 +257,7 @@ private fun HomeHero(data: HomeData, onNavigate: (String) -> Unit) {
                     onClick = { onNavigate(RoutePath.APP_SETTINGS_RELATIONSHIP) },
                 )
             }
+            Spacer(Modifier.height(TwoHeartsTokens.Spacing.space4))
         }
     }
 }
@@ -399,17 +382,16 @@ private fun RecentMemorySection(
         return
     }
 
-    ThSurfaceCard(
-        tone = CardTone.WARM,
-        onClick = { onNavigate(RoutePath.APP_MEMORIES_DETAIL.replace(":memoryId", Uri.encode(memory.id))) },
-    ) {
+    Column(Modifier.fillMaxWidth()
+        .clickable(role = Role.Button) { onNavigate(RoutePath.APP_MEMORIES_DETAIL.replace(":memoryId", Uri.encode(memory.id))) }
+        .padding(vertical = TwoHeartsTokens.Spacing.space2)) {
         ThEyebrow(text = DateTimeHelper.formatShortDisplay(memory.memoryDate))
 
         Spacer(modifier = Modifier.height(TwoHeartsTokens.Spacing.space2))
 
         Text(
             text = memory.title,
-            style = ThTextStyles.reading,
+            style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
@@ -565,18 +547,15 @@ private fun HomeActionRow(
     emphasized: Boolean = false,
 ) {
     val thColors = LocalTwoHeartsColors.current
-    val shape = RoundedCornerShape(TwoHeartsTokens.Radius.md)
-    val surface = if (emphasized) Modifier.background(thColors.surfaceWarm) else Modifier
+    val ink = if (emphasized) thColors.goldInk else thColors.roseDeep
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(shape)
-            .then(surface)
             .heightIn(min = TwoHeartsTokens.Dimensions.touchTargetMin)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(
-                horizontal = TwoHeartsTokens.Spacing.cardPadding,
+                horizontal = TwoHeartsTokens.Spacing.space1,
                 vertical = TwoHeartsTokens.Spacing.space4,
             ),
         verticalAlignment = Alignment.CenterVertically,
@@ -584,7 +563,7 @@ private fun HomeActionRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = ink,
             modifier = Modifier.size(22.dp),
         )
         Spacer(modifier = Modifier.width(TwoHeartsTokens.Spacing.space3))

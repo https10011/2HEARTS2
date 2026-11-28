@@ -6,13 +6,20 @@ import com.twohearts.app.ui.components.ThIcons
 /** Display names, icons, and navigation roles for app destinations. */
 object NavConfig {
 
-    /** The four peer destinations, with a branded entry for the relationship hub. */
+    /** The five peer destinations, with a branded entry for the relationship hub. */
     val bottomNavItems = listOf(
         NavItem(
             id = "home",
             route = RoutePath.APP_HOME,
             label = "Home",
             icon = ThIcons.Home,
+            isPrimary = true,
+        ),
+        NavItem(
+            id = "notes",
+            route = RoutePath.APP_NOTES,
+            label = "Notes",
+            icon = ThIcons.Note,
             isPrimary = true,
         ),
         NavItem(
@@ -25,10 +32,10 @@ object NavConfig {
             isPrimary = true,
         ),
         NavItem(
-            id = "notes",
-            route = RoutePath.APP_NOTES,
-            label = "Notes",
-            icon = ThIcons.Note,
+            id = "yuki",
+            route = RoutePath.APP_YUKI,
+            label = "Yuki",
+            icon = ThIcons.Cat,
             isPrimary = true,
         ),
         NavItem(

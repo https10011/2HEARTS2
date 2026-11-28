@@ -124,7 +124,6 @@ class TransformationNavigationTest {
                 NavConfig.bottomNavItems.forEach { composable(it.route) {} }
                 composable(RoutePath.APP_SEARCH) {}
                 composable(RoutePath.APP_NOTIFICATIONS) {}
-                composable(RoutePath.APP_YUKI) {}
                 searchPatterns.values.forEach { composable(it) {} }
                 legacyGameRedirects(this@apply)
             }
