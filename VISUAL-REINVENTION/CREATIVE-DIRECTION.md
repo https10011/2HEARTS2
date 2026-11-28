@@ -1,0 +1,16 @@
+# A shared photo annual
+
+A private annual starts with the people it belongs to. Turn the first page and the structure changes with the material. A photograph can occupy the page, a date belongs in a margin, and a letter deserves room to read. TwoHearts will use this rhythm from entry to daily use.
+
+## Identity in use
+
+- Put an oxblood print mark on warm uncoated paper. Use linen for the reading ground, charcoal for writing, dusty blue for photographs and quiet navigation, and ochre sparingly for calendar cues. Night mode uses ink-blue paper, pale type and a warm rose action color. Dark artwork receives an explicitly light mark.
+- Give the cover an architectural composition with a folded page edge and a single masthead. Remove floral corner overlays. Use the couple's own portraits and media as the principal images inside. A missing image gets an intentional monogram or a drawn empty frame. Keep photographs free of text overlays that rely on the image brightness.
+- Use a display serif for names, letters and editorial titles. Use the locally licensed Inter family for instructions, forms and controls. A narrow date column and a large day numeral identify an agenda entry. Use natural size and wrapping in place of fixed-height title boxes.
+- Construct pages around their contents. Home is the open frontispiece, Us is a relationship contents page, Notes is a correspondence index, Memories is a contact sheet, Timeline is a dated chronology, Places is a travel folio, and Yuki has an inhabited room. Give security, permission and destructive interfaces a quiet reading order and explicit verbs.
+- Primary actions pair a verb with an identifiable action end. Secondary actions can sit at a natural edge of the object. Keep cancel available during confirmation and make disabled and busy states readable. Give icon actions a 48 dp target, spoken labels, visible focus and pressed feedback.
+- Separate independent items through page margins, alignment, typography and rules. A border belongs around a photo or a control when it explains that object's boundaries. Avoid repeating individually tinted tiles around ordinary text.
+- Dock five tabs along the foot of the page, allowing safe area and large text to determine the actual height. Home opens the daily spread, Notes permits frequent writing, Us centers both people, Yuki offers direct access to recurring care, and More indexes secondary routes. The center carries a circular TwoHearts seal. Preserve Android Back, encoded record links and notification entry.
+- Movement should explain selection, opening and returning. Use the existing native lifecycle and reduced-motion signals. Keep page artwork still. Yuki remains the intentional continuously animated surface, only while visible and active.
+- Prefer original native shapes and locally held media. Use a traced silhouette of the official interlocked mark for single-color small sizes if its contour matches the reference. Compare contours at launcher and high density. Keep art provenance beside the implementation.
+- Review the first impression and the next action together in light, dark, compact, and enlarged text layouts. Check the last action on a short screen, an interrupted save, an unavailable record and returning from a picker. A well-composed empty page must remain inviting without made-up relationship records.

@@ -1,0 +1,35 @@
+# TwoHearts visual reinvention
+
+The owner delegates design decisions for every user-visible native surface. The complete directive, design direction, route and component checklist, asset register, current status and handoff live alongside this roadmap. The 23-stage Transformation directory contains the previous release history. Use the live Kotlin graph to resolve scope.
+
+## Baseline and constraints
+
+Master started clean at 036ddfd75544ae99db9a7ef393352b0d436b4055. The single Android app module targets 35 with a minimum of 26. MainActivity constructs services, obtains local settings, and hands bootstrap, onboarding, PIN and returning-user state to Compose. AppRouter binds Room observations and service callbacks to content functions. PeriodRoutes registers its subgraph. OnboardingFlow uses a persisted step, including capabilities, rather than the shell back stack. NavigationActions redirects eleven legacy game URLs to Yuki. There is no active game catalog.
+
+The baseline contact sheets show a pink wash and repeated rounded sections on Home and Us, empty screens with a small icon floating on a largely blank page, and similar boxed editor footers across unrelated tasks. A four-item floating tab bar places Us second. CouplePortrait draws HeartFilled and removes it entirely in the large-type layout. Android 12+ uses a fill-gravity bitmap sourced from the adaptive launcher foreground. The SVG actually embeds a 198 × 184 bitmap for the mark. Scaling up a generated PNG cannot recreate its edge geometry. The welcome lockup then appears at a different scale. OEM-specific enlargement has not been measured on a handset.
+
+Keep Room schemas and migrations, DataStore, app identity, signatures, profile photo staging, scheduler permissions, vault storage, AppLockService, legacy routes, transfer validation and Yuki care progression. Preserve callback contracts and existing regression tests. Retain system-owned pickers, notification surfaces and settings under Android's control. Keep fonts and art offline. Treat security disclosures and screen-reader actions as functional behavior.
+
+## Execution and acceptance
+
+Stages run in order. Each depends on the preceding checkpoint. Screen families and state-specific checks are expanded in VISUAL-COVERAGE-CHECKLIST.md. Phase 0 is the documented baseline. Queue the remaining phases in order and update this table with evidence.
+
+| Phase | Responsibilities | Acceptance and verification | Status |
+|---|---|---|---|
+| 00 | Trace source, graph, packaged artwork, tests and previous release evidence. Select direction and publish inventory. | Clean synchronized starting SHA, baseline test count, raw APK size and runtime sample, visual references and gaps identified. | Baseline recorded |
+| 01 | Produce single-color official vector artwork, align system launch and cover composition. Replace welcome decorations. | Compare vector contour with owner art, inspect system drawable at multiple densities and both themes, open Welcome at 360 dp and large type, verify Begin, boot and returning-user gate. | Open |
+| 02 | Rebuild the five-tab dock and the Home frontispiece, portraits and daily hierarchy. | Exactly Home, Notes, Us, Yuki, More. Correct center in compact and enlarged text. Show official mark between both avatars in all layouts. Tap both portraits and verify tab state, Back, notification and search paths and clear content insets. | Open |
+| 03 | Establish paper, ink, type and action hierarchy. Recompose Us and More as navigable indexes, onboarding steps as an album inscription, preference and photo controls as working forms. | Use actual retained profile data, draft recovery, date, crop and skip paths. Inspect all seven steps plus empty and populated hubs, focus and press feedback. | Open |
+| 04 | Redesign notes, memories, timeline, places, their editors, readers, filters and viewers. | Contact sheet, letter page, chronology and travel folio each have distinct composition. Exercise CRUD, long text, image and video fallbacks, metadata and confirmations. Inspect media and text-only entries. | Open |
+| 05 | Recompose calendars, reminders, important dates, notifications, mood and period. | Teach schedule and recurrence visually. Distinguish estimate, saved, overdue and pending by text or shape. Verify date validation, permission denial, time zone, edit, deletion and calendar accessibility. | Open |
+| 06 | Recompose Search, settings, profile, personalization, storage, import/export, About, PIN and Vault. Review shared sheets and all status feedback. | Preserve exact disclosure, file chooser, cancellation, retry, encrypted content and lock paths. Verify pending, corrupt, missing, busy and error states. Large text can reach the last action. | Open |
+| 07 | Reframe Yuki room, care menu, shelf, wardrobe, states and reduced-motion presentation. | Room and actions visible together at normal size. Observe animation and feeding, touch, sleep and return paths. Retain lifecycle pause and persisted care. Inspect controls and error states in dark and at 200%. | Open |
+| 08 | Review the app as connected journeys, fix defects, measure packaged output and publish evidence and final report. | No unreviewed checklist items. Full debug/release tests, lint, APK, native capture review and API 26/33/35 hosted release rehearsal. Compare same-kind size and emulator startup samples. Verify delivery receipt and artifact SHA. Distinguish handset, TalkBack and hardware measurements pending. | Open |
+
+## Verification and continuation rules
+
+For each implementation checkpoint inspect the real changed screens. Use the existing NativeComposeScene, Phase render harnesses and Transformation UI tests. Compare baseline and revised content at 320/360 dp, a standard phone, regular type and 200%, light/dark, with long names, missing media and representative records. Verify semantics, 48 dp targets, focus, IME/insets and system/user motion preferences. Aim for 4.5:1 normal text and 3:1 large text and meaningful icons. Use safe synthetic fixtures. Trace every feature back to a working entry point.
+
+Run targeted tests followed by `./gradlew :app:testDebugUnitTest :app:assembleDebug`. Record exact results and actual screenshots. For final acceptance add release unit tests, lint, runtime installation, cold/warm/recreation, upgrade retention and relevant connected tests via the build workflow. Compare signed artifact size with the hosted baseline and local debug with local debug. Read frame and launch timings with sample count and runtime. Investigate regressions before attributing them to the presentation. No external SDK, remote fonts, paid assets or private photo uploads.
+
+Maintain a report in Phase-NN, update the coverage rows, provenance, status and next task, review staged changes, commit and push to master normally, then verify remote SHA. Check state again after interruption. Preserve concurrent work. Track incomplete verification explicitly and add corrective work to this plan when renders expose an issue. The final report covers every subject in section 36 of the directive and links the delivered APK to the tested source.
